@@ -1,7 +1,9 @@
 import {useEffect,useRef,useState} from 'react';
 import Phaser from 'phaser';
 import type {WorldProps} from '../core/contracts';
-import {buildings,createWorldArt,createTreeArt,createCharacterArt,MAP_W,MAP_H,type Obstacle} from './art';
+import {buildings,createWorldArt,MAP_W,MAP_H,type Obstacle} from './art';
+
+import {ASSET_MANIFEST,assetUrl,characterArt,frameRect,type SheetId} from './assets';
 
 type Villager={id:string;name:string;x:number;y:number;color:string;hat?:string;symbol:string};
 const villagers:Villager[]=[
@@ -24,39 +26,58 @@ const initialPosition={x:383,y:262};
 
 export default function World(props:WorldProps){
  const host=useRef<HTMLDivElement>(null),latest=useRef(props),controls=useRef({up:false,down:false,left:false,right:false,interact:false});latest.current=props;
- const [nearby,setNearby]=useState<string|null>(null),[ready,setReady]=useState(false);
+ const [nearby,setNearby]=useState<string|null>(null),[ready,setReady]=useState(false),[loadError,setLoadError]=useState(false);
  useEffect(()=>{
   if(!host.current)return;
   let alive=true;
   class Village extends Phaser.Scene{
    player!:Phaser.GameObjects.Sprite;keys!:Record<string,Phaser.Input.Keyboard.Key>;obstacles:Obstacle[]=[];direction=0;walking=0;lastSave=0;lastNear='';lastInteract=-500;wasMoving=false;pendingInteract=false;wasPaused=false;
    marker!:Phaser.GameObjects.Text;gate!:Phaser.GameObjects.Text;
+   preload(){
+    for(const sheet of Object.keys(ASSET_MANIFEST.sheets) as SheetId[])this.load.image(sheet,assetUrl(sheet));
+    this.load.on('loaderror',()=>{if(alive)setLoadError(true);});
+   }
+   registerAtlas(sheet:SheetId){
+    const texture=this.textures.get(sheet),source=texture.getSourceImage() as HTMLImageElement,s=ASSET_MANIFEST.sheets[sheet];
+    const canvas=document.createElement('canvas');canvas.width=s.width;canvas.height=s.height;const g=canvas.getContext('2d',{willReadFrequently:true})!;g.drawImage(source,0,0);
+    const pixels=g.getImageData(0,0,s.width,s.height).data;
+    for(let i=0;i<s.columns*s.rows;i++){
+     const f=frameRect(sheet,i);let left=f.width,top=f.height,right=0,bottom=0;
+     // Ignore almost-transparent background dust when finding the visual foot anchor.
+     for(let y=0;y<f.height;y++)for(let x=0;x<f.width;x++)if(pixels[((f.y+y)*s.width+f.x+x)*4+3]>128){left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}
+     const pad=2;left=Math.max(0,left-pad);top=Math.max(0,top-pad);right=Math.min(f.width-1,right+pad);bottom=Math.min(f.height-1,bottom+pad);
+     texture.add(i,0,f.x+left,f.y+top,right-left+1,bottom-top+1);
+    }
+   }
+   scenery(sheet:SheetId,frame:number,x:number,y:number,width:number){
+    const image=this.add.image(x,y,sheet,frame).setOrigin(.5,1).setDepth(y);image.setScale(width/image.width);return image;
+   }
    create(){
-    const art=createWorldArt();this.obstacles=art.obstacles;
-    this.textures.addCanvas('village',art.canvas);this.add.image(0,0,'village').setOrigin(0);
-    buildings.filter(b=>b.name).forEach(b=>this.add.text(b.x+b.w/2,b.y+b.h+7,b.name,{fontFamily:'monospace',fontSize:'7px',color:'#fff1cf',backgroundColor:'#49674ed9',padding:{x:3,y:2}}).setOrigin(.5).setDepth(1));
-    this.textures.addCanvas('tree',createTreeArt());art.trees.forEach(t=>this.add.image(t.x,t.y,'tree').setOrigin(.5,1).setDepth(t.y));
-    const addCharacter=(key:string,color:string,hat?:string)=>{const t=this.textures.addCanvas(key,createCharacterArt(color,'#594b48',hat))!;for(let i=0;i<12;i++)t.add(i,0,i*16,0,16,24);};
-    addCharacter('hero','#d37966','#eee0b4');
+    if(!this.textures.exists('terrain'))return;
+    for(const sheet of ['traveler','battleCast','villagers','buildings','scenery'] as SheetId[])this.registerAtlas(sheet);
+    const art=createWorldArt(this.textures.get('terrain').getSourceImage() as HTMLImageElement);this.obstacles=art.obstacles;
+    this.textures.addCanvas('village',art.canvas);this.add.image(0,0,'village').setOrigin(0).setScale(.5);
+    buildings.forEach(b=>{this.scenery('buildings',b.frame,b.x+b.w/2,b.y+b.h,b.w+12);if(b.name)this.add.text(b.x+b.w/2,b.y+b.h+7,b.name,{fontFamily:'monospace',fontSize:'7px',color:'#fff1cf',backgroundColor:'#344a3ce8',padding:{x:3,y:2}}).setOrigin(.5).setDepth(b.y+b.h+1);});
+    art.trees.forEach((t,i)=>{const nearPerson=villagers.some(v=>Math.abs(v.x-t.x)<27&&Math.abs(v.y-t.y)<8);this.scenery('scenery',i%11===0?2:i%5===0?1:0,t.x,t.y,nearPerson?27:i%5===0?39:46);});
+    for(const [x,y] of [[313,246],[447,246],[312,349],[448,349],[180,287],[685,419]])this.scenery('scenery',3,x,y,28);
+    for(const [x,y] of [[283,280],[456,329],[194,344],[554,333]])this.scenery('scenery',5,x,y,30);
+    this.scenery('scenery',6,271,267,44);this.scenery('buildings',7,384,99,84);
     villagers.forEach(v=>{
-      addCharacter(v.id,v.color,v.hat);const sprite=this.add.sprite(v.x,v.y,v.id,0).setOrigin(.5,1).setDepth(v.y).setInteractive({useHandCursor:true});
+      const a=characterArt(v.id);const sprite=this.add.sprite(v.x,v.y,a.sheet,a.frame).setOrigin(.5,1).setDepth(v.y).setInteractive({useHandCursor:true});sprite.setScale((v.id==='rival'?39:35)/sprite.height);
       sprite.on('pointerdown',()=>{if(!latest.current.paused&&Phaser.Math.Distance.Between(this.player.x,this.player.y,v.x,v.y)<42)this.interact(v);});
-      const icon=this.add.text(v.x,v.y-29,v.symbol,{fontFamily:'monospace',fontSize:'9px',color:v.symbol==='?'?'#ffebaf':'#fff0cf',backgroundColor:'#354d4c',padding:{x:3,y:2}}).setOrigin(.5).setDepth(v.y+1);
+      const icon=this.add.text(v.x,v.y-43,v.symbol,{fontFamily:'monospace',fontSize:'8px',color:v.symbol==='?'?'#ffebaf':'#fff0cf',backgroundColor:'#354d4c',padding:{x:3,y:2}}).setOrigin(.5).setDepth(v.y+1);
       this.tweens.add({targets:icon,y:icon.y-2,duration:1100+v.x,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
     });
-    // The central spring is a layered, animated landmark.
-    this.add.ellipse(384,293,35,17,0x6b8171).setDepth(295);
-    this.add.ellipse(384,290,31,16,0xd4d5b4).setDepth(296);
-    const water=this.add.ellipse(384,288,24,11,0x79b9bf).setDepth(297);this.tweens.add({targets:water,alpha:.65,duration:1100,yoyo:true,repeat:-1});
-    this.add.rectangle(384,283,6,13,0xb8c6ab).setDepth(298);this.add.ellipse(384,277,14,5,0xe7e5bc).setDepth(299);
+    this.scenery('scenery',4,384,298,46);
+    const glimmer=this.add.ellipse(384,277,12,3,0xd2f6e5,.4).setDepth(299);this.tweens.add({targets:glimmer,alpha:.1,duration:1100,yoyo:true,repeat:-1});
     this.obstacles.push({x:368,y:281,w:32,h:17});
     const start=latest.current.position??initialPosition;
     const sx=Number.isFinite(start.x)?Phaser.Math.Clamp(start.x,36,MAP_W-36):initialPosition.x;
     const sy=Number.isFinite(start.y)?Phaser.Math.Clamp(start.y,46,MAP_H-30):initialPosition.y;
     const usable=this.canMove(sx,sy)?{x:sx,y:sy}:initialPosition;
-    this.player=this.add.sprite(usable.x,usable.y,'hero',0).setOrigin(.5,1).setDepth(usable.y);
-    this.cameras.main.setBounds(0,0,MAP_W,MAP_H).startFollow(this.player,true,.12,.12).setRoundPixels(true);
-    this.keys=this.input.keyboard!.addKeys('W,A,S,D,UP,DOWN,LEFT,RIGHT,E,ENTER',false) as Record<string,Phaser.Input.Keyboard.Key>;
+    this.player=this.add.sprite(usable.x,usable.y,'traveler',0).setOrigin(.5,1).setDepth(usable.y);this.player.setScale(36/this.player.height);
+    this.cameras.main.setZoom(2).setBounds(0,0,MAP_W,MAP_H).startFollow(this.player,true,.12,.12).setRoundPixels(true);
+    this.keys=this.input.keyboard!.addKeys('W,A,S,D,UP,DOWN,LEFT,RIGHT,E,ENTER,SHIFT',false) as Record<string,Phaser.Input.Keyboard.Key>;
     // Persist a press until the next scene update: a key released between frames still counts.
     const queueInteraction=(event:KeyboardEvent)=>{const target=event.target;const editing=target instanceof HTMLElement&&(target.isContentEditable||['INPUT','TEXTAREA','SELECT','BUTTON'].includes(target.tagName));if(!latest.current.paused&&!editing&&!event.repeat&&!event.isComposing)this.pendingInteract=true;};
     this.input.keyboard!.on('keydown-E',queueInteraction);this.input.keyboard!.on('keydown-ENTER',queueInteraction);
@@ -77,8 +98,8 @@ export default function World(props:WorldProps){
     this.wasPaused=paused;
     let dx=0,dy=0;
     if(!paused){dx=Number(this.keys.D.isDown||this.keys.RIGHT.isDown||controls.current.right)-Number(this.keys.A.isDown||this.keys.LEFT.isDown||controls.current.left);dy=Number(this.keys.S.isDown||this.keys.DOWN.isDown||controls.current.down)-Number(this.keys.W.isDown||this.keys.UP.isDown||controls.current.up);}
-    if(dx||dy){const distance=78*Math.min(delta,45)/1000/Math.hypot(dx,dy);const nx=this.player.x+dx*distance,ny=this.player.y+dy*distance;if(this.canMove(nx,this.player.y))this.player.x=nx;if(this.canMove(this.player.x,ny))this.player.y=ny;this.direction=Math.abs(dx)>Math.abs(dy)?(dx<0?1:2):(dy<0?3:0);this.walking+=delta;this.player.setFrame(this.direction*3+Math.floor(this.walking/145)%3);}
-    else this.player.setFrame(this.direction*3);
+    if(dx||dy){const running=this.keys.SHIFT.isDown;const distance=(running?132:78)*Math.min(delta,45)/1000/Math.hypot(dx,dy);const nx=this.player.x+dx*distance,ny=this.player.y+dy*distance;if(this.canMove(nx,this.player.y))this.player.x=nx;if(this.canMove(this.player.x,ny))this.player.y=ny;this.direction=Math.abs(dx)>Math.abs(dy)?(dx<0?1:2):(dy<0?3:0);this.walking+=delta;this.player.setFrame(this.direction*4+Math.floor(this.walking/(running?95:145))%4);}
+    else this.player.setFrame(this.direction*4);
     this.player.setDepth(this.player.y);
     if((time-this.lastSave>1200&&(dx||dy))||(this.wasMoving&&!dx&&!dy)){this.lastSave=time;latest.current.onMove?.({x:Math.round(this.player.x),y:Math.round(this.player.y)});}
     this.wasMoving=Boolean(dx||dy);
@@ -87,12 +108,12 @@ export default function World(props:WorldProps){
     const nearId=nearest?.id??'';
     if(nearId!==this.lastNear){this.lastNear=nearId;if(alive)setNearby(nearest?.name??null);}
     this.marker.setVisible(Boolean(nearest)&&!paused);
-    if(nearest){this.marker.setPosition(nearest.x,nearest.y-38).setText('[E] '+nearest.name.split(' · ')[0]);if(!paused&&(this.pendingInteract||controls.current.interact))this.interact(nearest);}
+    if(nearest){this.marker.setPosition(nearest.x,nearest.y-54).setText('[E] '+nearest.name.split(' · ')[0]);if(!paused&&(this.pendingInteract||controls.current.interact))this.interact(nearest);}
     if(!nearest){this.pendingInteract=false;controls.current.interact=false;}
     this.gate.setText(latest.current.badges.length>=3?'THE SUMMIT · OPEN':'THE SUMMIT · 3 BADGES');
    }
   }
-  const game=new Phaser.Game({type:Phaser.AUTO,parent:host.current,width:480,height:270,pixelArt:true,roundPixels:true,backgroundColor:'#79a66c',antialias:false,scene:Village,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},audio:{noAudio:true},input:{activePointers:3}});
+  const game=new Phaser.Game({type:Phaser.AUTO,parent:host.current,width:960,height:540,pixelArt:true,roundPixels:true,backgroundColor:'#79a66c',antialias:false,scene:Village,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},audio:{noAudio:true},input:{activePointers:3}});
   const clear=()=>{controls.current={up:false,down:false,left:false,right:false,interact:false};};
   window.addEventListener('blur',clear);
   return()=>{alive=false;window.removeEventListener('blur',clear);game.destroy(true);};
@@ -103,13 +124,13 @@ export default function World(props:WorldProps){
  return <div aria-label="Everstride village game world" style={{width:'100%',height:'100%',minHeight:320,position:'relative',overflow:'hidden',background:'#345647',isolation:'isolate'}}>
   <div ref={host} style={{width:'100%',height:'100%',minHeight:320,imageRendering:'pixelated'}}/>
   <div style={{position:'absolute',left:16,top:14,pointerEvents:'none',color:'#fff1cd',textShadow:'0 2px #324c40',fontFamily:'monospace',fontSize:11,letterSpacing:2}}><span style={{fontSize:9,opacity:.8}}>GREENHAVEN VALLEY</span><br/><strong style={{fontSize:15,letterSpacing:1}}>Willowmere</strong></div>
-  {!ready&&<div style={{position:'absolute',inset:0,display:'grid',placeItems:'center',color:'#f6e7c1'}}>Opening the village…</div>}
+  {!ready&&<div style={{position:'absolute',inset:0,display:'grid',placeItems:'center',color:'#f6e7c1'}}>{loadError?'Artwork could not load. Please reload when connected.':'Opening the village…'}</div>}
   {!props.paused&&<>
    <div style={{position:'absolute',bottom:16,left:16,display:'grid',gridTemplateColumns:'repeat(3,35px)',gap:3,opacity:.87}}>
     <span/><button aria-label="Move up" style={buttonStyle} {...hold('up')}>↑</button><span/>
     <button aria-label="Move left" style={buttonStyle} {...hold('left')}>←</button><button aria-label="Move down" style={buttonStyle} {...hold('down')}>↓</button><button aria-label="Move right" style={buttonStyle} {...hold('right')}>→</button>
    </div>
-   <button disabled={!nearby} onClick={()=>{controls.current.interact=true;}} style={{position:'absolute',right:16,bottom:18,padding:'12px 17px',border:'1px solid #f3ddb566',borderRadius:10,background:nearby?'#f0d69b':'#344e47dd',color:nearby?'#354c40':'#f2e4c0',fontFamily:'inherit',fontSize:11,cursor:nearby?'pointer':'default',maxWidth:'55%',boxShadow:'0 3px 0 #273e34'}}>{nearby?`E · ${nearby}`:'WASD / arrows to explore'}</button>
+   <button disabled={!nearby} onClick={()=>{controls.current.interact=true;}} style={{position:'absolute',right:16,bottom:18,padding:'12px 17px',border:'1px solid #f3ddb566',borderRadius:10,background:nearby?'#f0d69b':'#344e47dd',color:nearby?'#354c40':'#f2e4c0',fontFamily:'inherit',fontSize:11,cursor:nearby?'pointer':'default',maxWidth:'55%',boxShadow:'0 3px 0 #273e34'}}>{nearby?`E · ${nearby}`:'WASD / arrows · Shift to run'}</button>
   </>}
  </div>;
 }
