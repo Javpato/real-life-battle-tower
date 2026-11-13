@@ -53,6 +53,14 @@ await db.exec('reset role');await db.query("update public.step_epochs set starte
 const credit=await rpc('select public.credit_steps($1,$2,$3,500) result',[s,crypto.randomUUID(),ep.epochId]);assert.equal(credit.creditedCoins,10);
 assert.equal((await rpc('select public.credit_steps($1,$2,$3,500) result',[s,crypto.randomUUID(),ep.epochId])).creditedCoins,0);
 assert.equal((await rpc('select public.credit_steps($1,$2,$3,450) result',[s,crypto.randomUUID(),ep.epochId])).creditedCoins,0);
+// Partial blocks survive source changes without being repriced.
+const ep2=await rpc("select public.start_step_epoch($1,'step-counter','hard') result",[s]);
+await db.exec('reset role');await db.query("update public.step_epochs set started_at=now()-interval '1 minute' where id=$1",[ep2.epochId]);await actor(bob);
+assert.equal((await rpc('select public.credit_steps($1,$2,$3,60) result',[s,crypto.randomUUID(),ep2.epochId])).creditedCoins,0);
+const ep3=await rpc("select public.start_step_epoch($1,'health-connect','hard') result",[s]);
+await db.exec('reset role');await db.query("update public.step_epochs set started_at=now()-interval '1 minute' where id=$1",[ep3.epochId]);await actor(bob);
+assert.equal((await rpc('select public.credit_steps($1,$2,$3,40) result',[s,crypto.randomUUID(),ep3.epochId])).creditedCoins,2);
+await rejects('select public.credit_steps($1,$2,$3,100)',[s,crypto.randomUUID(),ep2.epochId],/STEP_EPOCH_NOT_ACTIVE/);
 await actor(alice);await rpc('select public.revoke_linked_device($1,$2) result',[s,bob]);
 await actor(bob);assert.equal((await db.query('select * from public.nutrition_entries')).rows.length,0);
 await rejects('select public.credit_steps($1,$2,$3,600)',[s,crypto.randomUUID(),ep.epochId],/NOT_AUTHORIZED/);
