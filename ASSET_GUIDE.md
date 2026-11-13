@@ -24,7 +24,7 @@ These are source dimensions, not claimed 256px frames. `frameRect` rounds grid b
 
 ## Provenance and reference research
 
-All seven PNG atlases were generated specifically for Everstride with the built-in OpenAI image-generation tool on 2026-11-14. No stock or proprietary RPG graphics, ROM data, fan-game sprites, copied code, or external music were imported. These are original project resources; no third-party CC0 license is asserted for generated output.
+All seven PNG atlases and the battle background were generated specifically for Everstride with the built-in OpenAI image-generation tool on 2026-11-14. No stock or proprietary RPG graphics, ROM data, fan-game sprites, copied code, or external music were imported. These are original project resources; no third-party CC0 license is asserted for generated output.
 
 Primary references inspected for layout, sprite conventions and licensing:
 
@@ -51,3 +51,7 @@ Original music is deterministic Web Audio synthesis in `src/audio/music.ts`; `st
 ## Verification
 
 TypeScript compilation passes. `tests/adventure-smoke.mjs` passed against the artwork preview: actual keyboard exploration, interaction, manual battle, victory rewards, persistence and reload. `tests/art-browser.mjs` verifies real Shift input travels farther than walking over the same interval and captures all four directions. One run measured 31 versus 53 logical units (1.71×), no browser errors. All four frames were visually inspected, as were full battle portraits and the colored village: no cut limbs, atlas-neighbor bleed or conspicuous alpha fringe. Browser captures are inspection artifacts, not physical exercise validation. Integrated battle-screen sizing must also be checked after the parent UI adopts BattleSprite.
+
+## Battle arena background
+
+`battlefieldUrl()` resolves the original 1536×1024 garden arena from the manifest. Preserve its 3:2 ratio where possible; it contains no characters or UI. Suggested sprite foot anchors in normalized background coordinates: hero (0.28, 0.77), enemy (0.79, 0.43). CSS cover cropping changes these apparent positions and should be visually checked. Generation output `exec-a6183abe-9608-44bf-b8cf-715730a4739e`: original detailed crisp pixel garden arena, warm limestone, rich foliage and distant teal/terracotta village, empty lower-left and upper-right standing platforms, no text or characters.

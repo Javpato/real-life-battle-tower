@@ -14,3 +14,5 @@ export function characterArt(id:string,variant:'front'|'back'='front'):{sheet:Sh
  const entry=manifest.characters[id as CharacterId]??manifest.characters.hero;
  return {...entry,sheet:entry.sheet as SheetId};
 }
+
+export const battlefieldUrl=()=>`${import.meta.env.BASE_URL}${manifest.battlefield.path}`;

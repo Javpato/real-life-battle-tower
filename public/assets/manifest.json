@@ -10,6 +10,7 @@
   "terrain":{"path":"assets/world/terrain-v2.png","width":1254,"height":1254,"columns":2,"rows":2},
   "items":{"path":"assets/items/items-v2.png","width":1774,"height":887,"columns":4,"rows":2}
  },
+ "battlefield":{"path":"assets/world/battlefield-v2.png","width":1536,"height":1024,"heroFoot":[0.28,0.77],"enemyFoot":[0.79,0.43]},
  "characters":{
   "hero":{"sheet":"battleCast","frame":0,"name":"The traveler"},
   "trainer-1":{"sheet":"battleCast","frame":1,"name":"Moss"},
