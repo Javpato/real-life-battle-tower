@@ -226,6 +226,8 @@ export default function ExerciseCamera(props: Props) {
           pendingUnit.current = null;
           if (accepted) {
             setQuality(Math.round(unit.quality * 100));
+            setStatus("valid");
+            setMessage("Repetition saved. Nice work — continue when ready.");
           } else {
             // A canonical rejection must not spend the remaining local unit budget
             // or change which anatomical side the adventure expects.
@@ -295,7 +297,7 @@ export default function ExerciseCamera(props: Props) {
         setMessage(
           autoRef.current
             ? "Ready. The countdown will begin automatically."
-            : "Ready. Press Start series when comfortable.",
+            : "Ready. Use Start without automatic calibration when comfortable.",
         );
         if (autoRef.current) beginCountdown();
       }
@@ -305,7 +307,7 @@ export default function ExerciseCamera(props: Props) {
       setStatus(o.ready ? "ready" : (o.status ?? "insufficient"));
       setMessage(
         o.ready
-          ? "Ready. Press Start series when comfortable."
+          ? "Ready. Use Start without automatic calibration when comfortable."
           : (o.message ?? EXERCISE_GUIDES[p.exerciseId].setup),
       );
       if (autoRef.current && o.ready) beginCountdown();
@@ -726,16 +728,29 @@ export default function ExerciseCamera(props: Props) {
           />{" "}
           Start automatically after calibration
         </label>
-        {!autoStart && (
-          <button
-            type="button"
-            className="exercise-primary"
-            disabled={inactive || stage !== "ready"}
-            onClick={() => beginCountdown(true)}
-          >
-            Start series
-          </button>
-        )}
+        <button
+          type="button"
+          className="exercise-primary"
+          disabled={
+            camera.status !== "ready" ||
+            inactive ||
+            Boolean(pendingUnit.current) ||
+            props.sessionComplete ||
+            props.progress >= props.target
+          }
+          onClick={() => {
+            detector.current.pause();
+            lifecycle.current?.invalidateFrames();
+            resetTiming();
+            setPhase("running");
+            setStatus("ready");
+            setMessage(
+              "Series started. Move into position; only observed full reps count.",
+            );
+          }}
+        >
+          Start without automatic calibration
+        </button>
       </div>
       {rejections >= 3 && (
         <p className="exercise-note">

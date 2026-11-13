@@ -189,6 +189,21 @@ try {
     .getByRole("button", { name: "Enable camera", exact: true })
     .click();
   await state("ready");
+  // Explicit start can arm a series with no recognized body, but must never create a rep.
+  await page
+    .getByRole("button", {
+      name: "Start without automatic calibration",
+      exact: true,
+    })
+    .click();
+  assert.equal(
+    await page
+      .locator("[data-exercise-stage]")
+      .getAttribute("data-exercise-stage"),
+    "running",
+  );
+  await page.waitForTimeout(400);
+  assert.equal(await page.getByTestId("units").textContent(), "0");
   // Landscape mobile keeps controls reachable and stop functional.
   await page.setViewportSize({ width: 844, height: 390 });
   await controls();
@@ -207,6 +222,7 @@ try {
         "manual preview without credit",
         "front/back restart",
         "late permission stream cleanup",
+        "manual arming without a detected body creates no units",
         "landscape controls",
       ],
       physicalExerciseValidation: false,

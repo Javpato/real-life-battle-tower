@@ -1,5 +1,5 @@
 // Development-only fixture. Vite's production entry does not import or bundle this file.
-import { StrictMode, useState } from "react";
+import { StrictMode, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import ExerciseCamera from "../../src/exercises/ExerciseCamera";
 import type { ExerciseId } from "../../src/core/contracts";
@@ -10,6 +10,16 @@ function CameraFixture() {
     [session, setSession] = useState(1),
     [progress, setProgress] = useState(0),
     [exercise, setExercise] = useState<ExerciseId>("squat");
+  const receiptMode = new URLSearchParams(location.search).has("receipts");
+  const pendingReceipt = useRef<((accepted: boolean) => void) | null>(null);
+  const [requests, setRequests] = useState(0);
+  const settle = (accepted: boolean) => {
+    if (!pendingReceipt.current) return;
+    const resolve = pendingReceipt.current;
+    pendingReceipt.current = null;
+    if (accepted) setProgress((v) => v + 1);
+    resolve(accepted);
+  };
   return (
     <main style={{ maxWidth: 980, margin: "auto" }}>
       <h1>Camera lifecycle test fixture</h1>
@@ -38,18 +48,34 @@ function CameraFixture() {
         >
           Change exercise
         </button>
+        {receiptMode && (
+          <>
+            <button onClick={() => settle(true)}>Accept repetition</button>
+            <button onClick={() => settle(false)}>Reject repetition</button>
+          </>
+        )}
       </nav>
       <output data-testid="units">{progress}</output>
+      <output data-testid="requests">{requests}</output>
       <ExerciseCamera
         exerciseId={exercise}
         sessionId={`test-session-${session}`}
-        target={8}
+        target={receiptMode ? 2 : 8}
         progress={progress}
         active={active && !paused && !manual}
         mode={manual ? "manual" : "camera"}
         paused={paused}
         muted
-        onUnit={() => setProgress((v) => v + 1)}
+        onUnit={() => {
+          if (!receiptMode) {
+            setProgress((v) => v + 1);
+            return;
+          }
+          setRequests((v) => v + 1);
+          return new Promise<boolean>((resolve) => {
+            pendingReceipt.current = resolve;
+          });
+        }}
       />
     </main>
   );
