@@ -46,7 +46,7 @@ export const EXERCISE_GUIDES: Record<
       "https://www.cuh.nhs.uk/patient-information/general-stability-exercises1/",
   },
   squat: {
-    title: "Groundbreaker · Squat",
+    title: "Earthbound · Squat",
     setup:
       "Stand upright with feet about shoulder-width apart, knees comfortably straight and hands in front of your chest. Keep the visible hip, knee and ankle in view.",
     movement:
@@ -72,7 +72,7 @@ export const EXERCISE_GUIDES: Record<
     note: "Moving only your head does not count. You can stop at any time.",
   },
   diamond: {
-    title: "Diamond Strike",
+    title: "Diamond Strike · Diamond push-up",
     setup:
       "Begin at the top of a push-up with hands close together under your chest, elbows extended and your body in a straight line. Finger placement is your choice and is not camera-verified.",
     movement: "Lower your torso with control, then press back to the top.",
@@ -89,7 +89,7 @@ export const EXERCISE_GUIDES: Record<
     note: "Breathe normally. Lowering or leaving the frame pauses valid time.",
   },
   birddog: {
-    title: "Balance Arc · Bird Dog",
+    title: "Wild Balance · Bird Dog",
     setup:
       "Start on all fours: palms under shoulders, knees under hips and back steady. Both hands and knees begin on the floor. Extend the named arm with the opposite leg, then return to all fours.",
     movement:

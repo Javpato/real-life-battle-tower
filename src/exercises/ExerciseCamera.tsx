@@ -739,7 +739,7 @@ export default function ExerciseCamera(props: Props) {
         </label>
         <button
           type="button"
-          className="exercise-primary"
+          className="exercise-primary exercise-start-manual"
           disabled={
             camera.status !== "ready" ||
             inactive ||

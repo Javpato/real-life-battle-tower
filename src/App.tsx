@@ -23,6 +23,8 @@ import {
   Star,
 } from "lucide-react";
 import World from "./game/World";
+import BattleSprite, { ItemSprite } from "./game/BattleSprite";
+import { battlefieldUrl } from "./game/assets";
 import ExerciseLibrary from "./exercises/ExerciseLibrary";
 import DevicePanel from "./platform/DevicePanel";
 import type { ImportedHealth } from "./platform/health";
@@ -440,7 +442,10 @@ export default function App() {
                 </div>
               ) : (
                 <>
-                  <div className="battle-stage">
+                  <div
+                    className="battle-stage"
+                    style={{ backgroundImage: `url("${battlefieldUrl()}")` }}
+                  >
                     <div className="enemy-plate">
                       <div>
                         <strong>{b.enemy.name}</strong>
@@ -463,21 +468,17 @@ export default function App() {
                         {Math.ceil(b.enemyHp)} / {Math.ceil(b.enemy.hp)} HP
                       </small>
                     </div>
-                    <div
+                    <BattleSprite
+                      id={b.enemy.id}
                       className={
                         "combat-sprite enemy " + b.enemy.phases[b.phase][0]
                       }
-                    >
-                      <span>✦</span>
-                      <div className="sprite-head" />
-                      <div className="sprite-body" />
-                      <div className="sprite-feet" />
-                    </div>
-                    <div className="combat-sprite hero">
-                      <div className="sprite-head" />
-                      <div className="sprite-body" />
-                      <div className="sprite-feet" />
-                    </div>
+                    />
+                    <BattleSprite
+                      id="hero"
+                      variant="back"
+                      className="combat-sprite hero"
+                    />
                     <div className="hero-plate">
                       <strong>
                         {p.name} <small>Lv. {p.level}</small>
@@ -797,7 +798,7 @@ export default function App() {
               <>
                 <section className="card player-card">
                   <div className="player-heading">
-                    <div className="portrait">✦</div>
+                    <BattleSprite id="hero" className="profile-portrait" />
                     <div>
                       <small>YOUR ADVENTURER</small>
                       <h2>{p.name}</h2>
@@ -1206,6 +1207,7 @@ export default function App() {
                     },
                   ].map((x) => (
                     <div className="food-row" key={x.id}>
+                      <ItemSprite id={x.id} className="inventory-item-art" />
                       <strong>{x.name}</strong>
                       <button
                         className="secondary"
@@ -1373,9 +1375,9 @@ export default function App() {
                   </label>
                   <p className="tiny">
                     Difficulty does not increase enemy attack. Movement:
-                    WASD/arrows. Interact: E/Enter. Pause/menu: Escape. Your
-                    progress saves locally, or through acknowledged commands
-                    when a cloud adventure is open.
+                    WASD/arrows. Hold Shift to run. Interact: E/Enter.
+                    Pause/menu: Escape. Your progress saves locally, or through
+                    acknowledged commands when a cloud adventure is open.
                   </p>
                   <p>
                     For Javpato’s girlfriend and Uriel’s brother — may your

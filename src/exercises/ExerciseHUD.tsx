@@ -154,6 +154,9 @@ export default function ExerciseHUD(props: ExerciseHudProps) {
       <div className="exercise-start-position">
         <span>STARTING POSITION</span>
         <p>{EXERCISE_GUIDES[exerciseId].setup}</p>
+        <small className="exercise-camera-angle">
+          CAMERA · {EXERCISE_GUIDES[exerciseId].camera}
+        </small>
       </div>
       <footer>
         <span>
