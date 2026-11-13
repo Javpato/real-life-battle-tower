@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { ExerciseCameraProps } from "../core/contracts";
+import type { ExerciseCameraProps, ExerciseUnit } from "../core/contracts";
 import {
   ExerciseDetector,
   observePose,
@@ -17,7 +17,9 @@ import ExerciseHUD from "./ExerciseHUD";
 import type { ExerciseVisualState } from "./exerciseUi";
 import "./exercises.css";
 
-type Props = ExerciseCameraProps & {
+type Props = Omit<ExerciseCameraProps, "onUnit"> & {
+  onUnit: (unit: ExerciseUnit) => void | boolean | Promise<boolean>;
+  lastSide?: "left" | "right";
   sessionId?: string;
   muted?: boolean;
   mode?: "camera" | "manual";
@@ -75,11 +77,12 @@ export default function ExerciseCamera(props: Props) {
   latest.current = props;
   const lifecycle = useRef<CameraLifecycle | null>(null);
   const detector = useRef(
-    new ExerciseDetector(props.exerciseId, props.sessionId),
+    new ExerciseDetector(props.exerciseId, props.sessionId, props.lastSide),
   );
   const detectorSession = useRef(sessionKey(props));
   const stageRef = useRef<Stage>("off"),
     pausedRef = useRef(false);
+  const pendingUnit = useRef<{ session: string } | null>(null);
   const issued = useRef(props.progress),
     calibrated = useRef(new Set<string>());
   const stableSince = useRef<number | null>(null),
@@ -152,6 +155,13 @@ export default function ExerciseCamera(props: Props) {
     const p = latest.current;
     // Render may have changed props before React effects run. Never credit a frame into the next session.
     if (detectorSession.current !== sessionKey(p)) return;
+    if (pendingUnit.current) {
+      setStatus("paused");
+      setMessage(
+        "Saving this repetition. Rest while your adventure confirms it.",
+      );
+      return;
+    }
     const o = observePose(p.exerciseId, frame) as RichObservation;
     const fresh = o.fresh !== false;
     if (
@@ -202,8 +212,55 @@ export default function ExerciseCamera(props: Props) {
         issued.current < latest.current.target
       ) {
         issued.current = Math.max(issued.current, latest.current.progress) + 1;
-        setQuality(Math.round(result.unit.quality * 100));
-        latest.current.onUnit(result.unit);
+        const unit = result.unit;
+        const pending = { session: detectorSession.current };
+        pendingUnit.current = pending;
+        detector.current.pause();
+        const settled = (accepted: boolean) => {
+          if (
+            pendingUnit.current !== pending ||
+            !lifecycle.current ||
+            detectorSession.current !== pending.session
+          )
+            return;
+          pendingUnit.current = null;
+          if (accepted) {
+            setQuality(Math.round(unit.quality * 100));
+          } else {
+            // A canonical rejection must not spend the remaining local unit budget
+            // or change which anatomical side the adventure expects.
+            const current = latest.current;
+            issued.current = current.progress;
+            detector.current = new ExerciseDetector(
+              current.exerciseId,
+              current.sessionId,
+              current.lastSide,
+            );
+            lifecycle.current.invalidateFrames();
+            setNextSide(detector.current.expectedSide);
+            setStatus("incomplete");
+            setMessage(
+              "That repetition was not accepted by the adventure. Your saved progress is kept; return to the starting position.",
+            );
+          }
+        };
+        try {
+          const receipt = latest.current.onUnit(unit);
+          if (receipt && typeof receipt === "object" && "then" in receipt) {
+            setStatus("paused");
+            setMessage(
+              "Saving this repetition. Rest while your adventure confirms it.",
+            );
+            void receipt.then(
+              (accepted) => settled(accepted),
+              () => settled(false),
+            );
+          } else {
+            settled(receipt !== false);
+          }
+        } catch {
+          settled(false);
+        }
       }
       return;
     }
@@ -409,13 +466,18 @@ export default function ExerciseCamera(props: Props) {
     };
   }, []);
   useEffect(() => {
+    pendingUnit.current = null;
     detectorSession.current = sessionKey(props);
-    detector.current = new ExerciseDetector(props.exerciseId, props.sessionId);
+    detector.current = new ExerciseDetector(
+      props.exerciseId,
+      props.sessionId,
+      props.lastSide,
+    );
     lifecycle.current?.invalidateFrames();
     issued.current = props.progress;
     resetTiming();
     setQuality(null);
-    setNextSide(undefined);
+    setNextSide(detector.current.expectedSide);
     setRejections(0);
     setDemo(needsGuide(props.exerciseId));
     if (lifecycle.current?.currentStatus === "ready") {
@@ -533,11 +595,6 @@ export default function ExerciseCamera(props: Props) {
           {demo ? "Hide guide" : "Show guide"}
         </button>
       </header>
-      <div className="exercise-starting-position">
-        <strong>Starting position</strong>
-        <p>{guide.setup}</p>
-        <small>{guide.camera}</small>
-      </div>
       {demo && <ExerciseDemo exerciseId={props.exerciseId} />}
       <div className={`exercise-feed ${camera.stream ? "is-live" : ""}`}>
         <video
@@ -570,7 +627,7 @@ export default function ExerciseCamera(props: Props) {
         nextSide={nextSide}
         quality={quality}
         countdown={hudStatus === "countdown" ? countdown : undefined}
-        paused={Boolean(inactive)}
+        paused={Boolean(!transportInactive && (paused || props.paused))}
         muted={props.muted}
         active={props.active && props.mode !== "manual" && !paused}
         complete={props.sessionComplete}
