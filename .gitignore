@@ -8,3 +8,9 @@ android/local.properties
 android/**/build/
 playwright-report/
 test-results/
+
+*.tsbuildinfo
+releases/
+
+supabase/.temp/
+supabase/.branches/

@@ -1,0 +1,8 @@
+{
+  "name": "Everstride original asset registry",
+  "world": {"generator": "src/game/art.ts", "tileSize": 16, "logicalViewport": [480, 270], "mapSize": [768, 576], "pixelArt": true},
+  "characters": {"generator": "createCharacterArt", "frameSize": [16, 24], "frames": 12, "directions": ["down", "left", "right", "up"]},
+  "exerciseGuides": {"component": "src/exercises/ExerciseDemo.tsx", "format": "inline SVG"},
+  "poseModel": {"path": "/models/pose_landmarker_lite.task", "source": "Google MediaPipe Pose Landmarker Lite", "runtime": "@mediapipe/tasks-vision 0.10.35"},
+  "audio": {"effects": "Web Audio synthesized triangle tones", "music": "src/audio/music.ts"}
+}

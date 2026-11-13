@@ -1,52 +1,1251 @@
-import {useEffect,useRef,useState,lazy,Suspense} from 'react';
-import {BookOpen,Heart,Coins,Map,Backpack,Settings,ChevronRight,Shield,Swords,Footprints,Pause,Play,Volume2,VolumeX,Leaf,Flame,Mountain,ArrowLeft,Camera,Check,Star} from 'lucide-react';
-import World from './game/World';
-import Journal from './nutrition/Journal';
-import {defaultNutrition,type NutritionState} from './nutrition/engine';
-import {initialPlayer,type Player,type Battle,type Enemy,attacks,available,attackFor,enemyFor,startBattle,beginAttack,acceptUnit,cancelSeries,enemyTurn,win,lose,reward,questTarget,xpNeeded} from './core/game';
-import type {Element,ExerciseId,ExerciseUnit} from './core/contracts';
-import {readSave,writeSave} from './services/storage';
-const ExerciseCamera=lazy(()=>import('./exercises/ExerciseCamera'));
-const typeLabel=(t:Element|null)=>t?{leg:'Leg',arm:'Arm',back:'Back'}[t]:'Neutral';
-const uid=()=>crypto.randomUUID();
-function sound(kind='click'){try{const a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.type='triangle';o.frequency.value=kind==='hit'?330:kind==='win'?660:440;g.gain.setValueAtTime(.07,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.22);o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+.23);setTimeout(()=>a.close(),350)}catch{}}
-export default function App(){
-const [p,P]=useState<Player>(initialPlayer),[n,N]=useState<NutritionState>(defaultNutrition),[ready,R]=useState(false),[panel,V]=useState<string|null>(null),[b,B]=useState<Battle|null>(null),[encounter,E]=useState<Enemy|null>(null),[chosen,CH]=useState<Element|null>(null),[camera,C]=useState(true),[muted,MU]=useState(false),[toast,TO]=useState(''),[welcome,W]=useState(false),[quest,Q]=useState<{exercise:ExerciseId;target:number;progress:number;side?:'left'|'right';seen:string[]}|null>(null),[saveError,SE]=useState('');
-const pRef=useRef(p);pRef.current=p;const finish=useRef(false);
-useEffect(()=>{Promise.all([readSave<{player:Player;battle:Battle|null}>('adventure'),readSave<NutritionState>('nutrition')]).then(([save,nutrition])=>{if(save){P(save.player);if(save.battle)B({...save.battle,paused:true});}else W(true);if(nutrition)N(nutrition);R(true)}).catch(()=>{SE('Storage could not be opened. Your session will not persist.');R(true)})},[]);
-useEffect(()=>{if(ready)void writeSave('adventure',{player:p,battle:b}).catch(()=>SE('Could not save adventure. Export your data before closing.'))},[p,b,ready]);
-useEffect(()=>{if(ready)void writeSave('nutrition',n).catch(()=>SE('Could not save journal.'))},[n,ready]);
-
-useEffect(()=>{if(!toast)return;const t=setTimeout(()=>TO(''),4500);return()=>clearTimeout(t)},[toast]);
-useEffect(()=>{if(b?.turn!=='enemy'||b.paused)return;const t=setTimeout(()=>B(old=>old?enemyTurn(old,pRef.current):null),1100);return()=>clearTimeout(t)},[b?.turn,b?.paused]);
-useEffect(()=>{const listener=(e:KeyboardEvent)=>{if(e.key==='Escape'){if(b)B({...b,paused:!b.paused});else if(quest)Q(null);else V(panel?null:'menu')}};window.addEventListener('keydown',listener);return()=>window.removeEventListener('keydown',listener)},[b,panel,quest]);
-function notify(s:string){TO(s);if(!muted)sound()}
-function interact(id:string){if(b||panel||quest)return;if(id.startsWith('trainer')||id.startsWith('leader')||id==='rival'){if(id==='rival'&&p.badges.length<3){notify('Rowan: Bring all three badges. Your adventure is just beginning.');return;}E(enemyFor(id,p));CH(null);V('preview');}else if(id.startsWith('quest')){const exercise=id.slice(6) as ExerciseId;Q({exercise,target:questTarget(exercise,p.quests[exercise]??0),progress:0,seen:[]});}else if(id==='healer'){P({...p,hp:p.maxHp});notify('Welcome to the Rest House. Take all the time you need. HP restored — always free.');}else V(id)}
-function onUnit(u:ExerciseUnit){if(b){B(old=>old?acceptUnit(old,u,pRef.current):null);if(!muted)sound('hit')}else if(quest){Q(old=>{if(!old||old.seen.includes(u.id))return old;if(['lunge','birddog'].includes(old.exercise)&&(!u.side||old.side===u.side))return old;return {...old,progress:old.progress+1,side:u.side,seen:[...old.seen,u.id]}})}}
-function manualSeries(){if(!b?.attack)return;let next=b;for(let i=b.progress;i<b.attack.units&&next.turn==='exercise';i++){next=acceptUnit(next,{id:uid(),exerciseId:b.attack.exercise,quality:1,confidence:0,verified:false,side:next.side==='left'?'right':'left',timestamp:performance.now()},p)}B(next)}
-function finishBattle(){if(!b||finish.current)return;finish.current=true;if(b.turn==='won'){P(win(p,b));notify(b.enemy.badge?'Badge earned! A specialization and special move are unlocked.':'Victory! Your progress is saved.');if(!muted)sound('win');if(b.enemy.id==='rival')V('ending')}else P(lose(p));B(null);finish.current=false}
-function item(key:string){if(!b||b.turn!=='player'||!p.items[key])return;P({...p,items:{...p.items,[key]:p.items[key]-1}});B({...b,turn:'enemy',playerHp:key==='potion'?Math.min(p.maxHp,b.playerHp+45):b.playerHp,defending:key==='shield'||b.defending,boost:key==='boost'||b.boost,log:key==='potion'?'45 HP restored.':key==='shield'?'Guard prepared.':'Next series powered up.'})}
-function discover(code:string){P(old=>old.discoveries.includes(code)?old:{...old,discoveries:[...old.discoveries,code],items:{...old.items,ingredient:old.items.ingredient+1}})}
-const iconType=(type:Element)=><span className={'type-tag '+type}>{type==='leg'?<Mountain size={12}/>:type==='arm'?<Flame size={12}/>:<Leaf size={12}/>} {typeLabel(type)}</span>;
-if(!ready)return <div className="loading"><span className="brand-mark">✦</span><h1>everstride</h1><p>Opening your adventure…</p></div>;
-if(panel==='journal')return <Journal state={n} onChange={N} onClose={()=>V(null)} onDiscover={discover}/>;
-return <div className="adventure-app"><header className="game-header"><button className="brand" onClick={()=>V(null)}><span className="brand-mark">✦</span><span>everstride<small>YOUR EVERYDAY ADVENTURE</small></span></button><nav><button className="active"><Map size={17}/>Adventure</button><button onClick={()=>{if(b)B({...b,paused:true});V('journal')}}><BookOpen size={17}/>Journal</button></nav><div className="header-right"><span className="local-pill"><i/> Saved locally</span><button className="icon-button" onClick={()=>MU(!muted)} aria-label="Toggle sound">{muted?<VolumeX size={18}/>:<Volume2 size={18}/>}</button><button className="icon-button" onClick={()=>V('menu')} aria-label="Settings"><Settings size={18}/></button><span className="avatar">J</span></div></header>
-<main className="game-main"><div className="game-title"><div><div className="eyebrow">CHAPTER 01 · THE EVERYDAY ADVENTURE</div><h1>{b?'A little effort. Real power.':'Welcome to Willowmere.'}</h1><p>{b?'Move at your own pace. Your opponent will wait.':'Your real life powers this little world. Let’s see where today takes you.'}</p></div><div className="weather">☀ <span>A good day to begin<small>WILLOWMERE VALLEY</small></span></div></div>
-<div className="game-layout"><section className="world-card"><div className="world-toolbar"><span><i/> {b?'TRAINING GROUNDS':'WILLOWMERE VILLAGE'}</span><span>{b?`${b.verified} verified · ${b.unverified} manual`:'WASD to move · E to say hello'}</span></div>{!b?<div className="world-frame"><World paused={!!panel||!!quest||welcome} badges={p.badges} position={p.position} onMove={position=>P(old=>({...old,position}))} onInteract={interact}/><div className="world-caption"><span>✦</span><div><strong>A world of small beginnings</strong><small>Meet the villagers. Find your own rhythm.</small></div></div></div>:<><div className="battle-stage"><div className="enemy-plate"><div><strong>{b.enemy.name}</strong><small>{b.enemy.title} · Phase {b.phase+1}/{b.enemy.phases.length}</small></div><div className="type-row">{b.enemy.phases[b.phase].map(iconType)}</div><div className="hp-track"><span style={{width:`${b.enemyHp/b.enemy.hp*100}%`}}/></div><small>{Math.ceil(b.enemyHp)} / {Math.ceil(b.enemy.hp)} HP</small></div><div className={'combat-sprite enemy '+b.enemy.phases[b.phase][0]}><span>✦</span><div className="sprite-head"/><div className="sprite-body"/><div className="sprite-feet"/></div><div className="combat-sprite hero"><div className="sprite-head"/><div className="sprite-body"/><div className="sprite-feet"/></div><div className="hero-plate"><strong>{p.name} <small>Lv. {p.level}</small></strong><div className="hp-track"><span style={{width:`${b.playerHp/p.maxHp*100}%`}}/></div><small>{Math.ceil(b.playerHp)} / {p.maxHp} HP · {typeLabel(b.type)}</small></div><div className="battle-log" aria-live="polite">{b.log}</div></div><div className="battle-actions">{b.paused?<div className="pause-message"><h2>Take your time.</h2><p>Your progress is safe. Nothing happens while you rest.</p><button className="primary" onClick={()=>B({...b,paused:false})}><Play size={16}/>Resume</button><button onClick={()=>V('journal')}>Open journal</button></div>:b.turn==='won'||b.turn==='lost'?<div className="pause-message"><h2>{b.turn==='won'?'A well-earned victory.':'A rest, then a fresh start.'}</h2><p>{b.turn==='won'?`+${b.enemy.xp} XP · +${b.enemy.coins} coins`:'Return to the Rest House. Your progress is kept.'}</p><button className="primary" onClick={finishBattle}>Continue adventure <ChevronRight size={18}/></button></div>:b.turn==='transform'?<div className="pause-message"><h2>A new strength awakens.</h2><p>Your series is complete. {b.enemy.name} changes type.</p><button className="primary" onClick={()=>B({...b,phase:b.phase+1,turn:'enemy'})}>Continue when ready</button></div>:b.turn==='exercise'?<div className="exercise-actions"><div><h2>{b.attack?.name}</h2><p>{b.progress} / {b.attack?.units} {b.attack?.exercise==='superman'?'seconds':'repetitions'}</p></div>{!camera&&<button className="primary" onClick={manualSeries}><Check size={16}/>I completed the remaining units</button>}<button className="secondary" onClick={()=>B({...b,paused:true})}><Pause size={16}/>Rest</button><button onClick={()=>B(cancelSeries(b))}>End series & turn</button><p className="tiny">{camera?'Every accepted movement causes damage.':'Manual mode is unverified. Group fatigue applies.'}</p></div>:b.turn==='enemy'?<div className="pause-message"><p>{b.enemy.name} is responding…</p><button onClick={()=>B({...b,paused:true})}>Pause safely</button></div>:<><div className="attack-grid">{p.equipped.map(id=>{const a=attackFor(id,p);return <button className={'attack-card '+a.type} key={id} onClick={()=>B(beginAttack(b,a))}><span>{iconType(a.type)}<small>{Math.round(a.damage)} power</small></span><strong>{a.name}</strong><small>{a.description}</small></button>})}</div><div className="button-row"><button onClick={()=>B({...b,defending:true,turn:'enemy',log:'You brace for the next hit.'})}><Shield size={16}/>Defend</button><button disabled={!p.items.potion} onClick={()=>item('potion')}>Potion ({p.items.potion})</button><button disabled={!p.items.shield} onClick={()=>item('shield')}>Guard ({p.items.shield})</button><button disabled={!p.items.boost} onClick={()=>item('boost')}>Boost ({p.items.boost})</button><button onClick={()=>B({...b,paused:true})}><Pause size={15}/>Pause</button>{b.enemy.id.startsWith('trainer')&&<button onClick={()=>{P({...p,hp:b.playerHp});B(null)}}>Leave</button>}<label className="check compact"><input type="checkbox" checked={camera} onChange={e=>C(e.target.checked)}/>Camera</label></div></>}</div></>}
-<div className="world-footer"><span><Heart size={15}/> Rest whenever you need.</span><button onClick={()=>{if(b)B({...b,paused:true});V('journal')}}><BookOpen size={16}/>Open your journal <ChevronRight size={15}/></button></div></section>
-<aside className="adventure-sidebar">{b?.turn==='exercise'&&camera&&!b.paused?<section className="card camera-card"><Suspense fallback={<p>Preparing local pose model…</p>}><ExerciseCamera exerciseId={b.attack!.exercise} target={b.attack!.units} progress={b.progress} active={true} onUnit={onUnit} onError={notify}/></Suspense><button onClick={()=>C(false)}>Detection trouble? Continue manually</button></section>:<><section className="card player-card"><div className="player-heading"><div className="portrait">✦</div><div><small>YOUR ADVENTURER</small><h2>{p.name}</h2><span>Level {p.level} · {p.badges.length?'Finding your stride':'A fresh beginning'}</span></div></div><div className="stat-line"><span><Heart size={15}/> Vitality</span><strong>{Math.ceil(b?.playerHp??p.hp)} <small>/ {p.maxHp}</small></strong></div><div className="hp-track"><span style={{width:`${(b?.playerHp??p.hp)/p.maxHp*100}%`}}/></div><div className="stat-line"><span>Next level</span><small>{p.xp} / {xpNeeded(p.level)} XP</small></div><div className="xp-track"><span style={{width:`${p.xp/xpNeeded(p.level)*100}%`}}/></div><div className="player-coins"><span><Coins size={19}/> Your pocket</span><strong>{p.coins}<small> coins</small></strong></div></section><section className="card quest-card"><div className="eyebrow">THE PATH AHEAD</div><h2>Find your strength.</h2><p>Three leaders. Three ways to move.<br/>One adventure that’s yours.</p>{(['leg','arm','back'] as Element[]).map((t,i)=><div className={'badge-row '+(p.badges.includes(t)?'earned':'')} key={t}><span className={'badge-icon '+t}>{p.badges.includes(t)?'✓':['⛰','✹','✧'][i]}</span><div><strong>{['Mountain','Ember','Wind'][i]} Badge</strong><small>{p.badges.includes(t)?'Earned · special unlocked':`${typeLabel(t)} Gym · waiting for you`}</small></div><ChevronRight size={16}/></div>)}<div className="chapter-progress">{p.badges.length}/3 badges <span>{p.ending?'Summit reached ✦':p.badges.length===3?'The summit awaits':'Every journey starts somewhere'}</span></div></section><button className="journal-teaser" onClick={()=>V('journal')}><div className="journal-book">✧</div><div><strong>Your field journal</strong><small>Food, movement & little milestones</small></div><ChevronRight size={19}/></button></>}</aside></div><div className="quick-actions"><button onClick={()=>V('inventory')}><Backpack size={18}/>Satchel & skills</button><button disabled={!!b} onClick={()=>interact('healer')}><Heart size={18}/>Rest House</button><button onClick={()=>V('devices')}><Footprints size={18}/>Devices & steps</button><span>Made for the people who make everyday life an adventure.</span></div></main>
-{toast&&<div className="toast" role="status">{toast}</div>}{saveError&&<div className="toast error">{saveError}</div>}
-{welcome&&<div className="modal-backdrop"><section className="modal welcome-modal"><div className="big-star">✦</div><div className="eyebrow">FOR THE PEOPLE WHO MAKE LIFE AN ADVENTURE</div><h1>Your everyday life.<br/>An extraordinary journey.</h1><p>Welcome to Everstride. Explore Willowmere, turn real movement into battle skills, and keep a thoughtful journal along the way.</p><label>What should we call your adventurer?<input maxLength={20} value={p.name} onChange={e=>P({...p,name:e.target.value||'Adventurer'})}/></label><button className="primary" onClick={()=>W(false)}>Take the first step <ChevronRight size={18}/></button><p className="tiny">Camera is optional. Pause any time. Your journal is never a score.</p></section></div>}
-{panel&&panel!=='journal'&&<div className="modal-backdrop"><section className="modal"><div className="card-title"><h2>{panel==='preview'?'Prepare for your next chapter':panel==='inventory'?'Your satchel':panel==='shop'?'The little supply shop':panel==='alchemy'?'The alchemist’s notebook':panel==='ending'?'You found your stride.':panel==='devices'?'Your connected adventure':'Make yourself at home'}</h2><button onClick={()=>V(null)} aria-label="Close">✕</button></div>
-{panel==='preview'&&encounter&&<><p><strong>{encounter.name}</strong> · {encounter.title}</p><div className="phase-preview">{encounter.phases.map((types,i)=><div key={i}><small>PHASE {i+1}</small><div className="type-row">{types.map(iconType)}</div></div>)}</div><p>Choose a specialization. It stays fixed for this encounter.</p><div className="button-row">{[null,...p.badges].map(t=><button className={chosen===t?'primary':'secondary'} key={t??'neutral'} onClick={()=>CH(t)}>{typeLabel(t)}</button>)}</div><p className="tiny">Leg beats Arm · Arm beats Back · Back beats Leg. Matching your specialization gives ×1.25 power. Dual defenses multiply.</p><p>Your moves: {p.equipped.map(id=>attacks.find(a=>a.id===id)?.name).join(' · ')}</p><label className="check"><input type="checkbox" checked={camera} onChange={e=>C(e.target.checked)}/>Use camera verification</label><div className="button-row"><button className="primary" onClick={()=>{B(startBattle(encounter,p,chosen));V(null)}}><Swords size={17}/>Begin encounter</button><button onClick={()=>V('inventory')}>Change skills</button></div></>}
-{panel==='inventory'&&<><p>Equip up to four skills. Choose the mix that suits you.</p><div className="attack-grid">{available(p).map(a=><button key={a.id} className={'attack-card '+a.type+(p.equipped.includes(a.id)?' equipped':'')} onClick={()=>{if(b){notify('Change equipment between encounters.');return}if(p.equipped.includes(a.id)){if(p.equipped.length>1)P({...p,equipped:p.equipped.filter(x=>x!==a.id)})}else if(p.equipped.length<4)P({...p,equipped:[...p.equipped,a.id]});else notify('Unequip a move first; four slots are available.')}}><span>{iconType(a.type)}<small>{p.equipped.includes(a.id)?'✓ equipped':'available'}</small></span><strong>{a.name}</strong><small>Lv. {(p.upgrades[a.id]??0)+1} · {Math.round(attackFor(a.id,p).damage)} power</small></button>)}</div><p>Potions {p.items.potion} · Guards {p.items.shield} · Boosts {p.items.boost} · Ingredients {p.items.ingredient}</p></>}
-{panel==='shop'&&<><p>Your pocket: <strong>{p.coins} coins</strong>. The Rest House heals for free.</p>{[{id:'potion',name:'Willow tonic · restores 45 HP',cost:15},{id:'shield',name:'Bark guard · halves one hit',cost:12},{id:'boost',name:'Bright spark · next series +25%',cost:20}].map(x=><div className="food-row" key={x.id}><strong>{x.name}</strong><button className="secondary" disabled={p.coins<x.cost} onClick={()=>{P({...p,coins:p.coins-x.cost,items:{...p.items,[x.id]:p.items[x.id]+1}});notify('Tucked safely into your satchel.')}}>{x.cost} coins</button></div>)}<h3>Grow your skills</h3>{available(p).map(a=>{const level=p.upgrades[a.id]??0,cost=25*(level+1);return <div className="food-row" key={a.id}><span>{a.name} · Lv. {level+1}</span><button disabled={level>=4||p.coins<cost} onClick={()=>P({...p,coins:p.coins-cost,upgrades:{...p.upgrades,[a.id]:level+1}})}>{level>=4?'Mastered':`Upgrade · ${cost} coins`}</button></div>})}</>}
-{panel==='alchemy'&&<><p>Discover packaged foods through your journal’s scanner. Each unique product reveals one fictional ingredient — scanning never means eating.</p><div className="soft-callout">{p.discoveries.length} discoveries · {p.items.ingredient} ingredients</div><button className="primary" onClick={()=>V('journal')}><BookOpen size={16}/>Open food journal</button><h3>Brew something useful</h3>{[['potion','Willow tonic',1],['shield','Bark guard',1],['boost','Bright spark',2]].map(([id,name,cost])=><div className="food-row" key={id}><span>{name}</span><button disabled={p.items.ingredient<Number(cost)} onClick={()=>P({...p,items:{...p.items,ingredient:p.items.ingredient-Number(cost),[id]:p.items[String(id)]+1}})}>Craft · {cost} ingredient{Number(cost)>1?'s':''}</button></div>)}</>}
-{panel==='devices'&&<DevicePanel/>}
-{panel==='menu'&&<><div className="button-row"><button className="secondary" onClick={()=>V('inventory')}>Skills & items</button><button className="secondary" onClick={()=>V('journal')}>Nutrition journal</button><button className="secondary" onClick={()=>V('devices')}>Devices</button></div><label>Adventure difficulty<select disabled={!!b} value={p.difficulty} onChange={e=>P({...p,difficulty:e.target.value as Player['difficulty']})}><option value="easy">Easy · 85% enemy HP</option><option value="medium">Medium · standard HP</option><option value="hard">Hard · 135% enemy HP</option></select></label><p className="tiny">Difficulty does not increase enemy attack. Movement: WASD/arrows. Interact: E/Enter. Pause/menu: Escape. Your progress saves automatically on this device.</p><p>For Javpato’s girlfriend and Uriel’s brother — may your everyday routines become little adventures.</p></>}
-{panel==='ending'&&<><div className="big-star">✦</div><p>You crossed the valley, found three kinds of strength, and met the summit with your own effort.</p><h2>The greatest adventure was showing up.</h2><p>Willowmere is still here. Keep exploring, keep resting, and keep making the journey your own.</p><button className="primary" onClick={()=>V(null)}>Back to the village</button></>}
-</section></div>}
-{quest&&<div className="modal-backdrop"><section className="modal"><div className="card-title"><h2>A little village challenge</h2><button onClick={()=>Q(null)} aria-label="Leave quest">✕</button></div><p>{quest.exercise} · {quest.progress} / {quest.target} units · quest level {Math.min(5,(p.quests[quest.exercise]??0)+1)}</p>{quest.progress>=quest.target?<><p>Thank you! Small efforts make a strong village.</p><button className="primary" onClick={()=>{const count=p.quests[quest.exercise]??0;P({...reward(p,count<5?25:0,12),quests:{...p.quests,[quest.exercise]:count+1}});Q(null);notify('Quest complete. +12 coins'+(count<5?' · +25 XP':''))}}>Collect reward</button></>:<><label className="check"><input type="checkbox" checked={camera} onChange={e=>C(e.target.checked)}/>Use camera</label>{camera?<Suspense fallback={<p>Preparing camera…</p>}><ExerciseCamera exerciseId={quest.exercise} target={quest.target} progress={quest.progress} active={true} onUnit={onUnit} onError={notify}/></Suspense>:<><p className="notice">Manual confirmation is unverified. Take your time and stop if you need to.</p><button className="primary" onClick={()=>Q({...quest,progress:quest.target})}>I completed the exercise</button></>}<button onClick={()=>Q(null)}>Stop safely</button></>}</section></div>}
-</div>;
+import { useEffect, useRef, useState, lazy, Suspense } from "react";
+import {
+  BookOpen,
+  Heart,
+  Coins,
+  Map,
+  Backpack,
+  Settings,
+  ChevronRight,
+  Shield,
+  Swords,
+  Footprints,
+  Pause,
+  Play,
+  Volume2,
+  VolumeX,
+  Leaf,
+  Flame,
+  Mountain,
+  ArrowLeft,
+  Camera,
+  Check,
+  Star,
+} from "lucide-react";
+import World from "./game/World";
+import DevicePanel from "./platform/DevicePanel";
+import type { ImportedHealth } from "./platform/health";
+import { startMusic, stopMusic, setVolume } from "./audio/music";
+import Journal from "./nutrition/Journal";
+import { defaultNutrition, type NutritionState } from "./nutrition/engine";
+import {
+  initialPlayer,
+  type Player,
+  type Battle,
+  type Enemy,
+  attacks,
+  available,
+  attackFor,
+  enemyFor,
+  startBattle,
+  beginAttack,
+  acceptUnit,
+  cancelSeries,
+  enemyTurn,
+  win,
+  lose,
+  reward,
+  questTarget,
+  xpNeeded,
+} from "./core/game";
+import type { Element, ExerciseId, ExerciseUnit } from "./core/contracts";
+import { readSave, writeSave } from "./services/storage";
+const ExerciseCamera = lazy(() => import("./exercises/ExerciseCamera"));
+const typeLabel = (t: Element | null) =>
+  t ? { leg: "Leg", arm: "Arm", back: "Back" }[t] : "Neutral";
+const uid = () => crypto.randomUUID();
+function sound(kind = "click") {
+  try {
+    const a = new AudioContext(),
+      o = a.createOscillator(),
+      g = a.createGain();
+    o.type = "triangle";
+    o.frequency.value = kind === "hit" ? 330 : kind === "win" ? 660 : 440;
+    g.gain.setValueAtTime(0.07, a.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.22);
+    o.connect(g);
+    g.connect(a.destination);
+    o.start();
+    o.stop(a.currentTime + 0.23);
+    setTimeout(() => a.close(), 350);
+  } catch {}
 }
-function DevicePanel(){const [text,T]=useState('Checking available connections…');useEffect(()=>{import('./platform/health').then(async m=>{const r=await m.healthPlatform.availability();T(JSON.stringify(r,null,2))}).catch(()=>T('Native activity connection is unavailable in this browser. No simulated steps are used.'))},[]);return <><p>Web and Android share the same game. Native step counting requires a compatible Android device and permission.</p><pre className="device-state">{text}</pre><p className="notice">Cloud linking needs your Supabase project configuration. Until connected, this is a local adventure and journal.</p><p className="tiny">Linking devices also shares the nutrition journal. Never give a linking code to someone who should not see those records.</p></>}
+export default function App() {
+  const [p, P] = useState<Player>(initialPlayer),
+    [n, N] = useState<NutritionState>(defaultNutrition),
+    [ready, R] = useState(false),
+    [panel, V] = useState<string | null>(null),
+    [b, B] = useState<Battle | null>(null),
+    [encounter, E] = useState<Enemy | null>(null),
+    [chosen, CH] = useState<Element | null>(null),
+    [camera, C] = useState(true),
+    [muted, MU] = useState(false),
+    [toast, TO] = useState(""),
+    [welcome, W] = useState(false),
+    [quest, Q] = useState<{
+      exercise: ExerciseId;
+      target: number;
+      progress: number;
+      side?: "left" | "right";
+      seen: string[];
+    } | null>(null),
+    [saveError, SE] = useState("");
+  const audioReady = useRef(false);
+  useEffect(() => {
+    setVolume(muted ? 0 : 0.25);
+    if (audioReady.current)
+      void startMusic(
+        b?.turn === "won"
+          ? "victory"
+          : b?.enemy.id === "rival"
+            ? "rival"
+            : b?.enemy.badge
+              ? "leader"
+              : b
+                ? "trainer"
+                : "village",
+      );
+  }, [muted, b?.enemy.id, b?.turn === "won"]);
+  useEffect(() => () => stopMusic(), []);
+  const pRef = useRef(p);
+  pRef.current = p;
+  const finish = useRef(false);
+  useEffect(() => {
+    Promise.all([
+      readSave<{ player: Player; battle: Battle | null }>("adventure"),
+      readSave<NutritionState>("nutrition"),
+    ])
+      .then(([save, nutrition]) => {
+        if (save) {
+          P(save.player);
+          if (save.battle) B({ ...save.battle, paused: true });
+        } else W(true);
+        if (nutrition) N(nutrition);
+        R(true);
+      })
+      .catch(() => {
+        SE("Storage could not be opened. Your session will not persist.");
+        R(true);
+      });
+  }, []);
+  useEffect(() => {
+    if (ready)
+      void writeSave("adventure", { player: p, battle: b }).catch(() =>
+        SE("Could not save adventure. Export your data before closing."),
+      );
+  }, [p, b, ready]);
+  useEffect(() => {
+    if (ready)
+      void writeSave("nutrition", n).catch(() => SE("Could not save journal."));
+  }, [n, ready]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => TO(""), 4500);
+    return () => clearTimeout(t);
+  }, [toast]);
+  useEffect(() => {
+    if (b?.turn !== "enemy" || b.paused) return;
+    const t = setTimeout(
+      () => B((old) => (old ? enemyTurn(old, pRef.current) : null)),
+      1100,
+    );
+    return () => clearTimeout(t);
+  }, [b?.turn, b?.paused]);
+  useEffect(() => {
+    const listener = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (b) B({ ...b, paused: !b.paused });
+        else if (quest) Q(null);
+        else V(panel ? null : "menu");
+      }
+    };
+    window.addEventListener("keydown", listener);
+    return () => window.removeEventListener("keydown", listener);
+  }, [b, panel, quest]);
+  function notify(s: string) {
+    TO(s);
+    if (!muted) sound();
+  }
+  function interact(id: string) {
+    if (b || panel || quest) return;
+    if (id.startsWith("trainer") || id.startsWith("leader") || id === "rival") {
+      if (id === "rival" && p.badges.length < 3) {
+        notify(
+          "Rowan: Bring all three badges. Your adventure is just beginning.",
+        );
+        return;
+      }
+      E(enemyFor(id, p));
+      CH(null);
+      V("preview");
+    } else if (id.startsWith("quest")) {
+      const exercise = id.slice(6) as ExerciseId;
+      Q({
+        exercise,
+        target: questTarget(exercise, p.quests[exercise] ?? 0),
+        progress: 0,
+        seen: [],
+      });
+    } else if (id === "healer") {
+      P({ ...p, hp: p.maxHp });
+      notify(
+        "Welcome to the Rest House. Take all the time you need. HP restored — always free.",
+      );
+    } else V(id);
+  }
+  function onUnit(u: ExerciseUnit, sessionId?: string) {
+    if (b) {
+      B((old) => (old ? acceptUnit(old, u, pRef.current, sessionId) : null));
+      if (!muted) sound("hit");
+    } else if (quest) {
+      Q((old) => {
+        if (!old || old.seen.includes(u.id)) return old;
+        if (
+          ["lunge", "birddog"].includes(old.exercise) &&
+          (!u.side || old.side === u.side)
+        )
+          return old;
+        return {
+          ...old,
+          progress: old.progress + 1,
+          side: u.side,
+          seen: [...old.seen, u.id],
+        };
+      });
+    }
+  }
+  function manualSeries() {
+    if (!b?.attack) return;
+    let next = b;
+    for (
+      let i = b.progress;
+      i < b.attack.units && next.turn === "exercise";
+      i++
+    ) {
+      next = acceptUnit(
+        next,
+        {
+          id: uid(),
+          exerciseId: b.attack.exercise,
+          quality: 1,
+          confidence: 0,
+          verified: false,
+          side: next.side === "left" ? "right" : "left",
+          timestamp: performance.now(),
+        },
+        p,
+      );
+    }
+    B(next);
+  }
+  function finishBattle() {
+    if (!b || finish.current) return;
+    finish.current = true;
+    if (b.turn === "won") {
+      P(win(p, b));
+      notify(
+        b.enemy.badge
+          ? "Badge earned! A specialization and special move are unlocked."
+          : "Victory! Your progress is saved.",
+      );
+      if (!muted) sound("win");
+      if (b.enemy.id === "rival") V("ending");
+    } else P(lose(p));
+    B(null);
+    finish.current = false;
+  }
+  function item(key: string) {
+    if (!b || b.turn !== "player" || !p.items[key]) return;
+    P({ ...p, items: { ...p.items, [key]: p.items[key] - 1 } });
+    B({
+      ...b,
+      turn: "enemy",
+      playerHp:
+        key === "potion" ? Math.min(p.maxHp, b.playerHp + 45) : b.playerHp,
+      defending: key === "shield" || b.defending,
+      boost: key === "boost" || b.boost,
+      log:
+        key === "potion"
+          ? "45 HP restored."
+          : key === "shield"
+            ? "Guard prepared."
+            : "Next series powered up.",
+    });
+  }
+  function discover(code: string) {
+    P((old) =>
+      old.discoveries.includes(code)
+        ? old
+        : {
+            ...old,
+            discoveries: [...old.discoveries, code],
+            items: { ...old.items, ingredient: old.items.ingredient + 1 },
+          },
+    );
+  }
+  const iconType = (type: Element) => (
+    <span className={"type-tag " + type}>
+      {type === "leg" ? (
+        <Mountain size={12} />
+      ) : type === "arm" ? (
+        <Flame size={12} />
+      ) : (
+        <Leaf size={12} />
+      )}{" "}
+      {typeLabel(type)}
+    </span>
+  );
+  if (!ready)
+    return (
+      <div className="loading">
+        <span className="brand-mark">✦</span>
+        <h1>everstride</h1>
+        <p>Opening your adventure…</p>
+      </div>
+    );
+  if (panel === "journal")
+    return (
+      <Journal
+        state={n}
+        onChange={N}
+        onClose={() => V(null)}
+        onDiscover={discover}
+      />
+    );
+  return (
+    <div
+      className="adventure-app"
+      onPointerDown={() => {
+        if (!audioReady.current) {
+          audioReady.current = true;
+          setVolume(muted ? 0 : 0.25);
+          void startMusic("village");
+        }
+      }}
+    >
+      <header className="game-header">
+        <button className="brand" onClick={() => V(null)}>
+          <span className="brand-mark">✦</span>
+          <span>
+            everstride<small>YOUR EVERYDAY ADVENTURE</small>
+          </span>
+        </button>
+        <nav>
+          <button className="active">
+            <Map size={17} />
+            Adventure
+          </button>
+          <button
+            onClick={() => {
+              if (b) B({ ...b, paused: true });
+              V("journal");
+            }}
+          >
+            <BookOpen size={17} />
+            Journal
+          </button>
+        </nav>
+        <div className="header-right">
+          <span className="local-pill">
+            <i /> Saved locally
+          </span>
+          <button
+            className="icon-button"
+            onClick={() => MU(!muted)}
+            aria-label="Toggle sound"
+          >
+            {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+          </button>
+          <button
+            className="icon-button"
+            onClick={() => V("menu")}
+            aria-label="Settings"
+          >
+            <Settings size={18} />
+          </button>
+          <span className="avatar">J</span>
+        </div>
+      </header>
+      <main className="game-main">
+        <div className="game-title">
+          <div>
+            <div className="eyebrow">CHAPTER 01 · THE EVERYDAY ADVENTURE</div>
+            <h1>
+              {b ? "A little effort. Real power." : "Welcome to Willowmere."}
+            </h1>
+            <p>
+              {b
+                ? "Move at your own pace. Your opponent will wait."
+                : "Your real life powers this little world. Let’s see where today takes you."}
+            </p>
+          </div>
+          <div className="weather">
+            ☀{" "}
+            <span>
+              A good day to begin<small>WILLOWMERE VALLEY</small>
+            </span>
+          </div>
+        </div>
+        <div className="game-layout">
+          <section className="world-card">
+            <div className="world-toolbar">
+              <span>
+                <i /> {b ? "TRAINING GROUNDS" : "WILLOWMERE VILLAGE"}
+              </span>
+              <span>
+                {b
+                  ? `${b.verified} verified · ${b.unverified} manual`
+                  : "WASD to move · E to say hello"}
+              </span>
+            </div>
+            {!b ? (
+              <div className="world-frame">
+                <World
+                  paused={!!panel || !!quest || welcome}
+                  badges={p.badges}
+                  position={p.position}
+                  onMove={(position) => P((old) => ({ ...old, position }))}
+                  onInteract={interact}
+                />
+                <div className="world-caption">
+                  <span>✦</span>
+                  <div>
+                    <strong>A world of small beginnings</strong>
+                    <small>Meet the villagers. Find your own rhythm.</small>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="battle-stage">
+                  <div className="enemy-plate">
+                    <div>
+                      <strong>{b.enemy.name}</strong>
+                      <small>
+                        {b.enemy.title} · Phase {b.phase + 1}/
+                        {b.enemy.phases.length}
+                      </small>
+                    </div>
+                    <div className="type-row">
+                      {b.enemy.phases[b.phase].map(iconType)}
+                    </div>
+                    <div className="hp-track">
+                      <span
+                        style={{ width: `${(b.enemyHp / b.enemy.hp) * 100}%` }}
+                      />
+                    </div>
+                    <small>
+                      {Math.ceil(b.enemyHp)} / {Math.ceil(b.enemy.hp)} HP
+                    </small>
+                  </div>
+                  <div
+                    className={
+                      "combat-sprite enemy " + b.enemy.phases[b.phase][0]
+                    }
+                  >
+                    <span>✦</span>
+                    <div className="sprite-head" />
+                    <div className="sprite-body" />
+                    <div className="sprite-feet" />
+                  </div>
+                  <div className="combat-sprite hero">
+                    <div className="sprite-head" />
+                    <div className="sprite-body" />
+                    <div className="sprite-feet" />
+                  </div>
+                  <div className="hero-plate">
+                    <strong>
+                      {p.name} <small>Lv. {p.level}</small>
+                    </strong>
+                    <div className="hp-track">
+                      <span
+                        style={{ width: `${(b.playerHp / p.maxHp) * 100}%` }}
+                      />
+                    </div>
+                    <small>
+                      {Math.ceil(b.playerHp)} / {p.maxHp} HP ·{" "}
+                      {typeLabel(b.type)}
+                    </small>
+                  </div>
+                  <div className="battle-log" aria-live="polite">
+                    {b.log}
+                  </div>
+                </div>
+                <div className="battle-actions">
+                  {b.paused ? (
+                    <div className="pause-message">
+                      <h2>Take your time.</h2>
+                      <p>
+                        Your progress is safe. Nothing happens while you rest.
+                      </p>
+                      <button
+                        className="primary"
+                        onClick={() => B({ ...b, paused: false })}
+                      >
+                        <Play size={16} />
+                        Resume
+                      </button>
+                      <button onClick={() => V("journal")}>Open journal</button>
+                    </div>
+                  ) : b.turn === "won" || b.turn === "lost" ? (
+                    <div className="pause-message">
+                      <h2>
+                        {b.turn === "won"
+                          ? "A well-earned victory."
+                          : "A rest, then a fresh start."}
+                      </h2>
+                      <p>
+                        {b.turn === "won"
+                          ? `+${b.enemy.xp} XP · +${b.enemy.coins} coins`
+                          : "Return to the Rest House. Your progress is kept."}
+                      </p>
+                      <button className="primary" onClick={finishBattle}>
+                        Continue adventure <ChevronRight size={18} />
+                      </button>
+                    </div>
+                  ) : b.turn === "transform" ? (
+                    <div className="pause-message">
+                      <h2>A new strength awakens.</h2>
+                      <p>
+                        Your series is complete. {b.enemy.name} changes type.
+                      </p>
+                      <button
+                        className="primary"
+                        onClick={() =>
+                          B({ ...b, phase: b.phase + 1, turn: "enemy" })
+                        }
+                      >
+                        Continue when ready
+                      </button>
+                    </div>
+                  ) : b.turn === "exercise" ? (
+                    <div className="exercise-actions">
+                      <div>
+                        <h2>{b.attack?.name}</h2>
+                        <p>
+                          {b.progress} / {b.attack?.units}{" "}
+                          {b.attack?.exercise === "superman"
+                            ? "seconds"
+                            : "repetitions"}
+                        </p>
+                      </div>
+                      {!camera && (
+                        <button className="primary" onClick={manualSeries}>
+                          <Check size={16} />I completed the remaining units
+                        </button>
+                      )}
+                      <button
+                        className="secondary"
+                        onClick={() => B({ ...b, paused: true })}
+                      >
+                        <Pause size={16} />
+                        Rest
+                      </button>
+                      <button onClick={() => B(cancelSeries(b))}>
+                        End series & turn
+                      </button>
+                      <p className="tiny">
+                        {camera
+                          ? "Every accepted movement causes damage."
+                          : "Manual mode is unverified. Group fatigue applies."}
+                      </p>
+                    </div>
+                  ) : b.turn === "enemy" ? (
+                    <div className="pause-message">
+                      <p>{b.enemy.name} is responding…</p>
+                      <button onClick={() => B({ ...b, paused: true })}>
+                        Pause safely
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="attack-grid">
+                        {p.equipped.map((id) => {
+                          const a = attackFor(id, p);
+                          return (
+                            <button
+                              className={"attack-card " + a.type}
+                              key={id}
+                              onClick={() => B(beginAttack(b, a))}
+                            >
+                              <span>
+                                {iconType(a.type)}
+                                <small>{Math.round(a.damage)} power</small>
+                              </span>
+                              <strong>{a.name}</strong>
+                              <small>{a.description}</small>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <div className="button-row">
+                        <button
+                          onClick={() =>
+                            B({
+                              ...b,
+                              defending: true,
+                              turn: "enemy",
+                              log: "You brace for the next hit.",
+                            })
+                          }
+                        >
+                          <Shield size={16} />
+                          Defend
+                        </button>
+                        <button
+                          disabled={!p.items.potion}
+                          onClick={() => item("potion")}
+                        >
+                          Potion ({p.items.potion})
+                        </button>
+                        <button
+                          disabled={!p.items.shield}
+                          onClick={() => item("shield")}
+                        >
+                          Guard ({p.items.shield})
+                        </button>
+                        <button
+                          disabled={!p.items.boost}
+                          onClick={() => item("boost")}
+                        >
+                          Boost ({p.items.boost})
+                        </button>
+                        <button onClick={() => B({ ...b, paused: true })}>
+                          <Pause size={15} />
+                          Pause
+                        </button>
+                        {b.enemy.id.startsWith("trainer") && (
+                          <button
+                            onClick={() => {
+                              P({ ...p, hp: b.playerHp });
+                              B(null);
+                            }}
+                          >
+                            Leave
+                          </button>
+                        )}
+                        <label className="check compact">
+                          <input
+                            type="checkbox"
+                            checked={camera}
+                            onChange={(e) => C(e.target.checked)}
+                          />
+                          Camera
+                        </label>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+            <div className="world-footer">
+              <span>
+                <Heart size={15} /> Rest whenever you need.
+              </span>
+              <button
+                onClick={() => {
+                  if (b) B({ ...b, paused: true });
+                  V("journal");
+                }}
+              >
+                <BookOpen size={16} />
+                Open your journal <ChevronRight size={15} />
+              </button>
+            </div>
+          </section>
+          <aside className="adventure-sidebar">
+            {b?.turn === "exercise" && camera && !b.paused ? (
+              <section className="card camera-card">
+                <Suspense fallback={<p>Preparing local pose model…</p>}>
+                  <ExerciseCamera
+                    key={b.sessionId}
+                    exerciseId={b.attack!.exercise}
+                    target={b.attack!.units}
+                    progress={b.progress}
+                    active={true}
+                    onUnit={(u) => onUnit(u, b.sessionId)}
+                    onError={notify}
+                  />
+                </Suspense>
+                <button onClick={() => C(false)}>
+                  Detection trouble? Continue manually
+                </button>
+              </section>
+            ) : (
+              <>
+                <section className="card player-card">
+                  <div className="player-heading">
+                    <div className="portrait">✦</div>
+                    <div>
+                      <small>YOUR ADVENTURER</small>
+                      <h2>{p.name}</h2>
+                      <span>
+                        Level {p.level} ·{" "}
+                        {p.badges.length
+                          ? "Finding your stride"
+                          : "A fresh beginning"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="stat-line">
+                    <span>
+                      <Heart size={15} /> Vitality
+                    </span>
+                    <strong>
+                      {Math.ceil(b?.playerHp ?? p.hp)}{" "}
+                      <small>/ {p.maxHp}</small>
+                    </strong>
+                  </div>
+                  <div className="hp-track">
+                    <span
+                      style={{
+                        width: `${((b?.playerHp ?? p.hp) / p.maxHp) * 100}%`,
+                      }}
+                    />
+                  </div>
+                  <div className="stat-line">
+                    <span>Next level</span>
+                    <small>
+                      {p.xp} / {xpNeeded(p.level)} XP
+                    </small>
+                  </div>
+                  <div className="xp-track">
+                    <span
+                      style={{ width: `${(p.xp / xpNeeded(p.level)) * 100}%` }}
+                    />
+                  </div>
+                  <div className="player-coins">
+                    <span>
+                      <Coins size={19} /> Your pocket
+                    </span>
+                    <strong>
+                      {p.coins}
+                      <small> coins</small>
+                    </strong>
+                  </div>
+                </section>
+                <section className="card quest-card">
+                  <div className="eyebrow">THE PATH AHEAD</div>
+                  <h2>Find your strength.</h2>
+                  <p>
+                    Three leaders. Three ways to move.
+                    <br />
+                    One adventure that’s yours.
+                  </p>
+                  {(["leg", "arm", "back"] as Element[]).map((t, i) => (
+                    <div
+                      className={
+                        "badge-row " + (p.badges.includes(t) ? "earned" : "")
+                      }
+                      key={t}
+                    >
+                      <span className={"badge-icon " + t}>
+                        {p.badges.includes(t) ? "✓" : ["⛰", "✹", "✧"][i]}
+                      </span>
+                      <div>
+                        <strong>
+                          {["Mountain", "Ember", "Wind"][i]} Badge
+                        </strong>
+                        <small>
+                          {p.badges.includes(t)
+                            ? "Earned · special unlocked"
+                            : `${typeLabel(t)} Gym · waiting for you`}
+                        </small>
+                      </div>
+                      <ChevronRight size={16} />
+                    </div>
+                  ))}
+                  <div className="chapter-progress">
+                    {p.badges.length}/3 badges{" "}
+                    <span>
+                      {p.ending
+                        ? "Summit reached ✦"
+                        : p.badges.length === 3
+                          ? "The summit awaits"
+                          : "Every journey starts somewhere"}
+                    </span>
+                  </div>
+                </section>
+                <button className="journal-teaser" onClick={() => V("journal")}>
+                  <div className="journal-book">✧</div>
+                  <div>
+                    <strong>Your field journal</strong>
+                    <small>Food, movement & little milestones</small>
+                  </div>
+                  <ChevronRight size={19} />
+                </button>
+              </>
+            )}
+          </aside>
+        </div>
+        <div className="quick-actions">
+          <button onClick={() => V("inventory")}>
+            <Backpack size={18} />
+            Satchel & skills
+          </button>
+          <button disabled={!!b} onClick={() => interact("healer")}>
+            <Heart size={18} />
+            Rest House
+          </button>
+          <button onClick={() => V("devices")}>
+            <Footprints size={18} />
+            Devices & steps
+          </button>
+          <span>Made for the people who make everyday life an adventure.</span>
+        </div>
+      </main>
+      {toast && (
+        <div className="toast" role="status">
+          {toast}
+        </div>
+      )}
+      {saveError && <div className="toast error">{saveError}</div>}
+      {welcome && (
+        <div className="modal-backdrop">
+          <section className="modal welcome-modal">
+            <div className="big-star">✦</div>
+            <div className="eyebrow">
+              FOR THE PEOPLE WHO MAKE LIFE AN ADVENTURE
+            </div>
+            <h1>
+              Your everyday life.
+              <br />
+              An extraordinary journey.
+            </h1>
+            <p>
+              Welcome to Everstride. Explore Willowmere, turn real movement into
+              battle skills, and keep a thoughtful journal along the way.
+            </p>
+            <label>
+              What should we call your adventurer?
+              <input
+                maxLength={20}
+                value={p.name}
+                onChange={(e) =>
+                  P({ ...p, name: e.target.value || "Adventurer" })
+                }
+              />
+            </label>
+            <button className="primary" onClick={() => W(false)}>
+              Take the first step <ChevronRight size={18} />
+            </button>
+            <p className="tiny">
+              Camera is optional. Pause any time. Your journal is never a score.
+            </p>
+          </section>
+        </div>
+      )}
+      {panel && panel !== "journal" && (
+        <div className="modal-backdrop">
+          <section className="modal">
+            <div className="card-title">
+              <h2>
+                {panel === "preview"
+                  ? "Prepare for your next chapter"
+                  : panel === "inventory"
+                    ? "Your satchel"
+                    : panel === "shop"
+                      ? "The little supply shop"
+                      : panel === "alchemy"
+                        ? "The alchemist’s notebook"
+                        : panel === "ending"
+                          ? "You found your stride."
+                          : panel === "devices"
+                            ? "Your connected adventure"
+                            : "Make yourself at home"}
+              </h2>
+              <button onClick={() => V(null)} aria-label="Close">
+                ✕
+              </button>
+            </div>
+            {panel === "preview" && encounter && (
+              <>
+                <p>
+                  <strong>{encounter.name}</strong> · {encounter.title}
+                </p>
+                <div className="phase-preview">
+                  {encounter.phases.map((types, i) => (
+                    <div key={i}>
+                      <small>PHASE {i + 1}</small>
+                      <div className="type-row">{types.map(iconType)}</div>
+                    </div>
+                  ))}
+                </div>
+                <p>
+                  Choose a specialization. It stays fixed for this encounter.
+                </p>
+                <div className="button-row">
+                  {[null, ...p.badges].map((t) => (
+                    <button
+                      className={chosen === t ? "primary" : "secondary"}
+                      key={t ?? "neutral"}
+                      onClick={() => CH(t)}
+                    >
+                      {typeLabel(t)}
+                    </button>
+                  ))}
+                </div>
+                <p className="tiny">
+                  Leg beats Arm · Arm beats Back · Back beats Leg. Matching your
+                  specialization gives ×1.25 power. Dual defenses multiply.
+                </p>
+                <p>
+                  Your moves:{" "}
+                  {p.equipped
+                    .map((id) => attacks.find((a) => a.id === id)?.name)
+                    .join(" · ")}
+                </p>
+                <label className="check">
+                  <input
+                    type="checkbox"
+                    checked={camera}
+                    onChange={(e) => C(e.target.checked)}
+                  />
+                  Use camera verification
+                </label>
+                <div className="button-row">
+                  <button
+                    className="primary"
+                    onClick={() => {
+                      B(startBattle(encounter, p, chosen));
+                      V(null);
+                    }}
+                  >
+                    <Swords size={17} />
+                    Begin encounter
+                  </button>
+                  <button onClick={() => V("inventory")}>Change skills</button>
+                </div>
+              </>
+            )}
+            {panel === "inventory" && (
+              <>
+                <p>Equip up to four skills. Choose the mix that suits you.</p>
+                <div className="attack-grid">
+                  {available(p).map((a) => (
+                    <button
+                      key={a.id}
+                      className={
+                        "attack-card " +
+                        a.type +
+                        (p.equipped.includes(a.id) ? " equipped" : "")
+                      }
+                      onClick={() => {
+                        if (b) {
+                          notify("Change equipment between encounters.");
+                          return;
+                        }
+                        if (p.equipped.includes(a.id)) {
+                          if (p.equipped.length > 1)
+                            P({
+                              ...p,
+                              equipped: p.equipped.filter((x) => x !== a.id),
+                            });
+                        } else if (p.equipped.length < 4)
+                          P({ ...p, equipped: [...p.equipped, a.id] });
+                        else
+                          notify(
+                            "Unequip a move first; four slots are available.",
+                          );
+                      }}
+                    >
+                      <span>
+                        {iconType(a.type)}
+                        <small>
+                          {p.equipped.includes(a.id)
+                            ? "✓ equipped"
+                            : "available"}
+                        </small>
+                      </span>
+                      <strong>{a.name}</strong>
+                      <small>
+                        Lv. {(p.upgrades[a.id] ?? 0) + 1} ·{" "}
+                        {Math.round(attackFor(a.id, p).damage)} power
+                      </small>
+                    </button>
+                  ))}
+                </div>
+                <p>
+                  Potions {p.items.potion} · Guards {p.items.shield} · Boosts{" "}
+                  {p.items.boost} · Ingredients {p.items.ingredient}
+                </p>
+              </>
+            )}
+            {panel === "shop" && (
+              <>
+                <p>
+                  Your pocket: <strong>{p.coins} coins</strong>. The Rest House
+                  heals for free.
+                </p>
+                {[
+                  {
+                    id: "potion",
+                    name: "Willow tonic · restores 45 HP",
+                    cost: 15,
+                  },
+                  {
+                    id: "shield",
+                    name: "Bark guard · halves one hit",
+                    cost: 12,
+                  },
+                  {
+                    id: "boost",
+                    name: "Bright spark · next series +25%",
+                    cost: 20,
+                  },
+                ].map((x) => (
+                  <div className="food-row" key={x.id}>
+                    <strong>{x.name}</strong>
+                    <button
+                      className="secondary"
+                      disabled={p.coins < x.cost}
+                      onClick={() => {
+                        P({
+                          ...p,
+                          coins: p.coins - x.cost,
+                          items: { ...p.items, [x.id]: p.items[x.id] + 1 },
+                        });
+                        notify("Tucked safely into your satchel.");
+                      }}
+                    >
+                      {x.cost} coins
+                    </button>
+                  </div>
+                ))}
+                <h3>Grow your skills</h3>
+                {available(p).map((a) => {
+                  const level = p.upgrades[a.id] ?? 0,
+                    cost = 25 * (level + 1);
+                  return (
+                    <div className="food-row" key={a.id}>
+                      <span>
+                        {a.name} · Lv. {level + 1}
+                      </span>
+                      <button
+                        disabled={level >= 4 || p.coins < cost}
+                        onClick={() =>
+                          P({
+                            ...p,
+                            coins: p.coins - cost,
+                            upgrades: { ...p.upgrades, [a.id]: level + 1 },
+                          })
+                        }
+                      >
+                        {level >= 4 ? "Mastered" : `Upgrade · ${cost} coins`}
+                      </button>
+                    </div>
+                  );
+                })}
+              </>
+            )}
+            {panel === "alchemy" && (
+              <>
+                <p>
+                  Discover packaged foods through your journal’s scanner. Each
+                  unique product reveals one fictional ingredient — scanning
+                  never means eating.
+                </p>
+                <div className="soft-callout">
+                  {p.discoveries.length} discoveries · {p.items.ingredient}{" "}
+                  ingredients
+                </div>
+                <button className="primary" onClick={() => V("journal")}>
+                  <BookOpen size={16} />
+                  Open food journal
+                </button>
+                <h3>Brew something useful</h3>
+                {[
+                  ["potion", "Willow tonic", 1],
+                  ["shield", "Bark guard", 1],
+                  ["boost", "Bright spark", 2],
+                ].map(([id, name, cost]) => (
+                  <div className="food-row" key={id}>
+                    <span>{name}</span>
+                    <button
+                      disabled={p.items.ingredient < Number(cost)}
+                      onClick={() =>
+                        P({
+                          ...p,
+                          items: {
+                            ...p.items,
+                            ingredient: p.items.ingredient - Number(cost),
+                            [id]: p.items[String(id)] + 1,
+                          },
+                        })
+                      }
+                    >
+                      Craft · {cost} ingredient{Number(cost) > 1 ? "s" : ""}
+                    </button>
+                  </div>
+                ))}
+              </>
+            )}
+            {panel === "devices" && (
+              <DevicePanel
+                onActivityImport={(reading: ImportedHealth) => {
+                  N((old) => {
+                    const date = new Date(reading.startTime).toLocaleDateString(
+                      "en-CA",
+                    );
+                    const id = "health-" + date;
+                    return {
+                      ...old,
+                      healthImports: [
+                        ...(old.healthImports ?? []).filter((x) => x.id !== id),
+                        { ...reading, id, date },
+                      ],
+                      weights:
+                        reading.weightKg === null
+                          ? old.weights
+                          : [
+                              ...old.weights.filter((w) => w.id !== id),
+                              { id, date, weight: reading.weightKg },
+                            ],
+                    };
+                  });
+                  notify(
+                    "Reviewed health snapshot saved. No activity calories were automatically added twice.",
+                  );
+                }}
+              />
+            )}
+            {panel === "menu" && (
+              <>
+                <div className="button-row">
+                  <button className="secondary" onClick={() => V("inventory")}>
+                    Skills & items
+                  </button>
+                  <button className="secondary" onClick={() => V("journal")}>
+                    Nutrition journal
+                  </button>
+                  <button className="secondary" onClick={() => V("devices")}>
+                    Devices
+                  </button>
+                </div>
+                <label>
+                  Adventure difficulty
+                  <select
+                    disabled={!!b}
+                    value={p.difficulty}
+                    onChange={(e) =>
+                      P({
+                        ...p,
+                        difficulty: e.target.value as Player["difficulty"],
+                      })
+                    }
+                  >
+                    <option value="easy">Easy · 85% enemy HP</option>
+                    <option value="medium">Medium · standard HP</option>
+                    <option value="hard">Hard · 135% enemy HP</option>
+                  </select>
+                </label>
+                <p className="tiny">
+                  Difficulty does not increase enemy attack. Movement:
+                  WASD/arrows. Interact: E/Enter. Pause/menu: Escape. Your
+                  progress saves automatically on this device.
+                </p>
+                <p>
+                  For Javpato’s girlfriend and Uriel’s brother — may your
+                  everyday routines become little adventures.
+                </p>
+              </>
+            )}
+            {panel === "ending" && (
+              <>
+                <div className="big-star">✦</div>
+                <p>
+                  You crossed the valley, found three kinds of strength, and met
+                  the summit with your own effort.
+                </p>
+                <h2>The greatest adventure was showing up.</h2>
+                <p>
+                  Willowmere is still here. Keep exploring, keep resting, and
+                  keep making the journey your own.
+                </p>
+                <button className="primary" onClick={() => V(null)}>
+                  Back to the village
+                </button>
+              </>
+            )}
+          </section>
+        </div>
+      )}
+      {quest && (
+        <div className="modal-backdrop">
+          <section className="modal">
+            <div className="card-title">
+              <h2>A little village challenge</h2>
+              <button onClick={() => Q(null)} aria-label="Leave quest">
+                ✕
+              </button>
+            </div>
+            <p>
+              {quest.exercise} · {quest.progress} / {quest.target} units · quest
+              level {Math.min(5, (p.quests[quest.exercise] ?? 0) + 1)}
+            </p>
+            {quest.progress >= quest.target ? (
+              <>
+                <p>Thank you! Small efforts make a strong village.</p>
+                <button
+                  className="primary"
+                  onClick={() => {
+                    const count = p.quests[quest.exercise] ?? 0;
+                    P({
+                      ...reward(p, count < 5 ? 25 : 0, 12),
+                      quests: { ...p.quests, [quest.exercise]: count + 1 },
+                    });
+                    Q(null);
+                    notify(
+                      "Quest complete. +12 coins" +
+                        (count < 5 ? " · +25 XP" : ""),
+                    );
+                  }}
+                >
+                  Collect reward
+                </button>
+              </>
+            ) : (
+              <>
+                <label className="check">
+                  <input
+                    type="checkbox"
+                    checked={camera}
+                    onChange={(e) => C(e.target.checked)}
+                  />
+                  Use camera
+                </label>
+                {camera ? (
+                  <Suspense fallback={<p>Preparing camera…</p>}>
+                    <ExerciseCamera
+                      exerciseId={quest.exercise}
+                      target={quest.target}
+                      progress={quest.progress}
+                      active={true}
+                      onUnit={onUnit}
+                      onError={notify}
+                    />
+                  </Suspense>
+                ) : (
+                  <>
+                    <p className="notice">
+                      Manual confirmation is unverified. Take your time and stop
+                      if you need to.
+                    </p>
+                    <button
+                      className="primary"
+                      onClick={() => Q({ ...quest, progress: quest.target })}
+                    >
+                      I completed the exercise
+                    </button>
+                  </>
+                )}
+                <button onClick={() => Q(null)}>Stop safely</button>
+              </>
+            )}
+          </section>
+        </div>
+      )}
+    </div>
+  );
+}
