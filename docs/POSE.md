@@ -1,25 +1,51 @@
 # Local exercise recognition
 
-`ExerciseCamera` implements the shared `ExerciseCameraProps`. Mount it with the current exercise, required units and committed progress; use a React key equal to the attack/session ID so a fresh series resets its alternation history. `active=false` immediately prevents outgoing units. `onUnit` reports one verified repetition, or one verified second for Superman. The combat engine must independently deduplicate `id` and enforce its current session and phase. Quality is in [0,1], not percent. Bird Dog side refers to the extended arm. The component does not apply damage or rewards.
+`ExerciseDetector` converts fresh MediaPipe landmarks into verified `ExerciseUnit` events. It never calculates HP, rewards or medical form approval. The central engine independently checks IDs, session, turn and minimum confidence (0.5). Bird Dog's side is the extended arm; lunge's side is the measured active leg. Preview mirroring never swaps anatomical indexes.
 
-The camera is permission-gated, local-only and stopped on unmount. A dedicated worker runs the official MediaPipe lite pose model with CPU WebAssembly. It processes at most one frame at a time and skips stale video frames. No camera data is sent to any server. The preview is mirrored with CSS; anatomical landmarks are never swapped.
+## Observation contract
 
-Calibration requires visible joints, a stable starting pose for two seconds, and one practice movement that does not emit a combat unit. A three-second countdown follows; automatic or button-triggered start is available. Guides are skippable and can be opened again. Pause, tracking loss and recalibration preserve committed progress. A partially completed dynamic repetition must restart after a pause. Superman preserves fractions of valid time and excludes gaps above 250 ms. The app's battle controls provide manual continuation and encounter cancellation.
+`observePose(exercise, frame, preferredObservedSide?)` returns `visible`, `ready`, `extended`, `side`, `amplitude`, `confidence`, `motion`; optional additions are `status`, `message`, `missingJoints`, `observedSide` and `fresh`. `visible` means the exercise's current evidence is available, not that the entire body is visible. `ready && fresh` can calibrate the initial position. There is no requirement to perform a practice repetition before calibration. The camera lifecycle uses a stable initial position and a countdown; that lifecycle is separate from this detector.
 
-## Assets
+`status` is `no-body`, `partial`, `insufficient`, `ready`, `moving` or `hold`. `missingJoints` names anatomical joints. `observedSide` identifies a measured camera-facing chain for squat/push-up/Superman; it is not an invented alternating side. `side` exists only when the active lunge/Bird Dog side is geometrically distinguishable. `DetectorFeedback` retains `state`, `message`, optional `unit`/`rejected`, with optional HUD `status`/`nextSide`.
 
-- Model: `public/models/pose_landmarker_lite.task`, official model revision float16/1 from https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task .
-- WebAssembly files: copied without modification from installed `@mediapipe/tasks-vision` 0.10.35 into `public/models/wasm`. Keep the package and WASM versions identical. The worker uses the module-compatible WASM loader (`forVisionTasks(path, true)`).
-- Model/framework source and licensing: https://github.com/google-ai-edge/mediapipe (Apache-2.0). Exercise illustrations are original SVG diagrams in `ExerciseDemo.tsx`.
+### Evidence by exercise
 
-## Detection limitations
+| Exercise | Fresh required evidence | Other checks |
+|---|---|---|
+| Squat | Either hip–knee–ankle chain | Standing angle >155°, depth <115°; measurable hip movement. Arms and shoulders may be hidden. A visible shoulder is an additional upright check. |
+| Push-up / diamond | One shoulder–elbow–wrist chain, same-side hip and either ankle or knee | Horizontal body, observable body alignment, elbow >150° at top and <112° at depth, measurable torso displacement. The far arm/leg is optional. Finger placement is not verified. |
+| Lunge | Active hip–knee–ankle, real opposite ankle; both shins for standing reset | Split feet, flexion <118°, distinct knee bend or forward knee/foot geometry. Far hip can be hidden. Ambiguous equally bent sides do not count. |
+| Superman | One same-side shoulder, wrist, hip and ankle | Low horizontal torso, arm/leg reach beyond torso, visible elevation. Far floor-hidden limbs are optional. Each valid second contributes independently. |
+| Bird Dog | Torso reference, extending shoulder–elbow–wrist and opposite hip–knee–ankle, supporting wrist and knee | Opposite anatomical pair, extended angles, arm/leg projecting away from torso, visible support points. Support elbow and ankle can be hidden. |
 
-These are game heuristics, not a clinical posture assessment. All required joints must be visible. Side identification for lunges uses a distinctly flexed knee and separated feet; ambiguous side views are rejected instead of guessed. Bird Dog requires opposite arm/leg extension. Superman checks visible elevation and horizontal torso geometry; a single camera cannot prove prone orientation or medical form correctness. Diamond push-ups use the standard push-up detector and do not verify finger placement. Model performance, lighting, occlusion and camera angle affect reliability.
+Required chains use visibility/presence ≥0.50; anatomical alternating evidence uses ≥0.55. Confidence is the minimum of the actual measured required points, never promoted above the source confidence. Out-of-frame/nonfinite points cannot authorize a unit. These thresholds and angle bands are heuristic configuration, not a clinical standard.
 
-`tests/exercises.test.ts` exercises pure synthetic state transitions, alternation, partial motion, timestamps, hold accounting, missing joints and geometric sanity. Synthetic tests are not physical verification.
+## Filtering, cycles and recovery
 
-Verified during implementation: 15 synthetic tests passed; TypeScript check passed; `node tests/exercises-browser-smoke.mjs http://127.0.0.1:5198` loaded the actual bundled model/WASM in headless Chrome and processed a blank frame, correctly returning no landmarks. This verifies worker startup and inference plumbing only, not camera permission or physical exercise accuracy.
+Positions are aspect-corrected and smoothed with a 65 ms exponential time constant. A newly visible point is not blended from its previous hidden/inferred position. Entry and exit angle bands provide hysteresis. Starting/depth stability is 180 ms, return stability 140 ms, and a cycle must last at least 650 ms after leaving the starting band. Complete depth and return are required; a noisy sample or small bounce cannot count.
+
+A chosen nonalternating body chain is locked during the cycle. Switching from one hidden leg/arm to the other cannot assemble a phantom repetition. A long loss resets that lock so a new, clearly observed initial position can recover automatically.
+
+Call `update(frame)` even when tracking is partial: it retains unfinished cycle state for at most 400 ms, resets stability and freezes time credit. Cached points may stabilize state/display but never authorize a unit or a held second. There must be new stable visible evidence after recovery. Loss beyond 400 ms resets only the unfinished cycle; alternation and saved Superman fractions remain. Frame gaps above 250 ms also cannot contribute elapsed held time. A brief occlusion at the only observed depth may still invalidate the repetition because stable depth was never verified.
+
+`pause()` resets an unfinished cycle, filtering and lock but preserves completed alternation and held-time fractions. Construct a new detector with the new session ID to reset the entire session. Do not call `pause()` on every invisible raw frame: that defeats short-loss recovery. `active=false` in the camera immediately suppresses unit delivery independently of the inference worker.
+
+## Worker and assets
+
+A dedicated worker runs MediaPipe's lite pose model with CPU WebAssembly, one pose and no segmentation. Camera frames remain on the device. Every transferred bitmap is closed, including invalid or uninitialized frames. Reinitialization closes an existing landmarker. Detection, presence and tracking thresholds are 0.50; downstream exercise confidence remains independently enforced.
+
+- Model: `public/models/pose_landmarker_lite.task`, official float16/1 model from https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task .
+- WASM: `public/models/wasm`, copied unchanged from the installed `@mediapipe/tasks-vision` package. Keep package and WASM versions aligned. The worker uses `forVisionTasks(path, true)` for module-compatible loading.
+- Framework/model provenance: https://github.com/google-ai-edge/mediapipe (Apache-2.0). `ExerciseDemo.tsx` contains original SVG guides.
+
+## Verification and limits
+
+`tests/exercises.test.ts` retains the original state-machine contracts: cycle completion, quality, alternation, incomplete movement, timing, pause, hold fractions and geometry. One old assertion required rejection when either knee disappeared; that assertion was intentionally replaced with acceptance of the other complete leg and rejection when neither chain is visible, matching the new lateral-view requirement.
+
+`tests/exercises-geometry.test.ts` uses actual 33-landmark geometry and full smoothed cycles: lateral squats without arms, near-side push-ups/diamond, knee references, partial and ambiguous lunges, strict alternation, opposite-limb Bird Dog from lateral/three-quarter views, same-side rejection, low Superman, camera aspect ratio, noise, short/long occlusion, chain switching, hold fractions and confidence bounds. These fixtures are not physical camera validation. The worker browser smoke loads real model/WASM and infers a blank frame; it validates plumbing, not exercise accuracy.
+
+A monocular camera cannot prove prone orientation, foot contact, exact hand/finger position or safe medical technique. Partial occlusion is supported only when the remaining evidence suffices; ambiguous anatomical sides are deliberately rejected. Real lighting, clothing, lens angle and model misidentification remain unverified risks.
 
 ## Physical acceptance — PENDING
 
-For each exercise on desktop and Android: camera permission; recommended framing; calibration; valid unit with actual combat damage; incomplete motion with no damage; tracking loss/recovery without lost progress; pause; cancellation; early victory stopping units. Test both anatomical sides with a mirrored preview. Check lunge side ambiguity and same-side Bird Dog rejection. Measure low-light and lower-performance Android behavior. No physical camera/device validation has been performed by this agent.
+For every exercise on desktop and Android: grant permission; follow the exercise-specific starting pose; calibrate without a practice repetition; complete a real unit and observe canonical damage; perform incomplete movement with no damage; briefly hide an irrelevant limb; hide a required chain; recover without losing credited progress; pause; cancel; test early victory. Test anatomical left/right alternation with mirrored preview and both camera-facing sides. For Superman, verify low floor placement and no time credited during tracking loss. Check lower-light and lower-performance phones. No physical camera/device validation was performed by the recognition agent.
