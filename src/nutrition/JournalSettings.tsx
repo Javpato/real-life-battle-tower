@@ -1,0 +1,38 @@
+import {useEffect,useState} from 'react';
+import {type NutritionState,today} from './engine';
+import {settings,type JournalSettingsData,type LocalPreferences,type Units,readLocalPreferences,saveLocalPreferences,applyJournalPreferences,PREFERENCE_EVENT,displayWeight,kgToLb,lbToKg,cmToIn,inToCm,resolveDailyTarget,dueReminders} from './journalPreferences';
+export function useJournalPreferences(){const [pref,setPref]=useState(readLocalPreferences);useEffect(()=>{const update=()=>setPref(readLocalPreferences());window.addEventListener(PREFERENCE_EVENT,update);window.addEventListener('storage',update);applyJournalPreferences(readLocalPreferences());return()=>{window.removeEventListener(PREFERENCE_EVENT,update);window.removeEventListener('storage',update);};},[]);return pref;}
+
+export function JournalReminderBanner({state}:{state:NutritionState}){
+ useJournalPreferences();
+ const [now,setNow]=useState(new Date()),[dismissed,setDismissed]=useState<string[]>(()=>{try{return JSON.parse(localStorage.getItem('everstride-reminders-dismissed')??'[]');}catch{return [];}});
+ useEffect(()=>{const id=setInterval(()=>setNow(new Date()),30000);return()=>clearInterval(id);},[]);
+ const due=dueReminders(settings(state),now,dismissed);
+ if(!due.length)return null;
+ return <div className="notice" aria-live="polite">{due.map(r=><div className="button-row" key={r.id}><span>◷ {r.label} <small>· optional reminder</small></span><button onClick={()=>{const next=[...dismissed.filter(v=>v.startsWith(today()+':')),`${today()}:${r.id}`];setDismissed(next);try{localStorage.setItem('everstride-reminders-dismissed',JSON.stringify(next));}catch{}}}>Dismiss for today</button></div>)}</div>;
+}
+
+export default function JournalSettings({state,onChange}:{state:NutritionState;onChange:(state:NutritionState)=>void}){
+ const cfg=settings(state),local=useJournalPreferences();const [selectedDate,setDate]=useState(today()),[label,setLabel]=useState('A moment for your journal'),[time,setTime]=useState('19:00'),[input,setInput]=useState(''),[unitKind,setUnitKind]=useState<'weight'|'height'>('weight'),[feedback,setFeedback]=useState('');
+ const write=(patch:Partial<JournalSettingsData>)=>onChange({...state,journalSettings:{...cfg,...patch}} as NutritionState);
+ const preference=(p:Partial<LocalPreferences>)=>{const next={...local,...p};saveLocalPreferences(next);if(p.units)write({units:p.units});};
+ const changePlan=(key:string,kind:'weekly'|'overrides',patch:Record<string,unknown>)=>{if(kind==='overrides'&&'kcal' in patch&&patch.kcal===undefined){const overrides={...cfg.overrides};delete overrides[key];write({overrides});return;}write({[kind]:{...cfg[kind],[key]:{...(cfg[kind][key]??{kind:'default'}),...patch}}});};
+ const example=resolveDailyTarget(state,selectedDate,null);
+ const conversion=Number(input);const converted=unitKind==='weight'?(local.units==='imperial'?lbToKg(conversion):kgToLb(conversion)):(local.units==='imperial'?inToCm(conversion):cmToIn(conversion));
+ return <>
+  <section className="card"><h2>Make this journal yours</h2><div className="form-grid"><label>Appearance<select value={local.theme} onChange={e=>preference({theme:e.target.value as LocalPreferences['theme']})}><option value="light">Light · garden daylight</option><option value="dark">Dark · evening calm</option></select></label><label>Preferred units<select value={local.units} onChange={e=>preference({units:e.target.value as Units})}><option value="metric">Metric · kg, cm, g</option><option value="imperial">Imperial · lb, in, oz</option></select></label></div><p className="tiny">Appearance and display preference are saved on this device. Stored measurements remain metric to avoid conversion drift.</p>
+   {state.profile.weight&&<p>Your profile weight: <strong>{displayWeight(state.profile.weight,local.units)}</strong></p>}
+   <details><summary>Convert a measurement</summary><div className="form-grid"><label>Measurement<select value={unitKind} onChange={e=>setUnitKind(e.target.value as 'weight'|'height')}><option value="weight">Weight</option><option value="height">Height</option></select></label><label>Value in {unitKind==='weight'?(local.units==='imperial'?'lb':'kg'):(local.units==='imperial'?'in':'cm')}<input type="number" min="0" step="any" value={input} onChange={e=>setInput(e.target.value)}/></label></div>{input!==''&&Number.isFinite(conversion)&&conversion>=0&&<p>{converted.toFixed(2)} {unitKind==='weight'?(local.units==='imperial'?'kg':'lb'):(local.units==='imperial'?'cm':'in')}</p>}</details>
+  </section>
+  <section className="card"><h2>A rhythm for your week</h2><p className="muted">Optional training/rest labels and absolute food targets. Leave energy blank to use your profile. A custom target includes your activity allowance; exercise credit is not added again.</p>
+   <div style={{display:'grid',gap:8}}>{['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map((name,i)=><div className="form-grid" key={name} style={{alignItems:'end'}}><label>{name}<select value={cfg.weekly[i]?.kind??'default'} onChange={e=>changePlan(String(i),'weekly',{kind:e.target.value})}><option value="default">Usual day</option><option value="rest">Rest day</option><option value="training">Training day</option></select></label><label>Optional kcal target<input aria-label={`${name} kcal target`} type="number" min="0" step="50" placeholder="Use profile" value={cfg.weekly[i]?.kcal??''} onChange={e=>changePlan(String(i),'weekly',{kcal:e.target.value===''?undefined:Number(e.target.value)})}/></label></div>)}</div>
+   <h3 style={{marginTop:24}}>One day can be different</h3><div className="form-grid"><label>Date<input type="date" value={selectedDate} onChange={e=>setDate(e.target.value)}/></label><label>Override kcal target<input type="number" step="50" placeholder="Use weekly rhythm" value={cfg.overrides[selectedDate]?.kcal??''} onChange={e=>changePlan(selectedDate,'overrides',{kcal:e.target.value===''?undefined:Number(e.target.value)})}/></label></div>
+   {example.reason&&<p className="notice">{example.reason}</p>}
+   <button className="secondary" onClick={()=>{const overrides={...cfg.overrides};delete overrides[selectedDate];write({overrides});}}>Remove this date’s override</button><p className="tiny">Date overrides take precedence over weekly templates. App limits are guardrails, not a medical assessment. Targets are never rewards or requirements.</p>
+  </section>
+  <section className="card"><h2>A gentle nudge, if you want one</h2><p className="muted">Reminders appear in the journal while the app is open. No push permission, background delivery or missed-reminder penalty.</p>
+   {cfg.reminders.map(r=><div className="food-row" key={r.id}><label className="check"><input type="checkbox" checked={r.enabled} onChange={e=>write({reminders:cfg.reminders.map(x=>x.id===r.id?{...x,enabled:e.target.checked}:x)})}/>{r.label} · {r.time}</label><button onClick={()=>write({reminders:cfg.reminders.filter(x=>x.id!==r.id)})}>Remove</button></div>)}
+   <div className="form-grid"><label>Reminder<input maxLength={100} value={label} onChange={e=>setLabel(e.target.value)}/></label><label>Local time<input type="time" value={time} onChange={e=>setTime(e.target.value)}/></label></div><button className="secondary" onClick={()=>{if(!label.trim()||!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)){setFeedback('Add a reminder and valid time.');return;}write({reminders:[...cfg.reminders,{id:crypto.randomUUID(),label:label.trim(),time,enabled:true}]});setFeedback('Optional in-app reminder added.');}}>Add reminder</button>{feedback&&<p role="status" className="tiny">{feedback}</p>}
+  </section>
+ </>;
+}
