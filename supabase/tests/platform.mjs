@@ -88,5 +88,45 @@ await actor(alice);const still=await rpc("select public.adventure_control_comman
 await rpc("select public.adventure_control_command($1,'safe',$2) result",[s,lease2.epoch]);
 const handed=await rpc("select public.adventure_control_command($1,'renew',$2) result",[s,lease2.epoch]);assert.equal(handed.holderId,bob);assert.equal(handed.epoch,lease2.epoch+1);
 await actor(bob);assert.equal((await rpc('select public.read_adventure_control($1) result',[s])).holderId,bob);
+// Execute the same shared reducer and fenced SQL transaction through the complete adventure.
+// Manual units are deliberately marked unverified; this is not a physical-camera test.
+const {initialAdventure,applyAdventureCommand}=await import('../functions/_shared/commands.ts');
+const {attackFor,effectiveness}=await import('../functions/_shared/game.ts');
+await actor(eve);const journeySave=(await rpc('select public.create_game_save($1) result',['Journey test'])).saveId;
+let journey;
+async function dispatchJourney(command){
+ await actor(eve);
+ const ctx=await rpc('select public.read_adventure_context($1) result',[journeySave]);
+ const current=ctx.snapshot??initialAdventure();current.player.coins=ctx.coins;current.player.items={...current.player.items,...ctx.items};current.player.upgrades=ctx.upgrades;
+ const next=applyAdventureCommand(current,command);
+ await db.exec('reset role;set role service_role');
+ const result=await rpc('select public.commit_adventure_command($1,$2,$3,1,$4,$5,$6,$7) result',[journeySave,crypto.randomUUID(),eve,ctx.revision,{kind:'adventure',command},next,next.player.coins-current.player.coins]);
+ assert.equal(result.error,undefined);journey=result.snapshot;return journey;
+}
+await dispatchJourney({kind:'initialize'});
+for(const enemyId of ['trainer-1','leader-leg','leader-arm','leader-back','rival']){
+ await dispatchJourney({kind:'heal'});
+ while(journey.player.items.potion<6&&journey.player.coins>=15)await dispatchJourney({kind:'purchaseItem',item:'potion'});
+ await dispatchJourney({kind:'startBattle',enemyId,specialization:null});
+ let loops=0;
+ while(journey.battle&&journey.battle.turn!=='won'&&loops++<200){
+  const b=journey.battle;
+  assert.notEqual(b.turn,'lost',`Complete adventure fixture lost against ${enemyId}`);
+  if(b.turn==='enemy')await dispatchJourney({kind:'resolveEnemy'});
+  else if(b.turn==='transform')await dispatchJourney({kind:'continuePhase'});
+  else if(b.turn==='exercise')await dispatchJourney({kind:'manualRemaining',sessionId:b.sessionId});
+  else if(b.turn==='player'){
+   if(b.playerHp<55&&journey.player.items.potion>0)await dispatchJourney({kind:'useItem',item:'potion'});
+   else {
+    const attacks=journey.player.equipped.map(id=>attackFor(id,journey.player));
+    attacks.sort((a,z)=>z.damage*effectiveness(z.type,b.enemy.phases[b.phase])-a.damage*effectiveness(a.type,b.enemy.phases[b.phase]));
+    await dispatchJourney({kind:'beginAttack',attackId:attacks[0].id});
+   }
+  }
+ }
+ assert.equal(journey.battle.turn,'won');await dispatchJourney({kind:'finishBattle'});
+}
+assert.equal(journey.player.badges.length,3);assert.equal(journey.player.ending,true);
+console.log('PASS: full database-backed manual adventure from initial save through all three leaders and three-phase rival, using the shared core and server-only commit.');
 console.log('PASS: RLS, pairing, idempotency, wallet, fencing, safe transfer, shared diary, conflicts, null version, export owner, erase generation, steps deduplication revocation, service-only adventure commits, CAS, receipts and fenced wallet deltas.');
 await db.close();
