@@ -1,4 +1,4 @@
-import {energy,type NutritionState} from './engine';
+import {energy,profileForDate,today,reconcile,incrementalEnergy,total,type NutritionState} from './engine';
 export type Units='metric'|'imperial';
 export type DayPlan={kind:'default'|'rest'|'training';kcal?:number};
 export type Reminder={id:string;label:string;time:string;enabled:boolean};
@@ -25,12 +25,28 @@ export function applyJournalPreferences(p:LocalPreferences){
 }
 export function saveLocalPreferences(p:LocalPreferences){try{localStorage.setItem(KEY,JSON.stringify(p));}catch{/* Preferences still apply for this session. */}applyJournalPreferences(p);if(typeof window!=='undefined')window.dispatchEvent(new Event(PREFERENCE_EVENT));}
 export function resolveDailyTarget(s:NutritionState,date:string,baseTarget:number|null){
- const cfg=settings(s),day=new Date(date+'T12:00:00').getDay(),override=cfg.overrides[date],weekly=cfg.weekly[String(day)],plan=override??weekly??{kind:'default' as const};
+ // Weekly preferences were not versioned: do not rewrite past days using today's template.
+ const cfg=settings(s),day=new Date(date+'T12:00:00').getDay(),override=cfg.overrides[date],weekly=date<today()?undefined:cfg.weekly[String(day)],plan=override??weekly??{kind:'default' as const};
  const source=override?'date override':weekly?'weekly template':'profile';
+ const profile=profileForDate(s,date);
+ if(!profile)return {target:null,kind:plan.kind,source,reason:'No historical personalized profile exists for this date.'};
  if(plan.kcal===undefined)return {target:baseTarget,kind:plan.kind,source};
- const calc=energy(s.profile);if(!calc||!s.profile.eligible)return {target:baseTarget,kind:plan.kind,source,reason:'A personalized target requires an eligible adult profile.'};
+ const calc=energy(profile);if(!calc||!profile.eligible)return {target:baseTarget,kind:plan.kind,source,reason:'A personalized target requires an eligible adult profile for this date.'};
  const floor=Math.max(calc.rmr,calc.tdee-Math.min(calc.tdee*.2,500)),ceiling=Math.min(6000,calc.tdee*1.5);
  if(!Number.isFinite(plan.kcal)||plan.kcal<floor||plan.kcal>ceiling)return {target:baseTarget,kind:plan.kind,source,reason:'This override falls outside the app’s existing goal limits; the profile target is used.'};
  return {target:plan.kcal,kind:plan.kind,source};
+}
+/** Historical calculations must use one dated profile consistently, including activity credit. */
+export function dailyEnergySummary(s:NutritionState,date:string){
+ const profile=profileForDate(s,date),calc=profile?energy(profile):null;
+ const activities=reconcile(s.activities.filter(a=>a.date===date));
+ const additionalEnergy=activities.filter(a=>a.included&&((a as typeof a&{additional?:boolean}).additional??((profile?.exerciseCredit??0)>0))).reduce((sum,a)=>sum+incrementalEnergy(a,profile?.weight??0),0);
+ const activityCredit=additionalEnergy*(profile?.exerciseCredit??0);
+ const resolution=resolveDailyTarget(s,date,calc?calc.target+activityCredit:null);
+ // Food-credit policy changes the intake budget, not the estimate of expenditure.
+ const expenditure=calc?calc.tdee+additionalEnergy:null;
+ const logged=total(s.entries.filter(e=>e.date===date&&!e.planned));
+ const balance=expenditure!==null&&s.completeDays.includes(date)&&logged.kcal!==null?expenditure-logged.kcal:null;
+ return {profile,calc,activities,additionalEnergy,activityCredit,target:resolution.target,targetReason:resolution.reason,targetSource:resolution.source,expenditure,balance};
 }
 export function dueReminders(cfg:JournalSettingsData,now:Date,dismissed:string[]=[]){const day=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`,minutes=now.getHours()*60+now.getMinutes();return cfg.reminders.filter(r=>{if(!r.enabled||!/^([01]\d|2[0-3]):[0-5]\d$/.test(r.time))return false;const [h,m]=r.time.split(':').map(Number);return minutes>=h*60+m&&!dismissed.includes(`${day}:${r.id}`);});}
