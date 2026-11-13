@@ -35,8 +35,15 @@ export class AdventureController {
     }
     const response=await this.api.executeAdventure(saveId,lease.epoch,pending.command,pending.id,pending.expectedRevision);
     if(!response.ok)throw Error(response.error);
-    this.update({snapshot:response.data.snapshot,revision:response.data.revision});
-    if(response.data.snapshot.battle?.turn!=='exercise'&&!response.data.snapshot.quest){
+    // Replayed receipts describe the original commit, which may predate a later
+    // canonical read. Acknowledge the same operation without rolling the UI back.
+    if(response.data.revision<this.state.revision){
+     const current=await this.api.readAdventure(saveId);if(!current.ok)throw Error(current.error);
+     if(!current.data.snapshot||current.data.revision<this.state.revision)throw Error('STALE_CANONICAL_SNAPSHOT');
+     const snapshot=structuredClone(current.data.snapshot);snapshot.player={...snapshot.player,coins:current.data.coins,items:{...snapshot.player.items,...current.data.items},upgrades:current.data.upgrades};
+     this.update({snapshot,revision:current.data.revision});
+    }else this.update({snapshot:response.data.snapshot,revision:response.data.revision});
+    if(this.state.snapshot.battle?.turn!=='exercise'&&!this.state.snapshot.quest){
      const safe=await this.api.control(saveId,'safe',lease.epoch);if(safe.ok)this.update({lease:safe.data});
     }
    }
