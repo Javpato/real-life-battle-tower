@@ -1,24 +1,41 @@
 import { useEffect, useRef, useState } from "react";
 import type { ExerciseCameraProps } from "../core/contracts";
-import { ExerciseDetector, observePose, type PoseFrame } from "./detectors";
+import {
+  ExerciseDetector,
+  observePose,
+  type PoseFrame,
+  type Observation,
+  type DetectorFeedback,
+} from "./detectors";
+import {
+  CameraLifecycle,
+  type CameraSelection,
+  type CameraSnapshot,
+} from "./cameraLifecycle";
 import ExerciseDemo, { EXERCISE_GUIDES } from "./ExerciseDemo";
+import ExerciseHUD from "./ExerciseHUD";
+import type { ExerciseVisualState } from "./exerciseUi";
 import "./exercises.css";
 
+type Props = ExerciseCameraProps & {
+  sessionId?: string;
+  muted?: boolean;
+  mode?: "camera" | "manual";
+  paused?: boolean;
+  sessionComplete?: boolean;
+};
 type Stage =
-  | "off"
-  | "loading"
-  | "framing"
-  | "practice"
-  | "countdown"
-  | "running"
-  | "error";
-function needsGuide(id: string) {
-  try {
-    return localStorage.getItem("everstride-guide-" + id) !== "seen";
-  } catch {
-    return true;
-  }
-}
+  "off" | "loading" | "framing" | "ready" | "countdown" | "running" | "error";
+type RichObservation = Observation & {
+  status?: ExerciseVisualState;
+  message?: string;
+  fresh?: boolean;
+  missingJoints?: string[];
+};
+type RichFeedback = DetectorFeedback & {
+  status?: ExerciseVisualState;
+  nextSide?: "left" | "right";
+};
 const LINKS = [
   [11, 12],
   [11, 13],
@@ -33,152 +50,224 @@ const LINKS = [
   [24, 26],
   [26, 28],
 ];
+const initialCamera: CameraSnapshot = {
+  status: "off",
+  message: "Your camera stays on this device.",
+  stream: null,
+};
+const calibrationGroup = (id: Props["exerciseId"]) =>
+  id === "diamond" ? "pushup" : id;
+function needsGuide(id: string) {
+  try {
+    return localStorage.getItem("everstride-guide-" + id) !== "seen";
+  } catch {
+    return true;
+  }
+}
+function sessionKey(props: Props) {
+  return `${props.exerciseId}:${props.sessionId ?? "default-session"}`;
+}
 
-export default function ExerciseCamera(props: ExerciseCameraProps) {
+export default function ExerciseCamera(props: Props) {
   const video = useRef<HTMLVideoElement>(null),
     canvas = useRef<HTMLCanvasElement>(null);
   const latest = useRef(props);
   latest.current = props;
-  const worker = useRef<Worker | null>(null),
-    stream = useRef<MediaStream | null>(null);
-  const detector = useRef(new ExerciseDetector(props.exerciseId));
+  const lifecycle = useRef<CameraLifecycle | null>(null);
+  const detector = useRef(
+    new ExerciseDetector(props.exerciseId, props.sessionId),
+  );
+  const detectorSession = useRef(sessionKey(props));
   const stageRef = useRef<Stage>("off"),
-    pausedRef = useRef(false),
-    issued = useRef(props.progress);
-  const busy = useRef(false),
-    stableSince = useRef<number | undefined>(undefined),
-    countdownAt = useRef<number | undefined>(undefined);
-  const loop = useRef(0),
-    lastFrame = useRef(-1),
-    lastCapture = useRef(0);
-  const generation = useRef(0);
-  const [stage, setStage] = useState<Stage>("off"),
-    [message, setMessage] = useState("Your camera stays on this device.");
+    pausedRef = useRef(false);
+  const issued = useRef(props.progress),
+    calibrated = useRef(new Set<string>());
+  const stableSince = useRef<number | null>(null),
+    countdownAt = useRef<number | null>(null),
+    lastObservation = useRef<number | null>(null);
+  const manualCountdown = useRef(false),
+    autoRef = useRef(true);
+  const [camera, setCamera] = useState(initialCamera),
+    [stage, setStage] = useState<Stage>("off");
+  const [status, setStatus] = useState<ExerciseVisualState>("off"),
+    [message, setMessage] = useState(initialCamera.message);
   const [demo, setDemo] = useState(() => needsGuide(props.exerciseId)),
-    [paused, setPaused] = useState(false),
-    [countdown, setCountdown] = useState(3);
-  const [quality, setQuality] = useState<number | null>(null),
-    [rejections, setRejections] = useState(0);
-  const [autoStart, setAutoStart] = useState(true);
-  const autoRef = useRef(true);
+    [paused, setPaused] = useState(false);
+  const [countdown, setCountdown] = useState(3),
+    [quality, setQuality] = useState<number | null>(null),
+    [nextSide, setNextSide] = useState<"left" | "right" | undefined>();
+  const [rejections, setRejections] = useState(0),
+    [autoStart, setAutoStart] = useState(true);
+  const [selection, setSelection] = useState<CameraSelection>({
+      facingMode: "user",
+    }),
+    [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [deviceNotice, setDeviceNotice] = useState("");
+  const selectionRef = useRef(selection);
+  selectionRef.current = selection;
   autoRef.current = autoStart;
-  const setPhase = (next: Stage) => {
-    stageRef.current = next;
-    setStage(next);
+  const setPhase = (value: Stage) => {
+    stageRef.current = value;
+    setStage(value);
   };
-  const stop = () => {
-    generation.current++;
-    cancelAnimationFrame(loop.current);
-    worker.current?.terminate();
-    worker.current = null;
-    stream.current?.getTracks().forEach((track) => track.stop());
-    stream.current = null;
-    busy.current = false;
-    if (video.current) video.current.srcObject = null;
+  const resetTiming = () => {
+    stableSince.current = null;
+    countdownAt.current = null;
+    lastObservation.current = null;
+    manualCountdown.current = false;
+    setCountdown(3);
   };
-  const fail = (detail: string) => {
-    stop();
-    setPhase("error");
-    const text = `Camera recognition unavailable: ${detail}. You can continue with manual mode.`;
-    setMessage(text);
-    latest.current.onError?.(text);
-  };
-  useEffect(() => () => stop(), []);
-  useEffect(() => {
-    detector.current = new ExerciseDetector(props.exerciseId);
-    stableSince.current = undefined;
-    countdownAt.current = undefined;
-    issued.current = props.progress;
-    setQuality(null);
-    setRejections(0);
-    setDemo(needsGuide(props.exerciseId));
-    if (stream.current) {
-      setPhase("framing");
-      setMessage("Reposition for the new exercise.");
-    }
-  }, [props.exerciseId]);
-  useEffect(() => {
+  const beginCountdown = (manual = false) => {
     detector.current.pause();
-    issued.current = props.progress;
-    stableSince.current = undefined;
-    if (props.active && stageRef.current === "running") {
-      setPhase("countdown");
-      countdownAt.current = undefined;
-    }
-  }, [props.active]);
-  const beginCountdown = () => {
-    detector.current.pause();
-    countdownAt.current = undefined;
+    lifecycle.current?.invalidateFrames();
+    countdownAt.current = null;
+    manualCountdown.current = manual;
     setCountdown(3);
     setPhase("countdown");
+    setStatus("countdown");
+    setMessage("Starting position ready. Breathe and get comfortable.");
+  };
+  const draw = (frame: PoseFrame) => {
+    const c = canvas.current,
+      context = c?.getContext("2d");
+    if (!c || !context) return;
+    c.width = frame.width;
+    c.height = frame.height;
+    context.clearRect(0, 0, c.width, c.height);
+    context.strokeStyle = "#8affbe";
+    context.lineWidth = 3;
+    for (const [a, b] of LINKS) {
+      const p = frame.landmarks[a],
+        q = frame.landmarks[b];
+      if (!p || !q || (p.visibility ?? 0) < 0.55 || (q.visibility ?? 0) < 0.55)
+        continue;
+      context.beginPath();
+      context.moveTo(p.x * frame.width, p.y * frame.height);
+      context.lineTo(q.x * frame.width, q.y * frame.height);
+      context.stroke();
+    }
   };
   const receivePose = (frame: PoseFrame) => {
-    busy.current = false;
-    const context = canvas.current?.getContext("2d");
-    if (context && canvas.current) {
-      canvas.current.width = frame.width;
-      canvas.current.height = frame.height;
-      context.strokeStyle = "#8affbe";
-      context.lineWidth = 3;
-      for (const [a, b] of LINKS) {
-        const p = frame.landmarks[a],
-          q = frame.landmarks[b];
-        if (
-          !p ||
-          !q ||
-          (p.visibility ?? 0) < 0.55 ||
-          (q.visibility ?? 0) < 0.55
-        )
-          continue;
-        context.beginPath();
-        context.moveTo(p.x * frame.width, p.y * frame.height);
-        context.lineTo(q.x * frame.width, q.y * frame.height);
-        context.stroke();
-      }
-    }
+    draw(frame);
+    const p = latest.current;
+    // Render may have changed props before React effects run. Never credit a frame into the next session.
+    if (detectorSession.current !== sessionKey(p)) return;
+    const o = observePose(p.exerciseId, frame) as RichObservation;
+    const fresh = o.fresh !== false;
     if (
       pausedRef.current ||
-      !latest.current.active ||
-      issued.current >= latest.current.target
+      p.paused ||
+      !p.active ||
+      p.mode === "manual" ||
+      issued.current >= p.target ||
+      p.sessionComplete
     )
       return;
-    const o = observePose(latest.current.exerciseId, frame);
-    if (!o.visible) {
-      detector.current.pause();
-      stableSince.current = undefined;
-      countdownAt.current = undefined;
+    const previous = lastObservation.current;
+    lastObservation.current = frame.timestamp;
+    if (
+      previous !== null &&
+      (frame.timestamp <= previous || frame.timestamp - previous > 400)
+    ) {
+      stableSince.current = null;
+      countdownAt.current = null;
+      if (frame.timestamp <= previous) return;
+    }
+    if (stageRef.current === "running") {
+      // Let the detector handle brief occlusion. It must see missing frames to pause held time safely.
+      const result = detector.current.update(frame) as RichFeedback;
+      setNextSide(result.nextSide ?? detector.current.expectedSide);
+      setStatus(
+        result.unit
+          ? "valid"
+          : result.rejected
+            ? "incomplete"
+            : (result.status ??
+              (result.state === "tracking-lost"
+                ? (o.status ?? "partial")
+                : result.state)),
+      );
+      setMessage(result.message || o.message || "Move at your own pace.");
+      if (result.rejected) setRejections((n) => n + 1);
+      if (
+        result.unit &&
+        fresh &&
+        o.visible &&
+        latest.current.active &&
+        !latest.current.paused &&
+        latest.current.mode !== "manual" &&
+        !pausedRef.current &&
+        !latest.current.sessionComplete &&
+        detectorSession.current === sessionKey(latest.current) &&
+        issued.current < latest.current.target
+      ) {
+        issued.current = Math.max(issued.current, latest.current.progress) + 1;
+        setQuality(Math.round(result.unit.quality * 100));
+        latest.current.onUnit(result.unit);
+      }
+      return;
+    }
+    if (!o.visible || !fresh) {
+      stableSince.current = null;
+      countdownAt.current = null;
+      setCountdown(3);
+      setStatus(o.status ?? (frame.landmarks.length ? "partial" : "no-body"));
       setMessage(
-        "Required joints are hidden. Reposition; your progress is safe.",
+        o.message ??
+          "Move the required joints into view. Your completed units are kept.",
       );
       return;
     }
     if (stageRef.current === "framing") {
-      if (o.ready) {
-        stableSince.current ??= frame.timestamp;
-        setMessage("Starting position visible. Hold steady for two seconds.");
-        if (frame.timestamp - stableSince.current >= 2000) {
-          detector.current.pause();
-          setPhase("practice");
-          setMessage(
-            "Calibration: perform one practice repetition. It causes no damage.",
-          );
-        }
-      } else {
-        stableSince.current = undefined;
-        setMessage(
-          "Show your whole body and settle into the starting position.",
-        );
+      setStatus(o.status ?? (o.ready ? "ready" : "insufficient"));
+      if (!o.ready) {
+        stableSince.current = null;
+        setMessage(o.message ?? EXERCISE_GUIDES[p.exerciseId].setup);
+        return;
       }
+      stableSince.current ??= frame.timestamp;
+      setMessage("Starting position visible. Hold comfortably for a moment.");
+      if (
+        calibrated.current.has(calibrationGroup(p.exerciseId)) ||
+        frame.timestamp - stableSince.current >= 700
+      ) {
+        calibrated.current.add(calibrationGroup(p.exerciseId));
+        detector.current.pause();
+        setPhase("ready");
+        setStatus("ready");
+        setMessage(
+          autoRef.current
+            ? "Ready. The countdown will begin automatically."
+            : "Ready. Press Start series when comfortable.",
+        );
+        if (autoRef.current) beginCountdown();
+      }
+      return;
+    }
+    if (stageRef.current === "ready") {
+      setStatus(o.ready ? "ready" : (o.status ?? "insufficient"));
+      setMessage(
+        o.ready
+          ? "Ready. Press Start series when comfortable."
+          : (o.message ?? EXERCISE_GUIDES[p.exerciseId].setup),
+      );
+      if (autoRef.current && o.ready) beginCountdown();
       return;
     }
     if (stageRef.current === "countdown") {
       if (!o.ready) {
-        countdownAt.current = undefined;
-        setMessage("Return to the starting position for the countdown.");
+        countdownAt.current = null;
+        setCountdown(3);
+        setStatus(o.status ?? "insufficient");
+        setMessage(
+          o.message ??
+            "Return to the starting position. The countdown will restart when ready.",
+        );
         return;
       }
-      if (!autoRef.current && countdownAt.current === undefined) {
-        setMessage("Ready. Press Start series when comfortable.");
+      if (!autoRef.current && !manualCountdown.current) {
+        setPhase("ready");
+        setStatus("ready");
         return;
       }
       countdownAt.current ??= frame.timestamp;
@@ -187,256 +276,414 @@ export default function ExerciseCamera(props: ExerciseCameraProps) {
         3 - Math.floor((frame.timestamp - countdownAt.current) / 1000),
       );
       setCountdown(remaining);
-      setMessage(`Get ready · ${remaining}`);
+      setStatus("countdown");
+      setMessage(
+        remaining
+          ? `Get ready · ${remaining}`
+          : "Begin when ready. There is no time limit.",
+      );
       if (remaining === 0) {
         detector.current.pause();
         setPhase("running");
-        setMessage("Begin when ready. There is no time limit.");
+        setStatus("ready");
       }
-      return;
-    }
-    if (stageRef.current !== "practice" && stageRef.current !== "running")
-      return;
-    const result = detector.current.update(frame);
-    if (stageRef.current === "practice") {
-      setMessage(`Practice only · ${result.message}`);
-      if (result.unit) beginCountdown();
-      return;
-    }
-    setMessage(result.message);
-    if (result.rejected) setRejections((n) => n + 1);
-    if (
-      result.unit &&
-      latest.current.active &&
-      issued.current < latest.current.target
-    ) {
-      issued.current = Math.max(issued.current, latest.current.progress) + 1;
-      setQuality(Math.round(result.unit.quality * 100));
-      latest.current.onUnit(result.unit);
     }
   };
   const receiveRef = useRef(receivePose);
   receiveRef.current = receivePose;
-  const startCamera = async () => {
-    stop();
+  const cameraStateRef = useRef<(snapshot: CameraSnapshot) => void>(() => {});
+  cameraStateRef.current = (snapshot) => {
+    setCamera(snapshot);
+    if (snapshot.status === "requesting") {
+      calibrated.current.clear();
+      detector.current.pause();
+      resetTiming();
+      setPhase("loading");
+      setStatus("loading");
+    } else if (
+      snapshot.status === "starting" ||
+      snapshot.status === "recovering"
+    ) {
+      detector.current.pause();
+      resetTiming();
+      setPhase("loading");
+      setStatus("loading");
+    } else if (snapshot.status === "ready") {
+      resetTiming();
+      setPhase("framing");
+      setStatus("ready");
+      void refreshDevices();
+    } else if (snapshot.status === "off" || snapshot.status === "error") {
+      detector.current.pause();
+      calibrated.current.clear();
+      resetTiming();
+      setPhase(snapshot.status);
+      setStatus(snapshot.status);
+      const c = canvas.current;
+      c?.getContext("2d")?.clearRect(0, 0, c.width, c.height);
+      if (snapshot.status === "error")
+        latest.current.onError?.(snapshot.message);
+    }
+    setMessage(snapshot.message);
+  };
+  async function refreshDevices() {
     try {
-      localStorage.setItem("everstride-guide-" + props.exerciseId, "seen");
-    } catch {}
-    setDemo(false);
-    setPhase("loading");
-    setMessage("Loading local pose recognition…");
-    pausedRef.current = false;
-    setPaused(false);
-    const attempt = generation.current;
-    try {
-      if (!navigator.mediaDevices?.getUserMedia)
-        throw new Error(
-          "A secure HTTPS page and camera permission are required",
-        );
-      const media = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: {
-          facingMode: "user",
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          frameRate: { ideal: 24, max: 30 },
-        },
-      });
-      if (attempt !== generation.current) {
-        media.getTracks().forEach((track) => track.stop());
-        return;
-      }
-      stream.current = media;
-      if (!video.current) {
-        media.getTracks().forEach((t) => t.stop());
-        return;
-      }
-      video.current.srcObject = media;
-      await video.current.play();
-      if (attempt !== generation.current) return;
-      const poseWorker = new Worker(
-        new URL("./pose.worker.ts", import.meta.url),
-        { type: "module" },
+      if (!navigator.mediaDevices?.enumerateDevices) return;
+      const list = (await navigator.mediaDevices.enumerateDevices()).filter(
+        (d) => d.kind === "videoinput",
       );
-      worker.current = poseWorker;
-      poseWorker.onerror = () => fail("The local vision worker could not run");
-      poseWorker.onmessage = (event: MessageEvent) => {
-        if (worker.current !== poseWorker) return;
-        if (event.data.type === "error") {
-          fail(event.data.message);
-          return;
-        }
-        if (event.data.type === "pose")
-          receiveRef.current(event.data as PoseFrame);
-        if (event.data.type === "ready") {
-          setPhase("framing");
-          setMessage(
-            "Show your whole body, then settle into the starting position.",
-          );
-          const tick = async () => {
-            if (worker.current !== poseWorker) return;
-            loop.current = requestAnimationFrame(tick);
-            const v = video.current,
-              now = performance.now();
-            if (
-              !v ||
-              v.readyState < 2 ||
-              busy.current ||
-              v.currentTime === lastFrame.current ||
-              now - lastCapture.current < 65
-            )
-              return;
-            lastFrame.current = v.currentTime;
-            lastCapture.current = now;
-            busy.current = true;
-            try {
-              const bitmap = await createImageBitmap(v);
-              if (worker.current !== poseWorker) {
-                bitmap.close();
-                return;
-              }
-              poseWorker.postMessage(
-                { type: "frame", bitmap, timestamp: now },
-                [bitmap],
-              );
-            } catch {
-              busy.current = false;
-              fail("Camera frames could not be processed");
-            }
-          };
-          loop.current = requestAnimationFrame(tick);
-        }
-      };
-      const base = new URL(import.meta.env.BASE_URL, location.href);
-      poseWorker.postMessage({
+      if (lifecycle.current) setDevices(list);
+    } catch {
+      if (lifecycle.current)
+        setDeviceNotice(
+          "Camera names could not be refreshed. Front/back selection is still available.",
+        );
+    }
+  }
+  useEffect(() => {
+    const base = new URL(import.meta.env.BASE_URL, location.href);
+    const controller = new CameraLifecycle({
+      dependencies: {
+        getUserMedia: (constraints) => {
+          if (!navigator.mediaDevices?.getUserMedia)
+            return Promise.reject(
+              new Error(
+                "A secure HTTPS page and camera permission are required.",
+              ),
+            );
+          return navigator.mediaDevices.getUserMedia(constraints);
+        },
+        createWorker: () =>
+          new Worker(new URL("./pose.worker.ts", import.meta.url), {
+            type: "module",
+          }),
+        captureFrame: (v) => createImageBitmap(v),
+        requestFrame: (callback) => requestAnimationFrame(callback),
+        cancelFrame: (id) => cancelAnimationFrame(id),
+        setTimer: (callback, ms) => setTimeout(callback, ms),
+        clearTimer: (timer) => clearTimeout(timer),
+        now: () => performance.now(),
+      },
+      init: {
         type: "init",
         modelUrl: new URL("models/pose_landmarker_lite.task", base).href,
         wasmUrl: new URL("models/wasm", base).href,
-      });
-    } catch (error) {
-      if (attempt === generation.current)
-        fail(error instanceof Error ? error.message : "Permission was denied");
+      },
+      onState: (snapshot) => cameraStateRef.current(snapshot),
+      onPose: (frame) => receiveRef.current(frame),
+    });
+    lifecycle.current = controller;
+    const change = async () => {
+      await refreshDevices();
+      if (lifecycle.current !== controller) return;
+      const media = controller.currentStream;
+      const currentId = media?.getVideoTracks()[0]?.getSettings?.().deviceId;
+      try {
+        const list = await navigator.mediaDevices.enumerateDevices();
+        if (lifecycle.current !== controller) return;
+        if (
+          currentId &&
+          !list.some((d) => d.kind === "videoinput" && d.deviceId === currentId)
+        ) {
+          controller.stop(
+            "The selected camera disconnected. Choose another camera, then enable it.",
+          );
+          setSelection({ facingMode: selectionRef.current.facingMode });
+          setDeviceNotice("Camera connection changed. Your progress is kept.");
+        } else
+          setDeviceNotice(
+            "Camera list updated. You can choose a different camera.",
+          );
+      } catch {
+        setDeviceNotice(
+          "A camera changed. If the preview stopped, choose a camera and restart.",
+        );
+      }
+    };
+    navigator.mediaDevices?.addEventListener?.("devicechange", change);
+    void refreshDevices();
+    return () => {
+      navigator.mediaDevices?.removeEventListener?.("devicechange", change);
+      controller.dispose();
+      if (lifecycle.current === controller) lifecycle.current = null;
+    };
+  }, []);
+  useEffect(() => {
+    detectorSession.current = sessionKey(props);
+    detector.current = new ExerciseDetector(props.exerciseId, props.sessionId);
+    lifecycle.current?.invalidateFrames();
+    issued.current = props.progress;
+    resetTiming();
+    setQuality(null);
+    setNextSide(undefined);
+    setRejections(0);
+    setDemo(needsGuide(props.exerciseId));
+    if (lifecycle.current?.currentStatus === "ready") {
+      setPhase("framing");
+      setStatus("ready");
+      setMessage(EXERCISE_GUIDES[props.exerciseId].setup);
     }
+  }, [props.exerciseId, props.sessionId]);
+  useEffect(() => {
+    detector.current.pause();
+    lifecycle.current?.invalidateFrames();
+    issued.current = props.progress;
+    resetTiming();
+    if (
+      props.active &&
+      !props.paused &&
+      props.mode !== "manual" &&
+      !pausedRef.current &&
+      lifecycle.current?.currentStatus === "ready"
+    ) {
+      setPhase("framing");
+      setStatus("ready");
+      setMessage("Return to the starting position. Your calibration is kept.");
+    }
+  }, [props.active, props.paused, props.mode]);
+  useEffect(() => {
+    issued.current = Math.max(issued.current, props.progress);
+  }, [props.progress]);
+  useEffect(() => {
+    if (props.mode === "manual")
+      lifecycle.current?.stop(
+        "Manual mode selected. Camera stopped. Enable it again for a preview if you wish.",
+      );
+  }, [props.mode]);
+  const startCamera = async (next = selectionRef.current) => {
+    if (!video.current) return;
+    try {
+      localStorage.setItem(
+        "everstride-guide-" + latest.current.exerciseId,
+        "seen",
+      );
+    } catch {
+      /* Guides remain skippable without storage. */
+    }
+    setDemo(false);
+    setDeviceNotice("");
+    pausedRef.current = false;
+    setPaused(false);
+    detector.current.pause();
+    await lifecycle.current?.start(video.current, next);
+  };
+  const changeSelection = (next: CameraSelection) => {
+    setSelection(next);
+    selectionRef.current = next;
+    if (
+      lifecycle.current &&
+      !["off", "error"].includes(lifecycle.current.currentStatus)
+    )
+      void startCamera(next);
   };
   const togglePause = () => {
-    const next = !pausedRef.current;
-    pausedRef.current = next;
-    setPaused(next);
+    const value = !pausedRef.current;
+    pausedRef.current = value;
+    setPaused(value);
     detector.current.pause();
-    if (!next && stageRef.current === "running") beginCountdown();
+    lifecycle.current?.invalidateFrames();
+    resetTiming();
+    if (!value && lifecycle.current?.currentStatus === "ready")
+      setPhase("framing");
     setMessage(
-      next
-        ? "Rest as long as you need. Your progress is safe."
+      value
+        ? "Rest as long as you need. Your progress and calibration are kept."
         : "Return to the starting position.",
     );
   };
+  const inactive =
+    paused || props.paused || !props.active || props.mode === "manual";
+  const transportInactive = [
+    "off",
+    "error",
+    "requesting",
+    "starting",
+    "recovering",
+  ].includes(camera.status);
+  const hudStatus: ExerciseVisualState = transportInactive
+    ? camera.status === "off"
+      ? "off"
+      : camera.status === "error"
+        ? "error"
+        : "loading"
+    : inactive
+      ? "paused"
+      : status;
+  const hudMessage =
+    !transportInactive && inactive
+      ? props.mode === "manual"
+        ? "Manual mode · preview only. No camera repetitions are credited."
+        : paused || props.paused
+          ? "Paused. Your completed units are kept."
+          : "Preview only between turns. Choose an exercise to begin."
+      : message;
+  const mirrored =
+    (camera.facingMode ?? selection.facingMode) !== "environment";
+  const guide = EXERCISE_GUIDES[props.exerciseId];
   return (
-    <section className="exercise-camera" aria-label="Exercise camera">
+    <section
+      className="exercise-camera"
+      aria-label="Exercise camera"
+      data-camera-state={camera.status}
+      data-exercise-stage={stage}
+    >
       <header>
         <span className="exercise-tag">LOCAL BODY TRACKING</span>
         <button type="button" onClick={() => setDemo((v) => !v)}>
           {demo ? "Hide guide" : "Show guide"}
         </button>
       </header>
+      <div className="exercise-starting-position">
+        <strong>Starting position</strong>
+        <p>{guide.setup}</p>
+        <small>{guide.camera}</small>
+      </div>
       {demo && <ExerciseDemo exerciseId={props.exerciseId} />}
-      <div className={`exercise-feed ${stream.current ? "is-live" : ""}`}>
+      <div className={`exercise-feed ${camera.stream ? "is-live" : ""}`}>
         <video
           ref={video}
           muted
           autoPlay
           playsInline
-          aria-label="Mirrored camera preview"
+          aria-label="Camera preview"
+          style={{ transform: mirrored ? "scaleX(-1)" : "none" }}
         />
-        <canvas ref={canvas} aria-hidden="true" />
-        {!stream.current && (
+        <canvas
+          ref={canvas}
+          aria-hidden="true"
+          style={{ transform: mirrored ? "scaleX(-1)" : "none" }}
+        />
+        {!camera.stream && (
           <div className="exercise-placeholder">
             <span>◉</span>
-            <strong>{EXERCISE_GUIDES[props.exerciseId].camera}</strong>
+            <strong>{guide.camera}</strong>
             <small>Video is processed locally and is never uploaded.</small>
           </div>
         )}
-        {stage === "countdown" && (
-          <div className="exercise-countdown">{countdown}</div>
-        )}
-        {paused && <div className="exercise-countdown">REST</div>}
       </div>
-      <div className="exercise-readout">
-        <strong>
-          {props.progress} / {props.target}{" "}
-          {props.exerciseId === "superman" ? "seconds" : "reps"}
-        </strong>
-        <span>{quality === null ? "Quality —" : `Quality ${quality}%`}</span>
-      </div>
-      <p className="exercise-feedback" role="status" aria-live="polite">
-        {message}
-      </p>
-      {stage === "off" || stage === "error" ? (
-        <button
-          className="exercise-primary"
-          type="button"
-          onClick={startCamera}
-        >
-          {stage === "error" ? "Retry camera" : "Enable camera · skip guide"}
-        </button>
-      ) : (
+      <ExerciseHUD
+        exerciseId={props.exerciseId}
+        progress={props.progress}
+        target={props.target}
+        status={hudStatus}
+        message={hudMessage}
+        nextSide={nextSide}
+        quality={quality}
+        countdown={hudStatus === "countdown" ? countdown : undefined}
+        paused={Boolean(inactive)}
+        muted={props.muted}
+        active={props.active && props.mode !== "manual" && !paused}
+        complete={props.sessionComplete}
+      />
+      <div className="exercise-camera-controls" aria-label="Camera controls">
         <div className="exercise-actions">
           <button
             type="button"
-            onClick={togglePause}
-            disabled={stage === "loading"}
+            className="exercise-primary"
+            onClick={() => void startCamera()}
           >
-            {paused ? "Resume" : "Pause / rest"}
+            {camera.status === "error"
+              ? "Retry camera"
+              : camera.status === "off"
+                ? "Enable camera"
+                : "Restart camera"}
+          </button>
+          <button
+            type="button"
+            onClick={() => lifecycle.current?.stop()}
+            disabled={camera.status === "off"}
+          >
+            Stop camera
+          </button>
+          <button type="button" onClick={togglePause}>
+            {paused ? "Resume recognition" : "Pause / rest"}
           </button>
           <button
             type="button"
             onClick={() => {
               detector.current.pause();
-              stableSince.current = undefined;
-              setPhase("framing");
+              lifecycle.current?.invalidateFrames();
+              calibrated.current.delete(calibrationGroup(props.exerciseId));
+              resetTiming();
               setRejections(0);
-              setMessage("Recalibrating. Your completed units are safe.");
+              if (lifecycle.current?.currentStatus === "ready")
+                setPhase("framing");
+              setMessage(
+                "Recalibrate from the starting position. Completed units are kept.",
+              );
             }}
           >
             Recalibrate
           </button>
+        </div>
+        <div className="exercise-camera-selectors">
+          <label>
+            Camera facing
+            <select
+              aria-label="Camera facing"
+              value={selection.facingMode}
+              onChange={(e) =>
+                changeSelection({
+                  facingMode: e.target.value as CameraSelection["facingMode"],
+                })
+              }
+            >
+              <option value="user">Front / selfie camera</option>
+              <option value="environment">Back / outward camera</option>
+            </select>
+          </label>
+          <label>
+            Camera device
+            <select
+              aria-label="Camera device"
+              value={selection.deviceId ?? ""}
+              onChange={(e) =>
+                changeSelection({
+                  facingMode: selection.facingMode,
+                  deviceId: e.target.value || undefined,
+                })
+              }
+            >
+              <option value="">Automatic camera selection</option>
+              {devices.map((device, i) => (
+                <option
+                  key={device.deviceId || `camera-${i}`}
+                  value={device.deviceId}
+                >
+                  {device.label || `Camera ${i + 1}`}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        {deviceNotice && (
+          <p className="exercise-note" role="status">
+            {deviceNotice}
+          </p>
+        )}
+        <label className="exercise-auto">
+          <input
+            type="checkbox"
+            checked={autoStart}
+            onChange={(e) => setAutoStart(e.target.checked)}
+          />{" "}
+          Start automatically after calibration
+        </label>
+        {!autoStart && (
           <button
             type="button"
-            onClick={() => {
-              stop();
-              detector.current.pause();
-              setPhase("off");
-              setMessage(
-                "Camera stopped. Use the battle controls to cancel or continue manually.",
-              );
-            }}
+            className="exercise-primary"
+            disabled={inactive || stage !== "ready"}
+            onClick={() => beginCountdown(true)}
           >
-            Stop camera
+            Start series
           </button>
-        </div>
-      )}
-      <label className="exercise-auto">
-        <input
-          type="checkbox"
-          checked={autoStart}
-          onChange={(e) => setAutoStart(e.target.checked)}
-        />{" "}
-        Start automatically after calibration
-      </label>
-      {!autoStart && stage === "countdown" && (
-        <button
-          type="button"
-          className="exercise-primary"
-          onClick={() => {
-            countdownAt.current = performance.now();
-          }}
-        >
-          Start series
-        </button>
-      )}
+        )}
+      </div>
       {rejections >= 3 && (
         <p className="exercise-note">
-          Several movements were not verified. Try recalibration or the battle's
-          manual continuation. Verified progress is retained.
+          Several movements were not verified. Recalibrate or use manual
+          continuation. Verified progress is kept.
         </p>
       )}
       <small className="exercise-note">
