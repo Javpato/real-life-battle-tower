@@ -51,6 +51,8 @@ import {
 import type { Element, ExerciseId, ExerciseUnit } from "./core/contracts";
 import { readSave, writeSave } from "./services/storage";
 import {useAdventure} from "./services/useAdventure";
+import {useNutritionSync} from "./services/useNutritionSync";
+import NutritionSyncStatus from "./services/NutritionSyncStatus";
 import type {AdventureCommand} from "./core/commands";
 const ExerciseCamera = lazy(() => import("./exercises/ExerciseCamera"));
 const typeLabel = (t: Element | null) =>
@@ -77,6 +79,11 @@ export default function App() {
   const {player:p,battle:b,quest}=adventure.snapshot;
   const ready=adventure.ready;
   const [n,N]=useState<NutritionState>(defaultNutrition),[nutritionReady,NR]=useState(false),[panel,V]=useState<string|null>(null),[encounter,E]=useState<Enemy|null>(null),[chosen,CH]=useState<Element|null>(null),[camera,C]=useState(true),[muted,MU]=useState(false),[toast,TO]=useState(''),[welcome,W]=useState(false),[journalError,SE]=useState('');
+  const cloudDiary=adventure.mode==='cloud';
+  const nutritionCloud=useNutritionSync(cloudDiary?adventure.saveId!:null);
+  const diary=cloudDiary?nutritionCloud.state:n;
+  const diaryReady=cloudDiary?nutritionCloud.ready:nutritionReady;
+  const updateDiary=(next:NutritionState)=>{if(cloudDiary)nutritionCloud.update(next);else N(next);};
   const saveError=adventure.error||journalError;
   const [pauseRequested,PR]=useState(false);
   const dispatch=async(command:AdventureCommand)=>{const stop=(command.kind==='pause'&&command.paused)||['cancelSeries','stopSafely','cancelQuest','leaveBattle'].includes(command.kind);if(stop)PR(true);const ok=await adventure.send(command);if(ok&&stop)PR(false);return ok;};
@@ -160,12 +167,17 @@ export default function App() {
     );
   if (panel === "journal")
     return (
-      <Journal
-        state={n}
-        onChange={N}
-        onClose={() => V(null)}
-        onDiscover={discover}
-      />
+      <>
+        {cloudDiary&&<NutritionSyncStatus sync={nutritionCloud}/>}
+        {diaryReady?<Journal
+          state={diary}
+          onChange={updateDiary}
+          storageScope={cloudDiary?'cloud':'local'}
+          onDeleteJournal={cloudDiary?nutritionCloud.deleteAll:undefined}
+          onClose={() => V(null)}
+          onDiscover={discover}
+        />:<section className="loading"><h1>Opening your journal…</h1><p>{cloudDiary?nutritionCloud.status:'Loading the local journal.'}</p><button onClick={()=>V(null)}>Return to adventure</button></section>}
+      </>
     );
   return (
     <div
@@ -221,6 +233,7 @@ export default function App() {
           <span className="avatar">J</span>
         </div>
       </header>
+      {adventure.mode==='cloud'&&adventure.busy&&b?.turn==='exercise'&&!b.paused&&<div role="status" style={{padding:'8px 24px'}}><button className="secondary" onClick={()=>void dispatch({kind:'pause',paused:true})} disabled={pauseRequested}>{pauseRequested?'Recognition stopped · saving pause…':'Pause exercise now'}</button><span> Recognition can stop immediately while the cloud confirms your progress.</span></div>}
       <fieldset disabled={adventure.locked} style={{border:0,padding:0,margin:0,minWidth:0}}><main className="game-main">
         <div className="game-title">
           <div>
@@ -256,6 +269,7 @@ export default function App() {
             {!b ? (
               <div className="world-frame">
                 <World
+                  key={adventure.mode+':'+(adventure.saveId??'local')}
                   paused={!!panel || !!quest || welcome || adventure.locked}
                   badges={p.badges}
                   position={p.position}
@@ -920,12 +934,13 @@ export default function App() {
                 onReleaseControl={()=>adventure.controller.release()}
                 onRefreshCloud={()=>adventure.controller.refresh()}
                 onActivityImport={(reading: ImportedHealth) => {
-                  N((old) => {
+                  if(!diaryReady){notify('Wait for the journal to load before importing health data.');return;}
+                  const old=diary;
                     const date = new Date(reading.startTime).toLocaleDateString(
                       "en-CA",
                     );
                     const id = "health-" + date;
-                    return {
+                    updateDiary({
                       ...old,
                       healthImports: [
                         ...(old.healthImports ?? []).filter((x) => x.id !== id),
@@ -938,10 +953,9 @@ export default function App() {
                               ...old.weights.filter((w) => w.id !== id),
                               { id, date, weight: reading.weightKg },
                             ],
-                    };
-                  });
+                    });
                   notify(
-                    "Reviewed health snapshot saved. No activity calories were automatically added twice.",
+                    cloudDiary?"Reviewed health snapshot queued for the shared journal.":"Reviewed health snapshot saved. No activity calories were automatically added twice.",
                   );
                 }}
               />
