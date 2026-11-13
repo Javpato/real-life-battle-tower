@@ -1,0 +1,6 @@
+# Local CLI label only; the existing hosted project is selected with supabase link --project-ref.
+project_id = "everstride-local"
+[auth]
+enable_anonymous_sign_ins = true
+[functions.adventure-command]
+verify_jwt = true
