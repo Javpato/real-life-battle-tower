@@ -61,6 +61,25 @@ describe('game audit: authoritative rules',()=>{
 });
 
 describe('deterministic playable encounter simulation',()=>{
+  it('baseline progression can defeat trainers, leaders and rival without fabricated stats',()=>{
+    const scenarios=[{id:'trainer-1',xp:0,badges:[]},{id:'leader-leg',xp:210,badges:[]},{id:'leader-arm',xp:210,badges:['leg']},{id:'leader-back',xp:210,badges:['leg','arm']},{id:'rival',xp:540,badges:types}];
+    const durations:Record<string,number>={squat:3,lunge:3,pushup:3,diamond:4,superman:1,birddog:4};
+    const report=[];
+    for(const scenario of scenarios){
+      const p=reward(initialPlayer(),scenario.xp,0);p.badges=scenario.badges as Element[];
+      let b=startBattle(enemyFor(scenario.id,p),p,null,123456),series=0,seconds=0;
+      while(b.turn!=='won'&&b.turn!=='lost'&&series<40){
+        if(b.turn==='enemy'){b=enemyTurn(b,p);seconds+=2;continue}
+        if(b.turn==='transform'){b={...b,phase:b.phase+1,turn:'enemy'};continue}
+        const a=attacks.slice(0,6).reduce((best,a)=>effectiveness(a.type,b.enemy.phases[b.phase])*a.damage>effectiveness(best.type,b.enemy.phases[b.phase])*best.damage?a:best);
+        b=beginAttack(b,a);series++;
+        for(let i=0;i<a.units&&b.turn==='exercise';i++){seconds+=durations[a.exercise];b=acceptUnit(b,{...unit(b,`${scenario.id}:${series}:${i}`),quality:.8},p,b.sessionId);}
+      }
+      report.push({enemy:scenario.id,level:p.level,result:b.turn,series,activeSeconds:seconds,hp:Math.round(b.playerHp)});
+      expect(b.turn,JSON.stringify(report)).toBe('won');
+    }
+    console.info('Balance estimate (assumed cadence; excludes setup and unlimited rest):',JSON.stringify(report));
+  });
   it.each(['trainer-1','leader-leg','leader-arm','leader-back','rival'])('%s can finish with controlled phase transitions',id=>{
     const p={...initialPlayer(),maxHp:600,hp:600,speed:40,badges:types};let b=startBattle(enemyFor(id,p),p,null,123456);let series=0;
     while(b.turn!=='won'&&b.turn!=='lost'&&series<60){
