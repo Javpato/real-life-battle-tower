@@ -7,6 +7,9 @@ export const attacks:Attack[]=[
 {id:'diamond',name:'Diamond Strike',type:'arm',exercise:'diamond',units:4,damage:48,description:'4 diamond push-ups'},
 {id:'superman',name:'Skykeeper',type:'back',exercise:'superman',units:20,damage:32,description:'20 observable seconds'},
 {id:'birddog',name:'Wild Balance',type:'back',exercise:'birddog',units:10,damage:42,description:'5 bird dogs per side · alternate'},
+{id:'sitstand',name:'Root Rise',type:'leg',exercise:'sitstand',units:6,damage:24,description:'6 chair sit-to-stand cycles · sit, stand, sit'},
+{id:'wallpushup',name:'Wall Pulse',type:'arm',exercise:'wallpushup',units:8,damage:28,description:'8 wall push-ups · bend toward wall and return'},
+{id:'bridge',name:'Meadow Bridge',type:'back',exercise:'bridge',units:6,damage:30,description:'6 hip bridges · lift hips and lower'},
 {id:'quake',name:'Mountain Heart',type:'leg',exercise:'squat',units:10,damage:52,description:'Leg badge special · 10 squats'},
 {id:'nova',name:'Ember Fist',type:'arm',exercise:'pushup',units:8,damage:60,description:'Arm badge special · 8 push-ups'},
 {id:'wings',name:'Aurora Wings',type:'back',exercise:'superman',units:24,damage:50,description:'Back badge special · 24 seconds'}];

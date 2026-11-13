@@ -132,11 +132,30 @@ export function observePose(
       ? Math.min(a.visibility ?? 0, a.presence ?? 1)
       : 0;
   };
-  const good = (i: number, threshold = DETECTOR_CONFIG.visibility) =>
-    confidence(i) >= threshold;
-  const all = (ids: number[], threshold = DETECTOR_CONFIG.visibility) =>
-    ids.every((i) => good(i, threshold));
-  const score = (ids: number[]) => Math.min(...ids.map(confidence));
+  // A mildly uncertain distal joint need not hide an otherwise clear body.
+  // Floors reject inferred/absent points; aggregate evidence and strong anchors
+  // remain separate requirements before any verified event is permitted.
+  const floor = (i: number) =>
+    [11, 12, 23, 24].includes(i)
+      ? 0.45
+      : [13, 14, 25, 26].includes(i)
+        ? 0.4
+        : 0.35;
+  const good = (i: number, threshold = floor(i)) => confidence(i) >= threshold;
+  const score = (ids: number[]) => {
+    const values = ids.map(confidence),
+      mean = values.reduce((a, b) => a + b, 0) / values.length;
+    return 0.65 * mean + 0.35 * Math.min(...values);
+  };
+  const all = (ids: number[], threshold = DETECTOR_CONFIG.visibility) => {
+    const anchors = ids.filter((i) => [11, 12, 23, 24, 25, 26].includes(i));
+    return (
+      ids.every((i) => good(i)) &&
+      score(ids) >= threshold &&
+      anchors.filter((i) => confidence(i) >= 0.55).length >=
+        Math.min(2, anchors.length)
+    );
+  };
   const distance = (a: number, b: number) =>
     Math.hypot(p[a].x - p[b].x, p[a].y - p[b].y);
   const hasBody = [11, 12, 23, 24, 25, 26].some((i) => good(i));
@@ -154,11 +173,15 @@ export function observePose(
       : groups;
     const missing =
       relevant
-        .map((ids) => ids.filter((i) => !good(i, threshold)))
+        .map((ids) => ids.filter((i) => !good(i)))
         .sort((a, b) => a.length - b.length)[0] ?? [];
     return {
       ...empty,
-      status: hasBody ? "partial" : "no-body",
+      status: hasBody
+        ? missing.length
+          ? "partial"
+          : "insufficient"
+        : "no-body",
       message: hasBody
         ? preferredObservedSide
           ? `Keep the ${preferredObservedSide} side visible during this repetition. ${message}`
@@ -202,6 +225,106 @@ export function observePose(
         ? "Starting position visible."
         : o.message,
   });
+  if (exercise === "sitstand") {
+    const groups = candidates.map((c) => ({
+        side: c.side,
+        ids: [c.hip, c.knee, c.ankle],
+      })),
+      g = select(groups);
+    if (!g)
+      return unavailable(
+        groups.map((g) => g.ids),
+        "Show one hip, knee and ankle. Start seated on a stable chair, feet on the floor.",
+      );
+    const c = chain(g.side),
+      bend = angle(p[c.hip], p[c.knee], p[c.ankle]);
+    const scale = Math.max(
+      0.06,
+      (distance(c.hip, c.knee) + distance(c.knee, c.ankle)) * 0.6,
+    );
+    const upright = !good(c.shoulder) || p[c.shoulder].y < p[c.hip].y;
+    return finish({
+      ...base(g.ids, g.side),
+      ready:
+        upright &&
+        bend > 55 &&
+        bend < 130 &&
+        p[c.hip].y < p[c.knee].y + scale * 0.4,
+      extended:
+        upright && bend > 150 && p[c.hip].y < p[c.knee].y - scale * 0.35,
+      amplitude: clamp((bend - 90) / 75),
+      motion: p[c.hip].y / scale,
+      message: "Begin seated; stand upright, then sit back down with control.",
+    });
+  }
+  if (exercise === "wallpushup") {
+    const groups = candidates.map((c) => ({
+        side: c.side,
+        ids: [c.shoulder, c.elbow, c.wrist, c.hip],
+      })),
+      g = select(groups);
+    if (!g)
+      return unavailable(
+        groups.map((g) => g.ids),
+        "Show one shoulder, elbow, wrist and hip from the side. Start with your arms extended against the wall.",
+      );
+    const c = chain(g.side),
+      scale = Math.max(0.06, distance(c.shoulder, c.hip)),
+      bend = angle(p[c.shoulder], p[c.elbow], p[c.wrist]);
+    const standing =
+      p[c.hip].y > p[c.shoulder].y &&
+      Math.abs(p[c.hip].y - p[c.shoulder].y) >
+        Math.abs(p[c.hip].x - p[c.shoulder].x) * 0.8;
+    const handAtChest =
+      Math.abs(p[c.wrist].y - p[c.shoulder].y) < scale * 0.65 &&
+      Math.abs(p[c.wrist].x - p[c.shoulder].x) > scale * 0.2;
+    return finish({
+      ...base(g.ids, g.side),
+      ready: standing && handAtChest && bend > 140,
+      extended: standing && handAtChest && bend < 120,
+      amplitude: clamp((160 - bend) / 70),
+      motion: p[c.shoulder].x / scale,
+      message:
+        "Keep hands against the wall; bend your elbows as your torso approaches, then return.",
+    });
+  }
+  if (exercise === "bridge") {
+    const groups = candidates.map((c) => ({
+        side: c.side,
+        ids: [c.shoulder, c.hip, c.knee, c.ankle],
+      })),
+      g = select(groups);
+    if (!g)
+      return unavailable(
+        groups.map((g) => g.ids),
+        "Use a low side view showing one shoulder, hip, bent knee and ankle. Start lying on your back with hips down.",
+      );
+    const c = chain(g.side),
+      scale = Math.max(0.06, distance(c.shoulder, c.hip)),
+      hipAngle = angle(p[c.shoulder], p[c.hip], p[c.knee]),
+      kneeAngle = angle(p[c.hip], p[c.knee], p[c.ankle]);
+    const floorPosture =
+      Math.abs(p[c.shoulder].x - p[c.hip].x) >
+        Math.abs(p[c.shoulder].y - p[c.hip].y) * 0.75 &&
+      kneeAngle > 40 &&
+      kneeAngle < 140 &&
+      p[c.ankle].y > p[c.shoulder].y - scale * 0.2;
+    return finish({
+      ...base(g.ids, g.side),
+      ready:
+        floorPosture &&
+        p[c.hip].y >= p[c.shoulder].y - scale * 0.12 &&
+        hipAngle < 150,
+      extended:
+        floorPosture &&
+        p[c.hip].y < p[c.shoulder].y - scale * 0.18 &&
+        hipAngle > 155,
+      amplitude: clamp((hipAngle - 120) / 55),
+      motion: (p[c.hip].y - p[c.shoulder].y) / scale,
+      message:
+        "Start with hips down and knees bent. Lift the hips, then lower back to the starting position.",
+    });
+  }
   if (exercise === "squat") {
     const groups = candidates.map((c) => ({
       side: c.side,
@@ -224,7 +347,7 @@ export function observePose(
       (!good(c.shoulder) || p[c.shoulder].y < p[c.hip].y);
     return finish({
       ...base(g.ids, g.side),
-      ready: upright && bend > 155,
+      ready: upright && bend > 145,
       extended: upright && bend < 115,
       amplitude: clamp((165 - bend) / 80),
       motion: p[c.hip].y / scale,
@@ -253,8 +376,8 @@ export function observePose(
       bend = angle(p[c.shoulder], p[c.elbow], p[c.wrist]);
     return finish({
       ...base(g.ids, g.side),
-      ready: horizontal && alignment > 145 && bend > 150,
-      extended: horizontal && alignment > 140 && bend < 112,
+      ready: horizontal && alignment > 135 && bend > 140,
+      extended: horizontal && alignment > 130 && bend < 118,
       amplitude: clamp((165 - bend) / 80),
       motion: p[c.shoulder].y / scale,
     });
@@ -348,8 +471,8 @@ export function observePose(
         : undefined,
     );
     const standing =
-      measured.some((m) => m.bend > 150) &&
-      legs.every((a) => a === undefined || a > 150) &&
+      measured.some((m) => m.bend > 140) &&
+      legs.every((a) => a === undefined || a > 140) &&
       candidates.every(
         (c) =>
           all([c.knee, c.ankle], 0.55) &&
@@ -430,7 +553,7 @@ export function observePose(
   const ids = selected?.ids ?? (all(startIds, 0.55) ? startIds : usable[0].ids);
   return finish({
     ...base(ids),
-    ready,
+    ready: ready && !selected,
     extended: !!selected,
     side: selected?.side,
     amplitude: selected ? 1 : 0,
@@ -522,8 +645,8 @@ export class ExerciseDetector {
       const previous = this.filtered?.[i];
       const reliable =
         previous &&
-        (previous.visibility ?? 0) >= DETECTOR_CONFIG.visibility &&
-        (p.visibility ?? 0) >= DETECTOR_CONFIG.visibility;
+        (previous.visibility ?? 0) >= 0.35 &&
+        (p.visibility ?? 0) >= 0.35;
       return {
         ...p,
         x: reliable ? previous.x + alpha * (p.x - previous.x) : p.x,
@@ -716,7 +839,10 @@ export class ExerciseDetector {
         if (
           (this.exerciseId === "squat" ||
             this.exerciseId === "pushup" ||
-            this.exerciseId === "diamond") &&
+            this.exerciseId === "diamond" ||
+            this.exerciseId === "sitstand" ||
+            this.exerciseId === "wallpushup" ||
+            this.exerciseId === "bridge") &&
           this.movement < 0.08
         )
           return {

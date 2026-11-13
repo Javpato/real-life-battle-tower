@@ -63,7 +63,7 @@ describe('game audit: authoritative rules',()=>{
 describe('deterministic playable encounter simulation',()=>{
   it('baseline progression can defeat trainers, leaders and rival without fabricated stats',()=>{
     const scenarios=[{id:'trainer-1',xp:0,badges:[]},{id:'leader-leg',xp:210,badges:[]},{id:'leader-arm',xp:210,badges:['leg']},{id:'leader-back',xp:210,badges:['leg','arm']},{id:'rival',xp:540,badges:types}];
-    const durations:Record<string,number>={squat:3,lunge:3,pushup:3,diamond:4,superman:1,birddog:4};
+    const durations:Record<string,number>={squat:3,lunge:3,pushup:3,diamond:4,superman:1,birddog:4,sitstand:4,wallpushup:3,bridge:4};
     const report=[];
     for(const scenario of scenarios){
       const p=reward(initialPlayer(),scenario.xp,0);p.badges=scenario.badges as Element[];

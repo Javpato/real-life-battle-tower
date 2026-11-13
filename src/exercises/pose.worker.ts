@@ -15,9 +15,9 @@ self.onmessage = async (event: MessageEvent) => {
         baseOptions: { modelAssetPath: message.modelUrl, delegate: "CPU" },
         runningMode: "VIDEO",
         numPoses: 1,
-        minPoseDetectionConfidence: 0.5,
-        minPosePresenceConfidence: 0.5,
-        minTrackingConfidence: 0.5,
+        minPoseDetectionConfidence: 0.4,
+        minPosePresenceConfidence: 0.4,
+        minTrackingConfidence: 0.4,
         outputSegmentationMasks: false,
       });
       self.postMessage({ type: "ready" });

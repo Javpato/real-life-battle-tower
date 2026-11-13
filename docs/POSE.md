@@ -12,13 +12,16 @@
 
 | Exercise | Fresh required evidence | Other checks |
 |---|---|---|
-| Squat | Either hip–knee–ankle chain | Standing angle >155°, depth <115°; measurable hip movement. Arms and shoulders may be hidden. A visible shoulder is an additional upright check. |
-| Push-up / diamond | One shoulder–elbow–wrist chain, same-side hip and either ankle or knee | Horizontal body, observable body alignment, elbow >150° at top and <112° at depth, measurable torso displacement. The far arm/leg is optional. Finger placement is not verified. |
+| Squat | Either hip–knee–ankle chain | Standing angle >145°, depth <115°; measurable hip movement. Arms and shoulders may be hidden. A visible shoulder is an additional upright check. |
+| Push-up / diamond | One shoulder–elbow–wrist chain, same-side hip and either ankle or knee | Horizontal body, observable body alignment, elbow >140° at top and <118° at depth, measurable torso displacement. The far arm/leg is optional. Finger placement is not verified. |
 | Lunge | Active hip–knee–ankle, real opposite ankle; both shins for standing reset | Split feet, flexion <118°, distinct knee bend or forward knee/foot geometry. Far hip can be hidden. Ambiguous equally bent sides do not count. |
 | Superman | One same-side shoulder, wrist, hip and ankle | Low horizontal torso, arm/leg reach beyond torso, visible elevation. Far floor-hidden limbs are optional. Each valid second contributes independently. |
+| Chair sit-to-stand | One hip–knee–ankle chain | Begin seated with bent knee, stand with visible hip displacement and knee >150°, then sit back down. The chair itself is not machine-verified. |
+| Wall push-up | One shoulder–elbow–wrist chain and hip | Upright torso, hands near chest height, elbows extended→bent→extended, measurable torso approach. Moving only the arms is rejected. Wall contact is not machine-verified. |
+| Hip bridge | One shoulder–hip–knee–ankle chain | Begin hips down, knees bent; lift into a straighter shoulder–hip–knee line, then lower. Shoulder/ankle references constrain the low side-view posture. |
 | Bird Dog | Torso reference, extending shoulder–elbow–wrist and opposite hip–knee–ankle, supporting wrist and knee | Opposite anatomical pair, extended angles, arm/leg projecting away from torso, visible support points. Support elbow and ankle can be hidden. |
 
-Required chains use visibility/presence ≥0.50; anatomical alternating evidence uses ≥0.55. Confidence is the minimum of the actual measured required points, never promoted above the source confidence. Out-of-frame/nonfinite points cannot authorize a unit. These thresholds and angle bands are heuristic configuration, not a clinical standard.
+Per-joint visibility/presence floors are 0.45 for shoulders/hips, 0.40 for elbows/knees, and 0.35 for wrists/ankles. A measured chain also needs two core anchors at least 0.55 (or all its anchors if it has fewer than two), and an aggregate score at least 0.50, or 0.55 for anatomical alternating evidence. Aggregate confidence is 65% of the measured mean plus 35% of the measured minimum; it describes the chain, not certainty in its weakest joint. Thus an ankle at 0.42 can contribute with strong hip/knee anchors, but a missing joint at 0.10 cannot be averaged away. No confidence is clamped upward to pass the combat rule. Out-of-frame/nonfinite points cannot authorize a unit. These thresholds and angle bands are game heuristics, not a clinical standard.
 
 ## Filtering, cycles and recovery
 
@@ -28,11 +31,17 @@ A chosen nonalternating body chain is locked during the cycle. Switching from on
 
 Call `update(frame)` even when tracking is partial: it retains unfinished cycle state for at most 400 ms, resets stability and freezes time credit. Cached points may stabilize state/display but never authorize a unit or a held second. There must be new stable visible evidence after recovery. Loss beyond 400 ms resets only the unfinished cycle; alternation and saved Superman fractions remain. Frame gaps above 250 ms also cannot contribute elapsed held time. A brief occlusion at the only observed depth may still invalidate the repetition because stable depth was never verified.
 
-`pause()` resets an unfinished cycle, filtering and lock but preserves completed alternation and held-time fractions. Construct a new detector with the new session ID to reset the entire session. Do not call `pause()` on every invisible raw frame: that defeats short-loss recovery. `active=false` in the camera immediately suppresses unit delivery independently of the inference worker.
+`pause()` resets an unfinished cycle, filtering and lock but preserves completed alternation and held-time fractions. Construct a new detector with the new session ID to reset the entire session. If the same session remounts after a journal visit or reload, pass its canonical previous anatomical side as the optional third constructor argument. Each detector instance has a fresh unit-ID nonce, avoiding collisions with earlier events from that same session. Do not call `pause()` on every invisible raw frame: that defeats short-loss recovery. `active=false` in the camera immediately suppresses unit delivery independently of the inference worker.
+
+## Home exercise references
+
+The three extra basic attacks are editable in `src/core/game.ts`: Root Rise (6 chair cycles, 24 base damage, leg), Wall Pulse (8 wall push-ups, 28, arm), and Meadow Bridge (6 hip bridges, 30, back). They are available to equip without badges and use the existing damage/progression engine. Starting posture alone never earns a repetition.
+
+Movement descriptions were checked against the [NHS strength exercises](https://www.nhs.uk/live-well/exercise/strength-exercises/) sit-to-stand/wall press-up guidance and [Cambridge University Hospitals general stability exercises](https://www.cuh.nhs.uk/patient-information/general-stability-exercises1/) basic bridge guidance. No source images were copied. These references inform movement descriptions, not the accuracy of this camera heuristic or an individual exercise prescription. Use a stable chair and controlled comfortable movements; stop on discomfort.
 
 ## Worker and assets
 
-A dedicated worker runs MediaPipe's lite pose model with CPU WebAssembly, one pose and no segmentation. Camera frames remain on the device. Every transferred bitmap is closed, including invalid or uninitialized frames. Reinitialization closes an existing landmarker. Detection, presence and tracking thresholds are 0.50; downstream exercise confidence remains independently enforced.
+A dedicated worker runs MediaPipe's lite pose model with CPU WebAssembly, one pose and no segmentation. Camera frames remain on the device. Every transferred bitmap is closed, including invalid or uninitialized frames. Reinitialization closes an existing landmarker. Detection, presence and tracking acquisition thresholds are 0.40 so partial bodies can reach the exercise-specific evaluator; downstream confidence, anchors, geometry and full-cycle requirements remain independently enforced.
 
 - Model: `public/models/pose_landmarker_lite.task`, official float16/1 model from https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task .
 - WASM: `public/models/wasm`, copied unchanged from the installed `@mediapipe/tasks-vision` package. Keep package and WASM versions aligned. The worker uses `forVisionTasks(path, true)` for module-compatible loading.
@@ -42,7 +51,7 @@ A dedicated worker runs MediaPipe's lite pose model with CPU WebAssembly, one po
 
 `tests/exercises.test.ts` retains the original state-machine contracts: cycle completion, quality, alternation, incomplete movement, timing, pause, hold fractions and geometry. One old assertion required rejection when either knee disappeared; that assertion was intentionally replaced with acceptance of the other complete leg and rejection when neither chain is visible, matching the new lateral-view requirement.
 
-`tests/exercises-geometry.test.ts` uses actual 33-landmark geometry and full smoothed cycles: lateral squats without arms, near-side push-ups/diamond, knee references, partial and ambiguous lunges, strict alternation, opposite-limb Bird Dog from lateral/three-quarter views, same-side rejection, low Superman, camera aspect ratio, noise, short/long occlusion, chain switching, hold fractions and confidence bounds. These fixtures are not physical camera validation. The worker browser smoke loads real model/WASM and infers a blank frame; it validates plumbing, not exercise accuracy.
+`tests/exercises-geometry.test.ts` uses actual 33-landmark geometry and full smoothed cycles: lateral squats without arms, near-side push-ups/diamond, knee references, partial and ambiguous lunges, strict alternation, opposite-limb Bird Dog from lateral/three-quarter views, same-side rejection, low Superman, camera aspect ratio, noise, short/long occlusion, chain switching, hold fractions and confidence bounds. `tests/exercises-home.test.ts` additionally verifies three complete new geometric cycles, initial-pose/no-motion rejection, weak/distal confidence cases and canonical combat damage from each unlocked attack. These fixtures are not physical camera validation. The worker browser smoke loads real model/WASM and infers a blank frame; it validates plumbing, not exercise accuracy.
 
 A monocular camera cannot prove prone orientation, foot contact, exact hand/finger position or safe medical technique. Partial occlusion is supported only when the remaining evidence suffices; ambiguous anatomical sides are deliberately rejected. Real lighting, clothing, lens angle and model misidentification remain unverified risks.
 
