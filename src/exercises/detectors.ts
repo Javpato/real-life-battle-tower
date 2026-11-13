@@ -465,8 +465,19 @@ export class ExerciseDetector {
     readonly exerciseId: ExerciseId,
     sessionId: string = globalThis.crypto?.randomUUID?.() ??
       `session-${Date.now()}-${Math.random()}`,
+    previousSide?: Side,
   ) {
-    this.prefix = sessionId;
+    // A paused session may remount after a journal visit or reload. Its accepted
+    // side comes from canonical state; its new unit IDs must not collide with
+    // the old detector's sequence in that same session.
+    const instance =
+      globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
+    this.prefix = `${sessionId}:${instance}`;
+    if (
+      (exerciseId === "lunge" || exerciseId === "birddog") &&
+      (previousSide === "left" || previousSide === "right")
+    )
+      this.lastSide = previousSide;
   }
   get expectedSide(): Side | undefined {
     return this.lastSide

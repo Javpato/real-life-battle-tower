@@ -98,6 +98,29 @@ describe("exercise cycle and quality contracts", () => {
     const second = rep(d, 2000, "right")[0];
     expect(second.id).not.toBe(first.id);
   });
+  it.each<ExerciseId>(["lunge", "birddog"])(
+    "%s restores canonical alternation after a same-session remount",
+    (id) => {
+      const first = rep(
+        new ExerciseDetector(id, "restored-session"),
+        0,
+        "left",
+      )[0];
+      const restored = new ExerciseDetector(id, "restored-session", first.side);
+      expect(restored.expectedSide).toBe("right");
+      expect(rep(restored, 2000, "left")).toHaveLength(0);
+      restored.pause();
+      const next = rep(restored, 4000, "right");
+      expect(next).toHaveLength(1);
+      expect(next[0].side).toBe("right");
+      expect(next[0].id).not.toBe(first.id);
+    },
+  );
+  it("uses distinct unit IDs when a nonalternating detector remounts in the same session", () => {
+    const first = rep(new ExerciseDetector("squat", "same-session"), 0)[0];
+    const next = rep(new ExerciseDetector("squat", "same-session"), 0)[0];
+    expect(next.id).not.toBe(first.id);
+  });
   it("holds count real visible seconds, preserve fractions and exclude gaps", () => {
     const d = new ExerciseDetector("superman");
     const held = observation({ extended: true, amplitude: 1 });
