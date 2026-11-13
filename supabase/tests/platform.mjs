@@ -5,13 +5,13 @@ import {readFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
 const {PGlite}=await import(process.env.PGLITE_MODULE || '@electric-sql/pglite');
 const db=new PGlite();
-await db.exec(`create role anon; create role authenticated; create schema auth; create schema extensions;
+await db.exec(`create role anon; create role authenticated; create role service_role; create schema auth; create schema extensions;
 create table auth.users(id uuid primary key);
 create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
 grant usage on schema auth to authenticated;
 create function extensions.digest(text,text) returns bytea language sql as $$select decode(md5($1),'hex')$$;
 create function extensions.gen_random_bytes(integer) returns bytea language sql as $$select decode(replace(gen_random_uuid()::text,'-',''),'hex')$$;`);
-for(const file of ['202611140001_platform.sql','202611140002_privacy.sql']){
+for(const file of ['202611140001_platform.sql','202611140002_privacy.sql','202611140003_adventure.sql']){
  const sql=(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')).replace('create extension if not exists pgcrypto with schema extensions;','');
  await db.exec(sql);
 }
@@ -32,9 +32,9 @@ assert.equal((await rpc('select public.approve_pair_code($1,$2) result',[s,pair.
 await actor(bob);assert.equal((await db.query('select * from public.game_saves')).rows.length,1);
 assert.equal((await rpc("select public.adventure_control_command($1,'acquire') result",[s])).error,'CONTROL_BUSY');
 await actor(alice);const op=crypto.randomUUID();
-assert.equal((await rpc("select public.economy_command($1,$2,1,'purchaseItem','potion') result",[s,op])).coins,45);
-assert.equal((await rpc("select public.economy_command($1,$2,1,'purchaseItem','potion') result",[s,op])).coins,45);
-await rejects("select public.economy_command($1,$2,1,'purchaseItem','power-tonic')",[s,op],/IDEMPOTENCY_CONFLICT/);
+assert.equal((await rpc("select public.economy_command($1,$2,1,'purchaseItem','potion') result",[s,op])).coins,35);
+assert.equal((await rpc("select public.economy_command($1,$2,1,'purchaseItem','potion') result",[s,op])).coins,35);
+await rejects("select public.economy_command($1,$2,1,'purchaseItem','boost')",[s,op],/IDEMPOTENCY_CONFLICT/);
 const entry=crypto.randomUUID();await actor(bob);
 assert.equal((await rpc('select public.write_nutrition_entry($1,$2,$3,0,$4,false,1) result',[s,crypto.randomUUID(),entry,{food:'Oats',grams:40}])).version,1);
 assert.equal((await rpc('select public.write_nutrition_entry($1,$2,$3,0,$4,false,1) result',[s,crypto.randomUUID(),entry,{food:'Oats',grams:60}])).error,'VERSION_CONFLICT');
@@ -64,5 +64,21 @@ await rejects('select public.credit_steps($1,$2,$3,100)',[s,crypto.randomUUID(),
 await actor(alice);await rpc('select public.revoke_linked_device($1,$2) result',[s,bob]);
 await actor(bob);assert.equal((await db.query('select * from public.nutrition_entries')).rows.length,0);
 await rejects('select public.credit_steps($1,$2,$3,600)',[s,crypto.randomUUID(),ep.epochId],/NOT_AUTHORIZED/);
-console.log('PASS: RLS, pairing, idempotency, wallet, fencing, safe transfer, shared diary, conflicts, null version, export owner, erase generation, steps deduplication and revocation.');
+await actor(alice);
+const lease2=await rpc("select public.adventure_control_command($1,'acquire') result",[s]);
+const context=await rpc('select public.read_adventure_context($1) result',[s]);
+const commandBody={kind:'adventure',command:{kind:'initialize'}};
+const snapshot={player:{coins:context.coins,items:context.items,upgrades:context.upgrades},battle:null,quest:null};
+const commitId=crypto.randomUUID();
+await rejects('select public.commit_adventure_command($1,$2,$3,$4,$5,$6,$7,7)',[s,commitId,alice,lease2.epoch,context.revision,commandBody,snapshot],/permission denied/);
+await db.exec('reset role; set role service_role');
+const committed=await rpc('select public.commit_adventure_command($1,$2,$3,$4,$5,$6,$7,7) result',[s,commitId,alice,lease2.epoch,context.revision,commandBody,snapshot]);
+assert.equal(committed.snapshot.player.coins,context.coins+7);
+const repeated=await rpc('select public.commit_adventure_command($1,$2,$3,$4,$5,$6,$7,7) result',[s,commitId,alice,lease2.epoch,context.revision,commandBody,snapshot]);
+assert.equal(repeated.revision,committed.revision);
+const stale=await rpc('select public.commit_adventure_command($1,$2,$3,$4,$5,$6,$7,7) result',[s,crypto.randomUUID(),alice,lease2.epoch,context.revision,commandBody,snapshot]);
+assert.equal(stale.error,'VERSION_CONFLICT');
+await rejects('select public.commit_adventure_command($1,$2,$3,$4,$5,$6,$7,7)',[s,crypto.randomUUID(),alice,lease2.epoch-1,committed.revision,commandBody,snapshot],/CONTROL_LOST/);
+await actor(alice);assert.equal((await rpc('select public.get_adventure_receipt($1,$2,$3) result',[s,commitId,commandBody])).revision,committed.revision);
+console.log('PASS: RLS, pairing, idempotency, wallet, fencing, safe transfer, shared diary, conflicts, null version, export owner, erase generation, steps deduplication revocation, service-only adventure commits, CAS, receipts and fenced wallet deltas.');
 await db.close();
