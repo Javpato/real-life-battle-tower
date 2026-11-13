@@ -1,24 +1,32 @@
 import {defaultNutrition,type NutritionState} from '../nutrition/engine';
 import type {RemoteNutritionEntry} from './sync';
-export type NutritionRecordContent={schema:1;kind:'entry'|Exclude<keyof NutritionState,'entries'>;value:unknown};
+import {defaults as defaultJournalSettings,type AdvancedJournalState,type JournalSettingsData,type DayPlan} from '../nutrition/journalPreferences';
+export type NutritionRecordContent={schema:1;kind:'entry'|Exclude<keyof AdvancedJournalState,'entries'>;value:unknown};
 export type NutritionPending={operationId:string;recordId:string;expectedVersion:number;content:NutritionRecordContent;deleted:boolean;generation:number};
 export type NutritionConflict={id:string;kind:string;local:NutritionPending;remote:RemoteNutritionEntry|null;reason:'VERSION_CONFLICT'|'NUTRITION_RESET'};
-export type NutritionCloudCache={userId:string;generation:number;confirmed:Record<string,RemoteNutritionEntry>;pending:NutritionPending[];conflicts:NutritionConflict[];draft?:NutritionState};
+export type NutritionCloudCache={userId:string;generation:number;confirmed:Record<string,RemoteNutritionEntry>;pending:NutritionPending[];conflicts:NutritionConflict[];draft?:AdvancedJournalState};
 export const emptyCache=(userId:string,generation=1):NutritionCloudCache=>({userId,generation,confirmed:{},pending:[],conflicts:[]});
-const metadata:Array<Exclude<keyof NutritionState,'entries'>>=['profile','activities','weights','favorites','recipes','completeDays','goalHistory','healthImports'];
+type MetadataKind=Exclude<keyof AdvancedJournalState,'entries'>;
+// Exhaustive registry makes new persisted NutritionState fields a compile-time integration requirement.
+const metadataTypes:Record<MetadataKind,'array'|'object'>={profile:'object',journalSettings:'object',activities:'array',weights:'array',favorites:'array',recipes:'array',completeDays:'array',goalHistory:'array',healthImports:'array'};
+const metadata=Object.keys(metadataTypes) as MetadataKind[];
+function object(value:unknown):value is Record<string,unknown>{return !!value&&typeof value==='object'&&!Array.isArray(value);}
+function dayPlan(value:unknown):value is DayPlan{return object(value)&&['default','rest','training'].includes(String(value.kind))&&(value.kcal===undefined||(typeof value.kcal==='number'&&Number.isFinite(value.kcal)));}
+function journalSettings(value:unknown):value is JournalSettingsData{return object(value)&&(value.units==='metric'||value.units==='imperial')&&object(value.weekly)&&Object.values(value.weekly).every(dayPlan)&&object(value.overrides)&&Object.values(value.overrides).every(dayPlan)&&Array.isArray(value.reminders)&&value.reminders.every(r=>object(r)&&typeof r.id==='string'&&typeof r.label==='string'&&typeof r.time==='string'&&typeof r.enabled==='boolean');}
+
 export function canonical(value:unknown):string {if(Array.isArray(value))return '['+value.map(canonical).join(',')+']';if(value&&typeof value==='object')return '{'+Object.entries(value).filter(([,v])=>v!==undefined).sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>JSON.stringify(k)+':'+canonical(v)).join(',')+'}';return JSON.stringify(value)??'null';}
 async function recordId(saveId:string,key:string){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(saveId+':nutrition-v1:'+key));const bytes=new Uint8Array(digest).slice(0,16);bytes[6]=(bytes[6]&15)|80;bytes[8]=(bytes[8]&63)|128;const hex=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;}
-export async function nutritionRecords(saveId:string,state:NutritionState):Promise<Record<string,NutritionRecordContent>>{
+export async function nutritionRecords(saveId:string,state:AdvancedJournalState):Promise<Record<string,NutritionRecordContent>>{
  const records:Record<string,NutritionRecordContent>={};
  await Promise.all(state.entries.map(async entry=>{records[await recordId(saveId,'entry:'+entry.id)]={schema:1,kind:'entry',value:entry};}));
- await Promise.all(metadata.map(async kind=>{records[await recordId(saveId,'meta:'+kind)]={schema:1,kind,value:state[kind]??[]};}));
+ await Promise.all(metadata.map(async kind=>{records[await recordId(saveId,'meta:'+kind)]={schema:1,kind,value:state[kind]??(kind==='journalSettings'?defaultJournalSettings():[])};}));
  return records;
 }
-export function visibleNutrition(cache:NutritionCloudCache):NutritionState {
+export function visibleNutrition(cache:NutritionCloudCache):AdvancedJournalState {
  const current=new Map<string,{content:Record<string,unknown>|NutritionRecordContent;deleted:boolean}>();
  for(const row of Object.values(cache.confirmed))current.set(row.id,row);
  for(const op of cache.pending)current.set(op.recordId,op);
- const state=defaultNutrition();
+ const state:AdvancedJournalState=defaultNutrition();
  for(const row of current.values()){
   if(row.deleted)continue;const content=row.content as unknown as NutritionRecordContent;
   if(content.schema!==1)continue;
@@ -27,12 +35,14 @@ export function visibleNutrition(cache:NutritionCloudCache):NutritionState {
    if(entry&&typeof entry.id==='string'&&entry.food&&typeof entry.food.name==='string'&&entry.food.per100&&typeof entry.date==='string'&&typeof entry.createdAt==='string'&&Number.isFinite(entry.amount))state.entries.push(entry);
   }else if(content.kind==='profile'){
    if(content.value&&typeof content.value==='object'&&!Array.isArray(content.value))state.profile={...state.profile,...content.value};
-  }else if(metadata.includes(content.kind)&&Array.isArray(content.value)) (state as unknown as Record<string,unknown>)[content.kind]=content.value;
+  }else if(content.kind==='journalSettings'){
+   if(journalSettings(content.value))state.journalSettings=content.value;
+  }else if(metadata.includes(content.kind)&&metadataTypes[content.kind]==='array'&&Array.isArray(content.value)) (state as unknown as Record<string,unknown>)[content.kind]=content.value;
  }
  state.entries.sort((a,b)=>a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id));
  return state;
 }
-export async function appendNutritionChanges(cache:NutritionCloudCache,saveId:string,before:NutritionState,after:NutritionState){
+export async function appendNutritionChanges(cache:NutritionCloudCache,saveId:string,before:AdvancedJournalState,after:AdvancedJournalState){
  const [old,next]=await Promise.all([nutritionRecords(saveId,before),nutritionRecords(saveId,after)]);
  for(const id of new Set([...Object.keys(old),...Object.keys(next)])){
   if(canonical(old[id])===canonical(next[id]))continue;
