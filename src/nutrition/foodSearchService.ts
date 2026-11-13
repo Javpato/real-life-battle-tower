@@ -1,13 +1,13 @@
 import type {Food} from './engine';
-// Actual OFF responses retrieved 2026-11-14. Database: ODbL; individual contents: DbCL.
+// Actual OFF responses retrieved 2026-11-13. Database: ODbL; individual contents: DbCL.
 // Source queries and licensing: https://openfoodfacts.github.io/openfoodfacts-server/api/tutorials/license-be-on-the-legal-side/
 // https://world.openfoodfacts.org/api/v2/product/3017620422003.json
 // https://world.openfoodfacts.org/cgi/search.pl?search_terms=rolled%20oats&search_simple=1&action=process&json=1&page_size=3
 // This attributed extract is distributed under ODbL 1.0: https://opendatacommons.org/licenses/odbl/1-0/
 export const INITIAL_FOODS:Food[]=[
- {id:'20003166',barcode:'20003166',name:"FLOCONS D'AVOINE",brand:'Crownfield',basis:'g',source:'Open Food Facts · offline snapshot 2026-11-14 · ODbL / DbCL · check packaging',per100:{kcal:372,protein:13.5,carbs:58.7,fat:7,fiber:10}},
- {id:'3168930003632',barcode:'3168930003632',name:'Quaker Oats',brand:'Quaker',basis:'g',source:'Open Food Facts · offline snapshot 2026-11-14 · ODbL / DbCL · check packaging',per100:{kcal:375,protein:11,carbs:60,fat:8,fiber:9}},
- {id:'3017620422003',barcode:'3017620422003',name:'Nutella',brand:'Ferrero, Nutella',basis:'g',source:'Open Food Facts · offline snapshot 2026-11-14 · ODbL / DbCL · check packaging',per100:{kcal:539,protein:6.3,carbs:57.5,fat:30.9,fiber:0}},
+ {id:'20003166',barcode:'20003166',name:"FLOCONS D'AVOINE",brand:'Crownfield',basis:'g',source:'Open Food Facts · offline snapshot 2026-11-13 · ODbL / DbCL · check packaging',per100:{kcal:372,protein:13.5,carbs:58.7,fat:7,fiber:10}},
+ {id:'3168930003632',barcode:'3168930003632',name:'Quaker Oats',brand:'Quaker',basis:'g',source:'Open Food Facts · offline snapshot 2026-11-13 · ODbL / DbCL · check packaging',per100:{kcal:375,protein:11,carbs:60,fat:8,fiber:9}},
+ {id:'3017620422003',barcode:'3017620422003',name:'Nutella',brand:'Ferrero, Nutella',basis:'g',source:'Open Food Facts · offline snapshot 2026-11-13 · ODbL / DbCL · check packaging',per100:{kcal:539,protein:6.3,carbs:57.5,fat:30.9,fiber:0}},
 ];
 export function localFoodSearch(query:string){const q=query.toLocaleLowerCase().trim();return INITIAL_FOODS.filter(f=>`${f.name} ${f.brand} ${f.barcode}`.toLocaleLowerCase().includes(q));}
 type RawProduct={code?:unknown;product_name?:unknown;brands?:unknown;nutriments?:Record<string,unknown>;nutrition_data_per?:unknown;nutrition_data?:unknown};

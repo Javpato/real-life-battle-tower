@@ -48,6 +48,7 @@ import {
   rollingAverage,
   csv,
   recipe,
+  profileForDate,
 } from "./engine";
 export default function Journal({
   state: s,
@@ -87,7 +88,8 @@ export default function Journal({
     [scanStop, SS] = useState<(() => void) | null>(null);
   const entries = s.entries.filter((e) => e.date === date && !e.planned),
     totals = total(entries),
-    calc = energy(s.profile),
+    activeProfile = profileForDate(s, date),
+    calc = activeProfile ? energy(activeProfile) : null,
     acts = reconcile(s.activities.filter((a) => a.date === date));
   const extra = acts
     .filter((a) => a.included)
@@ -98,6 +100,7 @@ export default function Journal({
     calc ? calc.target + extra * s.profile.exerciseCredit : null,
   ).target;
   const kcal = totals.kcal ?? 0;
+  useEffect(() => P(s.profile), [s.profile]);
   const update = (patch: Partial<NutritionState>) => set({ ...s, ...patch });
   const changeDate = (n: number) => {
     const dt = new Date(date + "T12:00:00");
@@ -305,7 +308,7 @@ export default function Journal({
         </div>
       </aside>
       <main className="journal-main">
-        <header className="journal-top">
+        <header className="journal-top"><button className="mobile-back" onClick={onClose} aria-label="Return to adventure"><ArrowLeft size={18}/></button>
           <span>
             <span className="status-dot" /> PERSONAL JOURNAL{" "}
             <small>Saved on this device</small>

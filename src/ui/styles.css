@@ -1963,3 +1963,5 @@ input[type="checkbox"] {
     gap: 12px;
   }
 }
+.offline-banner{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:120;padding:9px 16px;background:#e9d48f;color:#51482c;border-radius:0 0 8px 8px;font-size:11px;max-width:95vw;box-shadow:0 4px 10px #2222}
+.mobile-back{display:none}@media(max-width:760px){.mobile-back{display:inline-flex;padding:8px;margin-left:-8px}.journal-top{gap:8px}.journal-top>span{flex:1}.journal-top small{display:none}}

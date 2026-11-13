@@ -28,7 +28,7 @@ try {
 
   // From the entrance: step east of the fountain, then south to the trainer.
   await hold('d', 550);
-  const trainer = page.getByRole('button', { name: /E · Pip · first steps/ });
+  const trainer = page.getByRole('button', { name: /E · Moss · first steps/ });
   for (let attempt = 0; attempt < 8 && !(await trainer.isVisible()); attempt++) await hold('s', 140);
   await expect(trainer).toBeVisible();
   // Hold a real key press across Phaser render frames.

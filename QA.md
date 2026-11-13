@@ -2,6 +2,16 @@
 
 This document reports the implemented build, not the full master-prompt wish list. Status was inspected during the November 13–14, 2026 sprint. “Connected” means a feature has a reachable application flow; it does not mean it was physically validated or deployed to a public service.
 
+## Latest integration update
+
+- Public release is live at https://everstride-real-life-rpg.transformacion801587.chatgpt.site. The public URL passed the real keyboard/manual trainer victory and saved-reward reload test in an isolated Chrome context.
+- Production offline shell installation, offline reload and offline journal opening passed in Chrome. Pose models cache only after their first successful download.
+- Original procedural village/trainer/leader/rival/victory music is connected; independent recorded audio assets and speech counting are not complete.
+- Native device panel is connected to actual permission, step-reading and health snapshot APIs. Accepted snapshots are saved to the journal without adding overlapping calorie estimates. Physical hardware remains unverified.
+- Real Supabase project URL and publishable key are configured only in ignored `.env.local`. A real auth request returned `Anonymous sign-ins are disabled` (422). CLI link returned `AccessTokenRequiredError`. No hosted migration or live shared save success is claimed.
+- Embedded PostgreSQL verification was rerun by the integrator and passed: RLS, pairing, idempotency, wallet, fencing, safe transfer, shared diary, version conflicts, erase generation, steps, service-only adventure commits and CAS receipts. This remains distinct from hosted Supabase verification.
+- Non-finite profile input validation and unknown-energy display have been corrected; 100 ml-labelled product basis is preserved.
+
 ## Observed automated results
 
 | Check | Result and evidence | What it does not establish |

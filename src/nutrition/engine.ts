@@ -146,6 +146,7 @@ export function energy(p: Profile) {
     if (p.method === "katch") {
       if (
         p.bodyFat === undefined ||
+        !Number.isFinite(p.bodyFat) ||
         p.bodyFat <= 0 ||
         p.bodyFat >= 100 ||
         !p.bodyFatMethod
@@ -170,6 +171,7 @@ export function energy(p: Profile) {
       }
     }
   }
+  if (!Number.isFinite(rmr) || rmr <= 0) return null;
   const tdee = rmr * p.factor;
   let delta = p.goal === "maintain" ? 0 : (tdee * p.adjustment) / 100;
   const restricted =
@@ -329,4 +331,16 @@ export async function lookupBarcode(code: string): Promise<Food> {
       fiber: read("fiber_100g"),
     },
   };
+}
+
+/** Historical dates use the last profile version actually established by that day. */
+export function profileForDate(
+  state: NutritionState,
+  date: string,
+): Profile | null {
+  if (date >= today()) return state.profile;
+  const versions = state.goalHistory
+    .filter((v) => localDate(new Date(v.date)) <= date)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  return versions.at(-1)?.profile ?? null;
 }
