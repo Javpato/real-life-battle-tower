@@ -2,12 +2,15 @@ import {createClient} from 'npm:@supabase/supabase-js@2.119.0';
 import {applyAdventureCommand,initialAdventure,type AdventureCommand,type AdventureSnapshot} from '../_shared/commands.ts';
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info','Access-Control-Allow-Methods':'POST,OPTIONS'};
 function response(body:unknown,status=200){return new Response(JSON.stringify(body),{status,headers:{...cors,'Content-Type':'application/json'}});}
+function namedDefaultKey(variable:string){try{const value=JSON.parse(Deno.env.get(variable)??'{}').default;return typeof value==='string'&&value?value:undefined;}catch{return undefined;}}
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 Deno.serve(async request=>{
  if(request.method==='OPTIONS')return new Response(null,{status:204,headers:cors});
  if(request.method!=='POST')return response({error:'METHOD_NOT_ALLOWED'},405);
  try{
-  const url=Deno.env.get('SUPABASE_URL'),publicKey=Deno.env.get('EVERSTRIDE_PUBLISHABLE_KEY')??Deno.env.get('SUPABASE_ANON_KEY'),secret=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  const url=Deno.env.get('SUPABASE_URL');
+  const publicKey=Deno.env.get('EVERSTRIDE_PUBLISHABLE_KEY')??namedDefaultKey('SUPABASE_PUBLISHABLE_KEYS')??Deno.env.get('SUPABASE_PUBLISHABLE_KEY')??Deno.env.get('SUPABASE_ANON_KEY');
+  const secret=namedDefaultKey('SUPABASE_SECRET_KEYS')??Deno.env.get('SUPABASE_SECRET_KEY')??Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   if(!url||!publicKey||!secret)return response({error:'SERVER_NOT_CONFIGURED'},503);
   const authorization=request.headers.get('authorization');
   if(!authorization?.startsWith('Bearer '))return response({error:'AUTH_REQUIRED'},401);

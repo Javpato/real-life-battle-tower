@@ -65,3 +65,8 @@ Use a stable operation ID for retries, serialize commands on the client, and sto
 Regenerate the Edge copies whenever `src/core/game.ts`, `contracts.ts`, or `commands.ts` changes. `sync-core.mjs --check` fails on drift. UI integration must likewise route all mutations through these commands to claim a shared adventure. The device panel deliberately keeps the cloud step wallet separate until that routing is enabled.
 
 Automatic table exposure may be disabled: the migrations explicitly grant `USAGE` on the API schema, `SELECT` on member-readable game tables, and `EXECUTE` only on the intended authenticated RPC wrappers. They revoke client writes and keep the privileged adventure commit callable only by `service_role`. RLS is explicitly enabled even if the project also enables it automatically.
+
+
+Control handoff: `requestControl(saveId)` queues a linked recipient’s request for five minutes. The holder’s next `renew` transfers only when the canonical server state is safe. Active exercise series and incomplete physical quests block handoff. Renewal then returns a different `holderId` and incremented epoch, so the old client must immediately stop sending commands. The requester polls `readControl`/`acquire`. This requires no direct interruption of a physical repetition.
+
+The Edge Function supports modern platform `SUPABASE_PUBLISHABLE_KEYS` and `SUPABASE_SECRET_KEYS` maps using their named `default` keys, singular local variables, and legacy anon/service-role fallbacks. Secret values stay inside the function. JWT verification remains enabled, and `getUser()` verifies the requesting user independently. See [Supabase function authentication](https://supabase.com/docs/guides/functions/auth).

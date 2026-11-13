@@ -2,7 +2,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type {AdventureCommand,AdventureSnapshot} from '../core/commands';
 
 export type SyncResult<T> = { ok: true; data: T } | { ok: false; error: string; unavailable?: boolean };
-export type Lease = { holderId: string | null; epoch: number; expiresAt: string; safePoint: boolean };
+export type Lease = { holderId: string | null; epoch: number; expiresAt: string; safePoint: boolean; requestedBy?:string|null;requestExpiresAt?:string|null };
 export type StepEpoch = { epochId: string; startedAt: string; source: 'health-connect' | 'step-counter'; difficulty: 'easy' | 'medium' | 'hard' };
 export type RemoteNutritionEntry = {id:string;save_id:string;version:number;content:Record<string,unknown>;deleted:boolean;updated_at:string};
 const env = (import.meta as ImportMeta & {env?:Record<string,string>}).env ?? {};
@@ -43,6 +43,8 @@ export class GameSync {
   /** Calling this explicitly authorizes adventure AND nutrition access. Show that fact before calling. */
   approvePairCode(saveId:string,code:string) {return this.rpc<{linked:true;deviceName:string;sharesNutrition:true}>('approve_pair_code',{save_id:saveId,code});}
   control(saveId:string,action:'acquire'|'renew'|'safe'|'busy'|'release'|'transfer',epoch?:number,target?:string) {return this.rpc<Lease>('adventure_control_command',{save_id:saveId,action,epoch:epoch??null,target:target??null});}
+  requestControl(saveId:string) {return this.rpc<Lease>('request_adventure_control',{save_id:saveId});}
+  readControl(saveId:string) {return this.rpc<Lease>('read_adventure_control',{save_id:saveId});}
   purchase(saveId:string,epoch:number,item:string,operationId=crypto.randomUUID()) {return this.rpc<{coins:number;item:string}>('economy_command',{save_id:saveId,operation_id:operationId,epoch,kind:'purchaseItem',item});}
   upgrade(saveId:string,epoch:number,attack:string,operationId=crypto.randomUUID()) {return this.rpc<{coins:number;level:number}>('economy_command',{save_id:saveId,operation_id:operationId,epoch,kind:'upgradeAttack',item:attack});}
   startStepEpoch(saveId:string,source:StepEpoch['source'],difficulty:StepEpoch['difficulty']) {return this.rpc<StepEpoch>('start_step_epoch',{save_id:saveId,source,difficulty});}

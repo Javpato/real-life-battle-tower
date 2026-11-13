@@ -11,7 +11,7 @@ create function auth.uid() returns uuid language sql stable as $$select nullif(c
 grant usage on schema auth to authenticated;
 create function extensions.digest(text,text) returns bytea language sql as $$select decode(md5($1),'hex')$$;
 create function extensions.gen_random_bytes(integer) returns bytea language sql as $$select decode(replace(gen_random_uuid()::text,'-',''),'hex')$$;`);
-for(const file of ['202611140001_platform.sql','202611140002_privacy.sql','202611140003_adventure.sql']){
+for(const file of ['202611140001_platform.sql','202611140002_privacy.sql','202611140003_adventure.sql','202611140004_control_requests.sql']){
  const sql=(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')).replace('create extension if not exists pgcrypto with schema extensions;','');
  await db.exec(sql);
 }
@@ -80,5 +80,13 @@ const stale=await rpc('select public.commit_adventure_command($1,$2,$3,$4,$5,$6,
 assert.equal(stale.error,'VERSION_CONFLICT');
 await rejects('select public.commit_adventure_command($1,$2,$3,$4,$5,$6,$7,7)',[s,crypto.randomUUID(),alice,lease2.epoch-1,committed.revision,commandBody,snapshot],/CONTROL_LOST/);
 await actor(alice);assert.equal((await rpc('select public.get_adventure_receipt($1,$2,$3) result',[s,commitId,commandBody])).revision,committed.revision);
+// A linked recipient requests control; renewal cannot hand it over during an active series.
+await db.exec('reset role');await db.query('insert into public.save_members values($1,$2,$3)',[s,bob,'Bob relinked']);await actor(alice);
+await rpc("select public.adventure_control_command($1,'busy',$2) result",[s,lease2.epoch]);
+await actor(bob);const pending=await rpc('select public.request_adventure_control($1) result',[s]);assert.equal(pending.requestedBy,bob);
+await actor(alice);const still=await rpc("select public.adventure_control_command($1,'renew',$2) result",[s,lease2.epoch]);assert.equal(still.holderId,alice);
+await rpc("select public.adventure_control_command($1,'safe',$2) result",[s,lease2.epoch]);
+const handed=await rpc("select public.adventure_control_command($1,'renew',$2) result",[s,lease2.epoch]);assert.equal(handed.holderId,bob);assert.equal(handed.epoch,lease2.epoch+1);
+await actor(bob);assert.equal((await rpc('select public.read_adventure_control($1) result',[s])).holderId,bob);
 console.log('PASS: RLS, pairing, idempotency, wallet, fencing, safe transfer, shared diary, conflicts, null version, export owner, erase generation, steps deduplication revocation, service-only adventure commits, CAS, receipts and fenced wallet deltas.');
 await db.close();
