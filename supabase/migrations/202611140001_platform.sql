@@ -7,6 +7,7 @@ grant usage on schema private to authenticated;
 create table public.game_saves (
  id uuid primary key default gen_random_uuid(), owner_id uuid not null references auth.users(id),
  coins integer not null default 60 check(coins >= 0), revision bigint not null default 0,
+ step_remainders jsonb not null default '{"easy":0,"medium":0,"hard":0}'::jsonb,
  created_at timestamptz not null default now()
 );
 create table public.save_members (
@@ -176,14 +177,14 @@ declare ep public.step_epochs; begin
  perform 1 from public.game_saves where id=s for update;
  if source_name not in ('health-connect','step-counter') or difficulty_name not in ('easy','medium','hard') then raise exception 'INVALID_SOURCE'; end if;
  -- Only the existing source owner can close an open epoch; explicitly sync before changing sources.
- if exists(select 1 from public.step_epochs where save_id=s and ended_at is null and user_id<>auth.uid()) then raise exception 'STEP_SOURCE_OTHER_DEVICE'; end if;
+ if exists(select 1 from public.step_epochs where save_id=s and ended_at is null and user_id<>auth.uid()) and not exists(select 1 from public.game_saves where id=s and owner_id=auth.uid()) then raise exception 'STEP_SOURCE_OTHER_DEVICE'; end if;
  update public.step_epochs set ended_at=now() where save_id=s and ended_at is null;
  insert into public.step_epochs(save_id,user_id,source,difficulty) values(s,auth.uid(),source_name,difficulty_name) returning * into ep;
  return jsonb_build_object('epochId',ep.id,'startedAt',ep.started_at,'source',ep.source,'difficulty',ep.difficulty);
 end; $$;
 create function public.start_step_epoch(save_id uuid,source text,difficulty text) returns jsonb language sql security invoker set search_path='' as $$ select private.start_steps(save_id,source,difficulty); $$;
 create function private.credit_steps(s uuid,op uuid,epid uuid,total bigint) returns jsonb language plpgsql security definer set search_path='' as $$
-declare ep public.step_epochs; previous private.operations; request jsonb:=jsonb_build_object('kind','steps','epochId',epid,'total',total); block_size integer; rate integer; blocks bigint; reward integer; result jsonb; balance integer; begin
+declare ep public.step_epochs; previous private.operations; request jsonb:=jsonb_build_object('kind','steps','epochId',epid,'total',total); block_size integer; rate integer; blocks bigint; reward integer; result jsonb; balance integer; remainder bigint; delta bigint; begin
  perform private.require_member(s); perform 1 from public.game_saves where id=s for update;
  select * into previous from private.operations where save_id=s and operation_id=op;
  if found then if previous.request<>request or previous.actor_id<>auth.uid() then raise exception 'IDEMPOTENCY_CONFLICT'; end if; return previous.result; end if;
@@ -193,10 +194,12 @@ declare ep public.step_epochs; previous private.operations; request jsonb:=jsonb
  total:=greatest(total,ep.reported_steps);
  block_size:=case ep.difficulty when 'easy' then 1000 when 'medium' then 500 else 100 end;
  rate:=case ep.difficulty when 'easy' then 30 when 'medium' then 12 else 2 end;
- blocks:=total/block_size; reward:=((blocks-ep.rewarded_blocks)*rate)::integer;
- update public.step_epochs set reported_steps=total,rewarded_blocks=blocks where id=epid;
- update public.game_saves set coins=coins+reward,revision=revision+1 where id=s returning coins into balance;
- result:=jsonb_build_object('creditedCoins',reward,'coins',balance,'creditedSteps',total,'remainingSteps',total%block_size);
+ delta:=total-ep.reported_steps;
+ select coalesce((step_remainders->>ep.difficulty)::bigint,0) into remainder from public.game_saves where id=s;
+ blocks:=(delta+remainder)/block_size; reward:=(blocks*rate)::integer; remainder:=(delta+remainder)%block_size;
+ update public.step_epochs set reported_steps=total,rewarded_blocks=rewarded_blocks+blocks where id=epid;
+ update public.game_saves set coins=coins+reward,revision=revision+1,step_remainders=jsonb_set(step_remainders,array[ep.difficulty],to_jsonb(remainder)) where id=s returning coins into balance;
+ result:=jsonb_build_object('creditedCoins',reward,'coins',balance,'creditedSteps',total,'remainingSteps',remainder);
  insert into private.operations values(s,op,auth.uid(),request,result,now()); return result;
 end; $$;
 create function public.credit_steps(save_id uuid,operation_id uuid,epoch_id uuid,total_steps bigint) returns jsonb language sql security invoker set search_path='' as $$ select private.credit_steps(save_id,operation_id,epoch_id,total_steps); $$;
