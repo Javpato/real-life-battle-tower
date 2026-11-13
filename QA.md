@@ -6,7 +6,7 @@ This document reports the implemented build, not the full master-prompt wish lis
 
 - Public release is live at https://everstride-real-life-rpg.transformacion801587.chatgpt.site. The public URL passed the real keyboard/manual trainer victory and saved-reward reload test in an isolated Chrome context.
 - Production offline shell installation, offline reload and offline journal opening passed in Chrome. Pose models cache only after their first successful download.
-- Original procedural village/trainer/leader/rival/victory music is connected; independent recorded audio assets and speech counting are not complete.
+- Original procedural village/trainer/leader/rival/victory music is connected; optional device speech counts accepted units and announces sides/completion; independent recorded audio tracks are not included.
 - Native device panel is connected to actual permission, step-reading and health snapshot APIs. Accepted snapshots are saved to the journal without adding overlapping calorie estimates. Physical hardware remains unverified.
 - Real Supabase project URL and publishable key are configured only in ignored `.env.local`. A real auth request returned `Anonymous sign-ins are disabled` (422). CLI link returned `AccessTokenRequiredError`. No hosted migration or live shared save success is claimed.
 - Embedded PostgreSQL verification was rerun by the integrator and passed: RLS, pairing, idempotency, wallet, fencing, safe transfer, shared diary, version conflicts, erase generation, steps, service-only adventure commits and CAS receipts. This remains distinct from hosted Supabase verification.
@@ -19,9 +19,9 @@ This document reports the implemented build, not the full master-prompt wish lis
 
 | Check | Result and evidence | What it does not establish |
 |---|---|---|
-| `npm test` | **124 tests passed across 13 files**, observed after cloud integration on November 14. Covers game, pose state machines, nutrition calculations, projections, preferences, food mapping, and web platform failure behavior. | Physical movement accuracy, production service configuration, or end-to-end Android behavior. The release build must also pass after any later changes. |
+| `npm test` | **201 tests passed across 18 files**, observed after the camera and graphics rework on November 14. Covers game, pose state machines, nutrition calculations, projections, preferences, food mapping, and web platform failure behavior. | Physical movement accuracy, production service configuration, or end-to-end Android behavior. The release build must also pass after any later changes. |
 | Game rules | 6 initial tests plus 17 audit tests. Includes type symmetry, STAB, phase caps, deduplication, session fencing, input checks, fatigue, guard/dodge, idempotent rewards and progression simulations. | A malicious client cannot be trusted merely because its local reducer validates input. Local play uses the same reducer; cloud play commits only through the authenticated Edge Function. Physical unit events are not cryptographic proof of exercise. |
-| Exercise detectors | 15 synthetic tests. Full cycles, incomplete motion, side alternation, partial hold time, pauses, timestamps, missing joints, torso movement and opposite-limb geometry. | Successful recognition on any real person. |
+| Exercise detectors | 64 synthetic detector tests. Full cycles, incomplete motion, side alternation, partial hold time, pauses, timestamps, missing joints, torso movement and opposite-limb geometry. | Successful recognition on any real person. |
 | `node tests/exercises-browser-smoke.mjs http://127.0.0.1:5198` | Passed against the exercise development server: actual bundled MediaPipe model and WASM loaded in headless Chrome; blank-frame inference returned zero landmarks. | Webcam permission, valid rep detection, physical form or Android WebView performance. The script expects a Vite dev server because it imports the worker source path. |
 | `node tests/adventure-smoke.mjs` | Passed in a fresh isolated Chrome context: real WASD/E navigation → nearby trainer → manual attack confirmation → victory → 70 coins / 35 XP / one claimed encounter → reload with identical saved rewards. No test save or progression was injected. | Camera combat or completion of all leaders through browser navigation. |
 | `node tests/ui-smoke.mjs` | Passed: village/journal rendering, manual food entry, portion confirmation, persistence, adult profile example yielding 1,780 kcal resting estimate, and 390 px mobile overflow check. Zero captured page errors. | All journal forms, all viewport sizes, clinical validity, live food provider uptime, or native imports. |
@@ -40,12 +40,12 @@ Screenshots created during this run: `/tmp/everstride-encounter-preview.png`, `/
 | Village exploration | Connected Phaser village, player animation, collision checks, camera following, keyboard and pointer controls, proximity interaction, visible NPCs and buildings. One overworld scene; building interiors and a dialogue-tree system are not implemented. |
 | RPG combat | Connected attack/defend/potion/guard/boost, deterministic type rules, manual and camera input paths, phases, pauses, cancellation, XP, coins and defeat recovery. A trainer was completed through the browser UI. |
 | Adventure completion | Three leaders and three-phase rival exist and are connected to encounters, badge locks, specials and ending UI. Deterministic simulations complete all encounter types. A full fresh-save browser playthrough of all three leaders and the rival is still pending. |
-| Exercise camera | Six detector implementations and real worker pipeline are connected. Local processing, permission flow, guides, framing, practice calibration, countdown, pause/recalibration and manual fallback exist. **All six physical acceptance tests remain pending.** |
+| Exercise camera | Nine exercise detectors and the real worker pipeline are connected. Local processing, recoverable permission flow, initial-position guides, partial-body framing, optional automatic calibration, manual arming, countdown, pause/recalibration and manual fallback exist. **All nine physical acceptance tests remain pending.** |
 | Manual mode | Connected and explicitly unverified. Full remaining units are generated through the central combat reducer; group fatigue applies only to those units. This is not evidence of exercise performed. |
 | Quests | Four reachable exercise missions, five escalating targets and repeat rewards. Camera/manual completion paths exist. Automated/browser coverage of every quest and repeated reward boundary remains incomplete. |
 | Shop and equipment | Reachable item purchase, upgrades, up to four equipped attacks and unlocked specials. Adventure mutations route through the common semantic command reducer, including local play. |
 | Alchemy | Journal product discovery awards a unique fictional ingredient; laboratory crafting spends ingredients on potion/guard/boost. Discovery does not mark a meal eaten. Physical barcode scan and full live-product-to-crafted-object browser path remain pending. |
-| Audio and visual polish | Original canvas pixel art, synthesized UI/combat sounds and village/trainer/leader/rival/victory music. Voiced coaching and dedicated transformation sprite sequences remain incomplete. |
+| Audio and visual polish | Original raster sprite atlases, four-direction animations, synthesized UI/combat sounds and village/trainer/leader/rival/victory music. Voiced coaching and dedicated transformation sprite sequences remain incomplete. |
 | Persistence | Local IndexedDB adventure snapshot includes player and battle together; journal is a separate record. Reloaded battles pause. Reward claim IDs prevent duplicate victory claims. No remote merge is implied. |
 | Nutrition journal | Connected manual label entry, OFF lookup/search, saved foods, meal quantities, planning dates, recipes, activities, measurements, charts, adult calculation profiles, conditional projections, export/delete and preferences. Source-specific limitations below apply. |
 | Android package | Capacitor/native source and compilation work exist; hardware acceptance is pending. A buildable APK is not proof of real steps or camera operation. |
@@ -72,7 +72,7 @@ Screenshots created during this run: `/tmp/everstride-encounter-preview.png`, `/
 
 ## Required physical acceptance
 
-For each of squat, lunge, push-up, diamond push-up, Superman and Bird Dog, on desktop and a real Android device:
+For each of squat, lunge, push-up, diamond push-up, Superman, Bird Dog, chair sit-to-stand, wall push-up and glute bridge, on desktop and a real Android device:
 
 1. Grant/deny camera permission and recover without losing the adventure.
 2. Follow the guide, position the camera and complete calibration.
@@ -86,3 +86,25 @@ For each of squat, lunge, push-up, diamond push-up, Superman and Bird Dog, on de
 For Android: install the final APK, test supported and unsupported sensors, permission revocation, Health Connect with empty/real data, baseline creation, reopen/reboot, repeated synchronization, source changes and a second device. Confirm no overlapping step sources are summed and no duplicate coins appear. Test app background behavior rather than assuming continuous sensing.
 
 For deployment: test fresh storage, HTTPS permissions, bundled WASM/model loading, a normal trainer victory, reload persistence, service errors and a landscape phone viewport on the actual public URL. Record only real demonstrated capabilities.
+
+## Camera, recognition and graphics rework — November 14
+
+The current source replaces the original all-joints visibility gate and mandatory practice repetition. It uses exercise-specific chains, lower per-joint visibility floors with strong anchors and aggregate confidence gates, fresh-evidence checks, side locking, smoothing and a 400 ms incomplete-cycle retention window. Retained points/state never earn invisible repetitions or held seconds. A visible **Start without automatic calibration** action can arm recognition immediately; missing evidence still earns zero units.
+
+Camera transport is separate from exercise state: generations fence late permission/worker responses, tracks and `srcObject` are released on stop, restart creates a new stream, devices/facing mode can be selected, timeout recovery is bounded, and stale device inventories cannot stop a replacement stream. The camera panel remains mounted during battle pause, manual fallback, intervening turns and victory. A new detector instance restores canonical alternation and uses fresh unit IDs. Async unit acknowledgement keeps rejected/duplicate events from consuming the remaining target.
+
+Observed checks on the rework:
+
+- **201 unit/domain tests across 18 files passed**, including 64 detector tests for the nine exercises, 17 camera lifecycle mocks, audio cue policy and recognition-to-combat contracts.
+- Real Chromium with its generated test-camera source passed permission denial/retry, three stop/reactivate cycles, track cleanup, pause/session transitions, manual preview without credit, front/back changes, late permissions, stale device inventories and manual start with no detected body. This is real browser/MediaPipe execution, **not physical movement validation**.
+- Synthetic browser fixtures passed fast calibration without a practice rep, one pending canonical receipt, non-optimistic HUD, rejection recovery, pause fencing and target completion.
+- Actual App navigation passed camera → exercise → pause/resume → off/restart → manual fallback → multiple turns → victory without remounting the panel or generating damage from an empty image. No page errors.
+- Desktop and 844×390 landscape were inspected. In the actual App, counters measured approximately 153 px and 80 px respectively. Starting-position guidance, next side, progress, camera controls and manual-start action remain accessible. Desktop controls below the large HUD may require scrolling. A 390 px portrait fixture had no horizontal overflow.
+- Final integrated battle-layout regression passed at desktop, 844×390 landscape and 390 px portrait: no horizontal overflow, complete cast silhouettes, visible HP and world-first ordering between turns. Camera stays full width on phones and moves first during active exercise.
+- Original raster atlases replace procedural character/building placeholders; four walking directions, alpha bounds and NPC visibility were inspected. Real Shift movement test measured 31 walking units versus 53 running units over 400 ms, preserving collision checks.
+- Actual UI home-exercise checks passed: guide → equip → keyboard trainer → Root Rise 6/6, Wall Pulse 8/8, and Meadow Bridge early victory at 5/6. All manual units stayed explicitly unverified; zero page errors.
+- The shared-core parity check and complete embedded-PostgreSQL campaign still pass after the three added basic attacks.
+
+New basic exercise attacks: chair sit-to-stand, wall push-up and glute bridge. They are available in the satchel, use the central damage rules and have original starting/movement illustrations. References: [NHS home strength exercises](https://www.nhs.uk/live-well/exercise/strength-exercises/) and [Cambridge University Hospitals general stability exercises](https://www.cuh.nhs.uk/patient-information/general-stability-exercises1/). Only movement descriptions inform the game; no source photographs or clinical exercise prescription is reproduced.
+
+All nine exercises still require trials with real people on real cameras. The model loading, browser-generated camera and synthetic landmark fixtures cannot establish physical accuracy or Android performance. Hosted Supabase remains separately blocked by owner authentication setup; this rework did not claim remote save verification.

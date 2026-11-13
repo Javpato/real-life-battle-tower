@@ -401,7 +401,7 @@ export default function App() {
         </div>
         <div
           className={
-            "game-layout" + (b?.turn === "exercise" ? " is-exercising" : "")
+            "game-layout" + (b ? " is-battle" : "") + (b?.turn === "exercise" ? " is-exercising" : "")
           }
         >
           <section className="world-card">

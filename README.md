@@ -20,9 +20,11 @@ The project has its own Git repository; do not use the parent workspace reposito
 
 ## Play
 
-WASD/arrows move; E/Enter interacts with a nearby villager. Touch arrows and interaction button are also available. Escape pauses combat/opens the menu. Camera is optional and manual units are clearly marked unverified. Earn three gym badges in any order, then visit Rowan at the summit. The Rest House heals for free; supplies and skills are in the shop. The journal is available from the header and does not award progress for eating or losing weight.
+WASD/arrows move; hold Shift to run; E/Enter interacts with a nearby villager. Touch arrows and interaction button are also available. Escape pauses combat/opens the menu. Camera is optional and manual units are clearly marked unverified. Earn three gym badges in any order, then visit Rowan at the summit. The Rest House heals for free; supplies and skills are in the shop. The journal is available from the header and does not award progress for eating or losing weight.
 
-Each camera exercise offers a skippable demonstration, framing, initial position, practice repetition, countdown and local tracking. Pause indefinitely. Canceling a series keeps its damage and consumes the turn; pausing does not. Detection is not a medical assessment. Camera frames stay on device; physical testing remains required.
+Each camera exercise offers a skippable demonstration, explicit starting position, short framing check, countdown and local tracking. You can also choose Start without automatic calibration; that starts evaluation but never fabricates missing movement. Camera controls remain available across pause, manual mode and turns. Pause indefinitely. Canceling a series keeps its damage and consumes the turn; pausing does not. Detection is not a medical assessment. Camera frames stay on device; physical testing remains required.
+
+The Exercise guide shows all nine basic exercises. Chair sit-to-stand, wall push-ups and glute bridges are available in Satchel & skills, alongside the original six exercises. You can equip any four skills between encounters. New detailed PNG atlases, directions and replacement instructions are listed in ASSET_GUIDE.md.
 
 ## Local data
 

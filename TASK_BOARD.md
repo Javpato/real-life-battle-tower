@@ -11,7 +11,7 @@
 | Android / real step adapters | sync_review | feature/platform | final dist | APK built and verified | Kotlin, signature and packaged asset comparison passed; no ADB device connected |
 | Public release | Astra | main | build + browser | public site live; release checks recorded in QA.md | Public trainer victory and saved rewards passed |
 | Real Supabase create/save/load | Astra + owner | main | anonymous auth + local CLI login | blocked externally | Auth returned 422 disabled; CLI returned AccessTokenRequiredError |
-| Authentic physical demo | owner | — | camera + Android | pending | Six exercise acceptance flows, actual steps, continuous video and official form |
+| Authentic physical demo | owner | — | camera + Android | pending | Nine exercise acceptance flows, actual steps, continuous video and official form |
 
 ## Latest integrations
 
@@ -23,3 +23,16 @@
 ## External actions
 
 Owner enables anonymous sign-ins in the existing project's Authentication settings and runs `npx supabase login` locally. No secret belongs in chat. Then link existing project `mydltosqcvyfmwjmqswo`, inspect/apply migrations, deploy `adventure-command`, and run `supabase/tests/live.mjs`. The public game remains playable locally while hosted setup is incomplete.
+
+## Camera and visual rework integration
+
+| Work | Owner | Status | Evidence |
+|---|---|---|---|
+| Camera stream lifecycle and unconditional manual arming | sync_review | integrated | 17 mocks, browser camera cycles, real App regression |
+| Partial-body detection and three home exercises | pose_android_feasibility | integrated | 64 geometry/state tests; nine basic exercises + central damage |
+| Large HUD, optional speech, initial-position guide | Astra | integrated | desktop/landscape counters, pause retention, original movement diagrams |
+| Original sprite atlases, world and battle art | combat_review | integrated | four directions, transparency, manifest, actual village gameplay |
+| Shift sprint | combat_review | integrated | real keyboard 1.71× movement comparison, same collisions |
+| Final composition and new skill UI verification | QA agents | passed | three viewports without clipping; all three new skills equip, damage and finish through UI; no physical accuracy claim |
+
+Hosted Supabase authorization remains unchanged and does not block local gameplay. Physical human-camera validation and Android sensor tests remain pending.
