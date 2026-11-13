@@ -439,7 +439,11 @@ export default function ExerciseCamera(props: Props) {
       const currentId = media?.getVideoTracks()[0]?.getSettings?.().deviceId;
       try {
         const list = await navigator.mediaDevices.enumerateDevices();
-        if (lifecycle.current !== controller) return;
+        if (
+          lifecycle.current !== controller ||
+          controller.currentStream !== media
+        )
+          return;
         if (
           currentId &&
           !list.some((d) => d.kind === "videoinput" && d.deviceId === currentId)
@@ -454,6 +458,11 @@ export default function ExerciseCamera(props: Props) {
             "Camera list updated. You can choose a different camera.",
           );
       } catch {
+        if (
+          lifecycle.current !== controller ||
+          controller.currentStream !== media
+        )
+          return;
         setDeviceNotice(
           "A camera changed. If the preview stopped, choose a camera and restart.",
         );

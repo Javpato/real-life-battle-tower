@@ -189,6 +189,34 @@ try {
     .getByRole("button", { name: "Enable camera", exact: true })
     .click();
   await state("ready");
+  // A late device inventory for the old stream cannot disconnect a newly restarted stream.
+  await page.evaluate(() => {
+    const original = navigator.mediaDevices.enumerateDevices.bind(
+      navigator.mediaDevices,
+    );
+    window.__restoreEnumeration = () => {
+      navigator.mediaDevices.enumerateDevices = original;
+    };
+    let calls = 0;
+    navigator.mediaDevices.enumerateDevices = () =>
+      ++calls === 2
+        ? new Promise((resolve) => {
+            window.__finishOldInventory = () => resolve([]);
+          })
+        : original();
+    navigator.mediaDevices.dispatchEvent(new Event("devicechange"));
+  });
+  await page.waitForFunction(() => Boolean(window.__finishOldInventory));
+  await page
+    .getByRole("button", { name: "Restart camera", exact: true })
+    .click();
+  await state("ready");
+  await page.evaluate(() => {
+    window.__finishOldInventory();
+    window.__restoreEnumeration();
+  });
+  await page.waitForTimeout(150);
+  await state("ready");
   // Explicit start can arm a series with no recognized body, but must never create a rep.
   await page
     .getByRole("button", {
@@ -222,6 +250,7 @@ try {
         "manual preview without credit",
         "front/back restart",
         "late permission stream cleanup",
+        "stale device inventory cannot stop a new stream",
         "manual arming without a detected body creates no units",
         "landscape controls",
       ],
