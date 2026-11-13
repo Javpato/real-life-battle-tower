@@ -23,12 +23,12 @@ try {
   await page.goto(process.env.GAME_URL || 'http://127.0.0.1:5173');
   await page.getByRole('button', { name: 'Take the first step' }).click();
   await expect(page.getByText('Opening the village…', { exact: true })).toHaveCount(0);
-  await page.locator('canvas').waitFor();
+  await expect(page.locator('canvas')).toHaveCount(1); await page.locator('canvas').waitFor();
   await page.waitForTimeout(400);
 
   // From the entrance: step east of the fountain, then south to the trainer.
   await hold('d', 550);
-  const trainer = page.getByRole('button', { name: /E · Moss · first steps/ });
+  const trainer = page.getByRole('button', { name: /E · .* · first steps/ });
   for (let attempt = 0; attempt < 8 && !(await trainer.isVisible()); attempt++) await hold('s', 140);
   await expect(trainer).toBeVisible();
   // Hold a real key press across Phaser render frames.
@@ -45,7 +45,7 @@ try {
   }
   await expect(victory).toBeVisible();
   await page.getByRole('button', { name: 'Continue adventure' }).click();
-  await page.locator('canvas').waitFor();
+  await expect(page.locator('canvas')).toHaveCount(1); await page.locator('canvas').waitFor();
   await expect.poll(async () => (await readAdventure())?.player.defeated.includes('trainer-1')).toBe(true);
   const beforeReload = await readAdventure();
   expect(beforeReload.player.coins).toBe(70);
@@ -54,7 +54,7 @@ try {
   expect(beforeReload.battle).toBeNull();
 
   await page.reload();
-  await page.locator('canvas').waitFor();
+  await expect(page.locator('canvas')).toHaveCount(1); await page.locator('canvas').waitFor();
   await expect(page.getByRole('button', { name: 'Take the first step' })).toHaveCount(0);
   const afterReload = await readAdventure();
   expect(afterReload.player.defeated).toEqual(beforeReload.player.defeated);

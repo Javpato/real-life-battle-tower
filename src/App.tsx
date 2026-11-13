@@ -50,6 +50,8 @@ import {
 } from "./core/game";
 import type { Element, ExerciseId, ExerciseUnit } from "./core/contracts";
 import { readSave, writeSave } from "./services/storage";
+import {useAdventure} from "./services/useAdventure";
+import type {AdventureCommand} from "./core/commands";
 const ExerciseCamera = lazy(() => import("./exercises/ExerciseCamera"));
 const typeLabel = (t: Element | null) =>
   t ? { leg: "Leg", arm: "Arm", back: "Back" }[t] : "Neutral";
@@ -71,25 +73,15 @@ function sound(kind = "click") {
   } catch {}
 }
 export default function App() {
-  const [p, P] = useState<Player>(initialPlayer),
-    [n, N] = useState<NutritionState>(defaultNutrition),
-    [ready, R] = useState(false),
-    [panel, V] = useState<string | null>(null),
-    [b, B] = useState<Battle | null>(null),
-    [encounter, E] = useState<Enemy | null>(null),
-    [chosen, CH] = useState<Element | null>(null),
-    [camera, C] = useState(true),
-    [muted, MU] = useState(false),
-    [toast, TO] = useState(""),
-    [welcome, W] = useState(false),
-    [quest, Q] = useState<{
-      exercise: ExerciseId;
-      target: number;
-      progress: number;
-      side?: "left" | "right";
-      seen: string[];
-    } | null>(null),
-    [saveError, SE] = useState("");
+  const adventure=useAdventure();
+  const {player:p,battle:b,quest}=adventure.snapshot;
+  const ready=adventure.ready;
+  const [n,N]=useState<NutritionState>(defaultNutrition),[nutritionReady,NR]=useState(false),[panel,V]=useState<string|null>(null),[encounter,E]=useState<Enemy|null>(null),[chosen,CH]=useState<Element|null>(null),[camera,C]=useState(true),[muted,MU]=useState(false),[toast,TO]=useState(''),[welcome,W]=useState(false),[journalError,SE]=useState('');
+  const saveError=adventure.error||journalError;
+  const [pauseRequested,PR]=useState(false);
+  const dispatch=async(command:AdventureCommand)=>{const stop=(command.kind==='pause'&&command.paused)||['cancelSeries','stopSafely','cancelQuest','leaveBattle'].includes(command.kind);if(stop)PR(true);const ok=await adventure.send(command);if(ok&&stop)PR(false);return ok;};
+  useEffect(()=>{if(adventure.fresh)W(true);},[adventure.fresh]);
+  useEffect(()=>{if(!adventure.error&&!adventure.busy)PR(false);},[adventure.error,adventure.busy]);
   const audioReady = useRef(false);
   useEffect(() => {
     setVolume(muted ? 0 : 0.25);
@@ -107,68 +99,22 @@ export default function App() {
       );
   }, [muted, b?.enemy.id, b?.turn === "won"]);
   useEffect(() => () => stopMusic(), []);
-  const pRef = useRef(p);
-  pRef.current = p;
-  const finish = useRef(false);
-  useEffect(() => {
-    Promise.all([
-      readSave<{ player: Player; battle: Battle | null }>("adventure"),
-      readSave<NutritionState>("nutrition"),
-    ])
-      .then(([save, nutrition]) => {
-        if (save) {
-          P(save.player);
-          if (save.battle) B({ ...save.battle, paused: true });
-        } else W(true);
-        if (nutrition) N(nutrition);
-        R(true);
-      })
-      .catch(() => {
-        SE("Storage could not be opened. Your session will not persist.");
-        R(true);
-      });
-  }, []);
-  useEffect(() => {
-    if (ready)
-      void writeSave("adventure", { player: p, battle: b }).catch(() =>
-        SE("Could not save adventure. Export your data before closing."),
-      );
-  }, [p, b, ready]);
-  useEffect(() => {
-    if (ready)
-      void writeSave("nutrition", n).catch(() => SE("Could not save journal."));
-  }, [n, ready]);
+  useEffect(()=>{void readSave<NutritionState>('nutrition').then(saved=>{if(saved)N(saved);NR(true);}).catch(()=>{SE('Could not open the local journal.');NR(true);});},[]);
+  useEffect(()=>{if(nutritionReady)void writeSave('nutrition',n).catch(()=>SE('Could not save the local journal.'));},[n,nutritionReady]);
 
   useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => TO(""), 4500);
     return () => clearTimeout(t);
   }, [toast]);
-  useEffect(() => {
-    if (b?.turn !== "enemy" || b.paused) return;
-    const t = setTimeout(
-      () => B((old) => (old ? enemyTurn(old, pRef.current) : null)),
-      1100,
-    );
-    return () => clearTimeout(t);
-  }, [b?.turn, b?.paused]);
-  useEffect(() => {
-    const listener = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        if (b) B({ ...b, paused: !b.paused });
-        else if (quest) Q(null);
-        else V(panel ? null : "menu");
-      }
-    };
-    window.addEventListener("keydown", listener);
-    return () => window.removeEventListener("keydown", listener);
-  }, [b, panel, quest]);
+  useEffect(()=>{if(b?.turn!=='enemy'||b.paused||adventure.locked)return;const timer=setTimeout(()=>void dispatch({kind:'resolveEnemy'}),1100);return()=>clearTimeout(timer);},[b?.turn,b?.paused,adventure.locked]);
+  useEffect(()=>{const listener=(e:KeyboardEvent)=>{if(e.key==='Escape'){if(b)void dispatch({kind:'pause',paused:!b.paused});else if(quest)void dispatch({kind:'cancelQuest'});else V(panel?null:'menu');}};window.addEventListener('keydown',listener);return()=>window.removeEventListener('keydown',listener);},[b,panel,quest,adventure.locked]);
   function notify(s: string) {
     TO(s);
     if (!muted) sound();
   }
   function interact(id: string) {
-    if (b || panel || quest) return;
+    if (b || panel || quest || adventure.locked) return;
     if (id.startsWith("trainer") || id.startsWith("leader") || id === "rival") {
       if (id === "rival" && p.badges.length < 3) {
         notify(
@@ -181,109 +127,17 @@ export default function App() {
       V("preview");
     } else if (id.startsWith("quest")) {
       const exercise = id.slice(6) as ExerciseId;
-      Q({
-        exercise,
-        target: questTarget(exercise, p.quests[exercise] ?? 0),
-        progress: 0,
-        seen: [],
-      });
+      void dispatch({kind:'startQuest',exercise});
     } else if (id === "healer") {
-      P({ ...p, hp: p.maxHp });
-      notify(
-        "Welcome to the Rest House. Take all the time you need. HP restored — always free.",
-      );
+      void dispatch({kind:'heal'});
+
     } else V(id);
   }
-  function onUnit(u: ExerciseUnit, sessionId?: string) {
-    if (b) {
-      B((old) => (old ? acceptUnit(old, u, pRef.current, sessionId) : null));
-      if (!muted) sound("hit");
-    } else if (quest) {
-      Q((old) => {
-        if (!old || old.seen.includes(u.id)) return old;
-        if (
-          ["lunge", "birddog"].includes(old.exercise) &&
-          (!u.side || old.side === u.side)
-        )
-          return old;
-        return {
-          ...old,
-          progress: old.progress + 1,
-          side: u.side,
-          seen: [...old.seen, u.id],
-        };
-      });
-    }
-  }
-  function manualSeries() {
-    if (!b?.attack) return;
-    let next = b;
-    for (
-      let i = b.progress;
-      i < b.attack.units && next.turn === "exercise";
-      i++
-    ) {
-      next = acceptUnit(
-        next,
-        {
-          id: uid(),
-          exerciseId: b.attack.exercise,
-          quality: 1,
-          confidence: 0,
-          verified: false,
-          side: next.side === "left" ? "right" : "left",
-          timestamp: performance.now(),
-        },
-        p,
-      );
-    }
-    B(next);
-  }
-  function finishBattle() {
-    if (!b || finish.current) return;
-    finish.current = true;
-    if (b.turn === "won") {
-      P(win(p, b));
-      notify(
-        b.enemy.badge
-          ? "Badge earned! A specialization and special move are unlocked."
-          : "Victory! Your progress is saved.",
-      );
-      if (!muted) sound("win");
-      if (b.enemy.id === "rival") V("ending");
-    } else P(lose(p));
-    B(null);
-    finish.current = false;
-  }
-  function item(key: string) {
-    if (!b || b.turn !== "player" || !p.items[key]) return;
-    P({ ...p, items: { ...p.items, [key]: p.items[key] - 1 } });
-    B({
-      ...b,
-      turn: "enemy",
-      playerHp:
-        key === "potion" ? Math.min(p.maxHp, b.playerHp + 45) : b.playerHp,
-      defending: key === "shield" || b.defending,
-      boost: key === "boost" || b.boost,
-      log:
-        key === "potion"
-          ? "45 HP restored."
-          : key === "shield"
-            ? "Guard prepared."
-            : "Next series powered up.",
-    });
-  }
-  function discover(code: string) {
-    P((old) =>
-      old.discoveries.includes(code)
-        ? old
-        : {
-            ...old,
-            discoveries: [...old.discoveries, code],
-            items: { ...old.items, ingredient: old.items.ingredient + 1 },
-          },
-    );
-  }
+  function onUnit(unit:ExerciseUnit,sessionId?:string){if(b)void dispatch({kind:'exerciseUnit',unit,sessionId:sessionId??b.sessionId});else if(quest)void dispatch({kind:'questUnit',unit,sessionId:quest.id});}
+  function manualSeries(){if(b)void dispatch({kind:'manualRemaining',sessionId:b.sessionId});}
+  async function finishBattle(){if(!b)return;const won=b.turn==='won',rival=b.enemy.id==='rival';if(await dispatch({kind:'finishBattle'})){notify(won?'Victory! Your effort is saved.':'Restored at the Rest House.');if(won&&!muted)sound('win');if(won&&rival)V('ending');}}
+  function item(key:string){void dispatch({kind:'useItem',item:key as 'potion'|'shield'|'boost'});}
+  function discover(barcode:string){void dispatch({kind:'discoverFood',barcode});}
   const iconType = (type: Element) => (
     <span className={"type-tag " + type}>
       {type === "leg" ? (
@@ -338,7 +192,7 @@ export default function App() {
           </button>
           <button
             onClick={() => {
-              if (b) B({ ...b, paused: true });
+              if (b) void dispatch({kind:'pause',paused:true});
               V("journal");
             }}
           >
@@ -348,7 +202,7 @@ export default function App() {
         </nav>
         <div className="header-right">
           <span className="local-pill">
-            <i /> Saved locally
+            <i /> {adventure.mode==='cloud'?(adventure.error?'Cloud · stopped':adventure.readOnly?'Cloud · viewing':adventure.busy?'Cloud · saving':'Cloud · in control'):'Saved locally'}
           </span>
           <button
             className="icon-button"
@@ -367,7 +221,7 @@ export default function App() {
           <span className="avatar">J</span>
         </div>
       </header>
-      <main className="game-main">
+      <fieldset disabled={adventure.locked} style={{border:0,padding:0,margin:0,minWidth:0}}><main className="game-main">
         <div className="game-title">
           <div>
             <div className="eyebrow">CHAPTER 01 · THE EVERYDAY ADVENTURE</div>
@@ -402,10 +256,10 @@ export default function App() {
             {!b ? (
               <div className="world-frame">
                 <World
-                  paused={!!panel || !!quest || welcome}
+                  paused={!!panel || !!quest || welcome || adventure.locked}
                   badges={p.badges}
                   position={p.position}
-                  onMove={(position) => P((old) => ({ ...old, position }))}
+                  onMove={(position) => {if(!adventure.locked)void dispatch({kind:'move',...position});}}
                   onInteract={interact}
                 />
                 <div className="world-caption">
@@ -481,7 +335,7 @@ export default function App() {
                       </p>
                       <button
                         className="primary"
-                        onClick={() => B({ ...b, paused: false })}
+                        onClick={() => void dispatch({kind:'pause',paused:false})}
                       >
                         <Play size={16} />
                         Resume
@@ -513,7 +367,7 @@ export default function App() {
                       <button
                         className="primary"
                         onClick={() =>
-                          B({ ...b, phase: b.phase + 1, turn: "enemy" })
+                          void dispatch({kind:'continuePhase'})
                         }
                       >
                         Continue when ready
@@ -537,12 +391,12 @@ export default function App() {
                       )}
                       <button
                         className="secondary"
-                        onClick={() => B({ ...b, paused: true })}
+                        onClick={() => void dispatch({kind:'pause',paused:true})}
                       >
                         <Pause size={16} />
                         Rest
                       </button>
-                      <button onClick={() => B(cancelSeries(b))}>
+                      <button onClick={() => void dispatch({kind:'cancelSeries'})}>
                         End series & turn
                       </button>
                       <p className="tiny">
@@ -554,7 +408,7 @@ export default function App() {
                   ) : b.turn === "enemy" ? (
                     <div className="pause-message">
                       <p>{b.enemy.name} is responding…</p>
-                      <button onClick={() => B({ ...b, paused: true })}>
+                      <button onClick={() => void dispatch({kind:'pause',paused:true})}>
                         Pause safely
                       </button>
                     </div>
@@ -567,7 +421,7 @@ export default function App() {
                             <button
                               className={"attack-card " + a.type}
                               key={id}
-                              onClick={() => B(beginAttack(b, a))}
+                              onClick={() => void dispatch({kind:'beginAttack',attackId:a.id})}
                             >
                               <span>
                                 {iconType(a.type)}
@@ -582,12 +436,7 @@ export default function App() {
                       <div className="button-row">
                         <button
                           onClick={() =>
-                            B({
-                              ...b,
-                              defending: true,
-                              turn: "enemy",
-                              log: "You brace for the next hit.",
-                            })
+                            void dispatch({kind:'defend'})
                           }
                         >
                           <Shield size={16} />
@@ -611,15 +460,14 @@ export default function App() {
                         >
                           Boost ({p.items.boost})
                         </button>
-                        <button onClick={() => B({ ...b, paused: true })}>
+                        <button onClick={() => void dispatch({kind:'pause',paused:true})}>
                           <Pause size={15} />
                           Pause
                         </button>
                         {b.enemy.id.startsWith("trainer") && (
                           <button
                             onClick={() => {
-                              P({ ...p, hp: b.playerHp });
-                              B(null);
+                              void dispatch({kind:'leaveBattle'});
                             }}
                           >
                             Leave
@@ -645,7 +493,7 @@ export default function App() {
               </span>
               <button
                 onClick={() => {
-                  if (b) B({ ...b, paused: true });
+                  if (b) void dispatch({kind:'pause',paused:true});
                   V("journal");
                 }}
               >
@@ -663,7 +511,7 @@ export default function App() {
                     exerciseId={b.attack!.exercise}
                     target={b.attack!.units}
                     progress={b.progress}
-                    active={true}
+                    active={!adventure.readOnly&&!adventure.error&&!pauseRequested}
                     onUnit={(u) => onUnit(u, b.sessionId)}
                     onError={notify}
                   />
@@ -794,13 +642,13 @@ export default function App() {
           </button>
           <span>Made for the people who make everyday life an adventure.</span>
         </div>
-      </main>
+      </main></fieldset>
       {toast && (
         <div className="toast" role="status">
           {toast}
         </div>
       )}
-      {saveError && <div className="toast error">{saveError}</div>}
+      {(saveError||adventure.mode==='cloud')&&<section className="notice" style={{margin:20}} role="status"><strong>{adventure.mode==='cloud'?`Cloud adventure ${adventure.saveId?.slice(0,8)} · revision ${adventure.revision}`:'Adventure status'}</strong><p>{saveError||'Only server-accepted actions change this adventure. Your local adventure and journal remain separate.'}</p><p>{adventure.pending} pending action(s)</p><div className="button-row">{adventure.error&&adventure.pending>0&&<><button onClick={()=>void adventure.controller.retry().catch(e=>notify(String(e)))}>Retry pending actions</button><button onClick={()=>{if(confirm('Discard these unacknowledged actions and reload the cloud snapshot? A local audit copy is retained.'))void adventure.controller.discardPending();}}>Discard pending & refresh</button></>}{adventure.mode==='cloud'&&<><button onClick={()=>V('devices')}>Cloud controls</button><button disabled={adventure.busy} onClick={()=>void adventure.controller.returnLocal().catch(e=>notify(String(e)))}>Return to local adventure</button></>}</div></section>}
       {welcome && (
         <div className="modal-backdrop">
           <section className="modal welcome-modal">
@@ -823,11 +671,11 @@ export default function App() {
                 maxLength={20}
                 value={p.name}
                 onChange={(e) =>
-                  P({ ...p, name: e.target.value || "Adventurer" })
+                  void dispatch({kind:'rename',name:e.target.value||'Adventurer'})
                 }
               />
             </label>
-            <button className="primary" onClick={() => W(false)}>
+            <button className="primary" onClick={() => {W(false);void dispatch({kind:'initialize'});}}>
               Take the first step <ChevronRight size={18} />
             </button>
             <p className="tiny">
@@ -859,6 +707,7 @@ export default function App() {
                 ✕
               </button>
             </div>
+            <fieldset disabled={adventure.locked && panel!=="devices"} style={{border:0,padding:0,margin:0,minWidth:0}}>
             {panel === "preview" && encounter && (
               <>
                 <p>
@@ -908,7 +757,7 @@ export default function App() {
                   <button
                     className="primary"
                     onClick={() => {
-                      B(startBattle(encounter, p, chosen));
+                      void dispatch({kind:'startBattle',enemyId:encounter.id,specialization:chosen});
                       V(null);
                     }}
                   >
@@ -938,12 +787,9 @@ export default function App() {
                         }
                         if (p.equipped.includes(a.id)) {
                           if (p.equipped.length > 1)
-                            P({
-                              ...p,
-                              equipped: p.equipped.filter((x) => x !== a.id),
-                            });
+                            void dispatch({kind:'equip',attackIds:p.equipped.filter(x=>x!==a.id)});
                         } else if (p.equipped.length < 4)
-                          P({ ...p, equipped: [...p.equipped, a.id] });
+                          void dispatch({kind:'equip',attackIds:[...p.equipped,a.id]});
                         else
                           notify(
                             "Unequip a move first; four slots are available.",
@@ -1001,12 +847,8 @@ export default function App() {
                       className="secondary"
                       disabled={p.coins < x.cost}
                       onClick={() => {
-                        P({
-                          ...p,
-                          coins: p.coins - x.cost,
-                          items: { ...p.items, [x.id]: p.items[x.id] + 1 },
-                        });
-                        notify("Tucked safely into your satchel.");
+                        void dispatch({kind:'purchaseItem',item:x.id as 'potion'|'shield'|'boost'});
+
                       }}
                     >
                       {x.cost} coins
@@ -1025,11 +867,7 @@ export default function App() {
                       <button
                         disabled={level >= 4 || p.coins < cost}
                         onClick={() =>
-                          P({
-                            ...p,
-                            coins: p.coins - cost,
-                            upgrades: { ...p.upgrades, [a.id]: level + 1 },
-                          })
+                          void dispatch({kind:'upgradeAttack',attackId:a.id})
                         }
                       >
                         {level >= 4 ? "Mastered" : `Upgrade · ${cost} coins`}
@@ -1065,14 +903,7 @@ export default function App() {
                     <button
                       disabled={p.items.ingredient < Number(cost)}
                       onClick={() =>
-                        P({
-                          ...p,
-                          items: {
-                            ...p.items,
-                            ingredient: p.items.ingredient - Number(cost),
-                            [id]: p.items[String(id)] + 1,
-                          },
-                        })
+                        void dispatch({kind:'craftItem',item:String(id) as 'potion'|'shield'|'boost'})
                       }
                     >
                       Craft · {cost} ingredient{Number(cost) > 1 ? "s" : ""}
@@ -1083,6 +914,11 @@ export default function App() {
             )}
             {panel === "devices" && (
               <DevicePanel
+                onOpenCloud={async saveId=>{await adventure.controller.openCloud(saveId);V(null);}}
+                cloudStatus={adventure.mode==='cloud'?{saveId:adventure.saveId!,readOnly:adventure.readOnly,busy:adventure.busy,requesting:adventure.requesting,safe:b?.turn!=='exercise'&&!quest}:undefined}
+                onRequestControl={()=>adventure.controller.requestControl()}
+                onReleaseControl={()=>adventure.controller.release()}
+                onRefreshCloud={()=>adventure.controller.refresh()}
                 onActivityImport={(reading: ImportedHealth) => {
                   N((old) => {
                     const date = new Date(reading.startTime).toLocaleDateString(
@@ -1129,10 +965,7 @@ export default function App() {
                     disabled={!!b}
                     value={p.difficulty}
                     onChange={(e) =>
-                      P({
-                        ...p,
-                        difficulty: e.target.value as Player["difficulty"],
-                      })
+                      void dispatch({kind:'setDifficulty',difficulty:e.target.value as Player['difficulty']})
                     }
                   >
                     <option value="easy">Easy · 85% enemy HP</option>
@@ -1142,8 +975,7 @@ export default function App() {
                 </label>
                 <p className="tiny">
                   Difficulty does not increase enemy attack. Movement:
-                  WASD/arrows. Interact: E/Enter. Pause/menu: Escape. Your
-                  progress saves automatically on this device.
+                  WASD/arrows. Interact: E/Enter. Pause/menu: Escape. Your progress saves locally, or through acknowledged commands when a cloud adventure is open.
                 </p>
                 <p>
                   For Javpato’s girlfriend and Uriel’s brother — may your
@@ -1168,6 +1000,7 @@ export default function App() {
                 </button>
               </>
             )}
+            </fieldset>
           </section>
         </div>
       )}
@@ -1176,7 +1009,7 @@ export default function App() {
           <section className="modal">
             <div className="card-title">
               <h2>A little village challenge</h2>
-              <button onClick={() => Q(null)} aria-label="Leave quest">
+              <button onClick={() => void dispatch({kind:'cancelQuest'})} aria-label="Leave quest">
                 ✕
               </button>
             </div>
@@ -1191,15 +1024,8 @@ export default function App() {
                   className="primary"
                   onClick={() => {
                     const count = p.quests[quest.exercise] ?? 0;
-                    P({
-                      ...reward(p, count < 5 ? 25 : 0, 12),
-                      quests: { ...p.quests, [quest.exercise]: count + 1 },
-                    });
-                    Q(null);
-                    notify(
-                      "Quest complete. +12 coins" +
-                        (count < 5 ? " · +25 XP" : ""),
-                    );
+                    void dispatch({kind:'finishQuest'});
+
                   }}
                 >
                   Collect reward
@@ -1221,7 +1047,7 @@ export default function App() {
                       exerciseId={quest.exercise}
                       target={quest.target}
                       progress={quest.progress}
-                      active={true}
+                      active={!adventure.readOnly&&!adventure.error&&!pauseRequested}
                       onUnit={onUnit}
                       onError={notify}
                     />
@@ -1234,13 +1060,13 @@ export default function App() {
                     </p>
                     <button
                       className="primary"
-                      onClick={() => Q({ ...quest, progress: quest.target })}
+                      onClick={() => void dispatch({kind:'manualQuest',sessionId:quest.id})}
                     >
                       I completed the exercise
                     </button>
                   </>
                 )}
-                <button onClick={() => Q(null)}>Stop safely</button>
+                <button onClick={() => void dispatch({kind:'cancelQuest'})}>Stop safely</button>
               </>
             )}
           </section>
