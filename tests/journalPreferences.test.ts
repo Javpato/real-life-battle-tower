@@ -1,9 +1,11 @@
-import {describe,it,expect,vi,afterEach} from 'vitest';
+import {describe,it,expect,vi,afterEach,beforeEach} from 'vitest';
 import {defaultNutrition,energy} from '../src/nutrition/engine';
 import {kgToLb,lbToKg,cmToIn,inToCm,gramsToOunces,ouncesToGrams,settings,resolveDailyTarget,dueReminders,type AdvancedJournalState} from '../src/nutrition/journalPreferences';
 import {mapFoodProduct,searchFoods,INITIAL_FOODS,localFoodSearch} from '../src/nutrition/foodSearchService';
 const state=():AdvancedJournalState=>({...defaultNutrition(),profile:{age:35,height:175,weight:80,sex:'male',method:'mifflin',factor:1.6,goal:'maintain',adjustment:10,eligible:true,exerciseCredit:0},journalSettings:{units:'metric',weekly:{'1':{kind:'training',kcal:2900}},overrides:{'2026-11-16':{kind:'rest',kcal:2600}},reminders:[]}});
 describe('journal preferences',()=>{
+ beforeEach(()=>{vi.useFakeTimers();vi.setSystemTime(new Date('2026-11-14T12:00:00Z'));});
+ afterEach(()=>vi.useRealTimers());
  it('round trips units without changing stored quantities',()=>{expect(lbToKg(kgToLb(81.3))).toBeCloseTo(81.3,12);expect(inToCm(cmToIn(175))).toBeCloseTo(175,12);expect(ouncesToGrams(gramsToOunces(130))).toBeCloseTo(130,12);});
  it('gives absolute date targets precedence without adding exercise twice',()=>{const s=state();expect(resolveDailyTarget(s,'2026-11-16',3200).target).toBe(2600);expect(resolveDailyTarget(s,'2026-11-23',3200).target).toBe(2900);expect(resolveDailyTarget(s,'2026-11-24',3200).target).toBe(3200);});
  it('falls back for invalid deficits and ineligible profiles',()=>{const s=state();s.journalSettings!.overrides['2026-11-16'].kcal=500;expect(resolveDailyTarget(s,'2026-11-16',2700).target).toBe(2700);s.profile.eligible=false;s.journalSettings!.overrides['2026-11-16'].kcal=2600;expect(resolveDailyTarget(s,'2026-11-16',null).target).toBeNull();});
