@@ -12,9 +12,9 @@ const villagers:Villager[]=[
  {id:'leader-arm',name:'Soleil · Ember Hall',x:615,y:465,color:'#d57f89',symbol:'II'},
  {id:'leader-back',name:'Zephyr · Wind Sanctum',x:610,y:202,color:'#80b4c0',symbol:'III'},
  {id:'rival',name:'Ash · the final challenge',x:384,y:106,color:'#77728e',hat:'#424d61',symbol:'★'},
- {id:'trainer-1',name:'Pip · first steps',x:426,y:338,color:'#e6b363',symbol:'!'},
- {id:'trainer-2',name:'Remy · riverside trainer',x:279,y:411,color:'#8ab9b2',symbol:'!'},
- {id:'trainer-3',name:'Tess · garden trainer',x:532,y:275,color:'#be8fa4',symbol:'!'},
+ {id:'trainer-1',name:'Moss · first steps',x:426,y:338,color:'#e6b363',symbol:'!'},
+ {id:'trainer-2',name:'Pip · riverside trainer',x:279,y:411,color:'#8ab9b2',symbol:'!'},
+ {id:'trainer-3',name:'Fern · garden trainer',x:532,y:275,color:'#be8fa4',symbol:'!'},
  {id:'quest-squat',name:'Ollie · squat challenge',x:193,y:202,color:'#a4bc6d',symbol:'?'},
  {id:'quest-pushup',name:'Ada · push-up challenge',x:548,y:349,color:'#c58a74',symbol:'?'},
  {id:'quest-birddog',name:'Noor · balance challenge',x:464,y:221,color:'#b69aca',symbol:'?'},
@@ -29,7 +29,7 @@ export default function World(props:WorldProps){
   if(!host.current)return;
   let alive=true;
   class Village extends Phaser.Scene{
-   player!:Phaser.GameObjects.Sprite;keys!:Record<string,Phaser.Input.Keyboard.Key>;obstacles:Obstacle[]=[];direction=0;walking=0;lastSave=0;lastNear='';lastInteract=0;wasMoving=false;
+   player!:Phaser.GameObjects.Sprite;keys!:Record<string,Phaser.Input.Keyboard.Key>;obstacles:Obstacle[]=[];direction=0;walking=0;lastSave=0;lastNear='';lastInteract=-500;wasMoving=false;pendingInteract=false;wasPaused=false;
    marker!:Phaser.GameObjects.Text;gate!:Phaser.GameObjects.Text;
    create(){
     const art=createWorldArt();this.obstacles=art.obstacles;
@@ -57,6 +57,10 @@ export default function World(props:WorldProps){
     this.player=this.add.sprite(usable.x,usable.y,'hero',0).setOrigin(.5,1).setDepth(usable.y);
     this.cameras.main.setBounds(0,0,MAP_W,MAP_H).startFollow(this.player,true,.12,.12).setRoundPixels(true);
     this.keys=this.input.keyboard!.addKeys('W,A,S,D,UP,DOWN,LEFT,RIGHT,E,ENTER',false) as Record<string,Phaser.Input.Keyboard.Key>;
+    // Persist a press until the next scene update: a key released between frames still counts.
+    const queueInteraction=(event:KeyboardEvent)=>{const target=event.target;const editing=target instanceof HTMLElement&&(target.isContentEditable||['INPUT','TEXTAREA','SELECT','BUTTON'].includes(target.tagName));if(!latest.current.paused&&!editing&&!event.repeat&&!event.isComposing)this.pendingInteract=true;};
+    this.input.keyboard!.on('keydown-E',queueInteraction);this.input.keyboard!.on('keydown-ENTER',queueInteraction);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>{this.input.keyboard?.off('keydown-E',queueInteraction);this.input.keyboard?.off('keydown-ENTER',queueInteraction);this.pendingInteract=false;});
     this.marker=this.add.text(0,0,'',{fontFamily:'monospace',fontSize:'8px',color:'#fff3d6',backgroundColor:'#354f48',padding:{x:5,y:4}}).setOrigin(.5,1).setDepth(10000);
     this.gate=this.add.text(384,41,'THE SUMMIT',{fontFamily:'monospace',fontSize:'9px',color:'#f6e4ad',backgroundColor:'#48674f',padding:{x:6,y:4}}).setOrigin(.5).setDepth(5);
     // Quiet firefly / pollen accents, kept behind interface.
@@ -64,11 +68,13 @@ export default function World(props:WorldProps){
     if(alive)setReady(true);
    }
    canMove(x:number,y:number){return x>30&&x<MAP_W-30&&y>41&&y<MAP_H-19&&!this.obstacles.some(o=>x+5>o.x&&x-5<o.x+o.w&&y>o.y&&y-5<o.y+o.h);}
-   interact(v:Villager){if(this.time.now-this.lastInteract<500)return;this.lastInteract=this.time.now;controls.current.interact=false;latest.current.onMove?.({x:this.player.x,y:this.player.y});latest.current.onInteract(v.id);}
+   interact(v:Villager){this.pendingInteract=false;controls.current.interact=false;if(latest.current.paused||this.time.now-this.lastInteract<500)return;this.lastInteract=this.time.now;latest.current.onMove?.({x:this.player.x,y:this.player.y});latest.current.onInteract(v.id);}
    update(time:number,delta:number){
     if(!this.player)return;
-    const focus=document.activeElement;const typing=focus instanceof HTMLInputElement||focus instanceof HTMLTextAreaElement||focus instanceof HTMLSelectElement;
+    const focus=document.activeElement;const typing=focus instanceof HTMLInputElement||focus instanceof HTMLTextAreaElement||focus instanceof HTMLSelectElement||(focus instanceof HTMLElement&&focus.isContentEditable);
     const paused=latest.current.paused||typing;
+    if(paused||this.wasPaused){this.pendingInteract=false;controls.current.interact=false;this.input.keyboard?.resetKeys();}
+    this.wasPaused=paused;
     let dx=0,dy=0;
     if(!paused){dx=Number(this.keys.D.isDown||this.keys.RIGHT.isDown||controls.current.right)-Number(this.keys.A.isDown||this.keys.LEFT.isDown||controls.current.left);dy=Number(this.keys.S.isDown||this.keys.DOWN.isDown||controls.current.down)-Number(this.keys.W.isDown||this.keys.UP.isDown||controls.current.up);}
     if(dx||dy){const distance=78*Math.min(delta,45)/1000/Math.hypot(dx,dy);const nx=this.player.x+dx*distance,ny=this.player.y+dy*distance;if(this.canMove(nx,this.player.y))this.player.x=nx;if(this.canMove(this.player.x,ny))this.player.y=ny;this.direction=Math.abs(dx)>Math.abs(dy)?(dx<0?1:2):(dy<0?3:0);this.walking+=delta;this.player.setFrame(this.direction*3+Math.floor(this.walking/145)%3);}
@@ -81,8 +87,8 @@ export default function World(props:WorldProps){
     const nearId=nearest?.id??'';
     if(nearId!==this.lastNear){this.lastNear=nearId;if(alive)setNearby(nearest?.name??null);}
     this.marker.setVisible(Boolean(nearest)&&!paused);
-    if(nearest){this.marker.setPosition(nearest.x,nearest.y-38).setText('[E] '+nearest.name.split(' · ')[0]);if(!paused&&(Phaser.Input.Keyboard.JustDown(this.keys.E)||Phaser.Input.Keyboard.JustDown(this.keys.ENTER)||controls.current.interact))this.interact(nearest);}
-    if(!nearest)controls.current.interact=false;
+    if(nearest){this.marker.setPosition(nearest.x,nearest.y-38).setText('[E] '+nearest.name.split(' · ')[0]);if(!paused&&(this.pendingInteract||controls.current.interact))this.interact(nearest);}
+    if(!nearest){this.pendingInteract=false;controls.current.interact=false;}
     this.gate.setText(latest.current.badges.length>=3?'THE SUMMIT · OPEN':'THE SUMMIT · 3 BADGES');
    }
   }
