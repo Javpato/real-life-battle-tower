@@ -5,7 +5,7 @@ import JournalSettings, {
 } from "./JournalSettings";
 import FoodSearch from "./FoodSearch";
 import {
-  resolveDailyTarget,
+  dailyEnergySummary,
   displayWeight,
   lbToKg,
   kgToLb,
@@ -15,6 +15,7 @@ import {
   ouncesToGrams,
 } from "./journalPreferences";
 import ProjectionPanel from "./ProjectionPanel";
+import Reports from "./Reports";
 import {
   Plus,
   Search,
@@ -43,23 +44,24 @@ import {
   scale,
   today,
   lookupBarcode,
-  incrementalEnergy,
-  reconcile,
   rollingAverage,
   csv,
   recipe,
-  profileForDate,
 } from "./engine";
 export default function Journal({
   state: s,
   onChange: set,
   onClose,
   onDiscover,
+  storageScope = "local",
+  onDeleteJournal,
 }: {
   state: NutritionState;
   onChange: (n: NutritionState) => void;
   onClose: () => void;
   onDiscover: (code: string) => void;
+  storageScope?: "local" | "cloud";
+  onDeleteJournal?: () => void | Promise<void>;
 }) {
   const prefs = useJournalPreferences();
   const scannerRef = useRef<(() => void) | null>(null);
@@ -88,17 +90,11 @@ export default function Journal({
     [scanStop, SS] = useState<(() => void) | null>(null);
   const entries = s.entries.filter((e) => e.date === date && !e.planned),
     totals = total(entries),
-    activeProfile = profileForDate(s, date),
-    calc = activeProfile ? energy(activeProfile) : null,
-    acts = reconcile(s.activities.filter((a) => a.date === date));
-  const extra = acts
-    .filter((a) => a.included)
-    .reduce((v, a) => v + incrementalEnergy(a, s.profile.weight ?? 0), 0);
-  const target = resolveDailyTarget(
-    s,
-    date,
-    calc ? calc.target + extra * s.profile.exerciseCredit : null,
-  ).target;
+    summary = dailyEnergySummary(s, date),
+    activeProfile = summary.profile,
+    calc = summary.calc,
+    acts = summary.activities,
+    target = summary.target;
   const kcal = totals.kcal ?? 0;
   useEffect(() => P(s.profile), [s.profile]);
   const update = (patch: Partial<NutritionState>) => set({ ...s, ...patch });
@@ -308,10 +304,21 @@ export default function Journal({
         </div>
       </aside>
       <main className="journal-main">
-        <header className="journal-top"><button className="mobile-back" onClick={onClose} aria-label="Return to adventure"><ArrowLeft size={18}/></button>
+        <header className="journal-top">
+          <button
+            className="mobile-back"
+            onClick={onClose}
+            aria-label="Return to adventure"
+          >
+            <ArrowLeft size={18} />
+          </button>
           <span>
             <span className="status-dot" /> PERSONAL JOURNAL{" "}
-            <small>Saved on this device</small>
+            <small>
+              {storageScope === "cloud"
+                ? "Shared across linked devices"
+                : "Saved on this device"}
+            </small>
           </span>
           <button
             className="icon-button"
@@ -482,9 +489,9 @@ export default function Journal({
                     "Protein",
                     "protein",
                     "#b2794f",
-                    s.profile.proteinTarget ??
-                      (s.profile.weight
-                        ? Math.round(s.profile.weight * 1.2)
+                    activeProfile?.proteinTarget ??
+                      (activeProfile?.weight
+                        ? Math.round(activeProfile.weight * 1.2)
                         : null),
                   ],
                   [
@@ -558,15 +565,19 @@ export default function Journal({
                 <p>
                   Resting estimate:{" "}
                   {calc ? Math.round(calc.rmr) + " kcal" : "profile incomplete"}{" "}
-                  · method: {s.profile.method}. Habitual expenditure = resting
-                  estimate × {s.profile.factor}. Activity credit = net
-                  additional exercise × {s.profile.exerciseCredit * 100}%.
+                  · method: {activeProfile?.method ?? "not configured"}.
+                  Habitual expenditure = resting estimate ×{" "}
+                  {activeProfile?.factor ?? "—"}. Food target credit = net
+                  additional exercise ×{" "}
+                  {(activeProfile?.exerciseCredit ?? 0) * 100}%.
                 </p>
                 <p>
-                  Remaining = food target − recorded intake. Estimated energy
-                  balance = estimated expenditure − intake, and is meaningful
-                  only with a complete day. Device energy and equations are
-                  estimates.{" "}
+                  Expenditure includes all additional activity marked outside
+                  your habitual factor. The credit policy only changes your food
+                  target. Remaining = food target − recorded intake. Estimated
+                  energy balance = estimated expenditure − intake, and is
+                  meaningful only with a complete day. Device energy and
+                  equations are estimates.{" "}
                   {calc?.range &&
                     `Without the equation parameter, resting estimates range from ${Math.round(calc.range[0])} to ${Math.round(calc.range[1])} kcal; the displayed center is illustrative.`}
                 </p>
@@ -577,24 +588,19 @@ export default function Journal({
                 <small>Estimated daily expenditure</small>
                 <strong>
                   {calc
-                    ? Math.round(calc.tdee + extra * s.profile.exerciseCredit) +
-                      " kcal"
+                    ? Math.round(summary.expenditure!) + " kcal"
                     : "Profile needed"}
                 </strong>
               </div>
               <div>
-                <small>Extra activity credited</small>
-                <strong>
-                  {Math.round(extra * s.profile.exerciseCredit)} kcal
-                </strong>
+                <small>Extra activity added to food target</small>
+                <strong>{Math.round(summary.activityCredit)} kcal</strong>
               </div>
               <div>
                 <small>Estimated balance · expenditure minus intake</small>
                 <strong>
-                  {calc && s.completeDays.includes(date) && totals.kcal !== null
-                    ? Math.round(
-                        calc.tdee + extra * s.profile.exerciseCredit - kcal,
-                      ) + " kcal"
+                  {summary.balance !== null
+                    ? Math.round(summary.balance) + " kcal"
                     : "Complete your log to compare"}
                 </strong>
               </div>
@@ -745,6 +751,7 @@ export default function Journal({
                         start: `${date}T${f.get("time")}:00`,
                         source: "Manual MET estimate",
                         included: true,
+                        additional: f.get("additional") === "on",
                       },
                     ],
                   });
@@ -797,6 +804,17 @@ export default function Journal({
                     defaultValue="3.5"
                   />
                 </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" name="additional" />
+                  This session is extra activity outside my usual activity
+                  factor.
+                </label>
+                <p className="tiny">
+                  Leave this unchecked for habitual training already included in
+                  your profile. Extra activity increases estimated expenditure;
+                  your 0%, 50% or 100% policy controls how much is added to your
+                  food target.
+                </p>
                 <button className="primary">Save activity</button>
               </form>
             </section>
@@ -811,7 +829,12 @@ export default function Journal({
                     <div>
                       <strong>{a.name}</strong>
                       <p>
-                        {a.minutes} min · {a.source} · {a.reason}
+                        {a.minutes} min · {a.source} · {a.reason} ·{" "}
+                        {a.additional
+                          ? "Additional to habitual activity"
+                          : a.additional === false
+                            ? "Already in habitual activity"
+                            : "Historical activity policy"}
                       </p>
                     </div>
                     <button
@@ -852,6 +875,7 @@ export default function Journal({
         )}
         {tab === "Progress" && (
           <>
+            <Reports state={s} />
             <ProjectionPanel state={s} onChange={set} />
             <div className="two-col">
               <section className="card">
@@ -1135,11 +1159,11 @@ export default function Journal({
                       })
                     }
                   >
-                    <option value="0">
-                      0% · already in my activity factor
+                    <option value="0">0% · keep the food target fixed</option>
+                    <option value="0.5">
+                      50% · add half of extra activity
                     </option>
-                    <option value="0.5">50% · only extra sessions</option>
-                    <option value="1">100% · only extra sessions</option>
+                    <option value="1">100% · add all extra activity</option>
                   </select>
                 </label>
                 {field("Protein reference target", "proteinTarget", "g/day")}
@@ -1164,10 +1188,9 @@ export default function Journal({
             <section className="card">
               <h2>Your data belongs to you</h2>
               <p>
-                Stored locally in this browser. Cloud sharing is not active
-                until a Supabase project is configured. Once enabled, all
-                devices you link to the same adventure will also access its
-                journal.
+                {storageScope === "cloud"
+                  ? "This journal belongs to the cloud adventure. All devices linked to that adventure can read and edit it. Pending changes and conflicts are shown separately. Cached copies on disconnected devices cannot be erased instantly."
+                  : "Stored locally in this browser. Opening a cloud adventure uses its separate shared journal; your local diary is not uploaded automatically."}
               </p>
               <p>
                 No nutrition AI, advertising, camera uploads or automatic
@@ -1178,9 +1201,29 @@ export default function Journal({
                 onClick={() => {
                   if (
                     confirm(
-                      "Delete all food, activity, measurements and nutrition preferences on this device? The adventure stays.",
+                      storageScope === "cloud"
+                        ? "Delete all food, activity, measurements and nutrition preferences from the shared cloud journal? Linked devices will receive these changes. The adventure stays."
+                        : "Delete all food, activity, measurements and nutrition preferences on this device? The adventure stays.",
                     )
                   ) {
+                    if (storageScope === "cloud") {
+                      if (onDeleteJournal)
+                        void Promise.resolve()
+                          .then(onDeleteJournal)
+                          .then(() => S("Shared journal deletion confirmed."))
+                          .catch((error) =>
+                            S(
+                              error instanceof Error
+                                ? error.message
+                                : String(error),
+                            ),
+                          );
+                      else
+                        S(
+                          "Cloud deletion is unavailable. Nothing was deleted.",
+                        );
+                      return;
+                    }
                     set({
                       profile: {
                         method: "mifflin",

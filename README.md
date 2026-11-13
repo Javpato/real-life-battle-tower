@@ -2,6 +2,8 @@
 
 An original pixel village, turn-based exercise combat, and a private nutrition journal. Built for Javpato’s girlfriend and Uriel’s brother. English UI; no generative nutrition AI. This is a working implementation with explicit unfinished integrations, not a claim that every master-spec item has shipped. See QA.md.
 
+Play the current public build: https://everstride-real-life-rpg.transformacion801587.chatgpt.site
+
 ## Run
 
 Node 22+ (developed with Node 24). From this directory:
@@ -34,7 +36,7 @@ Optional adult weight scenarios use an experimental deterministic implementation
 
 ## Cloud and devices
 
-Copy `.env.example` to `.env.local` and configure public Supabase URL/anon key. Never put privileged keys in frontend variables. Enable anonymous auth and deploy the migrations in `supabase/migrations/`. See `docs/PLATFORM.md` for implemented RPCs, RLS tests and limitations. A configured adapter is not evidence of a deployed backend. The app runs locally without Supabase; local state must not be silently copied over a cloud save.
+Copy `.env.example` to `.env.local` and configure `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. The existing project is already configured locally; `.env.local` is ignored by Git. Never put privileged keys in frontend variables. Enable anonymous auth and deploy the migrations in `supabase/migrations/`. See `docs/PLATFORM.md` for implemented RPCs, RLS tests and limitations. The cloud UI uses canonical adventure commands, safe device control and a separate journal with explicit conflict resolution. A configured adapter is not evidence of a deployed backend: hosted verification is currently waiting for anonymous sign-ins and the owner’s local CLI login. The app runs locally without Supabase; local state must not be silently copied over a cloud save.
 
 All devices linked to one cloud save are authorized to access that save’s journal; linking UI explains this. Never link a device belonging to someone who should not see the journal. Game control and nutrition edits have separate concurrency rules.
 
@@ -49,7 +51,7 @@ cd android
 ./gradlew assembleDebug
 ```
 
-The installable debug APK is `android/app/build/outputs/apk/debug/app-debug.apk`. Debug signing is for this demonstration, not a store release. Camera and activity permissions are requested when used. Web never invents steps. Health Connect and sensor availability are reported by native code. An emulator cannot validate actual walking. HealthKit is not implemented or verified in this Linux/Android environment.
+The packaged demonstration APK is `releases/everstride-debug.apk` (ignored by Git). Rebuilding produces `android/app/build/outputs/apk/debug/app-debug.apk`. Debug signing is for this demonstration, not a store release. Camera and activity permissions are requested when used. Web never invents steps. Health Connect and sensor availability are reported by native code. An emulator cannot validate actual walking. HealthKit is not implemented or verified in this Linux/Android environment.
 
 ## Verification
 

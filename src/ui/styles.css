@@ -1965,3 +1965,4 @@ input[type="checkbox"] {
 }
 .offline-banner{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:120;padding:9px 16px;background:#e9d48f;color:#51482c;border-radius:0 0 8px 8px;font-size:11px;max-width:95vw;box-shadow:0 4px 10px #2222}
 .mobile-back{display:none}@media(max-width:760px){.mobile-back{display:inline-flex;padding:8px;margin-left:-8px}.journal-top{gap:8px}.journal-top>span{flex:1}.journal-top small{display:none}}
+.report-chart{display:flex;align-items:end;gap:8px;overflow-x:auto;min-height:175px;padding:18px 2px 8px}.report-chart>button{flex:1;min-width:30px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:7px}.report-chart>button>span{width:min(100%,40px);border-radius:4px 4px 0 0;display:block}.report-chart small{font-size:9px}

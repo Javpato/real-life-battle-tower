@@ -51,6 +51,8 @@ export type Activity = {
   source: string;
   externalId?: string;
   included: boolean;
+  /** Explicitly outside the habitual activity factor; false avoids duplicate energy. */
+  additional?: boolean;
 };
 export type Measurement = {
   id: string;
