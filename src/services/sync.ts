@@ -45,18 +45,18 @@ export class GameSync {
   control(saveId:string,action:'acquire'|'renew'|'safe'|'busy'|'release'|'transfer',epoch?:number,target?:string) {return this.rpc<Lease>('adventure_control_command',{save_id:saveId,action,epoch:epoch??null,target:target??null});}
   requestControl(saveId:string) {return this.rpc<Lease>('request_adventure_control',{save_id:saveId});}
   readControl(saveId:string) {return this.rpc<Lease>('read_adventure_control',{save_id:saveId});}
-  purchase(saveId:string,epoch:number,item:string,operationId=crypto.randomUUID()) {return this.rpc<{coins:number;item:string}>('economy_command',{save_id:saveId,operation_id:operationId,epoch,kind:'purchaseItem',item});}
-  upgrade(saveId:string,epoch:number,attack:string,operationId=crypto.randomUUID()) {return this.rpc<{coins:number;level:number}>('economy_command',{save_id:saveId,operation_id:operationId,epoch,kind:'upgradeAttack',item:attack});}
+  purchase(saveId:string,epoch:number,item:string,operationId:string=crypto.randomUUID()) {return this.rpc<{coins:number;item:string}>('economy_command',{save_id:saveId,operation_id:operationId,epoch,kind:'purchaseItem',item});}
+  upgrade(saveId:string,epoch:number,attack:string,operationId:string=crypto.randomUUID()) {return this.rpc<{coins:number;level:number}>('economy_command',{save_id:saveId,operation_id:operationId,epoch,kind:'upgradeAttack',item:attack});}
   startStepEpoch(saveId:string,source:StepEpoch['source'],difficulty:StepEpoch['difficulty']) {return this.rpc<StepEpoch>('start_step_epoch',{save_id:saveId,source,difficulty});}
-  creditSteps(saveId:string,epochId:string,totalSteps:number,operationId=crypto.randomUUID()) {return this.rpc<{creditedCoins:number;coins:number;creditedSteps:number;remainingSteps:number}>('credit_steps',{save_id:saveId,operation_id:operationId,epoch_id:epochId,total_steps:totalSteps});}
-  writeNutrition(saveId:string,entryId:string,expectedVersion:number,content:Record<string,unknown>,deleted=false,operationId=crypto.randomUUID(),generation=1) {
+  creditSteps(saveId:string,epochId:string,totalSteps:number,operationId:string=crypto.randomUUID()) {return this.rpc<{creditedCoins:number;coins:number;creditedSteps:number;remainingSteps:number}>('credit_steps',{save_id:saveId,operation_id:operationId,epoch_id:epochId,total_steps:totalSteps});}
+  writeNutrition(saveId:string,entryId:string,expectedVersion:number,content:Record<string,unknown>,deleted=false,operationId:string=crypto.randomUUID(),generation=1) {
     return this.rpc<{id:string;version:number;deleted:boolean}>('write_nutrition_entry',{save_id:saveId,operation_id:operationId,entry_id:entryId,expected_version:expectedVersion,content,deleted,generation});
   }
   revokeDevice(saveId:string,userId:string) {return this.rpc<{revoked:true}>('revoke_linked_device',{save_id:saveId,target_user_id:userId});}
   exportNutrition(saveId:string) {return this.rpc<Record<string,unknown>>('export_nutrition_data',{save_id:saveId});}
   deleteNutrition(saveId:string) {return this.rpc<{deleted:true;generation:number}>('delete_all_nutrition_data',{save_id:saveId});}
   readAdventure(saveId:string) {return this.rpc<{revision:number;coins:number;snapshot:AdventureSnapshot|null;items:Record<string,number>;upgrades:Record<string,number>}>('read_adventure_context',{save_id:saveId});}
-  async executeAdventure(saveId:string,leaseEpoch:number,command:AdventureCommand,operationId=crypto.randomUUID(),expectedRevision?:number):Promise<SyncResult<{snapshot:AdventureSnapshot;revision:number}>> {
+  async executeAdventure(saveId:string,leaseEpoch:number,command:AdventureCommand,operationId:string=crypto.randomUUID(),expectedRevision?:number):Promise<SyncResult<{snapshot:AdventureSnapshot;revision:number}>> {
     if(!this.client)return this.missing();
     try {
       const {data,error}=await this.client.functions.invoke('adventure-command',{body:{saveId,leaseEpoch,command,operationId,expectedRevision}});
