@@ -29,7 +29,7 @@ export default function World(props:WorldProps){
   if(!host.current)return;
   let alive=true;
   class Village extends Phaser.Scene{
-   player!:Phaser.GameObjects.Sprite;keys!:Record<string,Phaser.Input.Keyboard.Key>;obstacles:Obstacle[]=[];direction=0;walking=0;lastSave=0;lastNear='';lastInteract=0;
+   player!:Phaser.GameObjects.Sprite;keys!:Record<string,Phaser.Input.Keyboard.Key>;obstacles:Obstacle[]=[];direction=0;walking=0;lastSave=0;lastNear='';lastInteract=0;wasMoving=false;
    marker!:Phaser.GameObjects.Text;gate!:Phaser.GameObjects.Text;
    create(){
     const art=createWorldArt();this.obstacles=art.obstacles;
@@ -74,7 +74,8 @@ export default function World(props:WorldProps){
     if(dx||dy){const distance=78*Math.min(delta,45)/1000/Math.hypot(dx,dy);const nx=this.player.x+dx*distance,ny=this.player.y+dy*distance;if(this.canMove(nx,this.player.y))this.player.x=nx;if(this.canMove(this.player.x,ny))this.player.y=ny;this.direction=Math.abs(dx)>Math.abs(dy)?(dx<0?1:2):(dy<0?3:0);this.walking+=delta;this.player.setFrame(this.direction*3+Math.floor(this.walking/145)%3);}
     else this.player.setFrame(this.direction*3);
     this.player.setDepth(this.player.y);
-    if(time-this.lastSave>1200&&(dx||dy)){this.lastSave=time;latest.current.onMove?.({x:Math.round(this.player.x),y:Math.round(this.player.y)});}
+    if((time-this.lastSave>1200&&(dx||dy))||(this.wasMoving&&!dx&&!dy)){this.lastSave=time;latest.current.onMove?.({x:Math.round(this.player.x),y:Math.round(this.player.y)});}
+    this.wasMoving=Boolean(dx||dy);
     let nearest:Villager|undefined;let dist=42;
     for(const v of villagers){const d=Phaser.Math.Distance.Between(this.player.x,this.player.y,v.x,v.y);if(d<dist){dist=d;nearest=v;}}
     const nearId=nearest?.id??'';
