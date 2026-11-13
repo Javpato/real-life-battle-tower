@@ -1,15 +1,50 @@
 import type { ExerciseId } from "../core/contracts";
 
+export type HomeExerciseId = "sitstand" | "wallpushup" | "bridge";
 export const EXERCISE_GUIDES: Record<
-  ExerciseId,
+  ExerciseId | HomeExerciseId,
   {
     title: string;
     setup: string;
     movement: string;
     camera: string;
     note: string;
+    source?: string;
   }
 > = {
+  sitstand: {
+    title: "Root Rise · Chair sit-to-stand",
+    setup:
+      "Sit near the front of a firm chair, feet flat and about hip-width apart. Put the chair against a wall so it cannot slide. Begin with your hips on the seat and hands resting comfortably.",
+    movement:
+      "Lean your chest slightly forward, stand up smoothly, then lower back onto the chair. A complete seated → standing → seated cycle counts once.",
+    camera:
+      "Side view · show one shoulder, hip, knee and ankle; the far arm may be hidden",
+    note: "Use a stable chair without wheels. Rest whenever you need; this game does not verify the chair itself.",
+    source: "https://www.nhs.uk/live-well/exercise/strength-exercises/",
+  },
+  wallpushup: {
+    title: "Wall Pulse · Wall push-up",
+    setup:
+      "Face a clear wall at about arm’s length. Place your palms against it around chest height, feet planted, and begin with your elbows comfortably extended.",
+    movement:
+      "Bend your elbows to bring your chest toward the wall, then push back to your starting position. Move your shoulders and torso together; a head nod alone does not count.",
+    camera:
+      "Side view · near shoulder, elbow, wrist and hip visible; camera around waist height",
+    note: "Choose a comfortable distance from the wall. Keep your movement controlled and stop when you need to.",
+    source: "https://www.nhs.uk/live-well/exercise/strength-exercises/",
+  },
+  bridge: {
+    title: "Meadow Bridge · Glute bridge",
+    setup:
+      "Lie on your back with knees bent and feet planted about hip-width apart. Let your shoulders and hips rest on the floor, with arms relaxed beside you.",
+    movement:
+      "Raise your hips gently while your shoulders and feet stay supported, then lower to the floor. One lift and complete return counts once.",
+    camera: "Low side view · show one shoulder, hip, knee and ankle",
+    note: "Lift through a comfortable range without forcing your back into an arch. This is a game exercise, not a rehabilitation prescription.",
+    source:
+      "https://www.cuh.nhs.uk/patient-information/general-stability-exercises1/",
+  },
   squat: {
     title: "Groundbreaker · Squat",
     setup:
@@ -67,7 +102,7 @@ export const EXERCISE_GUIDES: Record<
 export default function ExerciseDemo({
   exerciseId,
 }: {
-  exerciseId: ExerciseId;
+  exerciseId: ExerciseId | HomeExerciseId;
 }) {
   const guide = EXERCISE_GUIDES[exerciseId];
   const standing = exerciseId === "squat" || exerciseId === "lunge";
@@ -87,7 +122,30 @@ export default function ExerciseDemo({
           strokeLinejoin="round"
           fill="none"
         >
-          {standing ? (
+          {exerciseId === "sitstand" ? (
+            <>
+              <path d="M28 72H70V108M28 72V108M28 44V72" stroke="#d9b773" />
+              <circle cx="47" cy="27" r="8" />
+              <path d="M47 37V69L83 71L84 105M47 46L67 62" />
+              <circle cx="207" cy="19" r="8" />
+              <path d="M207 29V67L192 105M207 67L222 105M207 42L225 60" />
+            </>
+          ) : exerciseId === "wallpushup" ? (
+            <>
+              <path d="M111 13V108M267 13V108" stroke="#d9b773" />
+              <circle cx="60" cy="25" r="8" />
+              <path d="M62 35L52 69L42 105M62 40L110 40" />
+              <circle cx="229" cy="30" r="8" />
+              <path d="M230 40L213 72L193 105M232 45L246 66L265 42" />
+            </>
+          ) : exerciseId === "bridge" ? (
+            <>
+              <circle cx="23" cy="99" r="7" />
+              <path d="M33 104L72 104L94 70L120 104M40 104L61 105" />
+              <circle cx="174" cy="99" r="7" />
+              <path d="M184 104L215 75L240 63L266 104M190 104L211 105" />
+            </>
+          ) : standing ? (
             <>
               <circle cx="60" cy="18" r="8" />
               <path d="M60 28V65M60 40L40 60M60 40L80 60M60 65L45 105M60 65L75 105" />
@@ -100,20 +158,26 @@ export default function ExerciseDemo({
                 }
               />
             </>
+          ) : hold ? (
+            <>
+              <circle cx="28" cy="91" r="7" />
+              <path d="M38 99L88 100L124 103M40 99L12 101" />
+              <circle cx="180" cy="85" r="7" />
+              <path d="M191 94L230 95L267 79M194 94L160 78" />
+            </>
+          ) : exerciseId === "birddog" ? (
+            <>
+              <circle cx="30" cy="57" r="8" />
+              <path d="M42 66L91 66M45 67L45 104M91 66L91 103L121 104" />
+              <circle cx="181" cy="59" r="8" />
+              <path d="M193 69L230 70L267 70M195 69L157 69M200 71L200 104M230 71L230 104" />
+            </>
           ) : (
             <>
-              <circle cx="30" cy="51" r="8" />
-              <path d="M40 56L90 65L115 95M42 57L44 100M90 65L80 96" />
-              <circle cx="174" cy={hold ? 70 : 55} r="8" />
-              <path
-                d={
-                  hold
-                    ? "M182 78L224 80L260 66M185 78L155 64"
-                    : exerciseId === "birddog"
-                      ? "M182 60L218 65L260 65M185 60L150 61M187 60L190 100M218 65L212 98"
-                      : "M183 65L225 76L260 98M188 66L178 88L200 101"
-                }
-              />
+              <circle cx="29" cy="54" r="8" />
+              <path d="M41 62L86 78L124 101M44 63L44 104" />
+              <circle cx="176" cy="76" r="8" />
+              <path d="M187 84L225 93L264 103M192 85L212 96L190 104" />
             </>
           )}
         </g>
@@ -133,6 +197,14 @@ export default function ExerciseDemo({
       </p>
       <p className="exercise-note">{guide.camera}</p>
       <small>{guide.note}</small>
+      {guide.source && (
+        <p className="exercise-source">
+          <a href={guide.source} target="_blank" rel="noreferrer">
+            Exercise reference · NHS
+          </a>{" "}
+          · original game illustration
+        </p>
+      )}
     </div>
   );
 }

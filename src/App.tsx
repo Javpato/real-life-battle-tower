@@ -23,6 +23,7 @@ import {
   Star,
 } from "lucide-react";
 import World from "./game/World";
+import ExerciseLibrary from "./exercises/ExerciseLibrary";
 import DevicePanel from "./platform/DevicePanel";
 import type { ImportedHealth } from "./platform/health";
 import { startMusic, stopMusic, setVolume } from "./audio/music";
@@ -50,10 +51,10 @@ import {
 } from "./core/game";
 import type { Element, ExerciseId, ExerciseUnit } from "./core/contracts";
 import { readSave, writeSave } from "./services/storage";
-import {useAdventure} from "./services/useAdventure";
-import {useNutritionSync} from "./services/useNutritionSync";
+import { useAdventure } from "./services/useAdventure";
+import { useNutritionSync } from "./services/useNutritionSync";
 import NutritionSyncStatus from "./services/NutritionSyncStatus";
-import type {AdventureCommand} from "./core/commands";
+import type { AdventureCommand } from "./core/commands";
 const ExerciseCamera = lazy(() => import("./exercises/ExerciseCamera"));
 const typeLabel = (t: Element | null) =>
   t ? { leg: "Leg", arm: "Arm", back: "Back" }[t] : "Neutral";
@@ -75,20 +76,48 @@ function sound(kind = "click") {
   } catch {}
 }
 export default function App() {
-  const adventure=useAdventure();
-  const {player:p,battle:b,quest}=adventure.snapshot;
-  const ready=adventure.ready;
-  const [n,N]=useState<NutritionState>(defaultNutrition),[nutritionReady,NR]=useState(false),[panel,V]=useState<string|null>(null),[encounter,E]=useState<Enemy|null>(null),[chosen,CH]=useState<Element|null>(null),[camera,C]=useState(true),[muted,MU]=useState(false),[toast,TO]=useState(''),[welcome,W]=useState(false),[journalError,SE]=useState('');
-  const cloudDiary=adventure.mode==='cloud';
-  const nutritionCloud=useNutritionSync(cloudDiary?adventure.saveId!:null);
-  const diary=cloudDiary?nutritionCloud.state:n;
-  const diaryReady=cloudDiary?nutritionCloud.ready:nutritionReady;
-  const updateDiary=(next:NutritionState)=>{if(cloudDiary)nutritionCloud.update(next);else N(next);};
-  const saveError=adventure.error||journalError;
-  const [pauseRequested,PR]=useState(false);
-  const dispatch=async(command:AdventureCommand)=>{const stop=(command.kind==='pause'&&command.paused)||['cancelSeries','stopSafely','cancelQuest','leaveBattle'].includes(command.kind);if(stop)PR(true);const ok=await adventure.send(command);if(ok&&stop)PR(false);return ok;};
-  useEffect(()=>{if(adventure.fresh)W(true);},[adventure.fresh]);
-  useEffect(()=>{if(!adventure.error&&!adventure.busy)PR(false);},[adventure.error,adventure.busy]);
+  const adventure = useAdventure();
+  const { player: p, battle: b, quest } = adventure.snapshot;
+  const ready = adventure.ready;
+  const [n, N] = useState<NutritionState>(defaultNutrition),
+    [nutritionReady, NR] = useState(false),
+    [panel, V] = useState<string | null>(null),
+    [encounter, E] = useState<Enemy | null>(null),
+    [chosen, CH] = useState<Element | null>(null),
+    [camera, C] = useState(true),
+    [muted, MU] = useState(false),
+    [toast, TO] = useState(""),
+    [welcome, W] = useState(false),
+    [journalError, SE] = useState("");
+  const cloudDiary = adventure.mode === "cloud";
+  const nutritionCloud = useNutritionSync(
+    cloudDiary ? adventure.saveId! : null,
+  );
+  const diary = cloudDiary ? nutritionCloud.state : n;
+  const diaryReady = cloudDiary ? nutritionCloud.ready : nutritionReady;
+  const updateDiary = (next: NutritionState) => {
+    if (cloudDiary) nutritionCloud.update(next);
+    else N(next);
+  };
+  const saveError = adventure.error || journalError;
+  const [pauseRequested, PR] = useState(false);
+  const dispatch = async (command: AdventureCommand) => {
+    const stop =
+      (command.kind === "pause" && command.paused) ||
+      ["cancelSeries", "stopSafely", "cancelQuest", "leaveBattle"].includes(
+        command.kind,
+      );
+    if (stop) PR(true);
+    const ok = await adventure.send(command);
+    if (ok && stop) PR(false);
+    return ok;
+  };
+  useEffect(() => {
+    if (adventure.fresh) W(true);
+  }, [adventure.fresh]);
+  useEffect(() => {
+    if (!adventure.error && !adventure.busy) PR(false);
+  }, [adventure.error, adventure.busy]);
   const audioReady = useRef(false);
   useEffect(() => {
     setVolume(muted ? 0 : 0.25);
@@ -106,16 +135,48 @@ export default function App() {
       );
   }, [muted, b?.enemy.id, b?.turn === "won"]);
   useEffect(() => () => stopMusic(), []);
-  useEffect(()=>{void readSave<NutritionState>('nutrition').then(saved=>{if(saved)N(saved);NR(true);}).catch(()=>{SE('Could not open the local journal.');NR(true);});},[]);
-  useEffect(()=>{if(nutritionReady)void writeSave('nutrition',n).catch(()=>SE('Could not save the local journal.'));},[n,nutritionReady]);
+  useEffect(() => {
+    void readSave<NutritionState>("nutrition")
+      .then((saved) => {
+        if (saved) N(saved);
+        NR(true);
+      })
+      .catch(() => {
+        SE("Could not open the local journal.");
+        NR(true);
+      });
+  }, []);
+  useEffect(() => {
+    if (nutritionReady)
+      void writeSave("nutrition", n).catch(() =>
+        SE("Could not save the local journal."),
+      );
+  }, [n, nutritionReady]);
 
   useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => TO(""), 4500);
     return () => clearTimeout(t);
   }, [toast]);
-  useEffect(()=>{if(b?.turn!=='enemy'||b.paused||adventure.locked)return;const timer=setTimeout(()=>void dispatch({kind:'resolveEnemy'}),1100);return()=>clearTimeout(timer);},[b?.turn,b?.paused,adventure.locked]);
-  useEffect(()=>{const listener=(e:KeyboardEvent)=>{if(e.key==='Escape'){if(b)void dispatch({kind:'pause',paused:!b.paused});else if(quest)void dispatch({kind:'cancelQuest'});else V(panel?null:'menu');}};window.addEventListener('keydown',listener);return()=>window.removeEventListener('keydown',listener);},[b,panel,quest,adventure.locked]);
+  useEffect(() => {
+    if (b?.turn !== "enemy" || b.paused || adventure.locked) return;
+    const timer = setTimeout(
+      () => void dispatch({ kind: "resolveEnemy" }),
+      1100,
+    );
+    return () => clearTimeout(timer);
+  }, [b?.turn, b?.paused, adventure.locked]);
+  useEffect(() => {
+    const listener = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (b) void dispatch({ kind: "pause", paused: !b.paused });
+        else if (quest) void dispatch({ kind: "cancelQuest" });
+        else V(panel ? null : "menu");
+      }
+    };
+    window.addEventListener("keydown", listener);
+    return () => window.removeEventListener("keydown", listener);
+  }, [b, panel, quest, adventure.locked]);
   function notify(s: string) {
     TO(s);
     if (!muted) sound();
@@ -134,17 +195,54 @@ export default function App() {
       V("preview");
     } else if (id.startsWith("quest")) {
       const exercise = id.slice(6) as ExerciseId;
-      void dispatch({kind:'startQuest',exercise});
+      void dispatch({ kind: "startQuest", exercise });
     } else if (id === "healer") {
-      void dispatch({kind:'heal'});
-
+      void dispatch({ kind: "heal" });
     } else V(id);
   }
-  function onUnit(unit:ExerciseUnit,sessionId?:string){if(b)void dispatch({kind:'exerciseUnit',unit,sessionId:sessionId??b.sessionId});else if(quest)void dispatch({kind:'questUnit',unit,sessionId:quest.id});}
-  function manualSeries(){if(b)void dispatch({kind:'manualRemaining',sessionId:b.sessionId});}
-  async function finishBattle(){if(!b)return;const won=b.turn==='won',rival=b.enemy.id==='rival';if(await dispatch({kind:'finishBattle'})){notify(won?'Victory! Your effort is saved.':'Restored at the Rest House.');if(won&&!muted)sound('win');if(won&&rival)V('ending');}}
-  function item(key:string){void dispatch({kind:'useItem',item:key as 'potion'|'shield'|'boost'});}
-  function discover(barcode:string){void dispatch({kind:'discoverFood',barcode});}
+  async function onUnit(
+    unit: ExerciseUnit,
+    sessionId?: string,
+  ): Promise<boolean> {
+    const captured = sessionId ?? b?.sessionId ?? quest?.id;
+    if (!captured) return false;
+    const accepted = b
+      ? await dispatch({ kind: "exerciseUnit", unit, sessionId: captured })
+      : quest
+        ? await dispatch({ kind: "questUnit", unit, sessionId: captured })
+        : false;
+    if (!accepted) return false;
+    const saved = adventure.controller.state.snapshot;
+    return Boolean(
+      (saved.battle?.sessionId === captured &&
+        saved.battle.seen.includes(unit.id)) ||
+      (saved.quest?.id === captured && saved.quest.seen.includes(unit.id)),
+    );
+  }
+  function manualSeries() {
+    if (b) void dispatch({ kind: "manualRemaining", sessionId: b.sessionId });
+  }
+  async function finishBattle() {
+    if (!b) return;
+    const won = b.turn === "won",
+      rival = b.enemy.id === "rival";
+    if (await dispatch({ kind: "finishBattle" })) {
+      notify(
+        won ? "Victory! Your effort is saved." : "Restored at the Rest House.",
+      );
+      if (won && !muted) sound("win");
+      if (won && rival) V("ending");
+    }
+  }
+  function item(key: string) {
+    void dispatch({
+      kind: "useItem",
+      item: key as "potion" | "shield" | "boost",
+    });
+  }
+  function discover(barcode: string) {
+    void dispatch({ kind: "discoverFood", barcode });
+  }
   const iconType = (type: Element) => (
     <span className={"type-tag " + type}>
       {type === "leg" ? (
@@ -168,15 +266,27 @@ export default function App() {
   if (panel === "journal")
     return (
       <>
-        {cloudDiary&&<NutritionSyncStatus sync={nutritionCloud}/>}
-        {diaryReady?<Journal
-          state={diary}
-          onChange={updateDiary}
-          storageScope={cloudDiary?'cloud':'local'}
-          onDeleteJournal={cloudDiary?nutritionCloud.deleteAll:undefined}
-          onClose={() => V(null)}
-          onDiscover={discover}
-        />:<section className="loading"><h1>Opening your journal…</h1><p>{cloudDiary?nutritionCloud.status:'Loading the local journal.'}</p><button onClick={()=>V(null)}>Return to adventure</button></section>}
+        {cloudDiary && <NutritionSyncStatus sync={nutritionCloud} />}
+        {diaryReady ? (
+          <Journal
+            state={diary}
+            onChange={updateDiary}
+            storageScope={cloudDiary ? "cloud" : "local"}
+            onDeleteJournal={cloudDiary ? nutritionCloud.deleteAll : undefined}
+            onClose={() => V(null)}
+            onDiscover={discover}
+          />
+        ) : (
+          <section className="loading">
+            <h1>Opening your journal…</h1>
+            <p>
+              {cloudDiary
+                ? nutritionCloud.status
+                : "Loading the local journal."}
+            </p>
+            <button onClick={() => V(null)}>Return to adventure</button>
+          </section>
+        )}
       </>
     );
   return (
@@ -204,7 +314,7 @@ export default function App() {
           </button>
           <button
             onClick={() => {
-              if (b) void dispatch({kind:'pause',paused:true});
+              if (b) void dispatch({ kind: "pause", paused: true });
               V("journal");
             }}
           >
@@ -214,7 +324,16 @@ export default function App() {
         </nav>
         <div className="header-right">
           <span className="local-pill">
-            <i /> {adventure.mode==='cloud'?(adventure.error?'Cloud · stopped':adventure.readOnly?'Cloud · viewing':adventure.busy?'Cloud · saving':'Cloud · in control'):'Saved locally'}
+            <i />{" "}
+            {adventure.mode === "cloud"
+              ? adventure.error
+                ? "Cloud · stopped"
+                : adventure.readOnly
+                  ? "Cloud · viewing"
+                  : adventure.busy
+                    ? "Cloud · saving"
+                    : "Cloud · in control"
+              : "Saved locally"}
           </span>
           <button
             className="icon-button"
@@ -233,8 +352,32 @@ export default function App() {
           <span className="avatar">J</span>
         </div>
       </header>
-      {adventure.mode==='cloud'&&adventure.busy&&b?.turn==='exercise'&&!b.paused&&<div role="status" style={{padding:'8px 24px'}}><button className="secondary" onClick={()=>void dispatch({kind:'pause',paused:true})} disabled={pauseRequested}>{pauseRequested?'Recognition stopped · saving pause…':'Pause exercise now'}</button><span> Recognition can stop immediately while the cloud confirms your progress.</span></div>}
-      <fieldset disabled={adventure.locked} style={{border:0,padding:0,margin:0,minWidth:0}}><main className="game-main">
+      {adventure.mode === "cloud" &&
+        adventure.busy &&
+        b?.turn === "exercise" &&
+        !b.paused && (
+          <div role="status" style={{ padding: "8px 24px" }}>
+            <button
+              className="secondary"
+              onClick={() => void dispatch({ kind: "pause", paused: true })}
+              disabled={pauseRequested}
+            >
+              {pauseRequested
+                ? "Recognition stopped · saving pause…"
+                : "Pause exercise now"}
+            </button>
+            <span>
+              {" "}
+              Recognition can stop immediately while the cloud confirms your
+              progress.
+            </span>
+          </div>
+        )}
+      <main
+        className={
+          "game-main" + (b?.turn === "exercise" ? " exercise-session" : "")
+        }
+      >
         <div className="game-title">
           <div>
             <div className="eyebrow">CHAPTER 01 · THE EVERYDAY ADVENTURE</div>
@@ -254,285 +397,401 @@ export default function App() {
             </span>
           </div>
         </div>
-        <div className="game-layout">
+        <div
+          className={
+            "game-layout" + (b?.turn === "exercise" ? " is-exercising" : "")
+          }
+        >
           <section className="world-card">
-            <div className="world-toolbar">
-              <span>
-                <i /> {b ? "TRAINING GROUNDS" : "WILLOWMERE VILLAGE"}
-              </span>
-              <span>
-                {b
-                  ? `${b.verified} verified · ${b.unverified} manual`
-                  : "WASD to move · E to say hello"}
-              </span>
-            </div>
-            {!b ? (
-              <div className="world-frame">
-                <World
-                  key={adventure.mode+':'+(adventure.saveId??'local')}
-                  paused={!!panel || !!quest || welcome || adventure.locked}
-                  badges={p.badges}
-                  position={p.position}
-                  onMove={(position) => {if(!adventure.locked)void dispatch({kind:'move',...position});}}
-                  onInteract={interact}
-                />
-                <div className="world-caption">
-                  <span>✦</span>
-                  <div>
-                    <strong>A world of small beginnings</strong>
-                    <small>Meet the villagers. Find your own rhythm.</small>
+            <fieldset
+              disabled={adventure.locked}
+              style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
+            >
+              <div className="world-toolbar">
+                <span>
+                  <i /> {b ? "TRAINING GROUNDS" : "WILLOWMERE VILLAGE"}
+                </span>
+                <span>
+                  {b
+                    ? `${b.verified} verified · ${b.unverified} manual`
+                    : "WASD to move · E to say hello"}
+                </span>
+              </div>
+              {!b ? (
+                <div className="world-frame">
+                  <World
+                    key={adventure.mode + ":" + (adventure.saveId ?? "local")}
+                    paused={!!panel || !!quest || welcome || adventure.locked}
+                    badges={p.badges}
+                    position={p.position}
+                    onMove={(position) => {
+                      if (!adventure.locked)
+                        void dispatch({ kind: "move", ...position });
+                    }}
+                    onInteract={interact}
+                  />
+                  <div className="world-caption">
+                    <span>✦</span>
+                    <div>
+                      <strong>A world of small beginnings</strong>
+                      <small>Meet the villagers. Find your own rhythm.</small>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <>
-                <div className="battle-stage">
-                  <div className="enemy-plate">
-                    <div>
-                      <strong>{b.enemy.name}</strong>
+              ) : (
+                <>
+                  <div className="battle-stage">
+                    <div className="enemy-plate">
+                      <div>
+                        <strong>{b.enemy.name}</strong>
+                        <small>
+                          {b.enemy.title} · Phase {b.phase + 1}/
+                          {b.enemy.phases.length}
+                        </small>
+                      </div>
+                      <div className="type-row">
+                        {b.enemy.phases[b.phase].map(iconType)}
+                      </div>
+                      <div className="hp-track">
+                        <span
+                          style={{
+                            width: `${(b.enemyHp / b.enemy.hp) * 100}%`,
+                          }}
+                        />
+                      </div>
                       <small>
-                        {b.enemy.title} · Phase {b.phase + 1}/
-                        {b.enemy.phases.length}
+                        {Math.ceil(b.enemyHp)} / {Math.ceil(b.enemy.hp)} HP
                       </small>
                     </div>
-                    <div className="type-row">
-                      {b.enemy.phases[b.phase].map(iconType)}
+                    <div
+                      className={
+                        "combat-sprite enemy " + b.enemy.phases[b.phase][0]
+                      }
+                    >
+                      <span>✦</span>
+                      <div className="sprite-head" />
+                      <div className="sprite-body" />
+                      <div className="sprite-feet" />
                     </div>
-                    <div className="hp-track">
-                      <span
-                        style={{ width: `${(b.enemyHp / b.enemy.hp) * 100}%` }}
-                      />
+                    <div className="combat-sprite hero">
+                      <div className="sprite-head" />
+                      <div className="sprite-body" />
+                      <div className="sprite-feet" />
                     </div>
-                    <small>
-                      {Math.ceil(b.enemyHp)} / {Math.ceil(b.enemy.hp)} HP
-                    </small>
+                    <div className="hero-plate">
+                      <strong>
+                        {p.name} <small>Lv. {p.level}</small>
+                      </strong>
+                      <div className="hp-track">
+                        <span
+                          style={{ width: `${(b.playerHp / p.maxHp) * 100}%` }}
+                        />
+                      </div>
+                      <small>
+                        {Math.ceil(b.playerHp)} / {p.maxHp} HP ·{" "}
+                        {typeLabel(b.type)}
+                      </small>
+                    </div>
+                    <div className="battle-log" aria-live="polite">
+                      {b.log}
+                    </div>
                   </div>
-                  <div
-                    className={
-                      "combat-sprite enemy " + b.enemy.phases[b.phase][0]
-                    }
-                  >
-                    <span>✦</span>
-                    <div className="sprite-head" />
-                    <div className="sprite-body" />
-                    <div className="sprite-feet" />
-                  </div>
-                  <div className="combat-sprite hero">
-                    <div className="sprite-head" />
-                    <div className="sprite-body" />
-                    <div className="sprite-feet" />
-                  </div>
-                  <div className="hero-plate">
-                    <strong>
-                      {p.name} <small>Lv. {p.level}</small>
-                    </strong>
-                    <div className="hp-track">
-                      <span
-                        style={{ width: `${(b.playerHp / p.maxHp) * 100}%` }}
-                      />
-                    </div>
-                    <small>
-                      {Math.ceil(b.playerHp)} / {p.maxHp} HP ·{" "}
-                      {typeLabel(b.type)}
-                    </small>
-                  </div>
-                  <div className="battle-log" aria-live="polite">
-                    {b.log}
-                  </div>
-                </div>
-                <div className="battle-actions">
-                  {b.paused ? (
-                    <div className="pause-message">
-                      <h2>Take your time.</h2>
-                      <p>
-                        Your progress is safe. Nothing happens while you rest.
-                      </p>
-                      <button
-                        className="primary"
-                        onClick={() => void dispatch({kind:'pause',paused:false})}
-                      >
-                        <Play size={16} />
-                        Resume
-                      </button>
-                      <button onClick={() => V("journal")}>Open journal</button>
-                    </div>
-                  ) : b.turn === "won" || b.turn === "lost" ? (
-                    <div className="pause-message">
-                      <h2>
-                        {b.turn === "won"
-                          ? "A well-earned victory."
-                          : "A rest, then a fresh start."}
-                      </h2>
-                      <p>
-                        {b.turn === "won"
-                          ? `+${b.enemy.xp} XP · +${b.enemy.coins} coins`
-                          : "Return to the Rest House. Your progress is kept."}
-                      </p>
-                      <button className="primary" onClick={finishBattle}>
-                        Continue adventure <ChevronRight size={18} />
-                      </button>
-                    </div>
-                  ) : b.turn === "transform" ? (
-                    <div className="pause-message">
-                      <h2>A new strength awakens.</h2>
-                      <p>
-                        Your series is complete. {b.enemy.name} changes type.
-                      </p>
-                      <button
-                        className="primary"
-                        onClick={() =>
-                          void dispatch({kind:'continuePhase'})
-                        }
-                      >
-                        Continue when ready
-                      </button>
-                    </div>
-                  ) : b.turn === "exercise" ? (
-                    <div className="exercise-actions">
-                      <div>
-                        <h2>{b.attack?.name}</h2>
+                  <div className="battle-actions">
+                    {b.paused ? (
+                      <div className="pause-message">
+                        <h2>Take your time.</h2>
                         <p>
-                          {b.progress} / {b.attack?.units}{" "}
-                          {b.attack?.exercise === "superman"
-                            ? "seconds"
-                            : "repetitions"}
+                          Your progress is safe. Nothing happens while you rest.
                         </p>
-                      </div>
-                      {!camera && (
-                        <button className="primary" onClick={manualSeries}>
-                          <Check size={16} />I completed the remaining units
-                        </button>
-                      )}
-                      <button
-                        className="secondary"
-                        onClick={() => void dispatch({kind:'pause',paused:true})}
-                      >
-                        <Pause size={16} />
-                        Rest
-                      </button>
-                      <button onClick={() => void dispatch({kind:'cancelSeries'})}>
-                        End series & turn
-                      </button>
-                      <p className="tiny">
-                        {camera
-                          ? "Every accepted movement causes damage."
-                          : "Manual mode is unverified. Group fatigue applies."}
-                      </p>
-                    </div>
-                  ) : b.turn === "enemy" ? (
-                    <div className="pause-message">
-                      <p>{b.enemy.name} is responding…</p>
-                      <button onClick={() => void dispatch({kind:'pause',paused:true})}>
-                        Pause safely
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="attack-grid">
-                        {p.equipped.map((id) => {
-                          const a = attackFor(id, p);
-                          return (
-                            <button
-                              className={"attack-card " + a.type}
-                              key={id}
-                              onClick={() => void dispatch({kind:'beginAttack',attackId:a.id})}
-                            >
-                              <span>
-                                {iconType(a.type)}
-                                <small>{Math.round(a.damage)} power</small>
-                              </span>
-                              <strong>{a.name}</strong>
-                              <small>{a.description}</small>
-                            </button>
-                          );
-                        })}
-                      </div>
-                      <div className="button-row">
                         <button
+                          className="primary"
                           onClick={() =>
-                            void dispatch({kind:'defend'})
+                            void dispatch({ kind: "pause", paused: false })
                           }
                         >
-                          <Shield size={16} />
-                          Defend
+                          <Play size={16} />
+                          Resume
                         </button>
+                        <button onClick={() => V("journal")}>
+                          Open journal
+                        </button>
+                      </div>
+                    ) : b.turn === "won" || b.turn === "lost" ? (
+                      <div className="pause-message">
+                        <h2>
+                          {b.turn === "won"
+                            ? "A well-earned victory."
+                            : "A rest, then a fresh start."}
+                        </h2>
+                        <p>
+                          {b.turn === "won"
+                            ? `+${b.enemy.xp} XP · +${b.enemy.coins} coins`
+                            : "Return to the Rest House. Your progress is kept."}
+                        </p>
+                        <button className="primary" onClick={finishBattle}>
+                          Continue adventure <ChevronRight size={18} />
+                        </button>
+                      </div>
+                    ) : b.turn === "transform" ? (
+                      <div className="pause-message">
+                        <h2>A new strength awakens.</h2>
+                        <p>
+                          Your series is complete. {b.enemy.name} changes type.
+                        </p>
                         <button
-                          disabled={!p.items.potion}
-                          onClick={() => item("potion")}
+                          className="primary"
+                          onClick={() =>
+                            void dispatch({ kind: "continuePhase" })
+                          }
                         >
-                          Potion ({p.items.potion})
+                          Continue when ready
                         </button>
-                        <button
-                          disabled={!p.items.shield}
-                          onClick={() => item("shield")}
-                        >
-                          Guard ({p.items.shield})
-                        </button>
-                        <button
-                          disabled={!p.items.boost}
-                          onClick={() => item("boost")}
-                        >
-                          Boost ({p.items.boost})
-                        </button>
-                        <button onClick={() => void dispatch({kind:'pause',paused:true})}>
-                          <Pause size={15} />
-                          Pause
-                        </button>
-                        {b.enemy.id.startsWith("trainer") && (
-                          <button
-                            onClick={() => {
-                              void dispatch({kind:'leaveBattle'});
-                            }}
-                          >
-                            Leave
+                      </div>
+                    ) : b.turn === "exercise" ? (
+                      <div className="exercise-actions">
+                        <div>
+                          <h2>{b.attack?.name}</h2>
+                          <p>
+                            {b.progress} / {b.attack?.units}{" "}
+                            {b.attack?.exercise === "superman"
+                              ? "seconds"
+                              : "repetitions"}
+                          </p>
+                        </div>
+                        {!camera && (
+                          <button className="primary" onClick={manualSeries}>
+                            <Check size={16} />I completed the remaining units
                           </button>
                         )}
-                        <label className="check compact">
-                          <input
-                            type="checkbox"
-                            checked={camera}
-                            onChange={(e) => C(e.target.checked)}
-                          />
-                          Camera
-                        </label>
+                        <button
+                          className="secondary"
+                          onClick={() =>
+                            void dispatch({ kind: "pause", paused: true })
+                          }
+                        >
+                          <Pause size={16} />
+                          Rest
+                        </button>
+                        <button
+                          onClick={() =>
+                            void dispatch({ kind: "cancelSeries" })
+                          }
+                        >
+                          End series & turn
+                        </button>
+                        <p className="tiny">
+                          {camera
+                            ? "Every accepted movement causes damage."
+                            : "Manual mode is unverified. Group fatigue applies."}
+                        </p>
                       </div>
-                    </>
-                  )}
-                </div>
-              </>
-            )}
-            <div className="world-footer">
-              <span>
-                <Heart size={15} /> Rest whenever you need.
-              </span>
-              <button
-                onClick={() => {
-                  if (b) void dispatch({kind:'pause',paused:true});
-                  V("journal");
-                }}
-              >
-                <BookOpen size={16} />
-                Open your journal <ChevronRight size={15} />
-              </button>
-            </div>
+                    ) : b.turn === "enemy" ? (
+                      <div className="pause-message">
+                        <p>{b.enemy.name} is responding…</p>
+                        <button
+                          onClick={() =>
+                            void dispatch({ kind: "pause", paused: true })
+                          }
+                        >
+                          Pause safely
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="attack-grid">
+                          {p.equipped.map((id) => {
+                            const a = attackFor(id, p);
+                            return (
+                              <button
+                                className={"attack-card " + a.type}
+                                key={id}
+                                onClick={() =>
+                                  void dispatch({
+                                    kind: "beginAttack",
+                                    attackId: a.id,
+                                  })
+                                }
+                              >
+                                <span>
+                                  {iconType(a.type)}
+                                  <small>{Math.round(a.damage)} power</small>
+                                </span>
+                                <strong>{a.name}</strong>
+                                <small>{a.description}</small>
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <div className="button-row">
+                          <button
+                            onClick={() => void dispatch({ kind: "defend" })}
+                          >
+                            <Shield size={16} />
+                            Defend
+                          </button>
+                          <button
+                            disabled={!p.items.potion}
+                            onClick={() => item("potion")}
+                          >
+                            Potion ({p.items.potion})
+                          </button>
+                          <button
+                            disabled={!p.items.shield}
+                            onClick={() => item("shield")}
+                          >
+                            Guard ({p.items.shield})
+                          </button>
+                          <button
+                            disabled={!p.items.boost}
+                            onClick={() => item("boost")}
+                          >
+                            Boost ({p.items.boost})
+                          </button>
+                          <button
+                            onClick={() =>
+                              void dispatch({ kind: "pause", paused: true })
+                            }
+                          >
+                            <Pause size={15} />
+                            Pause
+                          </button>
+                          {b.enemy.id.startsWith("trainer") && (
+                            <button
+                              onClick={() => {
+                                void dispatch({ kind: "leaveBattle" });
+                              }}
+                            >
+                              Leave
+                            </button>
+                          )}
+                          <label className="check compact">
+                            <input
+                              type="checkbox"
+                              checked={camera}
+                              disabled={b.turn !== "player"}
+                              onChange={(e) => C(e.target.checked)}
+                            />
+                            Camera
+                          </label>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+              <div className="world-footer">
+                <span>
+                  <Heart size={15} /> Rest whenever you need.
+                </span>
+                <button
+                  onClick={() => {
+                    if (b) void dispatch({ kind: "pause", paused: true });
+                    V("journal");
+                  }}
+                >
+                  <BookOpen size={16} />
+                  Open your journal <ChevronRight size={15} />
+                </button>
+              </div>
+            </fieldset>
           </section>
           <aside className="adventure-sidebar">
-            {b?.turn === "exercise" && camera && !b.paused ? (
+            {b ? (
               <section className="card camera-card">
-                <Suspense fallback={<p>Preparing local pose model…</p>}>
+                <div className="exercise-battle-strip">
+                  <strong>{b.enemy.name}</strong>
+                  <span>
+                    {Math.ceil(b.enemyHp)} / {Math.ceil(b.enemy.hp)} HP
+                  </span>
+                  <div className="hp-track">
+                    <span
+                      style={{ width: `${(b.enemyHp / b.enemy.hp) * 100}%` }}
+                    />
+                  </div>
+                  <small>
+                    Your HP: {Math.ceil(b.playerHp)} / {p.maxHp}
+                  </small>
+                </div>
+                <div
+                  className="exercise-mode-switch"
+                  aria-label="Exercise input mode"
+                >
+                  <button
+                    aria-pressed={camera}
+                    disabled={b.turn === "exercise"}
+                    onClick={() => C(true)}
+                  >
+                    Camera mode
+                  </button>
+                  <button
+                    aria-pressed={!camera}
+                    disabled={b.turn === "exercise"}
+                    onClick={() => C(false)}
+                  >
+                    Manual mode
+                  </button>
+                  {b.turn === "exercise" && (
+                    <small>
+                      Input mode stays fixed during the series. Camera preview
+                      can always be restarted.
+                    </small>
+                  )}
+                </div>
+                <Suspense fallback={<p>Preparing camera controls…</p>}>
                   <ExerciseCamera
-                    key={b.sessionId}
-                    exerciseId={b.attack!.exercise}
-                    target={b.attack!.units}
+                    key={b.id}
+                    sessionId={b.sessionId}
+                    lastSide={b.side}
+                    exerciseId={
+                      (b.attack ?? attackFor(p.equipped[0] ?? attacks[0].id, p))
+                        .exercise
+                    }
+                    target={
+                      (b.attack ?? attackFor(p.equipped[0] ?? attacks[0].id, p))
+                        .units
+                    }
                     progress={b.progress}
-                    active={!adventure.readOnly&&!adventure.error&&!pauseRequested}
+                    mode={camera ? "camera" : "manual"}
+                    muted={muted}
+                    paused={b.paused || pauseRequested}
+                    sessionComplete={Boolean(
+                      b.attack &&
+                      (b.progress >= b.attack.units ||
+                        b.turn === "won" ||
+                        b.turn === "transform"),
+                    )}
+                    active={
+                      camera &&
+                      b.turn === "exercise" &&
+                      !b.paused &&
+                      !adventure.readOnly &&
+                      !adventure.error &&
+                      !pauseRequested
+                    }
                     onUnit={(u) => onUnit(u, b.sessionId)}
                     onError={notify}
                   />
                 </Suspense>
-                <button onClick={() => C(false)}>
-                  Detection trouble? Continue manually
-                </button>
+                {camera && b.turn === "exercise" && (
+                  <button
+                    className="manual-fallback"
+                    onClick={() => {
+                      C(false);
+                      notify(
+                        "Manual continuation is unverified. Already earned damage is kept. Camera mode is available next turn.",
+                      );
+                    }}
+                  >
+                    Detection trouble? Continue remaining units manually
+                  </button>
+                )}
+                {!camera && b.turn === "exercise" && (
+                  <p className="notice">
+                    Manual confirmation is unverified. You can preview the
+                    camera now and switch back to verified camera mode next
+                    turn.
+                  </p>
+                )}
               </section>
             ) : (
               <>
@@ -555,14 +814,13 @@ export default function App() {
                       <Heart size={15} /> Vitality
                     </span>
                     <strong>
-                      {Math.ceil(b?.playerHp ?? p.hp)}{" "}
-                      <small>/ {p.maxHp}</small>
+                      {Math.ceil(p.hp)} <small>/ {p.maxHp}</small>
                     </strong>
                   </div>
                   <div className="hp-track">
                     <span
                       style={{
-                        width: `${((b?.playerHp ?? p.hp) / p.maxHp) * 100}%`,
+                        width: `${(p.hp / p.maxHp) * 100}%`,
                       }}
                     />
                   </div>
@@ -646,6 +904,10 @@ export default function App() {
             <Backpack size={18} />
             Satchel & skills
           </button>
+          <button onClick={() => V("exercises")}>
+            <Play size={18} />
+            Exercise guide
+          </button>
           <button disabled={!!b} onClick={() => interact("healer")}>
             <Heart size={18} />
             Rest House
@@ -656,13 +918,68 @@ export default function App() {
           </button>
           <span>Made for the people who make everyday life an adventure.</span>
         </div>
-      </main></fieldset>
+      </main>
       {toast && (
         <div className="toast" role="status">
           {toast}
         </div>
       )}
-      {(saveError||adventure.mode==='cloud')&&<section className="notice" style={{margin:20}} role="status"><strong>{adventure.mode==='cloud'?`Cloud adventure ${adventure.saveId?.slice(0,8)} · revision ${adventure.revision}`:'Adventure status'}</strong><p>{saveError||'Only server-accepted actions change this adventure. Your local adventure and journal remain separate.'}</p><p>{adventure.pending} pending action(s)</p><div className="button-row">{adventure.error&&adventure.pending>0&&<><button onClick={()=>void adventure.controller.retry().catch(e=>notify(String(e)))}>Retry pending actions</button><button onClick={()=>{if(confirm('Discard these unacknowledged actions and reload the cloud snapshot? A local audit copy is retained.'))void adventure.controller.discardPending();}}>Discard pending & refresh</button></>}{adventure.mode==='cloud'&&<><button onClick={()=>V('devices')}>Cloud controls</button><button disabled={adventure.busy} onClick={()=>void adventure.controller.returnLocal().catch(e=>notify(String(e)))}>Return to local adventure</button></>}</div></section>}
+      {(saveError || adventure.mode === "cloud") && (
+        <section className="notice" style={{ margin: 20 }} role="status">
+          <strong>
+            {adventure.mode === "cloud"
+              ? `Cloud adventure ${adventure.saveId?.slice(0, 8)} · revision ${adventure.revision}`
+              : "Adventure status"}
+          </strong>
+          <p>
+            {saveError ||
+              "Only server-accepted actions change this adventure. Your local adventure and journal remain separate."}
+          </p>
+          <p>{adventure.pending} pending action(s)</p>
+          <div className="button-row">
+            {adventure.error && adventure.pending > 0 && (
+              <>
+                <button
+                  onClick={() =>
+                    void adventure.controller
+                      .retry()
+                      .catch((e) => notify(String(e)))
+                  }
+                >
+                  Retry pending actions
+                </button>
+                <button
+                  onClick={() => {
+                    if (
+                      confirm(
+                        "Discard these unacknowledged actions and reload the cloud snapshot? A local audit copy is retained.",
+                      )
+                    )
+                      void adventure.controller.discardPending();
+                  }}
+                >
+                  Discard pending & refresh
+                </button>
+              </>
+            )}
+            {adventure.mode === "cloud" && (
+              <>
+                <button onClick={() => V("devices")}>Cloud controls</button>
+                <button
+                  disabled={adventure.busy}
+                  onClick={() =>
+                    void adventure.controller
+                      .returnLocal()
+                      .catch((e) => notify(String(e)))
+                  }
+                >
+                  Return to local adventure
+                </button>
+              </>
+            )}
+          </div>
+        </section>
+      )}
       {welcome && (
         <div className="modal-backdrop">
           <section className="modal welcome-modal">
@@ -685,11 +1002,20 @@ export default function App() {
                 maxLength={20}
                 value={p.name}
                 onChange={(e) =>
-                  void dispatch({kind:'rename',name:e.target.value||'Adventurer'})
+                  void dispatch({
+                    kind: "rename",
+                    name: e.target.value || "Adventurer",
+                  })
                 }
               />
             </label>
-            <button className="primary" onClick={() => {W(false);void dispatch({kind:'initialize'});}}>
+            <button
+              className="primary"
+              onClick={() => {
+                W(false);
+                void dispatch({ kind: "initialize" });
+              }}
+            >
               Take the first step <ChevronRight size={18} />
             </button>
             <p className="tiny">
@@ -703,239 +1029,289 @@ export default function App() {
           <section className="modal">
             <div className="card-title">
               <h2>
-                {panel === "preview"
-                  ? "Prepare for your next chapter"
-                  : panel === "inventory"
-                    ? "Your satchel"
-                    : panel === "shop"
-                      ? "The little supply shop"
-                      : panel === "alchemy"
-                        ? "The alchemist’s notebook"
-                        : panel === "ending"
-                          ? "You found your stride."
-                          : panel === "devices"
-                            ? "Your connected adventure"
-                            : "Make yourself at home"}
+                {panel === "exercises"
+                  ? "Your home exercise guide"
+                  : panel === "preview"
+                    ? "Prepare for your next chapter"
+                    : panel === "inventory"
+                      ? "Your satchel"
+                      : panel === "shop"
+                        ? "The little supply shop"
+                        : panel === "alchemy"
+                          ? "The alchemist’s notebook"
+                          : panel === "ending"
+                            ? "You found your stride."
+                            : panel === "devices"
+                              ? "Your connected adventure"
+                              : "Make yourself at home"}
               </h2>
               <button onClick={() => V(null)} aria-label="Close">
                 ✕
               </button>
             </div>
-            <fieldset disabled={adventure.locked && panel!=="devices"} style={{border:0,padding:0,margin:0,minWidth:0}}>
-            {panel === "preview" && encounter && (
-              <>
-                <p>
-                  <strong>{encounter.name}</strong> · {encounter.title}
-                </p>
-                <div className="phase-preview">
-                  {encounter.phases.map((types, i) => (
-                    <div key={i}>
-                      <small>PHASE {i + 1}</small>
-                      <div className="type-row">{types.map(iconType)}</div>
-                    </div>
-                  ))}
-                </div>
-                <p>
-                  Choose a specialization. It stays fixed for this encounter.
-                </p>
-                <div className="button-row">
-                  {[null, ...p.badges].map((t) => (
+            <fieldset
+              disabled={adventure.locked && panel !== "devices"}
+              style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
+            >
+              {panel === "preview" && encounter && (
+                <>
+                  <p>
+                    <strong>{encounter.name}</strong> · {encounter.title}
+                  </p>
+                  <div className="phase-preview">
+                    {encounter.phases.map((types, i) => (
+                      <div key={i}>
+                        <small>PHASE {i + 1}</small>
+                        <div className="type-row">{types.map(iconType)}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <p>
+                    Choose a specialization. It stays fixed for this encounter.
+                  </p>
+                  <div className="button-row">
+                    {[null, ...p.badges].map((t) => (
+                      <button
+                        className={chosen === t ? "primary" : "secondary"}
+                        key={t ?? "neutral"}
+                        onClick={() => CH(t)}
+                      >
+                        {typeLabel(t)}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="tiny">
+                    Leg beats Arm · Arm beats Back · Back beats Leg. Matching
+                    your specialization gives ×1.25 power. Dual defenses
+                    multiply.
+                  </p>
+                  <p>
+                    Your moves:{" "}
+                    {p.equipped
+                      .map((id) => attacks.find((a) => a.id === id)?.name)
+                      .join(" · ")}
+                  </p>
+                  <label className="check">
+                    <input
+                      type="checkbox"
+                      checked={camera}
+                      onChange={(e) => C(e.target.checked)}
+                    />
+                    Use camera verification
+                  </label>
+                  <div className="button-row">
                     <button
-                      className={chosen === t ? "primary" : "secondary"}
-                      key={t ?? "neutral"}
-                      onClick={() => CH(t)}
-                    >
-                      {typeLabel(t)}
-                    </button>
-                  ))}
-                </div>
-                <p className="tiny">
-                  Leg beats Arm · Arm beats Back · Back beats Leg. Matching your
-                  specialization gives ×1.25 power. Dual defenses multiply.
-                </p>
-                <p>
-                  Your moves:{" "}
-                  {p.equipped
-                    .map((id) => attacks.find((a) => a.id === id)?.name)
-                    .join(" · ")}
-                </p>
-                <label className="check">
-                  <input
-                    type="checkbox"
-                    checked={camera}
-                    onChange={(e) => C(e.target.checked)}
-                  />
-                  Use camera verification
-                </label>
-                <div className="button-row">
-                  <button
-                    className="primary"
-                    onClick={() => {
-                      void dispatch({kind:'startBattle',enemyId:encounter.id,specialization:chosen});
-                      V(null);
-                    }}
-                  >
-                    <Swords size={17} />
-                    Begin encounter
-                  </button>
-                  <button onClick={() => V("inventory")}>Change skills</button>
-                </div>
-              </>
-            )}
-            {panel === "inventory" && (
-              <>
-                <p>Equip up to four skills. Choose the mix that suits you.</p>
-                <div className="attack-grid">
-                  {available(p).map((a) => (
-                    <button
-                      key={a.id}
-                      className={
-                        "attack-card " +
-                        a.type +
-                        (p.equipped.includes(a.id) ? " equipped" : "")
-                      }
+                      className="primary"
                       onClick={() => {
-                        if (b) {
-                          notify("Change equipment between encounters.");
-                          return;
-                        }
-                        if (p.equipped.includes(a.id)) {
-                          if (p.equipped.length > 1)
-                            void dispatch({kind:'equip',attackIds:p.equipped.filter(x=>x!==a.id)});
-                        } else if (p.equipped.length < 4)
-                          void dispatch({kind:'equip',attackIds:[...p.equipped,a.id]});
-                        else
-                          notify(
-                            "Unequip a move first; four slots are available.",
-                          );
+                        void dispatch({
+                          kind: "startBattle",
+                          enemyId: encounter.id,
+                          specialization: chosen,
+                        });
+                        V(null);
                       }}
                     >
-                      <span>
-                        {iconType(a.type)}
-                        <small>
-                          {p.equipped.includes(a.id)
-                            ? "✓ equipped"
-                            : "available"}
-                        </small>
-                      </span>
-                      <strong>{a.name}</strong>
-                      <small>
-                        Lv. {(p.upgrades[a.id] ?? 0) + 1} ·{" "}
-                        {Math.round(attackFor(a.id, p).damage)} power
-                      </small>
+                      <Swords size={17} />
+                      Begin encounter
                     </button>
-                  ))}
-                </div>
-                <p>
-                  Potions {p.items.potion} · Guards {p.items.shield} · Boosts{" "}
-                  {p.items.boost} · Ingredients {p.items.ingredient}
-                </p>
-              </>
-            )}
-            {panel === "shop" && (
-              <>
-                <p>
-                  Your pocket: <strong>{p.coins} coins</strong>. The Rest House
-                  heals for free.
-                </p>
-                {[
-                  {
-                    id: "potion",
-                    name: "Willow tonic · restores 45 HP",
-                    cost: 15,
-                  },
-                  {
-                    id: "shield",
-                    name: "Bark guard · halves one hit",
-                    cost: 12,
-                  },
-                  {
-                    id: "boost",
-                    name: "Bright spark · next series +25%",
-                    cost: 20,
-                  },
-                ].map((x) => (
-                  <div className="food-row" key={x.id}>
-                    <strong>{x.name}</strong>
-                    <button
-                      className="secondary"
-                      disabled={p.coins < x.cost}
-                      onClick={() => {
-                        void dispatch({kind:'purchaseItem',item:x.id as 'potion'|'shield'|'boost'});
-
-                      }}
-                    >
-                      {x.cost} coins
+                    <button onClick={() => V("inventory")}>
+                      Change skills
                     </button>
                   </div>
-                ))}
-                <h3>Grow your skills</h3>
-                {available(p).map((a) => {
-                  const level = p.upgrades[a.id] ?? 0,
-                    cost = 25 * (level + 1);
-                  return (
-                    <div className="food-row" key={a.id}>
-                      <span>
-                        {a.name} · Lv. {level + 1}
-                      </span>
+                </>
+              )}
+              {panel === "exercises" && <ExerciseLibrary />}
+              {panel === "inventory" && (
+                <>
+                  <p>Equip up to four skills. Choose the mix that suits you.</p>
+                  <button className="secondary" onClick={() => V("exercises")}>
+                    View exercises & starting positions
+                  </button>
+                  <div className="attack-grid">
+                    {available(p).map((a) => (
                       <button
-                        disabled={level >= 4 || p.coins < cost}
-                        onClick={() =>
-                          void dispatch({kind:'upgradeAttack',attackId:a.id})
+                        key={a.id}
+                        className={
+                          "attack-card " +
+                          a.type +
+                          (p.equipped.includes(a.id) ? " equipped" : "")
                         }
+                        onClick={() => {
+                          if (b) {
+                            notify("Change equipment between encounters.");
+                            return;
+                          }
+                          if (p.equipped.includes(a.id)) {
+                            if (p.equipped.length > 1)
+                              void dispatch({
+                                kind: "equip",
+                                attackIds: p.equipped.filter((x) => x !== a.id),
+                              });
+                          } else if (p.equipped.length < 4)
+                            void dispatch({
+                              kind: "equip",
+                              attackIds: [...p.equipped, a.id],
+                            });
+                          else
+                            notify(
+                              "Unequip a move first; four slots are available.",
+                            );
+                        }}
                       >
-                        {level >= 4 ? "Mastered" : `Upgrade · ${cost} coins`}
+                        <span>
+                          {iconType(a.type)}
+                          <small>
+                            {p.equipped.includes(a.id)
+                              ? "✓ equipped"
+                              : "available"}
+                          </small>
+                        </span>
+                        <strong>{a.name}</strong>
+                        <small>
+                          {a.description}
+                          <br />
+                          Lv. {(p.upgrades[a.id] ?? 0) + 1} ·{" "}
+                          {Math.round(attackFor(a.id, p).damage)} power
+                        </small>
+                      </button>
+                    ))}
+                  </div>
+                  <p>
+                    Potions {p.items.potion} · Guards {p.items.shield} · Boosts{" "}
+                    {p.items.boost} · Ingredients {p.items.ingredient}
+                  </p>
+                </>
+              )}
+              {panel === "shop" && (
+                <>
+                  <p>
+                    Your pocket: <strong>{p.coins} coins</strong>. The Rest
+                    House heals for free.
+                  </p>
+                  {[
+                    {
+                      id: "potion",
+                      name: "Willow tonic · restores 45 HP",
+                      cost: 15,
+                    },
+                    {
+                      id: "shield",
+                      name: "Bark guard · halves one hit",
+                      cost: 12,
+                    },
+                    {
+                      id: "boost",
+                      name: "Bright spark · next series +25%",
+                      cost: 20,
+                    },
+                  ].map((x) => (
+                    <div className="food-row" key={x.id}>
+                      <strong>{x.name}</strong>
+                      <button
+                        className="secondary"
+                        disabled={p.coins < x.cost}
+                        onClick={() => {
+                          void dispatch({
+                            kind: "purchaseItem",
+                            item: x.id as "potion" | "shield" | "boost",
+                          });
+                        }}
+                      >
+                        {x.cost} coins
                       </button>
                     </div>
-                  );
-                })}
-              </>
-            )}
-            {panel === "alchemy" && (
-              <>
-                <p>
-                  Discover packaged foods through your journal’s scanner. Each
-                  unique product reveals one fictional ingredient — scanning
-                  never means eating.
-                </p>
-                <div className="soft-callout">
-                  {p.discoveries.length} discoveries · {p.items.ingredient}{" "}
-                  ingredients
-                </div>
-                <button className="primary" onClick={() => V("journal")}>
-                  <BookOpen size={16} />
-                  Open food journal
-                </button>
-                <h3>Brew something useful</h3>
-                {[
-                  ["potion", "Willow tonic", 1],
-                  ["shield", "Bark guard", 1],
-                  ["boost", "Bright spark", 2],
-                ].map(([id, name, cost]) => (
-                  <div className="food-row" key={id}>
-                    <span>{name}</span>
-                    <button
-                      disabled={p.items.ingredient < Number(cost)}
-                      onClick={() =>
-                        void dispatch({kind:'craftItem',item:String(id) as 'potion'|'shield'|'boost'})
-                      }
-                    >
-                      Craft · {cost} ingredient{Number(cost) > 1 ? "s" : ""}
-                    </button>
+                  ))}
+                  <h3>Grow your skills</h3>
+                  {available(p).map((a) => {
+                    const level = p.upgrades[a.id] ?? 0,
+                      cost = 25 * (level + 1);
+                    return (
+                      <div className="food-row" key={a.id}>
+                        <span>
+                          {a.name} · Lv. {level + 1}
+                        </span>
+                        <button
+                          disabled={level >= 4 || p.coins < cost}
+                          onClick={() =>
+                            void dispatch({
+                              kind: "upgradeAttack",
+                              attackId: a.id,
+                            })
+                          }
+                        >
+                          {level >= 4 ? "Mastered" : `Upgrade · ${cost} coins`}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+              {panel === "alchemy" && (
+                <>
+                  <p>
+                    Discover packaged foods through your journal’s scanner. Each
+                    unique product reveals one fictional ingredient — scanning
+                    never means eating.
+                  </p>
+                  <div className="soft-callout">
+                    {p.discoveries.length} discoveries · {p.items.ingredient}{" "}
+                    ingredients
                   </div>
-                ))}
-              </>
-            )}
-            {panel === "devices" && (
-              <DevicePanel
-                onOpenCloud={async saveId=>{await adventure.controller.openCloud(saveId);V(null);}}
-                cloudStatus={adventure.mode==='cloud'?{saveId:adventure.saveId!,readOnly:adventure.readOnly,busy:adventure.busy,requesting:adventure.requesting,safe:b?.turn!=='exercise'&&!quest}:undefined}
-                onRequestControl={()=>adventure.controller.requestControl()}
-                onReleaseControl={()=>adventure.controller.release()}
-                onRefreshCloud={()=>adventure.controller.refresh()}
-                onActivityImport={(reading: ImportedHealth) => {
-                  if(!diaryReady){notify('Wait for the journal to load before importing health data.');return;}
-                  const old=diary;
+                  <button className="primary" onClick={() => V("journal")}>
+                    <BookOpen size={16} />
+                    Open food journal
+                  </button>
+                  <h3>Brew something useful</h3>
+                  {[
+                    ["potion", "Willow tonic", 1],
+                    ["shield", "Bark guard", 1],
+                    ["boost", "Bright spark", 2],
+                  ].map(([id, name, cost]) => (
+                    <div className="food-row" key={id}>
+                      <span>{name}</span>
+                      <button
+                        disabled={p.items.ingredient < Number(cost)}
+                        onClick={() =>
+                          void dispatch({
+                            kind: "craftItem",
+                            item: String(id) as "potion" | "shield" | "boost",
+                          })
+                        }
+                      >
+                        Craft · {cost} ingredient{Number(cost) > 1 ? "s" : ""}
+                      </button>
+                    </div>
+                  ))}
+                </>
+              )}
+              {panel === "devices" && (
+                <DevicePanel
+                  onOpenCloud={async (saveId) => {
+                    await adventure.controller.openCloud(saveId);
+                    V(null);
+                  }}
+                  cloudStatus={
+                    adventure.mode === "cloud"
+                      ? {
+                          saveId: adventure.saveId!,
+                          readOnly: adventure.readOnly,
+                          busy: adventure.busy,
+                          requesting: adventure.requesting,
+                          safe: b?.turn !== "exercise" && !quest,
+                        }
+                      : undefined
+                  }
+                  onRequestControl={() => adventure.controller.requestControl()}
+                  onReleaseControl={() => adventure.controller.release()}
+                  onRefreshCloud={() => adventure.controller.refresh()}
+                  onActivityImport={(reading: ImportedHealth) => {
+                    if (!diaryReady) {
+                      notify(
+                        "Wait for the journal to load before importing health data.",
+                      );
+                      return;
+                    }
+                    const old = diary;
                     const date = new Date(reading.startTime).toLocaleDateString(
                       "en-CA",
                     );
@@ -954,76 +1330,89 @@ export default function App() {
                               { id, date, weight: reading.weightKg },
                             ],
                     });
-                  notify(
-                    cloudDiary?"Reviewed health snapshot queued for the shared journal.":"Reviewed health snapshot saved. No activity calories were automatically added twice.",
-                  );
-                }}
-              />
-            )}
-            {panel === "menu" && (
-              <>
-                <div className="button-row">
-                  <button className="secondary" onClick={() => V("inventory")}>
-                    Skills & items
+                    notify(
+                      cloudDiary
+                        ? "Reviewed health snapshot queued for the shared journal."
+                        : "Reviewed health snapshot saved. No activity calories were automatically added twice.",
+                    );
+                  }}
+                />
+              )}
+              {panel === "menu" && (
+                <>
+                  <div className="button-row">
+                    <button
+                      className="secondary"
+                      onClick={() => V("inventory")}
+                    >
+                      Skills & items
+                    </button>
+                    <button className="secondary" onClick={() => V("journal")}>
+                      Nutrition journal
+                    </button>
+                    <button className="secondary" onClick={() => V("devices")}>
+                      Devices
+                    </button>
+                  </div>
+                  <label>
+                    Adventure difficulty
+                    <select
+                      disabled={!!b}
+                      value={p.difficulty}
+                      onChange={(e) =>
+                        void dispatch({
+                          kind: "setDifficulty",
+                          difficulty: e.target.value as Player["difficulty"],
+                        })
+                      }
+                    >
+                      <option value="easy">Easy · 85% enemy HP</option>
+                      <option value="medium">Medium · standard HP</option>
+                      <option value="hard">Hard · 135% enemy HP</option>
+                    </select>
+                  </label>
+                  <p className="tiny">
+                    Difficulty does not increase enemy attack. Movement:
+                    WASD/arrows. Interact: E/Enter. Pause/menu: Escape. Your
+                    progress saves locally, or through acknowledged commands
+                    when a cloud adventure is open.
+                  </p>
+                  <p>
+                    For Javpato’s girlfriend and Uriel’s brother — may your
+                    everyday routines become little adventures.
+                  </p>
+                </>
+              )}
+              {panel === "ending" && (
+                <>
+                  <div className="big-star">✦</div>
+                  <p>
+                    You crossed the valley, found three kinds of strength, and
+                    met the summit with your own effort.
+                  </p>
+                  <h2>The greatest adventure was showing up.</h2>
+                  <p>
+                    Willowmere is still here. Keep exploring, keep resting, and
+                    keep making the journey your own.
+                  </p>
+                  <button className="primary" onClick={() => V(null)}>
+                    Back to the village
                   </button>
-                  <button className="secondary" onClick={() => V("journal")}>
-                    Nutrition journal
-                  </button>
-                  <button className="secondary" onClick={() => V("devices")}>
-                    Devices
-                  </button>
-                </div>
-                <label>
-                  Adventure difficulty
-                  <select
-                    disabled={!!b}
-                    value={p.difficulty}
-                    onChange={(e) =>
-                      void dispatch({kind:'setDifficulty',difficulty:e.target.value as Player['difficulty']})
-                    }
-                  >
-                    <option value="easy">Easy · 85% enemy HP</option>
-                    <option value="medium">Medium · standard HP</option>
-                    <option value="hard">Hard · 135% enemy HP</option>
-                  </select>
-                </label>
-                <p className="tiny">
-                  Difficulty does not increase enemy attack. Movement:
-                  WASD/arrows. Interact: E/Enter. Pause/menu: Escape. Your progress saves locally, or through acknowledged commands when a cloud adventure is open.
-                </p>
-                <p>
-                  For Javpato’s girlfriend and Uriel’s brother — may your
-                  everyday routines become little adventures.
-                </p>
-              </>
-            )}
-            {panel === "ending" && (
-              <>
-                <div className="big-star">✦</div>
-                <p>
-                  You crossed the valley, found three kinds of strength, and met
-                  the summit with your own effort.
-                </p>
-                <h2>The greatest adventure was showing up.</h2>
-                <p>
-                  Willowmere is still here. Keep exploring, keep resting, and
-                  keep making the journey your own.
-                </p>
-                <button className="primary" onClick={() => V(null)}>
-                  Back to the village
-                </button>
-              </>
-            )}
+                </>
+              )}
             </fieldset>
           </section>
         </div>
       )}
       {quest && (
         <div className="modal-backdrop">
-          <section className="modal">
+          <section className="modal exercise-quest-modal">
             <div className="card-title">
               <h2>A little village challenge</h2>
-              <button onClick={() => void dispatch({kind:'cancelQuest'})} aria-label="Leave quest">
+              <button
+                onClick={() => void dispatch({ kind: "cancelQuest" })}
+                aria-label="Leave quest"
+              >
                 ✕
               </button>
             </div>
@@ -1031,6 +1420,29 @@ export default function App() {
               {quest.exercise} · {quest.progress} / {quest.target} units · quest
               level {Math.min(5, (p.quests[quest.exercise] ?? 0) + 1)}
             </p>
+            <Suspense fallback={<p>Preparing camera controls…</p>}>
+              <ExerciseCamera
+                key={quest.id}
+                sessionId={quest.id}
+                lastSide={quest.side}
+                exerciseId={quest.exercise}
+                target={quest.target}
+                progress={quest.progress}
+                mode={camera ? "camera" : "manual"}
+                muted={muted}
+                paused={pauseRequested}
+                sessionComplete={quest.progress >= quest.target}
+                active={
+                  camera &&
+                  quest.progress < quest.target &&
+                  !adventure.readOnly &&
+                  !adventure.error &&
+                  !pauseRequested
+                }
+                onUnit={onUnit}
+                onError={notify}
+              />
+            </Suspense>
             {quest.progress >= quest.target ? (
               <>
                 <p>Thank you! Small efforts make a strong village.</p>
@@ -1038,8 +1450,7 @@ export default function App() {
                   className="primary"
                   onClick={() => {
                     const count = p.quests[quest.exercise] ?? 0;
-                    void dispatch({kind:'finishQuest'});
-
+                    void dispatch({ kind: "finishQuest" });
                   }}
                 >
                   Collect reward
@@ -1051,22 +1462,12 @@ export default function App() {
                   <input
                     type="checkbox"
                     checked={camera}
+                    disabled={quest.progress > 0}
                     onChange={(e) => C(e.target.checked)}
                   />
                   Use camera
                 </label>
-                {camera ? (
-                  <Suspense fallback={<p>Preparing camera…</p>}>
-                    <ExerciseCamera
-                      exerciseId={quest.exercise}
-                      target={quest.target}
-                      progress={quest.progress}
-                      active={!adventure.readOnly&&!adventure.error&&!pauseRequested}
-                      onUnit={onUnit}
-                      onError={notify}
-                    />
-                  </Suspense>
-                ) : (
+                {!camera && (
                   <>
                     <p className="notice">
                       Manual confirmation is unverified. Take your time and stop
@@ -1074,13 +1475,26 @@ export default function App() {
                     </p>
                     <button
                       className="primary"
-                      onClick={() => void dispatch({kind:'manualQuest',sessionId:quest.id})}
+                      disabled={adventure.locked}
+                      onClick={() =>
+                        void dispatch({
+                          kind: "manualQuest",
+                          sessionId: quest.id,
+                        })
+                      }
                     >
                       I completed the exercise
                     </button>
                   </>
                 )}
-                <button onClick={() => void dispatch({kind:'cancelQuest'})}>Stop safely</button>
+                {camera && quest.progress > 0 && (
+                  <button onClick={() => C(false)}>
+                    Detection trouble? Continue manually
+                  </button>
+                )}
+                <button onClick={() => void dispatch({ kind: "cancelQuest" })}>
+                  Stop safely
+                </button>
               </>
             )}
           </section>
