@@ -2,6 +2,7 @@
  "name":"Everstride original bitmap asset registry", "version":2,
  "world":{"logicalViewport":[480,270],"mapSize":[768,576],"pixelArt":true,"groundRenderScale":2,"renderResolution":[960,540],"cameraZoom":2},
  "sheets":{
+  "heroBack":{"path":"assets/sprites/hero-back-v2.png","width":1024,"height":1536,"columns":1,"rows":1},
   "traveler":{"path":"assets/sprites/traveler-walk-v2.png","width":1247,"height":1261,"columns":4,"rows":4},
   "battleCast":{"path":"assets/sprites/battle-cast-v2.png","width":1774,"height":887,"columns":4,"rows":2},
   "villagers":{"path":"assets/sprites/villagers-v2.png","width":1774,"height":887,"columns":4,"rows":2},

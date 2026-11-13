@@ -10,7 +10,7 @@ export function frameRect(sheet:SheetId,index:number){
  return {x,y,width:Math.round((col+1)*s.width/s.columns)-x,height:Math.round((row+1)*s.height/s.rows)-y};
 }
 export function characterArt(id:string,variant:'front'|'back'='front'):{sheet:SheetId;frame:number;name:string}{
- if(id==='hero'&&variant==='back')return {sheet:'traveler',frame:12,name:'The traveler'};
+ if(id==='hero'&&variant==='back')return {sheet:'heroBack',frame:0,name:'The traveler'};
  const entry=manifest.characters[id as CharacterId]??manifest.characters.hero;
  return {...entry,sheet:entry.sheet as SheetId};
 }

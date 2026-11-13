@@ -20,7 +20,7 @@ All paths occur in the manifest; `src/game/assets.ts` resolves them relative to 
 
 These are source dimensions, not claimed 256px frames. `frameRect` rounds grid boundaries without overlapping adjacent cells. Phaser computes opaque-content bounds once when loading each atlas, ignoring near-transparent background dust for the foot anchor, then adds a two-pixel margin. Characters use bottom-center origins. Their world height is 35–39 units. The traveler uses one common scale for all 16 frames. Replacements should keep feet aligned and include every limb inside its cell. Battle UI uses the full original cell to preserve complete silhouettes.
 
-`BattleSprite({id, variant?, className?})` accepts encounter IDs or `hero`. `variant='back'` uses the actual north-facing traveler frame. Its class must supply display/width/height; the inner sprite fills that box. `ItemSprite({id,className?})` supports potion, shield, boost, coins, leg, arm, back and ingredient. Parent UI supplies sizing and animation; the sprite component only selects artwork.
+`BattleSprite({id, variant?, className?})` accepts encounter IDs or `hero`. `variant='back'` uses the dedicated rear battle portrait with matching proportions, not the chibi walking frame. Single-image portraits use contain sizing without stretching. Its class must supply display/width/height; the inner sprite fills that box. `ItemSprite({id,className?})` supports potion, shield, boost, coins, leg, arm, back and ingredient. Parent UI supplies sizing and animation; the sprite component only selects artwork.
 
 ## Provenance and reference research
 
@@ -55,3 +55,5 @@ TypeScript compilation passes. `tests/adventure-smoke.mjs` passed against the ar
 ## Battle arena background
 
 `battlefieldUrl()` resolves the original 1536×1024 garden arena from the manifest. Preserve its 3:2 ratio where possible; it contains no characters or UI. Suggested sprite foot anchors in normalized background coordinates: hero (0.28, 0.77), enemy (0.79, 0.43). CSS cover cropping changes these apparent positions and should be visually checked. Generation output `exec-a6183abe-9608-44bf-b8cf-715730a4739e`: original detailed crisp pixel garden arena, warm limestone, rich foliage and distant teal/terracotta village, empty lower-left and upper-right standing platforms, no text or characters.
+
+The dedicated `heroBack` sprite is a 1024×1536 transparent original portrait, generated from the original front-facing cast as identity reference (`exec-b2214ed1-a3aa-42db-8a6a-880eed535389`). Prompt: same copper-haired teal-caped traveler, complete full-body three-quarter rear battle stance facing upper-right, both boots visible, matching front portrait proportions/colors/pixel clusters, no text/other characters/floor. Combat-only portraits and item icons are not preloaded by the village.

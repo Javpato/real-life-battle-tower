@@ -34,7 +34,7 @@ export default function World(props:WorldProps){
    player!:Phaser.GameObjects.Sprite;keys!:Record<string,Phaser.Input.Keyboard.Key>;obstacles:Obstacle[]=[];direction=0;walking=0;lastSave=0;lastNear='';lastInteract=-500;wasMoving=false;pendingInteract=false;wasPaused=false;
    marker!:Phaser.GameObjects.Text;gate!:Phaser.GameObjects.Text;
    preload(){
-    for(const sheet of Object.keys(ASSET_MANIFEST.sheets) as SheetId[])this.load.image(sheet,assetUrl(sheet));
+    for(const sheet of ['traveler','battleCast','villagers','buildings','scenery','terrain'] as SheetId[])this.load.image(sheet,assetUrl(sheet));
     this.load.on('loaderror',()=>{if(alive)setLoadError(true);});
    }
    registerAtlas(sheet:SheetId){
