@@ -4,3 +4,6 @@ project_id = "everstride-local"
 enable_anonymous_sign_ins = true
 [functions.adventure-command]
 verify_jwt = true
+[functions.camera-pair]
+# Capability-protected, isolated camera pairing; never authenticates a game save.
+verify_jwt = false

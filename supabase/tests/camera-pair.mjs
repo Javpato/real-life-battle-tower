@@ -1,0 +1,13 @@
+import {readFile} from 'node:fs/promises';
+import assert from 'node:assert/strict';
+import {PGlite} from '@electric-sql/pglite';
+import {createPairState} from '../../src/companion/protocol.ts';
+const db=new PGlite();await db.exec('create role anon;create role authenticated;create role service_role;create schema everstride_private;');await db.exec(await readFile(new URL('../migrations/202611140006_camera_pair.sql',import.meta.url),'utf8'));
+const id=crypto.randomUUID(),rate='a'.repeat(64),state=createPairState(id,'d'.repeat(64),'i'.repeat(64),Date.now());
+await db.exec('set role anon');await assert.rejects(()=>db.query('select public.camera_pair_access($1,$2,$3)',[id,rate,state]),/permission denied/);
+await db.exec('reset role;set role authenticated');await assert.rejects(()=>db.query('select public.camera_pair_access($1,$2,$3)',[id,rate,state]),/permission denied/);await assert.rejects(()=>db.query('select * from everstride_private.camera_pairs'),/permission denied/);
+await db.exec('reset role;set role service_role');const create=await db.query('select public.camera_pair_access($1,$2,$3) result',[id,rate,state]);assert.equal(create.rows[0].result.revision,0);
+const first=await db.query('select public.camera_pair_commit($1,0,$2) result',[id,{...state,approved:true}]);assert.equal(first.rows[0].result,true);const stale=await db.query('select public.camera_pair_commit($1,0,$2) result',[id,state]);assert.equal(stale.rows[0].result,false);
+for(let i=1;i<12;i++){const next=crypto.randomUUID();await db.query('select public.camera_pair_access($1,$2,$3)',[next,rate,{...state,id:next}]);}await assert.rejects(()=>db.query('select public.camera_pair_access($1,$2,$3)',[crypto.randomUUID(),rate,state]),/RATE_LIMIT/);
+await db.exec('reset role');await db.query("update everstride_private.camera_pairs set expires_at=now()-interval '1 second' where id=$1",[id]);await db.exec('set role service_role');await assert.rejects(()=>db.query('select public.camera_pair_access($1,$2)',[id,rate]),/PAIR_EXPIRED_OR_LIMITED/);
+console.log('PASS: service-only signaling tables/RPCs, authenticated/anon denial, compare-and-swap fencing, create rate limit and expired-session rejection.');await db.close();

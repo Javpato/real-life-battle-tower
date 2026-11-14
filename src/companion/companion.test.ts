@@ -1,0 +1,18 @@
+import {describe,expect,it} from 'vitest';
+import {applySignal,createPairState,pairView,roleForToken,PAIR_TTL_MS} from './protocol';
+import {CompanionFrameGate} from './frames';
+const dh='d'.repeat(64),ih='a'.repeat(64),ph='b'.repeat(64);
+const fresh=()=>createPairState('room',dh,ih,1000);
+const claim=(s=fresh())=>applySignal(s,'invite','claim',{phoneHash:ph,challenge:'012345',phoneName:'Phone'},2000);
+const approved=()=>applySignal(claim(),'desktop','approve',{challenge:'012345'},3000);
+describe('isolated capability signaling',()=>{
+ it('separates invite/phone/desktop and allows only one phone',()=>{const s=claim();expect(roleForToken(s,dh)).toBe('desktop');expect(roleForToken(s,ph)).toBe('phone');expect(roleForToken(s,'wrong')).toBeNull();expect(()=>applySignal(s,'invite','claim',{phoneHash:'c'.repeat(64),challenge:'999999',phoneName:'Other'},2001)).toThrow('PHONE_ALREADY_CLAIMED');expect(()=>pairView(s,'invite')).toThrow('CLAIM_REQUIRED');});
+ it('requires matching desktop confirmation before exchanging SDP/ICE',()=>{const s=claim();expect(()=>applySignal(s,'phone','approve',{challenge:'012345'},3000)).toThrow();expect(()=>applySignal(s,'desktop','approve',{challenge:'999999'},3000)).toThrow();expect(()=>applySignal(s,'phone','answer',{type:'answer',sdp:'v=0'},3000)).toThrow('CONFIRM_PHONE_FIRST');expect(pairView(s,'phone').offer).toBeUndefined();});
+ it('caps signaling and expires five-minute capabilities',()=>{let s=approved();for(let i=0;i<64;i++)s=applySignal(s,'desktop','ice',{candidate:'candidate:'+i,sdpMid:'0',sdpMLineIndex:0},4000);expect(()=>applySignal(s,'desktop','ice',{candidate:'extra'},4000)).toThrow('ICE_LIMIT');expect(()=>applySignal(s,'desktop','poll',{},1000+PAIR_TTL_MS)).toThrow('PAIR_EXPIRED');expect(()=>applySignal(s,'desktop','offer',{type:'offer',sdp:'v=0'+'x'.repeat(16000)},4000)).toThrow('INVALID_SDP');});
+ it('close clears signaling and exposes no capabilities in peer views',()=>{const s=applySignal(approved(),'desktop','offer',{type:'offer',sdp:'v=0'},4000);const view=pairView(s,'phone');expect(JSON.stringify(view)).not.toContain(dh);expect(JSON.stringify(view)).not.toContain(ih);expect(JSON.stringify(view)).not.toContain(ph);const closed=applySignal(s,'phone','close',{},5000);expect(closed.offer).toBeUndefined();expect(closed.desktopIce).toEqual([]);expect(()=>applySignal(closed,'phone','poll',{},5001)).toThrow('PAIR_CLOSED');});
+});
+describe('phone frame freshness',()=>{
+ const packet=(sequence=1,timestamp=1000)=>({type:'pose',sequence,sentAt:timestamp+15,frame:{timestamp,width:640,height:480,landmarks:Array.from({length:33},()=>({x:.5,y:.5,z:0,visibility:.9,presence:.9})),rawLandmarks:[{x:99}],spikeJoints:[1]}});
+ it('maps capture times conservatively and strips untrusted detector metadata',()=>{const gate=new CompanionFrameGate();expect(gate.synchronize(2000,1000,2040)).toBe(true);const frame=gate.accept(packet(1,1010),2050);expect(frame?.timestamp).toBe(2010);expect(frame?.receivedAt).toBe(2050);expect(frame).not.toHaveProperty('rawLandmarks');expect(frame).not.toHaveProperty('captureLatencyMs');expect(gate.accept(packet(1,1020),2060)).toBeNull();});
+ it('rejects missing clock, excessive RTT, old frames, invalid confidence and dimensions',()=>{const gate=new CompanionFrameGate();expect(gate.accept(packet(),2000)).toBeNull();expect(gate.synchronize(2000,1000,2300)).toBe(false);gate.synchronize(2000,1000,2040);expect(gate.accept(packet(),2600)).toBeNull();const invalid=packet();invalid.frame.landmarks[0].visibility=1.1;expect(gate.accept(invalid,2050)).toBeNull();const dims=packet();dims.frame.width=9000;expect(gate.accept(dims,2050)).toBeNull();});
+});
