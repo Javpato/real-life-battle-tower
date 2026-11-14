@@ -19,7 +19,7 @@ This document reports the implemented build, not the full master-prompt wish lis
 
 | Check | Result and evidence | What it does not establish |
 |---|---|---|
-| `npm test` | **201 tests passed across 18 files**, observed after the camera and graphics rework on November 14. Covers game, pose state machines, nutrition calculations, projections, preferences, food mapping, and web platform failure behavior. | Physical movement accuracy, production service configuration, or end-to-end Android behavior. The release build must also pass after any later changes. |
+| `npm test` | **208 tests passed across 19 files**, observed after the immersive interface rework on November 14. Covers game, pose state machines, nutrition calculations, projections, preferences, food mapping, and web platform failure behavior. | Physical movement accuracy, production service configuration, or end-to-end Android behavior. The release build must also pass after any later changes. |
 | Game rules | 6 initial tests plus 17 audit tests. Includes type symmetry, STAB, phase caps, deduplication, session fencing, input checks, fatigue, guard/dodge, idempotent rewards and progression simulations. | A malicious client cannot be trusted merely because its local reducer validates input. Local play uses the same reducer; cloud play commits only through the authenticated Edge Function. Physical unit events are not cryptographic proof of exercise. |
 | Exercise detectors | 64 synthetic detector tests. Full cycles, incomplete motion, side alternation, partial hold time, pauses, timestamps, missing joints, torso movement and opposite-limb geometry. | Successful recognition on any real person. |
 | `node tests/exercises-browser-smoke.mjs http://127.0.0.1:5198` | Passed against the exercise development server: actual bundled MediaPipe model and WASM loaded in headless Chrome; blank-frame inference returned zero landmarks. | Webcam permission, valid rep detection, physical form or Android WebView performance. The script expects a Vite dev server because it imports the worker source path. |
@@ -108,3 +108,32 @@ Observed checks on the rework:
 New basic exercise attacks: chair sit-to-stand, wall push-up and glute bridge. They are available in the satchel, use the central damage rules and have original starting/movement illustrations. References: [NHS home strength exercises](https://www.nhs.uk/live-well/exercise/strength-exercises/) and [Cambridge University Hospitals general stability exercises](https://www.cuh.nhs.uk/patient-information/general-stability-exercises1/). Only movement descriptions inform the game; no source photographs or clinical exercise prescription is reproduced.
 
 All nine exercises still require trials with real people on real cameras. The model loading, browser-generated camera and synthetic landmark fixtures cannot establish physical accuracy or Android performance. Hosted Supabase remains separately blocked by owner authentication setup; this rework did not claim remote save verification.
+
+## Immersive fullscreen release — November 14, final source
+
+This release changes the presentation architecture: viewport-sized Phaser world, floating HUD, a separate RPG command component, a persistent exercise camera region, an exercise action dock and internally scrolling RPG windows. The journal stays a separate readable document view.
+
+- **208 tests across 19 files passed.** Production TypeScript/Vite/offline build passed. Existing large-bundle and mixed static/dynamic storage-import warnings remain; they did not fail the build.
+- Real Chrome navigation verified **1920×1080, 1366×768, 915×412, 844×390 and 390×844**. The world canvas fills its viewport; no global horizontal/vertical scrolling was observed. Native browser fullscreen entered and exited from the user-facing button.
+- World, character/settings window, encounter preview, four-action command menu and equipped-skill menu passed. Attack details use the central type/STAB helpers. Inventory, guide, healing, devices, shop and alchemy windows were inspected at 1366×768 and 915×412; larger content scrolls inside the window, with close controls reachable.
+- Preparation, active camera, explicit rest/resume, stop/restart, recalibration and manual continuation were exercised in the actual App. Counter sizes measured about **160 px at 1920, 136 px at 1366, 80 px in short landscape and 96 px in portrait**. Portrait side labels EITHER SIDE/LEFT/RIGHT now fit without clipping.
+- Short landscape uses a full-width camera layout and a **150×100 battle inset** beside the image. A 170 px gutter keeps the inset outside the displayed video/skeleton. The enemy and both HP indicators remain visible; the hero sprite is intentionally omitted in compact exercise layouts. Both characters remain visible in desktop exercise and normal battle scenes.
+- Generated-camera lifecycle smoke passed 11 checks. The real App camera remained mounted across pause, stop/restart, manual continuation, intervening turns and victory. Blank camera images earned zero units.
+- An explicitly labelled **synthetic-landmark** actual-App test credited one verified unit and reduced canonical enemy HP. Tracking loss, stop/restart and recalibration preserved exactly that HP/progress without extra credit; remaining manual units stayed separately unverified. These are integration checks, not proof of physical movement accuracy.
+- Manual adventure victory/reward reload and the food journal's registration/profile/persistence/mobile checks still pass. Three added home exercises still equip and complete through real UI interactions. Production offline installation, offline reload, retained adventure and offline journal opening passed after replacing obsolete heading selectors with the visible game scene.
+
+Problems found and corrected during visual QA:
+
+1. Old page margins/cards and fixed aspect ratios constrained the game. The viewport scene and Phaser resize camera now own the available screen.
+2. In short landscape, old minimum heights cut off characters. Arena-height-based sprite sizes and explicit command regions keep the cast/HP inside their region.
+3. Chromium omitted some live battle descendants when switching layout inside the old `fieldset`. Replacing that form container with `div.world-scene` and an `inert` interaction lock restored layout. Fresh-context regressions require positive HP/sprite dimensions, not merely coordinates within bounds. No forced-reflow workaround or camera remount is used.
+4. A long camera/demo column displaced exercise feedback. The camera, telemetry, guide popover and control strip now share a fixed viewport region.
+5. Camera mode retained a stale manual-mode message. The off-camera instruction is now derived from the current mode.
+6. EITHER SIDE overflowed the portrait telemetry column. It now wraps in a dedicated row while preserving the large counter.
+7. A shared food-row flex rule stretched shop item icons. The RPG item footprint is explicitly square.
+
+A transient Phaser framebuffer error appeared during rapid resize/HMR diagnostics with multiple browser sessions. Stable fresh-context final layout runs reported zero page errors; physical GPU/device resilience remains unverified.
+
+Native Android immersive-window code compiled. System bars are recoverable by an edge swipe and Back behavior is not intercepted. Final APK byte/signature verification is separate from actual installation: no real Android device or person was available. Hosted Supabase remains pending the owner's anonymous-auth/CLI authorization; no new live cloud save claim is made.
+
+Final actual-App immersive suite (`tests/immersive-browser.mjs`) passed all five viewports, including portrait after the side-label correction. Fullscreen entry/exit, menus, visible positive-sized battle HP, camera lifecycle and the labelled synthetic recognition-to-damage flow were confirmed. `releases/screenshots/` contains selected real browser captures; generated-camera/synthetic cases carry an explicit QA label.

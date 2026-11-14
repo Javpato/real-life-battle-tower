@@ -43,7 +43,7 @@ Hosted Supabase authorization remains unchanged and does not block local gamepla
 | Work | Owner / branch | Status | Checks |
 |---|---|---|---|
 | Root scene separation, fullscreen, RPG command menu and safe dock | Astra / main | integrated | TypeScript; world/menu/commands in five browser viewports |
-| Full-viewport Phaser, floating HUD, RPG windows and transitions | combat_review / feature/art-rework | integrated; final inset polish | 1920×1080, 1366×768, 915×412, 844×390, 390×844 |
-| Exercise preparation, giant counter, local video and concise feedback | pose_android_feasibility / feature/exercise-presentation | integrated; final instruction priority | actual App and isolated HUD; synthetic camera only |
-| Native immersive window and visual regression suite | sync_review / test/immersive-qa | native compiled; final browser run pending | no physical Android device connected |
-| Final screenshots, public release and matching Android package | Astra + QA | pending final integration | preserve existing site identity and local saves |
+| Full-viewport Phaser, floating HUD, RPG windows and transitions | combat_review / feature/art-rework | integrated and verified | 1920×1080, 1366×768, 915×412, 844×390, 390×844 |
+| Exercise preparation, giant counter, local video and concise feedback | pose_android_feasibility / feature/exercise-presentation | integrated and verified | actual App and isolated HUD; synthetic camera only |
+| Native immersive window and visual regression suite | sync_review / test/immersive-qa | native compiled; browser flows verified | no physical Android device connected |
+| Final screenshots, public release and matching Android package | Astra + QA | verified; packaging final source | full browser suite and synthetic actual-App damage flow passed |
