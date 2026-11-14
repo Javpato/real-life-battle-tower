@@ -79,6 +79,7 @@ export function guideArrow(card: GuideRect, target: GuideRect) {
     };
   const dx = b.x - a.x,
     dy = b.y - a.y;
+  if (!dx && !dy) return { x1: a.x, y1: a.y, x2: b.x, y2: b.y };
   const scale = (r: GuideRect) =>
     Math.min(
       Math.abs(dx) > 0 ? r.width / 2 / Math.abs(dx) : Infinity,

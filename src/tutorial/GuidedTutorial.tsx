@@ -72,7 +72,16 @@ function visibleTarget(
           rect.top + rect.height / 2,
         )
         .find((element) => !element.closest(".guided-tutorial"));
-      if (hit && (node.contains(hit) || hit.contains(node))) return rect;
+      const coveredByModal = hit?.closest(
+        '[aria-modal="true"],.modal-backdrop,.opening-modal-backdrop,.guide-help-backdrop',
+      );
+      const transparentAnchor =
+        style.pointerEvents === "none" && !coveredByModal;
+      if (
+        hit &&
+        (node.contains(hit) || hit.contains(node) || transparentAnchor)
+      )
+        return rect;
     }
   }
   return null;
