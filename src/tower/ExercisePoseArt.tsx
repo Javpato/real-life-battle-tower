@@ -1,5 +1,37 @@
-import './exercise-pose-art.css';
-/** Original pixel coach art. Teaching illustrations do not run detection or credit movement. */
-export default function ExercisePoseArt({exerciseId,title}:{exerciseId:string;title:string}){
- return <figure className="tower-exercise-pose"><div className="tower-pose-labels" aria-hidden="true"><span>01 · START</span><span>02 · MOVE</span></div><img src={`${import.meta.env.BASE_URL}assets/tower/guide-${exerciseId}.png`} width={280} height={140} alt={`${title}: starting position on the left and movement on the right`} draggable={false}/></figure>;
+import { skillGuide } from "./skillGuides";
+import "./exercise-pose-art.css";
+/** Text-only until a reviewed illustration of this exact movement exists.
+ * Never reuse a generic pose as if it demonstrated another exercise. */
+export default function ExercisePoseArt({
+  exerciseId,
+  title,
+}: {
+  exerciseId: string;
+  title: string;
+}) {
+  const aliases: Record<string, string> = {
+    wallpushup: "wall-pushup",
+    diamond: "diamond",
+    sitstand: "sitstand",
+    bridge: "glute-bridge",
+  };
+  const guide = skillGuide(aliases[exerciseId] ?? exerciseId);
+  return (
+    <figure
+      className="tower-exercise-pose"
+      aria-label={`${title} movement guide`}
+    >
+      <figcaption>{title} · movement guide</figcaption>
+      <ol>
+        <li>
+          <strong>01 · START</strong>
+          <p>{guide.setup}</p>
+        </li>
+        <li>
+          <strong>02 · MOVE</strong>
+          <p>{guide.movement}</p>
+        </li>
+      </ol>
+    </figure>
+  );
 }
