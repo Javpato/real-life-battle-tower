@@ -4,11 +4,17 @@ export async function openAttackMenu(page) {
   await page.locator(".command-attack").click();
 }
 export async function openCameraControls(page) {
-  if (await page.locator(".exercise-camera").isVisible()) return;
-  await page
-    .getByRole("button", { name: "Camera controls", exact: true })
-    .click();
+  // React closes the between-turn drawer when turn/mode changes; wait for that effect/transition.
+  await page.waitForTimeout(220);
+  const toggle = page.getByRole("button", {
+    name: "Camera controls",
+    exact: true,
+  });
+  if (await toggle.isVisible()) await toggle.click();
+  await page.locator(".exercise-camera").waitFor({ state: "visible" });
+  await page.waitForTimeout(200);
 }
+
 export async function dismissExerciseGuide(camera) {
   await camera.waitFor({ state: "visible" });
   // The first-use guide is set by an effect when the attack changes; let the drawer settle.

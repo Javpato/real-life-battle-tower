@@ -1,3 +1,8 @@
+import {
+  openCameraSettings,
+  closeCameraSettings,
+  dismissExerciseGuide,
+} from "./browser-controls.mjs";
 // Run with a Vite development server: node tests/camera-browser-smoke.mjs http://127.0.0.1:5182
 // Chromium fake hardware and stream spies are test-only. This is NOT a physical exercise accuracy test.
 import assert from "node:assert/strict";
@@ -38,6 +43,10 @@ try {
     };
   });
   await page.goto(base + "/tests/fixtures/camera.html");
+  // The standalone lifecycle fixture needs an explicit camera-stage height now that HUD overlays video.
+  await page.addStyleTag({
+    content: "main > .exercise-camera {height:620px;min-height:520px}",
+  });
   const camera = page.getByRole("region", {
     name: "Exercise camera",
     exact: true,
@@ -62,6 +71,7 @@ try {
         throw error;
       });
   const controls = async () => {
+    await openCameraSettings(camera);
     for (const name of ["Stop camera", "Recalibrate", "Pause / rest"])
       assert(
         await page.getByRole("button", { name, exact: true }).isVisible(),
@@ -69,14 +79,15 @@ try {
       );
     assert(await page.getByLabel("Camera facing", { exact: true }).isVisible());
     assert(await page.getByLabel("Camera device", { exact: true }).isVisible());
+    const initialPosition = camera.locator(".exercise-start-position summary");
     assert(
-      await page
-        .getByText("STARTING POSITION", { exact: true })
-        .first()
-        .isVisible(),
+      await initialPosition.isVisible(),
+      "Starting-position disclosure remains visible",
     );
+    await closeCameraSettings(camera);
   };
   await state("off");
+  await dismissExerciseGuide(camera);
   await controls();
   // A denied request is recoverable without reloading, and controls remain available.
   await page.evaluate(() => {
@@ -139,6 +150,16 @@ try {
   await page.getByRole("button", { name: "Manual mode", exact: true }).click();
   await state("off");
   await controls();
+  await page.getByRole("button", { name: "Camera mode", exact: true }).click();
+  await state("off");
+  assert(
+    await page
+      .getByText(/Enable the camera, then follow the starting position/)
+      .isVisible(),
+  );
+  assert.equal(await page.getByTestId("units").textContent(), "0");
+  await page.getByRole("button", { name: "Manual mode", exact: true }).click();
+  await state("off");
   await page
     .getByRole("button", { name: "Enable camera", exact: true })
     .click();
@@ -152,9 +173,11 @@ try {
   assert(await page.getByText(/Manual mode · preview only/).isVisible());
   await page.getByRole("button", { name: "Camera mode", exact: true }).click();
   // Facing selection restarts ownership safely. Desktop fake hardware may still report a single camera.
+  await openCameraSettings(camera);
   await page
     .getByLabel("Camera facing", { exact: true })
     .selectOption("environment");
+  await closeCameraSettings(camera);
   await state("ready");
   assert(
     await page.evaluate(() =>
@@ -248,6 +271,7 @@ try {
         "worker/model initialization on each restart",
         "pause/turn/session stream preservation",
         "manual preview without credit",
+        "off-state mode change updates guidance without credit",
         "front/back restart",
         "late permission stream cleanup",
         "stale device inventory cannot stop a new stream",
