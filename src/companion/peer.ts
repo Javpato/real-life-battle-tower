@@ -2,7 +2,7 @@ import type {PoseFrame} from '../exercises/detectors';
 import type {PairView} from './protocol';
 import type {SignalTransport} from './transport';
 import {CompanionFrameGate} from './frames';
-export type PeerEvents={onState?:(state:PairView)=>void;onStatus?:(status:string)=>void;onFrame?:(frame:PoseFrame|null)=>void;onPreview?:(stream:MediaStream|null)=>void;onConnected?:()=>void};
+export type PeerEvents={onState?:(state:PairView)=>void;onStatus?:(status:string)=>void;onFrame?:(frame:PoseFrame|null)=>void;onPreview?:(stream:MediaStream|null)=>void;onConnected?:()=>void;onDisconnected?:()=>void};
 /** Host-only ICE for same-LAN pairing; no relay, no server media path. */
 export class CompanionPeer{
  private pc:RTCPeerConnection;private channel?:RTCDataChannel;private timer?:ReturnType<typeof setInterval>;private pulse?:ReturnType<typeof setInterval>;private stopped=false;private polling=false;private negotiating=false;private remoteIce=0;private sequence=0;private lastFrame=-Infinity;private stale=true;private gate=new CompanionFrameGate();private pings=new Map<string,number>();private lastPing=-Infinity;private previewSender?:RTCRtpSender;private remotePreview:MediaStream|null=null;private previewOptin=false;private pendingTrack:MediaStreamTrack|null=null;private started=performance.now();
@@ -11,7 +11,7 @@ export class CompanionPeer{
   this.pc.onicecandidate=e=>{if(e.candidate&&!this.stopped)void this.transport.request(this.roomId,this.capability,'ice',e.candidate.toJSON()).catch(error=>this.events.onStatus?.(String(error)));};
   this.pc.ondatachannel=e=>this.attach(e.channel);
   this.pc.ontrack=e=>{if(role==='desktop'){this.remotePreview=e.streams[0]??new MediaStream([e.track]);if(this.previewOptin)this.events.onPreview?.(this.remotePreview);}};
-  this.pc.onconnectionstatechange=()=>{if(['failed','disconnected','closed'].includes(this.pc.connectionState)){this.events.onFrame?.(null);this.events.onPreview?.(null);this.events.onStatus?.('Phone connection lost. Reconnect or use the webcam.');}};
+  this.pc.onconnectionstatechange=()=>{if(!this.stopped&&['failed','disconnected','closed'].includes(this.pc.connectionState)){this.events.onDisconnected?.();this.events.onFrame?.(null);this.events.onPreview?.(null);this.events.onStatus?.('Phone connection lost. Reconnect or use the webcam.');}};
  }
  get connected(){return this.channel?.readyState==='open';}
  start(){void this.poll();this.timer=setInterval(()=>void this.poll(),900);this.pulse=setInterval(()=>this.tick(),100);}
@@ -25,7 +25,7 @@ export class CompanionPeer{
    if(this.pc.remoteDescription){for(const candidate of state.ice.slice(this.remoteIce)){await this.pc.addIceCandidate(candidate as RTCIceCandidateInit);this.remoteIce++;}}
   }
  }catch(error){if(this.stopped)return;if(this.connected&&/EXPIRED|LIMITED/.test(String(error))){clearInterval(this.timer);this.timer=undefined;return;}this.events.onStatus?.(`Pairing: ${error instanceof Error?error.message:String(error)}`);if(/EXPIRED|CLOSED|CAPABILITY/.test(String(error)))this.close(false);}finally{this.polling=false;}}
- private attach(channel:RTCDataChannel){this.channel=channel;channel.onopen=()=>{this.events.onStatus?.('Phone connected. Camera data stays between your devices.');this.events.onConnected?.();if(this.role==='desktop')this.ping();else this.send({type:'preview',enabled:Boolean(this.pendingTrack)});};channel.onclose=()=>{this.events.onFrame?.(null);this.events.onPreview?.(null);this.events.onStatus?.('Phone disconnected. No exercise units are being received.');};channel.onmessage=e=>{
+ private attach(channel:RTCDataChannel){this.channel=channel;channel.onopen=()=>{this.events.onStatus?.('Phone connected. Camera data stays between your devices.');this.events.onConnected?.();if(this.role==='desktop')this.ping();else this.send({type:'preview',enabled:Boolean(this.pendingTrack)});};channel.onclose=()=>{if(this.stopped)return;this.events.onDisconnected?.();this.events.onFrame?.(null);this.events.onPreview?.(null);this.events.onStatus?.('Phone disconnected. No exercise units are being received.');};channel.onmessage=e=>{
   if(this.stopped||typeof e.data!=='string'||e.data.length>18000)return;let p;try{p=JSON.parse(e.data);}catch{return;}if(!p||typeof p!=='object')return;
   if(p.type==='ping'&&this.role==='phone'&&typeof p.id==='string'){this.send({type:'pong',id:p.id,remoteNow:performance.now()});return;}
   if(p.type==='pong'&&this.role==='desktop'&&typeof p.id==='string'){const at=this.pings.get(p.id);if(at!==undefined){this.gate.synchronize(at,p.remoteNow,performance.now());this.pings.delete(p.id);}return;}
