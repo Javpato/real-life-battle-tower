@@ -112,9 +112,9 @@ export default function ExerciseCamera(props: Props) {
     autoRef = useRef(true);
   const [voice, setVoice] = useState(() => {
     try {
-      return localStorage.getItem("everstride-exercise-voice") === "on";
+      return localStorage.getItem("everstride-exercise-voice") !== "off";
     } catch {
-      return false;
+      return true;
     }
   });
   const [camera, setCamera] = useState(initialCamera),

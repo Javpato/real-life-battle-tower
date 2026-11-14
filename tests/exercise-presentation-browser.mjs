@@ -154,8 +154,9 @@ try {
   await page.waitForTimeout(350);
   await expect(page.locator(".exercise-guide-popover")).toHaveCount(0);
   const voice = page.getByRole("button", { name: "Voice coach", exact: true });
-  await voice.click();
   await expect(voice).toHaveAttribute("aria-pressed", "true");
+  await voice.click();
+  await expect(voice).toHaveAttribute("aria-pressed", "false");
   expect(errors).toEqual([]);
   console.log(
     JSON.stringify({
