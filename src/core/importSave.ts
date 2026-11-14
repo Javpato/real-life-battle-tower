@@ -7,8 +7,8 @@ export function validateLocalImport(value:unknown):AdventureSnapshot{
  if(!p||s.battle||s.quest)throw Error('FINISH_CURRENT_ACTIVITY');
  const integer=(n:unknown,max=10000000)=>Number.isSafeInteger(n)&&Number(n)>=0&&Number(n)<=max;
  if(typeof p.name!=='string'||!p.name.trim()||p.name.length>20||!['easy','medium','hard'].includes(p.difficulty))throw Error('INVALID_LOCAL_CHARACTER');
- for(const key of ['hp','maxHp','attack','defense','speed','level','xp','coins'] as const)if(!integer(p[key]))throw Error('INVALID_LOCAL_STATS');
- if(p.level<1||p.maxHp<1||p.hp>p.maxHp)throw Error('INVALID_LOCAL_STATS');
+ for(const key of ['maxHp','attack','defense','speed','level','xp','coins'] as const)if(!integer(p[key]))throw Error('INVALID_LOCAL_STATS');
+ if(!Number.isFinite(p.hp)||p.hp<0||p.level<1||p.maxHp<1||p.hp>p.maxHp)throw Error('INVALID_LOCAL_STATS');
  const strings=(v:unknown,max:number)=>Array.isArray(v)&&v.length<=max&&v.every(x=>typeof x==='string'&&x.length<=200)&&new Set(v).size===v.length;
  if(!strings(p.badges,3)||p.badges.some(b=>!['leg','arm','back'].includes(b))||!strings(p.equipped,4)||!p.equipped.length||p.equipped.some(id=>!attacks.some(a=>a.id===id)))throw Error('INVALID_LOCAL_LOADOUT');
  if(!strings(p.defeated,100)||!strings(p.discoveries,10000)||!strings(p.claimedBattles??[],10000)||typeof p.ending!=='boolean')throw Error('INVALID_LOCAL_PROGRESS');
