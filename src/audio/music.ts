@@ -4,9 +4,11 @@
  * To replace this score with recordings, keep these three exported control functions
  * and map the same track IDs to licensed audio files. Stop the prior track on changes.
  */
-export type MusicTrack='village'|'trainer'|'leader'|'rival'|'victory';
+export type MusicTrack='title'|'intro'|'village'|'trainer'|'leader'|'rival'|'victory';
 type Score={bpm:number;melody:readonly number[];roots:readonly number[];wave:OscillatorType;loop:boolean};
 const scores:Record<MusicTrack,Score>={
+ title:{bpm:92,melody:[64,0,67,71,76,0,74,71,69,0,67,64,62,0,0,0,64,67,71,76,79,0,76,74,71,69,67,0,64,0,0,0],roots:[40,48,43,45],wave:'triangle',loop:true},
+ intro:{bpm:76,melody:[72,0,67,0,64,0,67,0,69,0,72,0,71,0,0,0],roots:[48,45],wave:'triangle',loop:true},
  village:{bpm:86,melody:[74,0,69,71,74,76,0,71,69,0,66,69,71,0,0,0,74,0,78,76,74,71,69,0,67,69,71,0,69,0,0,0],roots:[50,55,57,53],wave:'triangle',loop:true},
  trainer:{bpm:108,melody:[72,67,70,72,0,75,74,70,67,0,65,67,70,72,0,67,72,74,75,0,74,70,67,65,67,70,72,0,70,67,0,0],roots:[48,53,55,46],wave:'triangle',loop:true},
  leader:{bpm:118,melody:[69,0,76,74,72,71,69,0,65,69,72,0,71,67,64,0,69,72,76,79,76,74,72,71,69,0,67,64,65,67,69,0],roots:[45,41,43,40],wave:'square',loop:true},
