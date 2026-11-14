@@ -2,6 +2,8 @@
 
 Cozylight's physical RPG: **YOUR BODY IS YOUR WEAPON. HOW HIGH CAN YOU CLIMB?**
 
+**[Play in your browser](https://javpato.github.io/real-life-battle-tower/)** · [Source code](https://github.com/Javpato/real-life-battle-tower)
+
 Run `npm install`, then `npm run dev`. The game starts with title, three independent saves and the tower menu. On the save screen, **Explore a local preview** opens the isolated developer profile with every skill and specialization available. Infinite Tower preparation exposes a preview starting floor. Preview never writes a normal slot or synchronizes.
 
 ## Playing
@@ -41,6 +43,14 @@ GAME_URL=http://127.0.0.1:5174 node tests/tower-migration-browser.mjs
 Browser checks require Chrome (default `/usr/bin/google-chrome`) and the local server. `tests/tower-offline.mjs` targets production preview on4174. Browser screenshots use real menu/pointer interaction and explicit manual controls, not injected save progress.
 
 For Android: `npx cap sync android`, then run `./gradlew assembleDebug` in `android/` with an installed Android SDK. Package identity remains `app.everstride.rpg`; display name is Battle Tower.
+
+## Public web deployment
+
+GitHub Pages serves the compiled game over HTTPS. Every push to `main` runs the tests, checks the shared backend source and local SQL contracts, builds the application with its repository subdirectory, and deploys `dist`. See [the workflow](.github/workflows/pages.yml). The website does not require the development computer or a Cloudflare tunnel to remain running.
+
+For a fork, enable **Settings → Pages → Source → GitHub Actions**, then add `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` under **Settings → Secrets and variables → Actions**. These values are public client configuration and appear in the browser bundle. Never use a Supabase service-role key or personal access token. Local `.env` files, dependencies, private build configuration and player data are excluded from Git. The workflow does not deploy or modify Supabase.
+
+For phone camera pairing, open the same published game on PC and phone, use the same Wi-Fi, create a fresh invitation and explicitly allow the phone camera. Old temporary-host links and QR codes are not the published website. Browser-local saves belong to their original origin; changing hosts does not transfer them automatically. Existing device/cloud linking remains available.
 
 ## Backend release
 
