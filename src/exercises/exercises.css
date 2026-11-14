@@ -730,6 +730,13 @@
   }
 }
 @media (max-height: 600px) and (orientation: landscape) {
+  /* Reserve the arena inset beside the image, never over tracked joints. */
+  .immersive-game.is-series.input-camera .exercise-feed video,
+  .immersive-game.is-series.input-camera .exercise-feed canvas,
+  .immersive-game.is-series.input-camera .exercise-placeholder {
+    left: 170px;
+    width: calc(100% - 170px);
+  }
   .immersive-game .exercise-camera {
     grid-template-columns: minmax(0, 1.15fr) minmax(245px, 0.85fr);
     grid-template-rows: 28px minmax(0, 1fr) 42px;
