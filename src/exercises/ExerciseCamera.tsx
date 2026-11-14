@@ -724,6 +724,7 @@ export default function ExerciseCamera(props: Props) {
             type="button"
             aria-pressed={voice}
             aria-label="Voice coach"
+            data-guide="camera-voice"
             onClick={() => {
               const enabled = !voice;
               setVoice(enabled);
@@ -749,6 +750,7 @@ export default function ExerciseCamera(props: Props) {
           <button
             type="button"
             aria-expanded={demo}
+            data-guide="camera-guide"
             onClick={() => (demo ? dismissGuide() : setDemo(true))}
           >
             {demo ? "Hide guide" : "Show guide"}
@@ -833,6 +835,7 @@ export default function ExerciseCamera(props: Props) {
           <button
             type="button"
             className="exercise-primary"
+            data-guide="camera-setup"
             onClick={() => void startCamera()}
           >
             {camera.status === "error"
@@ -848,11 +851,12 @@ export default function ExerciseCamera(props: Props) {
           >
             Stop camera
           </button>
-          <button type="button" onClick={togglePause}>
+          <button type="button" data-guide="camera-pause" onClick={togglePause}>
             {paused ? "Resume recognition" : "Pause / rest"}
           </button>
           <button
             type="button"
+            data-guide="camera-recalibrate"
             onClick={() => {
               detector.current.pause();
               lifecycle.current?.invalidateFrames();
@@ -882,6 +886,7 @@ export default function ExerciseCamera(props: Props) {
             type="button"
             className="exercise-primary exercise-start-manual"
             aria-label="Start without automatic calibration"
+            data-guide="camera-start"
             disabled={
               camera.status !== "ready" ||
               inactive ||
@@ -905,7 +910,7 @@ export default function ExerciseCamera(props: Props) {
           </button>
         </div>
         <details className="exercise-camera-settings">
-          <summary>Camera settings</summary>
+          <summary data-guide="camera-settings">Camera settings</summary>
           <div className="exercise-settings-popover">
             <div className="exercise-camera-selectors">
               <label>
