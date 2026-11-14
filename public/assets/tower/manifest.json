@@ -238,7 +238,11 @@
     "bag": "icon-bag.png",
     "settings": "icon-settings.png",
     "play": "icon-play.png",
-    "pause": "icon-pause.png"
+    "pause": "icon-pause.png",
+    "trophy": "icon-trophy.png",
+    "training": "icon-training.png",
+    "skill": "icon-skill.png",
+    "record": "icon-record.png"
   },
   "exerciseGuides": {
     "squat": {

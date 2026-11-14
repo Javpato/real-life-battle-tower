@@ -213,7 +213,7 @@ for k,n in enumerate(chars):
   if k==7:d.line((x+14,15,x+14,43),fill=GOLD,width=2)
  save(im,n+'-idle')
 # 32px handcrafted icon tiles.
-icons=['leg','arm','back','coin','potion','shield','star','tower','bag','settings','play','pause']
+icons=['leg','arm','back','coin','potion','shield','star','tower','bag','settings','play','pause','trophy','training','skill','record']
 for name in icons:
  im,d=canvas(32,32)
  if name=='coin':
@@ -229,6 +229,29 @@ for name in icons:
  elif name=='bag':poly(d,[(9,7),(12,3),(21,3),(24,7),(27,12),(27,29),(5,29),(5,12)],'#b78c60');box(d,(10,17,22,25),GOLD,INK);box(d,(15,18,17,21),LIGHT)
  elif name=='play':poly(d,[(8,4),(27,16),(8,28)],GOLD)
  elif name=='pause':box(d,(6,5,12,28),GOLD,INK);box(d,(20,5,26,28),GOLD,INK)
+ elif name=='trophy':
+  poly(d,[(7,4),(25,4),(23,17),(18,21),(18,25),(24,25),(24,29),(8,29),(8,25),(14,25),(14,21),(9,17)],GOLD)
+  d.line([(7,7),(3,7),(3,14),(9,18)],fill=INK,width=4);d.line([(25,7),(29,7),(29,14),(23,18)],fill=INK,width=4)
+  d.line([(7,7),(3,7),(3,14),(9,18)],fill=GOLD,width=2);d.line([(25,7),(29,7),(29,14),(23,18)],fill=GOLD,width=2)
+  box(d,(11,7,13,14),LIGHT);box(d,(10,27,22,28),'#bc7950')
+ elif name=='training':
+  # A physical training weight, diagonal bar and contrasting plates.
+  d.line((7,25,25,7),fill=INK,width=7);d.line((7,25,25,7),fill='#b9ccd1',width=3)
+  for pts in [[(2,21),(6,17),(15,26),(11,30)],[(17,6),(21,2),(30,11),(26,15)]]:poly(d,pts,'#5a98a2',width=1)
+  d.line((5,21,11,27),fill='#a6d4c6',width=2);d.line((21,5,27,11),fill='#a6d4c6',width=2)
+ elif name=='skill':
+  # Open skillbook with a crystal seal; no generic star fallback.
+  poly(d,[(3,6),(12,4),(16,7),(20,4),(29,6),(29,27),(20,25),(16,28),(12,25),(3,27)],'#8f647c')
+  poly(d,[(5,7),(12,6),(15,9),(15,24),(11,22),(5,24)],LIGHT,width=1)
+  poly(d,[(17,9),(21,6),(27,7),(27,24),(21,22),(17,24)],'#e6cfa2',width=1)
+  for y in [11,15,19]:box(d,(7,y,12,y),'#9d7d67')
+  poly(d,[(22,10),(25,15),(22,20),(19,15)],'#68afae',width=1)
+ elif name=='record':
+  # Personal chronicle/chart with three climbing columns and folded corner.
+  poly(d,[(6,2),(22,2),(28,8),(28,29),(6,29)],LIGHT)
+  poly(d,[(22,2),(22,8),(28,8)],'#bba47f',width=1)
+  box(d,(10,19,13,25),'#7bac8a');box(d,(16,14,19,25),'#56959d');box(d,(22,11,25,25),'#cb7d65')
+  box(d,(10,7,17,8),'#7d8590');box(d,(10,10,15,11),'#7d8590')
  else:
   for a in range(8):
    x=16+int(math.cos(a*math.pi/4)*10);y=16+int(math.sin(a*math.pi/4)*10);box(d,(x-3,y-3,x+3,y+3),'#9bb0ba',INK)
