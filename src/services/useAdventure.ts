@@ -21,7 +21,15 @@ export class AdventureController {
  async load(){try{const saved=await this.store.read<AdventureSnapshot>(this.storageKey);this.local=saved?{...normalizeAdventure(saved),quest:saved.quest??null,battle:saved.battle?{...saved.battle,paused:true}:null}:initialAdventure();this.update({snapshot:this.local,ready:true,fresh:!saved});
  if(this.localSaveId&&this.store===storage){const slots=await this.store.read<Array<{saveId:string|null;cloudSaveId?:string}>>('save-slots:v1');const remote=slots?.find(s=>s.saveId===this.localSaveId)?.cloudSaveId;if(remote){const cached=await this.store.read<AdventureSnapshot>(`adventure-cloud-cache:${remote}`);this.update({mode:'cloud',saveId:remote,snapshot:cached?normalizeAdventure(cached):this.local,readOnly:true,fresh:false});try{await this.openCloud(remote);}catch(error){this.update({readOnly:true,error:`Cloud unavailable. Showing cached adventure; reconnect to continue. ${String(error)}`});}}}
  }catch(e){this.update({ready:true,error:`Local storage unavailable: ${String(e)}`});}}
+ private rejectLocalCommand(pending:Pending){this.queue.shift();this.waiters.get(pending.id)?.(false);this.waiters.delete(pending.id);this.update({pending:this.queue.length,error:''});}
+ private recoverLocalValidation(){
+  if(this.running||this.state.mode!=='local'||!this.state.error)return;
+  // Old clients could retain a late movement command after a quest began. Only
+  // discard deterministic reducer rejections; persistence failures stay blocked.
+  while(this.queue.length){const pending=this.queue[0];try{applyAdventureCommand(this.state.snapshot,pending.command);break;}catch(error){if(!(error instanceof Error)||!/^\w+$/.test(error.message)||error.message!==error.message.toUpperCase())break;this.rejectLocalCommand(pending);}}
+ }
  async send(command:AdventureCommand):Promise<boolean>{
+  this.recoverLocalValidation();
   if(!this.state.ready||this.state.readOnly||this.state.error)return false;
   const id=crypto.randomUUID();const completion=new Promise<boolean>(resolve=>this.waiters.set(id,resolve));this.queue.push({id,command});this.update({pending:this.queue.length,busy:true});void this.drain();return completion;
  }
@@ -30,7 +38,14 @@ export class AdventureController {
   try{while(this.queue.length&&!this.state.readOnly&&!this.state.error){
    const pending=this.queue[0];
    if(this.state.mode==='local'){
-    const next=applyAdventureCommand(this.state.snapshot,pending.command);if(this.localSaveId&&this.store===storage)await persistSlotSnapshot(this.localSaveId,next);else await this.store.write(this.storageKey,next);this.local=next;this.update({snapshot:next,fresh:false});
+    let next:AdventureSnapshot;
+    try{next=applyAdventureCommand(this.state.snapshot,pending.command);}catch(error){
+     if(!(error instanceof Error)||!/^\w+$/.test(error.message)||error.message!==error.message.toUpperCase())throw error;
+     // A stale UI intent never becomes a permanently retrying local operation.
+     // Reject just this promise and continue processing valid close/cancel intents.
+     this.rejectLocalCommand(pending);continue;
+    }
+    if(this.localSaveId&&this.store===storage)await persistSlotSnapshot(this.localSaveId,next);else await this.store.write(this.storageKey,next);this.local=next;this.update({snapshot:next,fresh:false});
    }else{
     const {saveId,lease}=this.state;if(!saveId||!lease)throw Error('NO_CLOUD_CONTROL');
     pending.expectedRevision??=this.state.revision;await this.store.write(pendingKey(saveId,this.state.userId),this.queue);
