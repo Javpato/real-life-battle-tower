@@ -13,6 +13,7 @@ export type GuidedTutorialProps = {
   step: GuideStep | null;
   onAcknowledge: (id: string) => void;
   onHelp?: () => void;
+  onDismiss?:()=>void;
 };
 const viewport = (): GuideViewport => ({
   left: window.visualViewport?.offsetLeft ?? 0,
@@ -90,7 +91,9 @@ export default function GuidedTutorial({
   step,
   onAcknowledge,
   onHelp,
+  onDismiss,
 }: GuidedTutorialProps) {
+  const [doorMinimized,minimizeDoor]=useState(false);
   const card = useRef<HTMLElement>(null),
     markerId = useId().replaceAll(":", "");
   const [geometry, setGeometry] = useState<{
@@ -170,12 +173,14 @@ export default function GuidedTutorial({
   if (!step || typeof document === "undefined") return null;
   const bounds = geometry?.viewport ?? viewport(),
     target = geometry?.target ?? null;
+  const door=step.target==='world-door',small=bounds.width<900||bounds.height<550;
   const position = placeGuideCard(
       target,
       geometry?.size ?? { width: 340, height: 160 },
       bounds,
     ),
-    arrow = target ? guideArrow(position, target) : null;
+    arrow = !door && target ? guideArrow(position, target) : null;
+  if(door){position.width=small?Math.min(245,bounds.width-24):300;position.left=bounds.left+bounds.width-position.width-16;position.top=Math.max(bounds.top+80,bounds.top+(bounds.height-(doorMinimized?50:geometry?.size.height??160))/2);}
   return createPortal(
     <div
       className="guided-tutorial"
@@ -213,7 +218,7 @@ export default function GuidedTutorial({
       )}
       <aside
         ref={card}
-        className="guided-card"
+        className={`guided-card${door?" guided-door":""}${door&&small?" guided-door-mobile":""}`}
         role="status"
         aria-live="polite"
         aria-atomic="true"
@@ -226,13 +231,15 @@ export default function GuidedTutorial({
       >
         <span className="guided-eyebrow">YOUR NEXT STEP</span>
         <h2>{step.title}</h2>
-        <p>
+        {!(door&&small&&doorMinimized)&&<p>
           {!target && step.target
             ? (step.missingTargetBody ?? step.body)
             : step.body}
-        </p>
-        {(step.actionLabel || onHelp) && (
+        </p>}
+        {(step.actionLabel || onHelp || door) && (
           <div className="guided-card-actions">
+            {door&&small&&<button aria-expanded={!doorMinimized} onClick={()=>minimizeDoor(!doorMinimized)}>{doorMinimized?"Show door tip":"Minimize"}</button>}
+            {onDismiss&&<button aria-label="Dismiss tips" onClick={onDismiss}>×</button>}
             {step.actionLabel && (
               <button type="button" onClick={() => onAcknowledge(step.id)}>
                 {step.actionLabel}

@@ -98,8 +98,9 @@ describe("three connected home exercises", () => {
   it.each<Home>(["sitstand", "wallpushup", "bridge"])(
     "%s is unlocked, equipable and its measured event causes real canonical damage",
     (id) => {
-      expect(available(initialPlayer()).some((a) => a.id === id)).toBe(true);
-      let s = initialAdventure();
+      const player=initialPlayer();if(id==="bridge")player.quests.squat=1;
+      expect(available(player).some((a) => a.id === id)).toBe(true);
+      let s = initialAdventure();s.player=player;
       s = applyAdventureCommand(s, { kind: "equip", attackIds: [id] });
       s = applyAdventureCommand(s, {
         kind: "startBattle",

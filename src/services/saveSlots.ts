@@ -1,7 +1,10 @@
 import {initialAdventure,normalizeAdventure,type AdventureSnapshot} from '../core/commands';
+import {attacks} from '../core/game';
+import {WORLD_MAPS} from '../core/worldMaps';
+import {GUIDE_BASICS} from '../core/commands';
 import {readSave,writeSave,withSaveTransaction} from './storage';
 export type SaveSlotNumber=1|2|3;
-export type SaveSlot={slotNumber:SaveSlotNumber;saveId:string|null;cloudSaveId?:string;syncStatus?:'linked'|'syncing'|'offline'|'error';syncError?:string;updatedAt:string|null;snapshot?:AdventureSnapshot};
+export type SaveSlot={testOnly?:boolean;slotNumber:SaveSlotNumber;saveId:string|null;cloudSaveId?:string;syncStatus?:'linked'|'syncing'|'offline'|'error';syncError?:string;updatedAt:string|null;snapshot?:AdventureSnapshot};
 const registry='save-slots:v1';
 export const adventureKey=(saveId:string)=>`adventure:${saveId}`;
 export const nutritionKey=(saveId:string)=>`nutrition:${saveId}`;
@@ -30,11 +33,12 @@ export async function listSlots():Promise<SaveSlot[]>{
  const slots=await readSave<SaveSlot[]>(registry)??empty();
  return Promise.all(slots.map(async slot=>({...slot,snapshot:slot.saveId?(slot.cloudSaveId?await readSave<AdventureSnapshot>(`adventure-cloud-cache:${slot.cloudSaveId}`):undefined)??await readSave<AdventureSnapshot>(adventureKey(slot.saveId)):undefined})));
 }
-export async function createSlot(slotNumber:SaveSlotNumber,character:{name:string;avatar:'male'|'female'}):Promise<SaveSlot>{
+export async function createSlot(slotNumber:SaveSlotNumber,character:{name:string;avatar:'male'|'female';testOnly?:boolean}):Promise<SaveSlot>{
  if(![1,2,3].includes(slotNumber)||!character.name.trim()||character.name.trim().length>20||!['male','female'].includes(character.avatar))throw Error('Invalid character or slot.');
  await initializeSlots();
  const slot:SaveSlot={slotNumber,saveId:crypto.randomUUID(),updatedAt:new Date().toISOString()};
  const snapshot=normalizeAdventure(initialAdventure(),false);snapshot.player.name=character.name.trim();snapshot.journey!.avatar=character.avatar;
+ if(character.testOnly){slot.testOnly=true;snapshot.testOnly=true;snapshot.player={...snapshot.player,name:'admin',level:20,hp:328,maxHp:328,attack:58,defense:58,speed:31,coins:10000,badges:['leg','arm','back'],unlockedAttacks:attacks.map(a=>a.id),equipped:['squat','pushup','superman','birddog'],upgrades:Object.fromEntries(attacks.map(a=>[a.id,4])),items:{potion:99,shield:99,boost:99,ingredient:99}};snapshot.journey!.introComplete=true;snapshot.journey!.tutorialStage=6;snapshot.journey!.guide={version:1,completed:[...GUIDE_BASICS],seen:[]};snapshot.journey!.location={mapId:'starter_town',...WORLD_MAPS.starter_town.spawns.safe};}
  await withSaveTransaction(async store=>{const slots=await store.get(registry) as SaveSlot[];if(slots[slotNumber-1].saveId)throw Error('This slot already has an adventure.');slots[slotNumber-1]=slot;await store.put(snapshot,adventureKey(slot.saveId!));await store.put(slots,registry);});
  return {...slot,snapshot};
 }
@@ -48,7 +52,7 @@ export async function deleteSlot(slotNumber:SaveSlotNumber):Promise<void>{
  }
  if(slot.saveId){await store.put({slot,snapshot:await store.get(adventureKey(slot.saveId)),nutrition:await store.get(nutritionKey(slot.saveId))},`recovery:deleted:${slot.saveId}:${Date.now()}`);await store.delete(adventureKey(slot.saveId));await store.delete(nutritionKey(slot.saveId));}slots[slotNumber-1]={slotNumber,saveId:null,updatedAt:null};await store.put(slots,registry);});
 }
-export async function bindCloudSlot(localSaveId:string,cloudSaveId:string){await withSaveTransaction(async store=>{const slots=await store.get(registry) as SaveSlot[];const slot=slots.find(s=>s.saveId===localSaveId);if(!slot)throw Error('Save slot no longer exists.');if(slots.some(s=>s.saveId!==localSaveId&&s.cloudSaveId===cloudSaveId))throw Error('This cloud adventure is already assigned to another slot.');slot.cloudSaveId=cloudSaveId;await store.put(slots,registry);});}
+export async function bindCloudSlot(localSaveId:string,cloudSaveId:string){await withSaveTransaction(async store=>{const slots=await store.get(registry) as SaveSlot[];const slot=slots.find(s=>s.saveId===localSaveId);if(!slot)throw Error('Save slot no longer exists.');if(slot.testOnly)throw Error('Test adventures stay on this device.');if(slots.some(s=>s.saveId!==localSaveId&&s.cloudSaveId===cloudSaveId))throw Error('This cloud adventure is already assigned to another slot.');slot.cloudSaveId=cloudSaveId;await store.put(slots,registry);});}
 export async function persistSlotSnapshot(saveId:string,snapshot:AdventureSnapshot){await withSaveTransaction(async store=>{const slots=await store.get(registry) as SaveSlot[]|undefined;const slot=slots?.find(s=>s.saveId===saveId);if(!slot)throw Error('Save slot no longer exists.');slot.updatedAt=new Date().toISOString();await store.put(snapshot,adventureKey(saveId));await store.put(slots,registry);});}
 export const readSlotNutrition=<T>(id:string)=>readSave<T>(nutritionKey(id));
 export const writeSlotNutrition=(id:string,value:unknown)=>writeSave(nutritionKey(id),value);

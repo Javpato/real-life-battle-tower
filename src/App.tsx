@@ -47,6 +47,8 @@ import {
   type Enemy,
   attacks,
   available,
+  sortedAttacks,
+  unlockDescription,
   attackFor,
   enemyFor,
   startBattle,
@@ -110,6 +112,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
   const [fullscreen, setFullscreen] = useState(
     Boolean(document.fullscreenElement),
   );
+  const [autoTour,setAutoTour]=useState<{scope:GuideScope;index:number}|null>(null);
   const [cameraExpanded, setCameraExpanded] = useState(false);
   const [hitDamage, setHitDamage] = useState(0);
   const previousHp = useRef<{ id: string; hp: number } | null>(null);
@@ -127,7 +130,8 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
     return () => document.removeEventListener("fullscreenchange", update);
   }, []);
   useEffect(() => setCameraExpanded(false), [b?.id, b?.turn]);
-  async function toggleFullscreen() {
+  async function useCameraMode(){C(true);setCameraExpanded(true);if(b?.paused)await dispatch({kind:'pause',paused:false});}
+    async function toggleFullscreen() {
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
       else if (document.documentElement.requestFullscreen)
@@ -320,7 +324,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
   useEffect(()=>{if(!ready)return;const previous=recordedGuidePanel.current;recordedGuidePanel.current=panel;if(['inventory','map','journal'].includes(panel??'')&&!journey?.guide?.completed.includes(panel!))void dispatch({kind:'guideEvent',event:panel!});if(previous&&!panel&&!journey?.guide?.completed.includes('close'))void dispatch({kind:'guideEvent',event:'close'});},[panel,ready]);
   const guideDone=(id:string)=>Boolean(journey?.guide?.completed.includes(id));
   const scope:GuideScope|null=panel==='journal'?({Today:'journal-today',Food:'journal-food',Activity:'journal-activity',Progress:'journal-progress',Profile:'journal-settings'} as Record<string,GuideScope>)[journalTab]??'journal-today':panel==='menu'?'settings':['inventory','map','shop','alchemy','devices'].includes(panel??'')?panel as GuideScope:quest?'quest':b?(b.turn==='exercise'?'camera':'battle'):null;
-  const contextual=scope?getGuideSteps(scope).find(step=>!journey?.guide?.seen.includes(step.id)):undefined;
+  const contextual=autoTour&&autoTour.scope===scope?getGuideSteps(autoTour.scope)[autoTour.index]:undefined;
   let mandatory:GuideStep|undefined;
   if(journey && journey.tutorialStage<6 && !b && !quest){
     if(panel==='tutorial')mandatory=!guideDone('close')?{id:'close',target:'modal-close',title:'Try closing a window',body:'Press the highlighted X once. Then speak to Moss again to begin your practice.'}:{id:'practice',target:'tutorial-practice',title:'Your first friendly match',body:'Choose Attack, then three squats or three chair rises. Camera and manual mode are both available.'};
@@ -331,8 +335,9 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
     }
   }
   if(b?.enemy.id==='tutorial-moss' && !panel){mandatory=b.turn==='player'?{id:'attack',target:'battle-actions',title:'Choose your first move',body:'Press Attack, then choose Squat or Root Rise. Both are a short practice of three movements. Uncheck Camera here if you prefer manual play.'}:b.turn==='exercise'?{id:'practice-movement',target:camera?'camera-setup':'manual-confirm',title:camera?'Prepare, then move at your pace':'Manual practice',body:camera?'Follow the starting-position guide. Each accepted movement deals damage. Rest pauses the series; Recalibrate gives you five seconds to move back into place. You can switch to manual continuation below.':'Try three comfortable movements. Press the highlighted confirmation when finished. Manual completion is recorded as unverified, and the reward is the same.'}:b.turn==='won'?{id:'reward',target:'battle-finish',title:'Your first victory',body:'These are your earned XP and coins. Continue to discover your skills, the map and your journal.'}:undefined;}
+  useEffect(()=>{if(!ready||!scope||mandatory){setAutoTour(null);return;}if(!journey?.guide?.seen.includes('auto:'+scope)){setAutoTour({scope,index:0});void dispatch({kind:'guideSeen',id:'auto:'+scope});}else setAutoTour(null);},[scope,ready,Boolean(mandatory)]);
   const activeGuide=helpOpen?null:tourScope?getGuideSteps(tourScope)[tourIndex]:mandatory??contextual??null;
-  const tutorialOverlay=<><GuidedTutorial step={activeGuide} onAcknowledge={id=>{if(tourScope){if(tourIndex+1<getGuideSteps(tourScope).length)setTourIndex(tourIndex+1);else setTourScope(null);}else void dispatch({kind:'guideSeen',id})}} onHelp={()=>openHelp()}/>{helpOpen&&<HelpGuide scope={scope??'settings'} onClose={()=>setHelpOpen(false)} onStartGuide={next=>{setTourScope(next);setTourIndex(0);setHelpOpen(false);}}/>}</>;
+  const tutorialOverlay=<><GuidedTutorial step={activeGuide} onAcknowledge={id=>{if(tourScope){if(tourIndex+1<getGuideSteps(tourScope).length)setTourIndex(tourIndex+1);else setTourScope(null);}else if(autoTour){if(autoTour.index+1<getGuideSteps(autoTour.scope).length)setAutoTour({...autoTour,index:autoTour.index+1});else setAutoTour(null);void dispatch({kind:'guideSeen',id});}}} onDismiss={activeGuide?.actionLabel?()=>{setAutoTour(null);setTourScope(null);}:undefined} onHelp={()=>openHelp()}/>{helpOpen&&<HelpGuide scope={scope??'settings'} onClose={()=>setHelpOpen(false)} onStartGuide={next=>{setTourScope(next);setTourIndex(0);setHelpOpen(false);}}/>}</>;
   if(ready && journey && (!journey.introComplete || replayIntro))return <Introduction name={p.name} avatar={journey.avatar} onDone={()=>{setReplayIntro(false);if(!journey.introComplete)void dispatch({kind:'completeIntro'})}}/>;
   if (!ready)
     return (
@@ -800,8 +805,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                   >
                     <button
                       aria-pressed={camera}
-                      disabled={b.turn === "exercise"}
-                      onClick={() => C(true)}
+                      onClick={()=>void useCameraMode()}
                     >
                       Camera mode
                     </button>
@@ -835,6 +839,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                     }
                     progress={b.progress}
                     mode={camera ? "camera" : "manual"}
+                    onRequestCameraMode={()=>void useCameraMode()}
                     muted={muted}
                     paused={b.paused || pauseRequested}
                     sessionComplete={Boolean(
@@ -1249,9 +1254,11 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                     View exercises & starting positions
                   </button>
                   <div className="attack-grid">
-                    {available(p).map((a) => (
+                    {sortedAttacks(p,true).map((a) => (
                       <button
                         key={a.id}
+                        disabled={!available(p).some(move=>move.id===a.id)}
+                        aria-pressed={p.equipped.includes(a.id)}
                         className={
                           "attack-card " +
                           a.type +
@@ -1283,11 +1290,12 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                           {iconType(a.type)}
                           <small>
                             {p.equipped.includes(a.id)
-                              ? "✓ equipped"
-                              : "available"}
+                              ? `✓ Slot ${p.equipped.indexOf(a.id)+1} · equipped`
+                              : available(p).some(move=>move.id===a.id)?"available":"Locked"}
                           </small>
                         </span>
                         <strong>{a.name}</strong>
+                        {!available(p).some(move=>move.id===a.id)&&<em>{unlockDescription[a.id]}</em>}
                         <small>
                           {a.description}
                           <br />
@@ -1406,7 +1414,8 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                   ))}
                 </>
               )}
-              {panel === "devices" && (
+              {panel === "devices" && adventure.snapshot.testOnly && <p>This admin adventure is local for testing. Cloud linking is disabled; remove it from the save menu when finished.</p>}
+              {panel === "devices" && !adventure.snapshot.testOnly && (
                 <DevicePanel
                   localSaveId={localSaveId}
                   onOpenCloud={async (saveId) => {
@@ -1640,6 +1649,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                   target={quest.target}
                   progress={quest.progress}
                   mode={camera ? "camera" : "manual"}
+                    onRequestCameraMode={()=>void useCameraMode()}
                   muted={muted}
                   paused={pauseRequested}
                   sessionComplete={quest.progress >= quest.target}

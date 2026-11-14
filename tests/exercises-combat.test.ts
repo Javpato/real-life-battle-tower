@@ -13,6 +13,7 @@ import {
 import type { ExerciseUnit } from "../src/core/contracts";
 function battle(attack = "squat") {
   let s = initialAdventure();
+  s.player.unlockedAttacks=[...(s.player.unlockedAttacks??[]),attack];
   if (attack !== "squat")
     s = applyAdventureCommand(s, { kind: "equip", attackIds: [attack] });
   s = applyAdventureCommand(s, {

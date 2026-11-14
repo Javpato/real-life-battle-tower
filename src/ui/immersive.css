@@ -2265,3 +2265,10 @@
 .resident-story .profile-portrait { float:left; width:76px; height:100px; margin-right:18px; }
 .resident-story::after { content:''; display:block; clear:both; }
 .journal-guide-help { position:fixed; z-index:220; bottom:12px; right:18px; border:1px solid #baa16e; border-radius:7px; background:#203f35; color:#fff1ce; padding:9px 13px; font:600 13px system-ui; }
+
+/* Equipped moves are unmistakable without relying on color alone. */
+.attack-card.equipped {border:3px solid #ffe49b!important;background:linear-gradient(125deg,#426b48,#234d42)!important;box-shadow:0 0 0 2px #a77f38,0 0 22px #ffe09955,inset 0 0 18px #e9d08022!important;color:#fff6d8!important}
+.attack-card.equipped strong {color:#fff2ab!important}.attack-card[disabled] {opacity:.65;filter:saturate(.55)}.attack-card em{font-size:13px;line-height:1.4;color:#eedca4}
+.immersive-game.is-series.input-camera .adventure-sidebar {width:auto!important;min-width:0!important}
+.immersive-game.is-series.input-camera .exercise-camera-stage {grid-template-columns:minmax(0,1.3fr) minmax(240px,1fr)}
+@media(max-width:900px){.immersive-game.is-series.input-camera .exercise-camera-stage {grid-template-columns:minmax(0,1fr) minmax(180px,.9fr)}}

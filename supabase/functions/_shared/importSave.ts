@@ -5,6 +5,7 @@ import {attacks} from './game.ts';
 export function validateLocalImport(value:unknown):AdventureSnapshot{
  if(!value||typeof value!=='object')throw Error('INVALID_LOCAL_SAVE');
  const s=structuredClone(value) as AdventureSnapshot,p=s.player;
+ if(s.testOnly)throw Error('TEST_SAVE_LOCAL_ONLY');
  if(!p||s.battle||s.quest)throw Error('FINISH_CURRENT_ACTIVITY');
  const integer=(n:unknown,max=10000000)=>Number.isSafeInteger(n)&&Number(n)>=0&&Number(n)<=max;
  if(typeof p.name!=='string'||!p.name.trim()||p.name.length>20||!['easy','medium','hard'].includes(p.difficulty))throw Error('INVALID_LOCAL_CHARACTER');
@@ -17,5 +18,6 @@ export function validateLocalImport(value:unknown):AdventureSnapshot{
  if(Object.entries(p.upgrades).some(([id,n])=>!attacks.some(a=>a.id===id)||n>4))throw Error('INVALID_LOCAL_UPGRADE');
  if(s.journey&&(!['male','female'].includes(s.journey.avatar)||typeof s.journey.introComplete!=='boolean'||!integer(s.journey.tutorialStage,6)||!integer(s.journey.playSeconds,100000000)))throw Error('INVALID_LOCAL_JOURNEY');
  if(s.journey?.guide&&(![1].includes(s.journey.guide.version)||!strings(s.journey.guide.completed,30)||!strings(s.journey.guide.seen,200)))throw Error('INVALID_LOCAL_GUIDE');
+ if(p.unlockedAttacks&&(!strings(p.unlockedAttacks,attacks.length)||p.unlockedAttacks.some(id=>!attacks.some(a=>a.id===id))))throw Error('INVALID_LOCAL_LOADOUT');
  return normalizeAdventure({player:p,battle:null,quest:null,journey:s.journey});
 }

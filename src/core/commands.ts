@@ -1,11 +1,11 @@
-import {initialPlayer,available,attackFor,enemyFor,startBattle,beginAttack,acceptUnit,cancelSeries,enemyTurn,win,lose,reward,questTarget,type Player,type Battle} from './game';
+import {initialPlayer,attacks,unlockedAttackIds,available,attackFor,enemyFor,startBattle,beginAttack,acceptUnit,cancelSeries,enemyTurn,win,lose,reward,questTarget,type Player,type Battle} from './game';
 import type {Element,ExerciseId,ExerciseUnit} from './contracts';
 import {initialSpawn,resolveWorldPosition,resolvePortal,WORLD_MAPS,type WorldPosition} from './worldMaps';
 export const GUIDE_BASICS=['move','turn','door','talk','close','inventory','map','journal'] as const;
 export type GuideProgress={version:1;completed:string[];seen:string[]};
 export type Journey={guide?:GuideProgress;avatar:'male'|'female';introComplete:boolean;tutorialStage:number;location:WorldPosition;playSeconds:number};
 export type QuestSession={id:string;exercise:ExerciseId;target:number;progress:number;seen:string[];side?:'left'|'right'};
-export type AdventureSnapshot={player:Player;battle:Battle|null;quest:QuestSession|null;journey?:Journey};
+export type AdventureSnapshot={testOnly?:boolean;player:Player;battle:Battle|null;quest:QuestSession|null;journey?:Journey};
 export type AdventureCommand=
  |{kind:'guideEvent';event:string}|{kind:'guideSeen';id:string}|{kind:'startTutorialBattle'}|{kind:'completeIntro'}|{kind:'setTutorial';stage:number}|{kind:'location';mapId:string;x:number;y:number;facing:WorldPosition['facing']}|{kind:'portal';portalId:string}|{kind:'playTime';seconds:number}
  |{kind:'initialize'}|{kind:'move';x:number;y:number}|{kind:'rename';name:string}|{kind:'setDifficulty';difficulty:Player['difficulty']}
@@ -22,6 +22,8 @@ const prices={potion:15,shield:12,boost:20};
 export const initialAdventure=():AdventureSnapshot=>({player:initialPlayer(),battle:null,quest:null});
 export function normalizeAdventure(snapshot:AdventureSnapshot,legacy=true):AdventureSnapshot {
  const s=structuredClone(snapshot);s.quest??=null;
+ if(!s.player.unlockedAttacks)s.player.unlockedAttacks=[...new Set([...attacks.filter(a=>!['quake','nova','wings'].includes(a.id)).map(a=>a.id),...s.player.equipped,...Object.keys(s.player.upgrades)])];
+
  s.journey??={avatar:'male',introComplete:legacy,tutorialStage:legacy?6:0,location:legacy?resolveWorldPosition({mapId:'starter_town',...WORLD_MAPS.starter_town.spawns.safe}):initialSpawn(),playSeconds:0};
  s.journey.guide??={version:1,completed:s.journey.tutorialStage>=6?[...GUIDE_BASICS]:s.journey.tutorialStage>=2?['move','turn','door','talk','close']:s.journey.tutorialStage>=1?['move','turn','door']:[],seen:[]};
  s.journey.location=resolveWorldPosition(s.journey.location);if(s.journey.location.mapId==='rival_arena'&&s.player.badges.length<3)s.journey.location=resolveWorldPosition({mapId:'rival_town'});return s;
