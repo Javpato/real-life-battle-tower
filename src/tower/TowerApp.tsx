@@ -38,6 +38,7 @@ export default function TowerApp({onJournal}:{onJournal:(saveId:string)=>void}){
  const cameraActive=!!series&&!sessionComplete&&!series.paused&&!localPause&&confirm===null&&(activity?.kind==='trial'||activity?.kind==='workout'&&activity.status==='active'||run?.battle?.turn==='exercise');
  const previousActivity=useRef(activity?.kind);
  async function send(command:TowerCommand){const ok=await tower.send(command);if(ok)setMessage('');return ok}
+ useEffect(()=>{setEntries([]);setEditingId(null);setRoutineName('My training route');setShowPhone(false)},[tower.activeSlot,save?.debug]);
  useEffect(()=>{if(opening!=='logo')return;const t=setTimeout(()=>setOpening('title'),1800);return()=>clearTimeout(t)},[opening]);
  useEffect(()=>{if(save||!['logo','title'].includes(opening))return;const advance=(e:KeyboardEvent)=>{if(e.repeat||['Tab','Shift','Control','Alt','Meta'].includes(e.key))return;setOpening(opening==='logo'?'title':'slots')};window.addEventListener('keydown',advance);return()=>window.removeEventListener('keydown',advance)},[opening,save]);
  useEffect(()=>{const f=()=>setFullscreen(!!document.fullscreenElement);document.addEventListener('fullscreenchange',f);return()=>document.removeEventListener('fullscreenchange',f)},[]);
