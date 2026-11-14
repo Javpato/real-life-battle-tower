@@ -38,7 +38,7 @@ function historyEntry(raw:unknown):HistoryEntry{
  return out;
 }
 /** Explicit owner-only import into an empty cloud save. Endpoint enforces emptiness/lease.
- * Schema 1 only; this is not a migration of the removed RPG progression.
+ * Battle Tower schemas 1 and 2 only; removed adventure RPG snapshots remain unsupported.
  * Pure reconstruction prevents unknown nested properties entering canonical storage.
  */
 export function validateTowerImport(raw:unknown):PlayerSave{

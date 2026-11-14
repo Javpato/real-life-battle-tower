@@ -19,8 +19,8 @@ function cycle(d:ExerciseDetector,base=0,interrupt?:'hidden'|'stale'|'pause'|'ca
 }
 describe('observed full-cycle timing for Flash',()=>{
  for(const id of ['squat','pushup'] as ExerciseId[])it(`${id} reports movement onset through stable return, not the previous repetition gap`,()=>{
-  const d=new ExerciseDetector(id,'cycle');const first=cycle(d)[0];expect(first).toBeDefined();expect(first.cycle).toEqual({startedAt:300,endedAt:1700,uninterrupted:true});
-  d.pause();const second=cycle(d,120000)[0];expect(second.cycle).toEqual({startedAt:120300,endedAt:121700,uninterrupted:true});
+  const d=new ExerciseDetector(id,'cycle');const first=cycle(d)[0];expect(first).toBeDefined();expect(first.cycle).toMatchObject({startedAt:300,endedAt:1700,uninterrupted:true});expect(first.cycle?.clockId).toBeTruthy();
+  d.pause();const second=cycle(d,120000)[0];expect(second.cycle).toMatchObject({startedAt:120300,endedAt:121700,uninterrupted:true});expect(second.cycle?.clockId).toBe(first.cycle?.clockId);
  });
  for(const condition of ['hidden','stale'] as const)it(`retained repetition after ${condition} tracking cannot earn speed evidence`,()=>{
   const u=cycle(new ExerciseDetector('squat','cycle'),0,condition)[0];expect(u).toBeDefined();expect(u.cycle?.uninterrupted).toBe(false);

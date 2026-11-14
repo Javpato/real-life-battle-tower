@@ -14,14 +14,14 @@ const LEGACY_SKILL_IDS=new Set(['mini-squat','squat','pause-squat','assisted-lun
 export const isLegacySkill=(id:string)=>LEGACY_SKILL_IDS.has(id);
 export const FLASH_SKILLS=['mini-squat','squat','knee-pushup','pushup'] as const;
 export function trialRequirement(id:string):number{
- const skill=SKILL_BY_ID[id];if(!skill)throw Error('UNKNOWN_SKILL');
+ const skill=Object.hasOwn(SKILL_BY_ID,id)?SKILL_BY_ID[id]:undefined;if(!skill)throw Error('UNKNOWN_SKILL');
  let depth=0,parent=skill.prerequisite;const seen=new Set([id]);
  while(parent){if(seen.has(parent))throw Error('PREREQUISITE_CYCLE');seen.add(parent);depth++;parent=SKILL_BY_ID[parent]?.prerequisite??null;}
  return (skill.unit==='seconds'?[6,10,15]:[4,6,8])[Math.min(2,depth)];
 }
 export const canLearnSkill=(save:PlayerSave,id:string)=>canAttemptTrial(save,id)&&(!!save.skills[id]?.unlocked||save.debug||(save.progression?.trialTokens??0)>0);
 function cycleDuration(u:ExerciseUnit):number|null{
- const c=u.cycle;if(!u.verified||u.quality<.8||!c?.uninterrupted||!Number.isFinite(c.startedAt)||!Number.isFinite(c.endedAt)||c.startedAt<0||c.endedAt>u.timestamp||c.endedAt-c.startedAt<1000||c.endedAt-c.startedAt>8000)return null;
+ const c=u.cycle;if(c?.clockId!==undefined&&(typeof c.clockId!=='string'||!c.clockId.length||c.clockId.length>200))return null;if(!u.verified||u.quality<.8||c?.uninterrupted!==true||!Number.isFinite(c.startedAt)||!Number.isFinite(c.endedAt)||c.startedAt<0||c.endedAt!==u.timestamp||c.endedAt-c.startedAt<1000||c.endedAt-c.startedAt>8000)return null;
  return c.endedAt-c.startedAt;
 }
 function requireRule(ok:unknown,message:string):asserts ok {if(!ok)throw Error(message);}
@@ -43,7 +43,7 @@ export function normalizeWorkoutEntries(_s:PlayerSave,entries:WorkoutEntry[]):Wo
  requireRule(Array.isArray(entries)&&entries.length>0&&entries.length<=100,'INVALID_WORKOUT');
  const expanded:WorkoutEntry[]=[];
  for(const entry of entries){
-  const skill=SKILL_BY_ID[entry.skillId];requireRule(skill,'UNKNOWN_SKILL');
+  const skill=Object.hasOwn(SKILL_BY_ID,entry.skillId)?SKILL_BY_ID[entry.skillId]:undefined;requireRule(skill,'UNKNOWN_SKILL');
   requireRule(Number.isSafeInteger(entry.target)&&entry.target>=1&&entry.target<=1000&&(!skill.alternating||entry.target%2===0),'INVALID_WORKOUT_TARGET');
   const limit=skill.unit==='seconds'?30:12;
   for(let remaining=entry.target;remaining>0;remaining-=limit){expanded.push({skillId:entry.skillId,target:Math.min(limit,remaining)});requireRule(expanded.length<=100,'WORKOUT_TOO_MANY_SERIES');}
@@ -120,11 +120,13 @@ export function applyCommand(save:PlayerSave,command:TowerCommand,context:Engine
   if(series.paused||series.progress>=series.target||series.seen.includes(u.id))return;
   if(activity.kind==='trial'&&activity.completed||activity.kind==='tower'&&(activity.status!=='battle'||activity.battle?.turn!=='exercise')||activity.kind==='workout'&&activity.status!=='active')return;
   if(skill.alternating&&(!u.side||u.side===series.side))return;
-  const cycle=cycleDuration(u);
+  const cycle=cycleDuration(u),clock=u.cycle?.clockId??'legacy-clock';
+  const previousEnd=series.cycleEnds&&Object.hasOwn(series.cycleEnds,clock)?series.cycleEnds[clock]:undefined;
+  if(cycle!==null&&previousEnd!==undefined&&u.cycle!.startedAt<previousEnd)return;
   if(activity.kind==='trial'&&activity.trialKind==='flash'&&u.verified){if(cycle===null)return;if(activity.flashStage==='test'&&activity.cadenceMs!==undefined&&(cycle<activity.cadenceMs*.75||cycle>activity.cadenceMs*1.25))return;}
   // Unsupported variants can be practiced manually but cannot claim camera verification.
   requireRule(!u.verified||skill.detector==='supported','VARIANT_REQUIRES_MANUAL');
-  series.seen.push(u.id);series.progress++;series.side=u.side;
+  series.seen.push(u.id);series.progress++;series.side=u.side;if(cycle!==null)series.cycleEnds={...series.cycleEnds,[clock]:u.cycle!.endedAt};
  if(u.verified)series.verified++;else series.manual++;
  observeSeries(series,skill,u);
   if(activity.kind!=='workout')credit(s,skill.id,u.verified);

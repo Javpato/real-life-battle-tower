@@ -63,6 +63,19 @@ describe('v2 progression and resumable trials',()=>{
  });
 });
 describe('Flash evidence',()=>{
+ it('rejects replayed and overlapping cycles even with new event IDs, while allowing a fresh detector clock',()=>{
+  let s=initialSave();s.progression!.flashTokens=1;s=send(s,{kind:'startFlashTrial',skillId:'mini-squat'});
+  const unit:ExerciseUnit={id:'first',exerciseId:'squat',quality:.95,confidence:.95,verified:true,timestamp:3000,cycle:{clockId:'detector-A',startedAt:1000,endedAt:3000,uninterrupted:true}};
+  const accept=(u:ExerciseUnit)=>{s=send(s,{kind:'unit',sessionId:activeSeries(s)!.id,unit:u});};
+  accept(unit);accept({...unit,id:'replayed'});accept({...unit,id:'overlapping',timestamp:4000,cycle:{...unit.cycle!,startedAt:2000,endedAt:4000}});expect(activeSeries(s)!.progress).toBe(1);
+  s=JSON.parse(JSON.stringify(s));accept({...unit,id:'after-reload',cycle:{...unit.cycle!,clockId:'detector-B'}});expect(activeSeries(s)!.progress).toBe(2);
+  accept({...unit,id:'old-detector-replay'});expect(activeSeries(s)!.progress).toBe(2);
+ });
+ it('manual intents ignore caller-supplied verification and cadence fields',()=>{
+  let s=initialSave();s.progression!.flashTokens=1;s=send(s,{kind:'startFlashTrial',skillId:'mini-squat'});
+  s=send(s,{kind:'manualUnit',sessionId:activeSeries(s)!.id,verified:true,cycle:{startedAt:1,endedAt:2001,uninterrupted:true}} as TowerCommand);
+  expect(activeSeries(s)).toMatchObject({verified:0,manual:1});expect(s.activity.kind==='trial'&&s.activity.referenceCycles).toEqual([]);
+ });
  it('requires a boss opportunity and known compatible skill',()=>{
   expect(()=>send(initialSave(),{kind:'startFlashTrial',skillId:'mini-squat'})).toThrow('TRIAL_LOCKED');
   let s=winAt(initialSave(),5);s=send(s,{kind:'chooseBossReward',choice:'flash'});s=send(s,{kind:'startFlashTrial',skillId:'mini-squat'});expect(activeSeries(s)!.target).toBe(9);
@@ -82,6 +95,25 @@ describe('Flash evidence',()=>{
  });
 });
 describe('determinism and migration',()=>{
+ it('rejects inherited catalog property names without changing the save',()=>{
+  for(const id of ['__proto__','constructor','toString']){
+   const s=initialSave(),before=structuredClone(s);expect(()=>send(s,{kind:'startWorkout',entries:[{skillId:id,target:1}]})).toThrow('UNKNOWN_SKILL');expect(s).toEqual(before);
+   expect(()=>trialRequirement(id)).toThrow('UNKNOWN_SKILL');
+  }
+ });
+ it('preserves independent old slot data and migration is idempotent',()=>{
+  const old=Array.from({length:3},(_,i)=>{const s=initialSave(`Player ${i}`);s.version=1;delete s.progression;delete s.flashEquipped;s.loadout=[s.loadout[i]];s.records.endless={bestFloor:i+1,bestVerifiedFloor:0,runs:i+2,wins:0};return s;});
+  const before=structuredClone(old),migrated=old.map(migrateSave);expect(old).toEqual(before);
+  for(let i=0;i<3;i++){expect(migrated[i].name).toBe(before[i].name);expect(migrated[i].records).toEqual(before[i].records);expect(migrated[i].loadout[0]).toBe(before[i].loadout[0]);expect(migrated[i].loadout).toHaveLength(4);expect(migrateSave(migrated[i])).toEqual(migrated[i]);}
+ });
+ it('caps fully boosted Flash damage at each boss phase and never skips a phase',()=>{
+  let s=initialSave('Boosted','male',true);s.progression!.flashSkills=['squat'];s.progression!.flashCadence.squat=2000;s.flashEquipped=['squat'];s.loadout=['squat','pushup','birddog','superman'];s.specialization='leg';s=send(s,{kind:'startRun',mode:'endless',floor:100});run(s).powerUps={squat:5};s=send(s,{kind:'startFloor'});
+  for(let phase=0;phase<3;phase++){
+   s=send(s,{kind:'beginAttack',skillId:'squat'});run(s).battle!.enemyHp=run(s).battle!.enemy.thresholds[phase]+.01;
+   s=camera(s,phase);expect(run(s).battle!.phase).toBe(phase);expect(run(s).battle!.lastDamage).toBeCloseTo(.01);expect(run(s).battle!.enemyHp).toBe(run(s).battle!.enemy.thresholds[phase]);
+   if(phase<2){expect(run(s).battle!.turn).toBe('transform');s=send(s,{kind:'continuePhase'});s=send(s,{kind:'resolveEnemy'});}else expect(run(s).battle!.turn).toBe('won');
+  }
+ });
  it('generates 20 boss identities in a repeatable centennial cycle and bounded high floors',()=>{
   expect(new Set(Array.from({length:20},(_,i)=>generateFloor(7,(i+1)*5).artId)).size).toBe(20);
   expect(generateFloor(7,95).artId).toBe('boss-19');expect(generateFloor(7,100).artId).toBe('boss-20');expect(generateFloor(7,105).artId).toBe('boss-01');expect(generateFloor(7,200).artId).toBe('boss-20');

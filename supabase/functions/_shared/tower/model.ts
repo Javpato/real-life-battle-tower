@@ -8,7 +8,7 @@ export type Skill = {
 };
 export type SkillProgress={unlocked:boolean; mastery:number; totalUnits:number; verifiedUnits:number; manualUnits:number; trialVerification:'verified'|'manual'|'mixed'|null};
 export type SeriesTelemetry={qualityCount:number;qualitySum:number;qualitySquares:number;qualityMin:number;observedSeconds:number;intervals:number;lastTimestamp?:number};
-export type Series={id:string;skillId:string;target:number;progress:number;seen:string[];side?:'left'|'right';verified:number;manual:number;manualFactor:number;paused:boolean;telemetry?:SeriesTelemetry};
+export type Series={id:string;skillId:string;target:number;progress:number;seen:string[];side?:'left'|'right';verified:number;manual:number;manualFactor:number;paused:boolean;cycleEnds?:Record<string,number>;telemetry?:SeriesTelemetry};
 export type TowerEnemy={id:string;name:string;title:string;artId:string;hp:number;attack:number;defense:number;speed:number;phases:Element[][];thresholds:number[];boss:boolean};
 export type TowerBattle={id:string;enemy:TowerEnemy;enemyHp:number;playerHp:number;maxHp:number;phase:number;turn:'player'|'exercise'|'enemy'|'transform'|'won'|'lost';series:Series|null;defending:boolean;fatigue:Record<Element,number>;rng:number;log:string;hitSerial:number;lastDamage:number;verified:number;manual:number};
 export type RunMode='endless'|'challenge';

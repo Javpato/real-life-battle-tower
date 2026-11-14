@@ -1131,6 +1131,7 @@ export class ExerciseDetector {
       // Full movement onset -> observed stable return, never inter-rep gaps.
       ...((this.exerciseId === 'squat' || this.exerciseId === 'pushup') &&
         !this.estimatedCycle && !o.estimated ? {cycle: {
+          clockId: this.prefix,
           startedAt: this.start,
           endedAt: timestamp,
           uninterrupted: this.cycleUninterrupted,
