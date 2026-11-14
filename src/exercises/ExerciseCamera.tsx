@@ -587,13 +587,17 @@ export default function ExerciseCamera(props: Props) {
       ? "paused"
       : status;
   const hudMessage =
-    !transportInactive && inactive
+    camera.status === "off"
       ? props.mode === "manual"
-        ? "Manual mode · preview only. No camera repetitions are credited."
-        : paused || props.paused
-          ? "Paused. Your completed units are kept."
-          : "Preview only between turns. Choose an exercise to begin."
-      : message;
+        ? "Manual mode is unverified. Enable the camera for a preview if you wish."
+        : "Enable the camera, then follow the starting position. Start now is available when the camera is ready."
+      : !transportInactive && inactive
+        ? props.mode === "manual"
+          ? "Manual mode · preview only. No camera repetitions are credited."
+          : paused || props.paused
+            ? "Paused. Your completed units are kept."
+            : "Preview only between turns. Choose an exercise to begin."
+        : message;
   const mirrored =
     (camera.facingMode ?? selection.facingMode) !== "environment";
   const guide = EXERCISE_GUIDES[props.exerciseId];

@@ -1,6 +1,6 @@
 # Everstride — Real-Life RPG
 
-An original pixel village, turn-based exercise combat, and a private nutrition journal. Built for Javpato’s girlfriend and Uriel’s brother. English UI; no generative nutrition AI. This is a working implementation with explicit unfinished integrations, not a claim that every master-spec item has shipped. See QA.md.
+An original pixel village, turn-based exercise combat, and a private nutrition journal. Built for Javpato’s girlfriend and Uriel’s brother. English UI; no generative nutrition AI. This is a working implementation with explicit unfinished integrations, not a claim that every master-spec item has shipped. See QA.md and docs/INTERFACE.md.
 
 Play the current public build: https://everstride-real-life-rpg.transformacion801587.chatgpt.site
 
@@ -22,7 +22,9 @@ The project has its own Git repository; do not use the parent workspace reposito
 
 WASD/arrows move; hold Shift to run; E/Enter interacts with a nearby villager. Touch arrows and interaction button are also available. Escape pauses combat/opens the menu. Camera is optional and manual units are clearly marked unverified. Earn three gym badges in any order, then visit Rowan at the summit. The Rest House heals for free; supplies and skills are in the shop. The journal is available from the header and does not award progress for eating or losing weight.
 
-Each camera exercise offers a skippable demonstration, explicit starting position, short framing check, countdown and local tracking. You can also choose Start without automatic calibration; that starts evaluation but never fabricates missing movement. Camera controls remain available across pause, manual mode and turns. Pause indefinitely. Canceling a series keeps its damage and consumes the turn; pausing does not. Detection is not a medical assessment. Camera frames stay on device; physical testing remains required.
+The adventure fills the viewport. Use the expand icon in the top HUD for browser fullscreen; Escape or the same icon exits. Exploration, battle commands and exercise are separate spatial scenes. Inventories and settings open as RPG overlays. In battle choose Attack, then one of your four equipped skills; the cards show required units, level, type effectiveness and STAB. Camera controls remain available from the top HUD between turns.
+
+Each camera exercise offers a skippable demonstration, explicit starting position, short framing check, countdown and local tracking. You can also choose Start now (start without automatic calibration); that starts evaluation but never fabricates missing movement. Camera controls remain available across pause, manual mode and turns. Pause indefinitely. Canceling a series keeps its damage and consumes the turn; pausing does not. Detection is not a medical assessment. Camera frames stay on device; physical testing remains required.
 
 The Exercise guide shows all nine basic exercises. Chair sit-to-stand, wall push-ups and glute bridges are available in Satchel & skills, alongside the original six exercises. You can equip any four skills between encounters. New detailed PNG atlases, directions and replacement instructions are listed in ASSET_GUIDE.md.
 
@@ -53,7 +55,7 @@ cd android
 ./gradlew assembleDebug
 ```
 
-The packaged demonstration APK is `releases/everstride-debug.apk` (ignored by Git). Rebuilding produces `android/app/build/outputs/apk/debug/app-debug.apk`. Debug signing is for this demonstration, not a store release. Camera and activity permissions are requested when used. Web never invents steps. Health Connect and sensor availability are reported by native code. An emulator cannot validate actual walking. HealthKit is not implemented or verified in this Linux/Android environment.
+The packaged demonstration APK is `releases/everstride-debug.apk` (ignored by Git). Rebuilding produces `android/app/build/outputs/apk/debug/app-debug.apk`. Debug signing is for this demonstration, not a store release. The Android activity uses landscape immersive mode; swipe from an edge to reveal system navigation. Real-device navigation and cutout behavior remain unverified. Camera and activity permissions are requested when used. Web never invents steps. Health Connect and sensor availability are reported by native code. An emulator cannot validate actual walking. HealthKit is not implemented or verified in this Linux/Android environment.
 
 ## Verification
 
