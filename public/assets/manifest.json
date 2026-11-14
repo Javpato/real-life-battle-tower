@@ -95,6 +95,13 @@
       "height": 1024,
       "columns": 2,
       "rows": 1
+    },
+    "femaleWalk": {
+      "path": "assets/sprites/heroine-walk-v4.png",
+      "width": 1247,
+      "height": 1261,
+      "columns": 4,
+      "rows": 4
     }
   },
   "battlefield": {

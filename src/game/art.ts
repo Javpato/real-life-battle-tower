@@ -40,9 +40,10 @@ export function createWorldArt(terrain:HTMLImageElement){
 
 import type {WorldMap} from '../core/worldMaps';
 /** Native pixel terrain: deterministic decoration never changes collision geometry. */
-export function paintMap(map:WorldMap){
+export function paintMap(map:WorldMap,terrain?:HTMLImageElement){
  const c=document.createElement('canvas');c.width=map.width;c.height=map.height;const g=c.getContext('2d')!;g.imageSmoothingEnabled=false;
  const box=(x:number,y:number,w:number,h:number,color:string)=>{g.fillStyle=color;g.fillRect(Math.round(x),Math.round(y),w,h);};
+ const material=(frame:number,x:number,y:number,w:number,h:number)=>{if(!terrain)return;const size=terrain.width/2,tile=64;g.save();g.beginPath();g.rect(x,y,w,h);g.clip();for(let yy=Math.floor(y/tile)*tile;yy<y+h;yy+=tile)for(let xx=Math.floor(x/tile)*tile;xx<x+w;xx+=tile)g.drawImage(terrain,(frame%2)*size,Math.floor(frame/2)*size,size,size,xx,yy,tile,tile);g.restore();};
  if(map.kind==='interior'){
   box(0,0,c.width,c.height,'#382a35');box(16,16,352,256,'#d2b784');box(16,47,352,225,'#957052');
   for(let y=48;y<272;y+=16)for(let x=16;x<368;x+=32){box(x,y,31,15,(x+y)%3?'#aa805a':'#b78d62');box(x+3,y+3,22,1,'#c29c70');}
@@ -71,18 +72,15 @@ export function paintMap(map:WorldMap){
    box(36,54,72,58,'#604941');for(let y=59;y<110;y+=16){box(39,y,66,2,'#c5a279');for(let x=42;x<101;x+=8)box(x,y+3,5,11,['#a9ac7d','#b88073','#94acac'][(x+y)%3]);}
   }
  }else{
-  const grass=map.kind==='summit'?'#73918c':map.kind==='route'?'#4f805d':'#83a86f';box(0,0,c.width,c.height,grass);
+  const grass=map.kind==='summit'?'#73918c':map.kind==='route'?'#4f805d':'#83a86f';box(0,0,c.width,c.height,grass);material(0,0,0,c.width,c.height);
   for(let y=12;y<c.height;y+=24)for(let x=12;x<c.width;x+=24){const n=(x*31+y*17)%13;box(x+n,y+n,2,3,map.kind==='route'?'#709967':'#a5b77d');if(n%4===0)box(x+n+3,y+n+2,2,2,'#e5ca91');}
-  const path=(x:number,y:number,w:number,h:number)=>{box(x-3,y-3,w+6,h+6,'#697c58');box(x,y,w,h,map.kind==='summit'?'#b0b3a1':'#c3b285');for(let yy=y+5;yy<y+h;yy+=14)for(let xx=x+4;xx<x+w;xx+=20)box(xx,yy,7,2,'#d7c69a');};
-  if(map.kind==='town'){path(620,48,40,900);for(const y of [270,490,750,920])path(160,y,760,32);for(const x of [180,460,860])path(x,240,36,680);path(590,460,112,112);}
+  const path=(x:number,y:number,w:number,h:number)=>{box(x-3,y-3,w+6,h+6,'#697c58');box(x,y,w,h,map.kind==='summit'?'#b0b3a1':'#c3b285');material(map.kind==='summit'?2:1,x,y,w,h);for(let yy=y+5;yy<y+h;yy+=14)for(let xx=x+4;xx<x+w;xx+=20)box(xx,yy,7,2,'#d7c69a');};
+  if(map.kind==='town'){path(620,48,40,900);for(const y of [270,490,750,920])path(160,y,760,32);for(const x of [320,980])path(x,270,32,650);for(const b of map.buildings)path(b.x+b.w/2-14,b.y+b.h-2,28,54);path(550,520,180,155);material(2,552,522,176,151);}
   if(map.kind==='summit'){path(458,35,44,660);path(150,350,640,36);path(180,310,30,52);path(742,310,30,52);path(370,390,220,105);}
   if(map.kind==='route'){path(365,35,40,1080);path(285,280,180,34);path(285,280,34,460);path(285,706,120,34);path(395,910,160,34);}
-  for(const o of map.obstacles){if(map.buildings.some(b=>Math.abs(b.x+5-o.x)<4))continue;box(o.x,o.y,o.w,o.h,'#47777a');box(o.x+6,o.y+6,o.w-12,o.h-12,'#659a99');for(let y=o.y+16;y<o.y+o.h;y+=25)box(o.x+12,y,30,2,'#a3c8b1');}
-  // Boundary forest has a clear break at every route entrance.
-  const tree=(x:number,y:number)=>{box(x-3,y,6,14,'#66513b');box(x-14,y-16,28,18,'#315a49');box(x-10,y-28,20,20,'#456f50');box(x-5,y-35,10,16,'#648558');box(x-8,y-20,5,3,'#7b995e');};
-  for(let x=24;x<c.width-20;x+=30){if(!map.portals.some(p=>Math.abs(p.x+p.w/2-x)<55&&p.y<70))tree(x,45);if(!map.portals.some(p=>Math.abs(p.x+p.w/2-x)<55&&p.y>c.height-70))tree(x,c.height-9);}
-  for(let y=90;y<c.height-20;y+=32){tree(13,y);tree(c.width-13,y);}
-  if(map.kind==='route')for(let y=140;y<1000;y+=130){tree(95,y);tree(650,y+45);tree(125,y+20);tree(675,y+60);}
+  for(const o of map.obstacles){if(o.w<50||map.buildings.some(b=>Math.abs(b.x+5-o.x)<4))continue;box(o.x,o.y,o.w,o.h,'#47777a');box(o.x+6,o.y+6,o.w-12,o.h-12,'#659a99');for(let y=o.y+16;y<o.y+o.h;y+=25)box(o.x+12,y,30,2,'#a3c8b1');}
+  // Foliage and landmarks use the original transparent scenery atlas in World.
+
  }
  return c;
 }
