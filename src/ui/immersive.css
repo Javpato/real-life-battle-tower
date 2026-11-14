@@ -1,34 +1,1981 @@
 /* Spatial game shell. All rules are scoped; the journal keeps its document layout. */
-.immersive-game{--game-ink:#edf4df;--game-muted:#b7cbb0;--game-gold:#e3c783;--game-panel:#102e29ed;--game-line:#d8c98b66;--game-header:56px;--game-dock:174px;position:fixed;inset:0;width:100%;height:100dvh;overflow:hidden;background:#142d27;color:var(--game-ink);isolation:isolate}
-.immersive-game .game-header{position:absolute;inset:0 0 auto;height:var(--game-header);min-height:0;max-width:none;padding:0 20px;display:flex;gap:20px;background:linear-gradient(#102d29fa,#183831f5);border:0;border-bottom:1px solid var(--game-line);z-index:50;box-shadow:0 4px 20px #061b1a50;color:var(--game-ink)}
-.immersive-game .game-header .brand{font-size:23px;color:#f3e4b8;gap:9px}.immersive-game .game-header .brand-mark{width:34px;height:34px;border:1px solid #d5c58988;border-radius:8px;background:#254d3e;color:#f4d899;font-size:27px}.immersive-game .game-header .brand small{font-size:6px;letter-spacing:1.6px;color:#c5cda8}.immersive-game .game-header nav{height:100%;margin:0;gap:16px}.immersive-game .game-header nav button{height:100%;font-size:11px;color:#bfd1b9;border-bottom:2px solid transparent}.immersive-game .game-header nav button.active{color:#f5dda0;border-color:#e3c783}.immersive-game .header-actions{margin-left:auto;gap:10px;color:#e5e8ce}.immersive-game .save-status{color:#b7cbb0}.immersive-game .avatar{background:#d8c48d;color:#294035}
-.immersive-game .game-hud-controls{position:static;display:flex;align-items:center;gap:7px;margin-left:auto}.immersive-game .game-hud-controls button,.immersive-game .arena-toggle{min-height:36px;padding:7px 11px;border:1px solid #c9bc8066;border-radius:7px;background:#24483c;color:#f0e5bd;font-size:11px;white-space:nowrap}.immersive-game .game-hud-controls button:hover{background:#365e49;border-color:#edce8b}.immersive-game button:focus-visible{outline:3px solid #ffe1a1;outline-offset:3px}
-.immersive-game .game-main{position:absolute;inset:var(--game-header) 0 0;margin:0;padding:0!important;width:100%;max-width:none;min-height:0;overflow:hidden}.immersive-game .game-title,.immersive-game .world-toolbar,.immersive-game .world-footer,.immersive-game .world-caption{display:none!important}.immersive-game .game-layout,.immersive-game .game-layout.is-battle,.immersive-game .game-layout.is-exercising{position:absolute;inset:0;display:block!important;min-height:0;gap:0;margin:0}.immersive-game .world-card{position:absolute;inset:0;width:100%;height:100%;min-width:0;border:0;border-radius:0;background:transparent;overflow:hidden;box-shadow:none}.immersive-game .world-card>fieldset{position:relative;width:100%;height:100%;min-height:0;margin:0!important}.immersive-game .world-frame{position:absolute;inset:0;width:100%;height:100%;min-height:0;max-height:none;background:#31543b}.immersive-game .world-frame>div:first-child,.immersive-game .world-frame>div:first-child>div:first-child{height:100%!important;min-height:0!important}.immersive-game .world-region-label{display:none}.immersive-game .world-touch-pad{bottom:86px!important}.immersive-game .world-interact{bottom:88px!important}.immersive-game.mode-explore .adventure-sidebar{display:none!important}
+.immersive-game {
+  --game-ink: #edf4df;
+  --game-muted: #b7cbb0;
+  --game-gold: #e3c783;
+  --game-panel: #102e29ed;
+  --game-line: #d8c98b66;
+  --game-header: 56px;
+  --game-dock: 174px;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: #142d27;
+  color: var(--game-ink);
+  isolation: isolate;
+}
+.immersive-game .game-header {
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--game-header);
+  min-height: 0;
+  max-width: none;
+  padding: 0 20px;
+  display: flex;
+  gap: 20px;
+  background: linear-gradient(#102d29fa, #183831f5);
+  border: 0;
+  border-bottom: 1px solid var(--game-line);
+  z-index: 50;
+  box-shadow: 0 4px 20px #061b1a50;
+  color: var(--game-ink);
+}
+.immersive-game .game-header .brand {
+  font-size: 23px;
+  color: #f3e4b8;
+  gap: 9px;
+}
+.immersive-game .game-header .brand-mark {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #d5c58988;
+  border-radius: 8px;
+  background: #254d3e;
+  color: #f4d899;
+  font-size: 27px;
+}
+.immersive-game .game-header .brand small {
+  font-size: 6px;
+  letter-spacing: 1.6px;
+  color: #c5cda8;
+}
+.immersive-game .game-header nav {
+  height: 100%;
+  margin: 0;
+  gap: 16px;
+}
+.immersive-game .game-header nav button {
+  height: 100%;
+  font-size: 11px;
+  color: #bfd1b9;
+  border-bottom: 2px solid transparent;
+}
+.immersive-game .game-header nav button.active {
+  color: #f5dda0;
+  border-color: #e3c783;
+}
+.immersive-game .header-actions {
+  margin-left: auto;
+  gap: 10px;
+  color: #e5e8ce;
+}
+.immersive-game .save-status {
+  color: #b7cbb0;
+}
+.immersive-game .avatar {
+  background: #d8c48d;
+  color: #294035;
+}
+.immersive-game .game-hud-controls {
+  position: static;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+}
+.immersive-game .game-hud-controls button,
+.immersive-game .arena-toggle {
+  min-height: 36px;
+  padding: 7px 11px;
+  border: 1px solid #c9bc8066;
+  border-radius: 7px;
+  background: #24483c;
+  color: #f0e5bd;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.immersive-game .game-hud-controls button:hover {
+  background: #365e49;
+  border-color: #edce8b;
+}
+.immersive-game button:focus-visible {
+  outline: 3px solid #ffe1a1;
+  outline-offset: 3px;
+}
+.immersive-game .game-main {
+  position: absolute;
+  inset: var(--game-header) 0 0;
+  margin: 0;
+  padding: 0 !important;
+  width: 100%;
+  max-width: none;
+  min-height: 0;
+  overflow: hidden;
+}
+.immersive-game .game-title,
+.immersive-game .world-toolbar,
+.immersive-game .world-footer,
+.immersive-game .world-caption {
+  display: none !important;
+}
+.immersive-game .game-layout,
+.immersive-game .game-layout.is-battle,
+.immersive-game .game-layout.is-exercising {
+  position: absolute;
+  inset: 0;
+  display: block !important;
+  min-height: 0;
+  gap: 0;
+  margin: 0;
+}
+.immersive-game .world-card {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: hidden;
+  box-shadow: none;
+}
+.immersive-game .world-card > fieldset {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0 !important;
+}
+.immersive-game .world-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  background: #31543b;
+}
+.immersive-game .world-frame > div:first-child,
+.immersive-game .world-frame > div:first-child > div:first-child {
+  height: 100% !important;
+  min-height: 0 !important;
+}
+.immersive-game .world-region-label {
+  display: none;
+}
+.immersive-game .world-touch-pad {
+  bottom: 86px !important;
+}
+.immersive-game .world-interact {
+  bottom: 88px !important;
+}
+.immersive-game.mode-explore .adventure-sidebar {
+  display: none !important;
+}
 /* Small floating HUD panels leave the village itself in control of the screen. */
-.immersive-game .game-hud-player,.immersive-game .game-hud-objective{position:absolute;z-index:22;top:16px;border:1px solid var(--game-line);border-radius:10px;background:linear-gradient(130deg,#183d31f2,#102c28ed);box-shadow:0 5px 22px #10281b66,inset 0 1px #e1ce8b18;backdrop-filter:blur(7px);color:var(--game-ink);padding:12px 15px;pointer-events:auto}.immersive-game .game-hud-player{left:16px;width:238px;display:flex;align-items:center;gap:11px}.immersive-game .game-hud-player .profile-portrait{width:48px;height:60px;background:#57775366;border-radius:6px}.immersive-game .game-hud-player strong{font-size:16px;color:#f4e4ad}.immersive-game .game-hud-player small{font-size:10px;color:var(--game-muted)}.immersive-game .game-hud-player .hp-track{height:7px;margin:5px 0;background:#091d1b}.immersive-game .game-hud-player .hp-track span{background:linear-gradient(90deg,#65b479,#a7d082)}.immersive-game .game-hud-objective{right:16px;width:260px;font-size:12px}.immersive-game .game-hud-objective strong{display:block;color:#f4dfa7;font-size:14px;margin-bottom:5px}.immersive-game .game-hud-objective small{font-size:10px;color:var(--game-muted)}.immersive-game .game-hud-objective .type-row{gap:5px;margin-top:8px}
-.immersive-game .quick-actions{position:absolute;z-index:32;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100% - 24px);margin:0;min-height:48px;padding:5px 8px;display:flex!important;align-items:center;gap:4px;border:1px solid var(--game-line);border-radius:12px;background:#102e29ed;box-shadow:0 5px 22px #071a1a66;backdrop-filter:blur(8px)}.immersive-game .quick-actions>span{display:none}.immersive-game .quick-actions button{min-height:38px;display:flex;align-items:center;gap:7px;padding:8px 12px;border-radius:7px;color:#ebdfb8;font-size:11px}.immersive-game .quick-actions button:hover{background:#34573f;color:#fff1be}.immersive-game .quick-actions button svg{width:17px;height:17px;color:#c4dca4}
+.immersive-game .game-hud-player,
+.immersive-game .game-hud-objective {
+  position: absolute;
+  z-index: 22;
+  top: 16px;
+  border: 1px solid var(--game-line);
+  border-radius: 10px;
+  background: linear-gradient(130deg, #183d31f2, #102c28ed);
+  box-shadow:
+    0 5px 22px #10281b66,
+    inset 0 1px #e1ce8b18;
+  backdrop-filter: blur(7px);
+  color: var(--game-ink);
+  padding: 12px 15px;
+  pointer-events: auto;
+}
+.immersive-game .game-hud-player {
+  left: 16px;
+  width: 238px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.immersive-game .game-hud-player .profile-portrait {
+  width: 48px;
+  height: 60px;
+  background: #57775366;
+  border-radius: 6px;
+}
+.immersive-game .game-hud-player strong {
+  font-size: 16px;
+  color: #f4e4ad;
+}
+.immersive-game .game-hud-player small {
+  font-size: 10px;
+  color: var(--game-muted);
+}
+.immersive-game .game-hud-player .hp-track {
+  height: 7px;
+  margin: 5px 0;
+  background: #091d1b;
+}
+.immersive-game .game-hud-player .hp-track span {
+  background: linear-gradient(90deg, #65b479, #a7d082);
+}
+.immersive-game .game-hud-objective {
+  right: 16px;
+  width: 260px;
+  font-size: 12px;
+}
+.immersive-game .game-hud-objective strong {
+  display: block;
+  color: #f4dfa7;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+.immersive-game .game-hud-objective small {
+  font-size: 10px;
+  color: var(--game-muted);
+}
+.immersive-game .game-hud-objective .type-row {
+  gap: 5px;
+  margin-top: 8px;
+}
+.immersive-game .quick-actions {
+  position: absolute;
+  z-index: 32;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 24px);
+  margin: 0;
+  min-height: 48px;
+  padding: 5px 8px;
+  display: flex !important;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--game-line);
+  border-radius: 12px;
+  background: #102e29ed;
+  box-shadow: 0 5px 22px #071a1a66;
+  backdrop-filter: blur(8px);
+}
+.immersive-game .quick-actions > span {
+  display: none;
+}
+.immersive-game .quick-actions button {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border-radius: 7px;
+  color: #ebdfb8;
+  font-size: 11px;
+}
+.immersive-game .quick-actions button:hover {
+  background: #34573f;
+  color: #fff1be;
+}
+.immersive-game .quick-actions button svg {
+  width: 17px;
+  height: 17px;
+  color: #c4dca4;
+}
 /* Arena and commands occupy separate fixed regions, so controls never cover feet. */
-.immersive-game.mode-battle .quick-actions{display:none!important}.immersive-game .battle-stage{position:absolute;inset:0 0 var(--game-dock);width:100%;height:auto;min-height:0;max-height:none;aspect-ratio:auto;border:0;border-radius:0;background-size:cover;background-position:center;container-type:size;overflow:hidden}.immersive-game .battle-stage:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(#112d2930,transparent 28%,transparent 72%,#142e2933);z-index:0}.immersive-game .combat-sprite{z-index:1;filter:drop-shadow(2px 7px 1px #182a2b55)}
-.immersive-game .combat-sprite.enemy{width:clamp(125px,22cqw,245px);height:clamp(125px,22cqw,245px);left:calc(76% - clamp(62.5px,11cqw,122.5px));top:calc(47% - clamp(117px,20.6cqw,230px));right:auto;bottom:auto}.immersive-game .combat-sprite.hero{width:clamp(145px,25cqw,285px);height:clamp(145px,25cqw,285px);left:calc(26% - clamp(72.5px,12.5cqw,142.5px));bottom:13%;top:auto;transform:none}
-.immersive-game .enemy-plate,.immersive-game .hero-plate{z-index:3;background:linear-gradient(125deg,#153b31f2,#102c29ed);color:#f3eacb;border:1px solid #d2bc796e;border-radius:9px;box-shadow:0 4px 13px #09251b55;padding:10px 13px;width:228px;max-width:42%;line-height:1.15;backdrop-filter:blur(5px)}.immersive-game .enemy-plate{left:18px;top:18px}.immersive-game .hero-plate{right:18px;bottom:54px}.immersive-game .enemy-plate strong{color:#f6e2a6;font-size:22px;line-height:1.1}.immersive-game .hero-plate strong{font-size:15px;color:#f4e4b8}.immersive-game .enemy-plate small,.immersive-game .hero-plate small{font-size:10px;color:#c7d5bc}.immersive-game .enemy-plate .type-row{margin:5px 0;gap:4px}.immersive-game .hp-track{background:#0b211e}.immersive-game .enemy-plate .hp-track,.immersive-game .hero-plate .hp-track{height:7px;margin:6px 0}.immersive-game .hp-track span{background:linear-gradient(90deg,#6eb47e,#b5d985)}.immersive-game .battle-log{z-index:4;left:50%;transform:translateX(-50%);bottom:10px;width:max-content;max-width:calc(100% - 28px);padding:9px 18px;border:1px solid #d0ba7470;border-radius:8px;background:#12342ce8;box-shadow:0 3px 12px #0b291b44;color:#f2e6bf;font-size:12px;text-align:center;line-height:1.3}
-.immersive-game .battle-actions{position:absolute;inset:auto 0 0;height:var(--game-dock);padding:12px 22px;overflow:auto;z-index:10;background:linear-gradient(#193b31f8,#0f2a26);border-top:1px solid var(--game-line);color:#eef0d6;box-shadow:0 -8px 25px #0d281d55}.immersive-game .attack-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;max-width:1100px;margin:0 auto 8px}.immersive-game .attack-card{position:relative;text-align:left;min-height:84px;padding:9px 13px;background:#254c3d;border:1px solid #aab97a88;border-radius:8px;color:#f6e9bf;box-shadow:inset 0 2px #d6d89c22,0 3px #0a251f}.immersive-game .attack-card.arm{background:#594338;border-color:#c5986a}.immersive-game .attack-card.back{background:#294c54;border-color:#83b2ac}.immersive-game .attack-card:hover{filter:brightness(1.16);transform:translateY(-2px)}.immersive-game .attack-card strong{font-family:inherit;font-weight:800;font-size:16px;line-height:1.15;display:block;margin:6px 0 3px;color:#f8e7b4}.immersive-game .attack-card small{font-size:10px;color:#cfdbc2}.immersive-game .attack-card>span{display:flex;justify-content:space-between;align-items:center}.immersive-game .battle-actions>.button-row{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:0}.immersive-game .battle-actions button:not(.attack-card){min-height:35px;padding:7px 12px;color:#e6e6ca;border:1px solid #9fb58366;background:#23483b;border-radius:6px}.immersive-game .battle-actions .check{color:#e1e5c7;font-size:11px}.immersive-game .pause-message{margin:0;padding:6px;text-align:center}.immersive-game .pause-message h2{margin:0 0 5px;color:#f5df9d;font-size:23px}.immersive-game .pause-message p{margin:5px 0 10px;color:#d9dfc1;font-size:12px}
+.immersive-game.mode-battle .quick-actions {
+  display: none !important;
+}
+.immersive-game .battle-stage {
+  position: absolute;
+  inset: 0 0 var(--game-dock);
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+  background-size: cover;
+  background-position: center;
+  container-type: size;
+  overflow: hidden;
+}
+.immersive-game .battle-stage:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    #112d2930,
+    transparent 28%,
+    transparent 72%,
+    #142e2933
+  );
+  z-index: 0;
+}
+.immersive-game .combat-sprite {
+  z-index: 1;
+  filter: drop-shadow(2px 7px 1px #182a2b55);
+}
+.immersive-game .combat-sprite.enemy {
+  width: clamp(125px, 22cqw, 245px);
+  height: clamp(125px, 22cqw, 245px);
+  left: calc(76% - clamp(62.5px, 11cqw, 122.5px));
+  top: calc(47% - clamp(117px, 20.6cqw, 230px));
+  right: auto;
+  bottom: auto;
+}
+.immersive-game .combat-sprite.hero {
+  width: clamp(145px, 25cqw, 285px);
+  height: clamp(145px, 25cqw, 285px);
+  left: calc(26% - clamp(72.5px, 12.5cqw, 142.5px));
+  bottom: 13%;
+  top: auto;
+  transform: none;
+}
+.immersive-game .enemy-plate,
+.immersive-game .hero-plate {
+  z-index: 3;
+  background: linear-gradient(125deg, #153b31f2, #102c29ed);
+  color: #f3eacb;
+  border: 1px solid #d2bc796e;
+  border-radius: 9px;
+  box-shadow: 0 4px 13px #09251b55;
+  padding: 10px 13px;
+  width: 228px;
+  max-width: 42%;
+  line-height: 1.15;
+  backdrop-filter: blur(5px);
+}
+.immersive-game .enemy-plate {
+  left: 18px;
+  top: 18px;
+}
+.immersive-game .hero-plate {
+  right: 18px;
+  bottom: 54px;
+}
+.immersive-game .enemy-plate strong {
+  color: #f6e2a6;
+  font-size: 22px;
+  line-height: 1.1;
+}
+.immersive-game .hero-plate strong {
+  font-size: 15px;
+  color: #f4e4b8;
+}
+.immersive-game .enemy-plate small,
+.immersive-game .hero-plate small {
+  font-size: 10px;
+  color: #c7d5bc;
+}
+.immersive-game .enemy-plate .type-row {
+  margin: 5px 0;
+  gap: 4px;
+}
+.immersive-game .hp-track {
+  background: #0b211e;
+}
+.immersive-game .enemy-plate .hp-track,
+.immersive-game .hero-plate .hp-track {
+  height: 7px;
+  margin: 6px 0;
+}
+.immersive-game .hp-track span {
+  background: linear-gradient(90deg, #6eb47e, #b5d985);
+}
+.immersive-game .battle-log {
+  z-index: 4;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 10px;
+  width: max-content;
+  max-width: calc(100% - 28px);
+  padding: 9px 18px;
+  border: 1px solid #d0ba7470;
+  border-radius: 8px;
+  background: #12342ce8;
+  box-shadow: 0 3px 12px #0b291b44;
+  color: #f2e6bf;
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.3;
+}
+.immersive-game .battle-actions {
+  position: absolute;
+  inset: auto 0 0;
+  height: var(--game-dock);
+  padding: 12px 22px;
+  overflow: auto;
+  z-index: 10;
+  background: linear-gradient(#193b31f8, #0f2a26);
+  border-top: 1px solid var(--game-line);
+  color: #eef0d6;
+  box-shadow: 0 -8px 25px #0d281d55;
+}
+.immersive-game .attack-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  max-width: 1100px;
+  margin: 0 auto 8px;
+}
+.immersive-game .attack-card {
+  position: relative;
+  text-align: left;
+  min-height: 84px;
+  padding: 9px 13px;
+  background: #254c3d;
+  border: 1px solid #aab97a88;
+  border-radius: 8px;
+  color: #f6e9bf;
+  box-shadow:
+    inset 0 2px #d6d89c22,
+    0 3px #0a251f;
+}
+.immersive-game .attack-card.arm {
+  background: #594338;
+  border-color: #c5986a;
+}
+.immersive-game .attack-card.back {
+  background: #294c54;
+  border-color: #83b2ac;
+}
+.immersive-game .attack-card:hover {
+  filter: brightness(1.16);
+  transform: translateY(-2px);
+}
+.immersive-game .attack-card strong {
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 1.15;
+  display: block;
+  margin: 6px 0 3px;
+  color: #f8e7b4;
+}
+.immersive-game .attack-card small {
+  font-size: 10px;
+  color: #cfdbc2;
+}
+.immersive-game .attack-card > span {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.immersive-game .battle-actions > .button-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+}
+.immersive-game .battle-actions button:not(.attack-card) {
+  min-height: 35px;
+  padding: 7px 12px;
+  color: #e6e6ca;
+  border: 1px solid #9fb58366;
+  background: #23483b;
+  border-radius: 6px;
+}
+.immersive-game .battle-actions .check {
+  color: #e1e5c7;
+  font-size: 11px;
+}
+.immersive-game .pause-message {
+  margin: 0;
+  padding: 6px;
+  text-align: center;
+}
+.immersive-game .pause-message h2 {
+  margin: 0 0 5px;
+  color: #f5df9d;
+  font-size: 23px;
+}
+.immersive-game .pause-message p {
+  margin: 5px 0 10px;
+  color: #d9dfc1;
+  font-size: 12px;
+}
 /* Mounted camera drawer: CSS visibility changes never stop/recreate the stream. */
-.immersive-game.mode-battle .adventure-sidebar{display:block!important;position:absolute;z-index:30;right:14px;top:14px;bottom:calc(var(--game-dock) + 12px);width:min(480px,calc(100% - 28px));min-height:0;overflow:hidden;visibility:hidden;pointer-events:none;transform:translateX(calc(100% + 20px));transition:transform .18s ease,visibility .18s;order:initial!important}.immersive-game.mode-battle.camera-expanded .adventure-sidebar{visibility:visible;pointer-events:auto;transform:none}.immersive-game .camera-card{height:100%;min-height:0;max-height:none;padding:10px;border:1px solid var(--game-line);border-radius:12px;background:#102b27f5;box-shadow:0 8px 30px #071f1a88;overflow:auto;color:#eef4dc}.immersive-game .camera-card-meta{padding:0 2px 7px}.immersive-game .exercise-battle-strip{padding:6px;flex-wrap:wrap}.immersive-game .exercise-mode-switch{margin:5px 0;gap:6px}.immersive-game .exercise-mode-switch button{min-height:34px;font-size:12px;padding:7px 10px}.immersive-game .exercise-mode-switch small{font-size:10px}
+.immersive-game.mode-battle .adventure-sidebar {
+  display: block !important;
+  position: absolute;
+  z-index: 30;
+  right: 14px;
+  top: 14px;
+  bottom: calc(var(--game-dock) + 12px);
+  width: min(480px, calc(100% - 28px));
+  min-height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(calc(100% + 20px));
+  transition:
+    transform 0.18s ease,
+    visibility 0.18s;
+  order: initial !important;
+}
+.immersive-game.mode-battle.camera-expanded .adventure-sidebar {
+  visibility: visible;
+  pointer-events: auto;
+  transform: none;
+}
+.immersive-game .camera-card {
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  padding: 10px;
+  border: 1px solid var(--game-line);
+  border-radius: 12px;
+  background: #102b27f5;
+  box-shadow: 0 8px 30px #071f1a88;
+  overflow: auto;
+  color: #eef4dc;
+}
+.immersive-game .camera-card-meta {
+  padding: 0 2px 7px;
+}
+.immersive-game .exercise-battle-strip {
+  padding: 6px;
+  flex-wrap: wrap;
+}
+.immersive-game .exercise-mode-switch {
+  margin: 5px 0;
+  gap: 6px;
+}
+.immersive-game .exercise-mode-switch button {
+  min-height: 34px;
+  font-size: 12px;
+  padding: 7px 10px;
+}
+.immersive-game .exercise-mode-switch small {
+  font-size: 10px;
+}
 /* Active series: camera and arena become one spatial HUD, with shared safe controls. */
-.immersive-game.is-series{--game-dock:74px}.immersive-game.is-series .battle-actions{display:none}.immersive-game.is-series .series-command-dock{position:absolute;z-index:40;inset:auto 0 0;min-height:74px;height:74px;padding:10px 18px;display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(#183d31,#0e2924);border-top:1px solid var(--game-line);box-shadow:0 -4px 18px #08231d66;color:#edf2d5}.immersive-game .series-command-dock button{min-height:42px;padding:10px 18px;border-radius:8px;border:1px solid #d4c17e88;background:#325942;color:#f4e6b6;font-size:13px;font-weight:700}.immersive-game .series-command-dock .primary{background:#e8ce89;color:#20392c;border-color:#f5e1a4}.immersive-game .series-dock-title{margin-right:auto;min-width:110px;max-width:35%;font-size:12px}.immersive-game .series-dock-title strong{display:block;color:#f6dfa2;font-size:16px}.immersive-game .series-dock-title small{color:#bdd1b3;font-size:11px}.immersive-game.is-series.input-camera .battle-stage{right:60%;width:40%;bottom:74px;background-position:45% center}.immersive-game.is-series.input-camera .adventure-sidebar{left:40%;right:0;top:0;bottom:74px;width:auto;visibility:visible;pointer-events:auto;transform:none;z-index:20}.immersive-game.is-series.input-camera .camera-card{padding:8px;height:100%;overflow:hidden;border:0;border-left:1px solid #d4bf8066;border-radius:0;box-shadow:none;background:#102e29}.immersive-game.is-series .camera-card-meta{display:none}.immersive-game.is-series.input-camera .combat-sprite.enemy{width:clamp(100px,30cqw,180px);height:clamp(100px,30cqw,180px);left:calc(73% - clamp(50px,15cqw,90px));top:calc(43% - clamp(94px,28cqw,168px))}.immersive-game.is-series.input-camera .combat-sprite.hero{width:clamp(120px,36cqw,210px);height:clamp(120px,36cqw,210px);left:calc(27% - clamp(60px,18cqw,105px));bottom:17%}.immersive-game.is-series.input-camera .enemy-plate,.immersive-game.is-series.input-camera .hero-plate{width:46%;max-width:none;padding:8px}.immersive-game.is-series.input-camera .enemy-plate{left:8px;top:10px}.immersive-game.is-series.input-camera .hero-plate{right:8px;bottom:48px}.immersive-game.is-series.input-camera .enemy-plate strong{font-size:18px}.immersive-game.is-series.input-camera .battle-log{font-size:11px;padding:7px 10px;bottom:8px}.immersive-game.is-series.input-manual .adventure-sidebar{visibility:hidden;pointer-events:none;transform:translateX(calc(100% + 20px))}.immersive-game.is-series.input-manual.camera-expanded .adventure-sidebar{visibility:visible;pointer-events:auto;transform:none;bottom:86px}.immersive-game .manual-exercise-guide{position:absolute;z-index:5;left:50%;top:22%;transform:translateX(-50%);width:min(340px,38%);padding:18px 20px;border:1px solid #e2d2988c;border-radius:12px;background:#15372de8;box-shadow:0 5px 25px #163c2377;backdrop-filter:blur(5px);text-align:center;color:#eaf0d1}.immersive-game .manual-exercise-guide strong{display:block;font-size:24px;color:#f2db9e}.immersive-game .manual-exercise-guide p{font-size:13px;line-height:1.45}.immersive-game .manual-exercise-guide small{font-size:11px;color:#c4d8b9}
-@media(max-width:760px){.immersive-game{--game-header:52px;--game-dock:214px}.immersive-game .game-header{padding:0 10px;gap:10px}.immersive-game .game-header .brand{font-size:20px}.immersive-game .game-header .brand small,.immersive-game .game-header nav,.immersive-game .save-status{display:none}.immersive-game .game-header .brand-mark{width:30px;height:30px;font-size:22px}.immersive-game .header-actions{gap:7px}.immersive-game .game-hud-controls{gap:5px}.immersive-game .game-hud-controls button{padding:6px 8px;font-size:10px;min-height:34px}.immersive-game .game-hud-player{left:10px;top:10px;width:190px;padding:8px;gap:7px}.immersive-game .game-hud-player .profile-portrait{width:35px;height:47px}.immersive-game .game-hud-player strong{font-size:13px}.immersive-game .game-hud-objective{top:10px;right:10px;width:158px;padding:9px;font-size:10px}.immersive-game .game-hud-objective strong{font-size:11px}.immersive-game .game-hud-objective small{font-size:9px}.immersive-game .quick-actions{bottom:max(8px,env(safe-area-inset-bottom));padding:4px;gap:0;max-width:calc(100% - 16px)}.immersive-game .quick-actions button{font-size:9px;padding:7px;gap:4px;min-height:42px}.immersive-game .world-touch-pad{bottom:75px!important}.immersive-game .world-interact{bottom:77px!important;font-size:10px!important;max-width:54%!important}.immersive-game .attack-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-bottom:8px}.immersive-game .attack-card{min-height:62px;padding:7px 9px}.immersive-game .attack-card strong{font-size:13px;margin:3px 0}.immersive-game .attack-card small{font-size:8px}.immersive-game .attack-card .type-tag{font-size:8px;padding:2px 5px}.immersive-game .battle-actions{padding:9px 10px}.immersive-game .battle-actions>.button-row{gap:4px}.immersive-game .battle-actions button:not(.attack-card){padding:6px 8px;min-height:30px;font-size:10px}.immersive-game .battle-stage{background-position:50% center}.immersive-game .enemy-plate,.immersive-game .hero-plate{width:43%;max-width:none;padding:7px 9px}.immersive-game .enemy-plate{left:10px;top:10px}.immersive-game .enemy-plate strong{font-size:18px}.immersive-game .hero-plate{right:10px;bottom:45px}.immersive-game .hero-plate strong{font-size:12px}.immersive-game .enemy-plate small,.immersive-game .hero-plate small{font-size:9px}.immersive-game .enemy-plate .type-row{margin:3px 0}.immersive-game .combat-sprite.enemy{width:120px;height:120px;left:calc(74% - 60px);top:calc(49% - 112px)}.immersive-game .combat-sprite.hero{width:145px;height:145px;left:calc(25% - 72px);bottom:12%}.immersive-game .battle-log{font-size:10px;padding:7px 10px;bottom:8px}.immersive-game .manual-exercise-guide{top:27%;left:50%;width:calc(100% - 30px);max-width:300px;padding:12px;transform:translateX(-50%)}.immersive-game .manual-exercise-guide strong{font-size:20px}.immersive-game.is-series{--game-dock:82px}.immersive-game.is-series .series-command-dock{height:82px;min-height:82px;padding:7px 10px;gap:6px;flex-wrap:wrap;justify-content:flex-end}.immersive-game .series-command-dock button{padding:8px 10px;font-size:11px;min-height:36px}.immersive-game .series-dock-title{position:absolute;left:10px;top:10px;max-width:35%;font-size:10px}.immersive-game .series-dock-title strong{font-size:12px}.immersive-game.is-series.input-camera .battle-stage{inset:0 0 auto;width:100%;height:100px;background-position:center 42%}.immersive-game.is-series.input-camera .adventure-sidebar{left:0;top:100px;bottom:82px;right:0;width:100%}.immersive-game.is-series.input-camera .camera-card{padding:5px;border-left:0;border-top:1px solid var(--game-line)}.immersive-game.is-series.input-camera .combat-sprite{display:none}.immersive-game.is-series.input-camera .enemy-plate,.immersive-game.is-series.input-camera .hero-plate{width:42%;top:7px;bottom:auto;padding:6px 8px;background:#15352be8}.immersive-game.is-series.input-camera .enemy-plate{left:8px}.immersive-game.is-series.input-camera .hero-plate{right:8px}.immersive-game.is-series.input-camera .enemy-plate strong{font-size:14px}.immersive-game.is-series.input-camera .enemy-plate>div:first-child small{display:none}.immersive-game.is-series.input-camera .battle-log{display:none}.immersive-game.is-series.input-manual .battle-stage{bottom:82px}.immersive-game .camera-expanded .camera-card{max-height:100%}}
-@media(max-height:550px) and (orientation:landscape){.immersive-game{--game-header:46px;--game-dock:127px}.immersive-game .game-header{height:46px;padding:0 12px}.immersive-game .game-header .brand small{display:none}.immersive-game .game-hud-player{top:9px;left:10px;padding:6px 9px;width:215px}.immersive-game .game-hud-player .profile-portrait{height:42px;width:34px}.immersive-game .game-hud-objective{top:9px;right:10px;padding:8px 11px;width:240px}.immersive-game .quick-actions{min-height:38px;bottom:7px}.immersive-game .quick-actions button{min-height:30px;padding:5px 9px;font-size:10px}.immersive-game .world-touch-pad{bottom:58px!important}.immersive-game .world-interact{bottom:60px!important}.immersive-game .attack-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:6px}.immersive-game .attack-card{min-height:64px;padding:6px 10px}.immersive-game .attack-card strong{font-size:13px;margin:3px 0}.immersive-game .attack-card small{font-size:9px}.immersive-game .battle-actions{padding:7px 12px}.immersive-game .battle-actions button:not(.attack-card){min-height:28px;padding:5px 9px;font-size:10px}.immersive-game .enemy-plate,.immersive-game .hero-plate{padding:6px 9px;width:185px;max-width:31%}.immersive-game .enemy-plate{top:8px;left:10px}.immersive-game .enemy-plate strong{font-size:17px}.immersive-game .enemy-plate small,.immersive-game .hero-plate small{font-size:8px}.immersive-game .enemy-plate .type-row{margin:2px 0}.immersive-game .hero-plate{right:10px;bottom:37px}.immersive-game .battle-log{padding:5px 10px;font-size:10px;bottom:6px}.immersive-game .combat-sprite.enemy{width:125px;height:125px;left:calc(74% - 62px);top:calc(53% - 117px)}.immersive-game .combat-sprite.hero{width:135px;height:135px;left:calc(28% - 67px);bottom:10%}.immersive-game.is-series{--game-dock:58px}.immersive-game.is-series .series-command-dock{height:58px;min-height:58px;padding:7px 12px;flex-wrap:nowrap}.immersive-game .series-command-dock button{min-height:35px;padding:7px 12px;font-size:11px}.immersive-game .series-dock-title{position:static;margin-right:auto;max-width:32%}.immersive-game .series-dock-title strong{font-size:13px}.immersive-game.is-series.input-camera .battle-stage{inset:0 60% 58px 0;width:40%;height:auto}.immersive-game.is-series.input-camera .adventure-sidebar{inset:0 0 58px 40%;width:auto}.immersive-game.is-series.input-camera .combat-sprite{display:block}.immersive-game.is-series.input-camera .combat-sprite.enemy{width:95px;height:95px;left:calc(75% - 47px);top:calc(54% - 89px)}.immersive-game.is-series.input-camera .combat-sprite.hero{width:105px;height:105px;left:calc(25% - 52px);bottom:12%}.immersive-game.is-series.input-camera .enemy-plate,.immersive-game.is-series.input-camera .hero-plate{width:45%;max-width:none;padding:5px 7px}.immersive-game.is-series.input-camera .enemy-plate strong{font-size:13px}.immersive-game.is-series.input-camera .enemy-plate>div:first-child small{display:none}.immersive-game.is-series.input-camera .hero-plate{top:auto;bottom:28px}.immersive-game.is-series.input-camera .battle-log{display:block;font-size:9px;padding:4px 7px;bottom:4px}.immersive-game.is-series.input-manual .battle-stage{bottom:58px}.immersive-game .manual-exercise-guide{top:15%;width:32%;max-width:300px;padding:10px}.immersive-game .manual-exercise-guide strong{font-size:18px}.immersive-game .manual-exercise-guide p{font-size:11px;margin:5px 0}.immersive-game .manual-exercise-guide small{font-size:9px}}
-@media(max-width:380px) and (orientation:portrait){.immersive-game .game-hud-objective{top:94px;width:155px}.immersive-game .game-header .brand>span:last-child{display:none}.immersive-game .quick-actions button{font-size:8px;padding:6px}.immersive-game .attack-card strong{font-size:12px}}
-@media(prefers-reduced-motion:reduce){.immersive-game *{scroll-behavior:auto!important}.immersive-game .adventure-sidebar{transition:none}.immersive-game .attack-card:hover{transform:none}}
+.immersive-game.is-series {
+  --game-dock: 74px;
+}
+.immersive-game.is-series .battle-actions {
+  display: none;
+}
+.immersive-game.is-series .series-command-dock {
+  position: absolute;
+  z-index: 40;
+  inset: auto 0 0;
+  min-height: 74px;
+  height: 74px;
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(#183d31, #0e2924);
+  border-top: 1px solid var(--game-line);
+  box-shadow: 0 -4px 18px #08231d66;
+  color: #edf2d5;
+}
+.immersive-game .series-command-dock button {
+  min-height: 42px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 1px solid #d4c17e88;
+  background: #325942;
+  color: #f4e6b6;
+  font-size: 13px;
+  font-weight: 700;
+}
+.immersive-game .series-command-dock .primary {
+  background: #e8ce89;
+  color: #20392c;
+  border-color: #f5e1a4;
+}
+.immersive-game .series-dock-title {
+  margin-right: auto;
+  min-width: 110px;
+  max-width: 35%;
+  font-size: 12px;
+}
+.immersive-game .series-dock-title strong {
+  display: block;
+  color: #f6dfa2;
+  font-size: 16px;
+}
+.immersive-game .series-dock-title small {
+  color: #bdd1b3;
+  font-size: 11px;
+}
+.immersive-game.is-series.input-camera .battle-stage {
+  right: 60%;
+  width: 40%;
+  bottom: 74px;
+  background-position: 45% center;
+}
+.immersive-game.is-series.input-camera .adventure-sidebar {
+  left: 40%;
+  right: 0;
+  top: 0;
+  bottom: 74px;
+  width: auto;
+  visibility: visible;
+  pointer-events: auto;
+  transform: none;
+  z-index: 20;
+}
+.immersive-game.is-series.input-camera .camera-card {
+  padding: 8px;
+  height: 100%;
+  overflow: hidden;
+  border: 0;
+  border-left: 1px solid #d4bf8066;
+  border-radius: 0;
+  box-shadow: none;
+  background: #102e29;
+}
+.immersive-game.is-series .camera-card-meta {
+  display: none;
+}
+.immersive-game.is-series.input-camera .combat-sprite.enemy {
+  width: clamp(100px, 30cqw, 180px);
+  height: clamp(100px, 30cqw, 180px);
+  left: calc(73% - clamp(50px, 15cqw, 90px));
+  top: calc(43% - clamp(94px, 28cqw, 168px));
+}
+.immersive-game.is-series.input-camera .combat-sprite.hero {
+  width: clamp(120px, 36cqw, 210px);
+  height: clamp(120px, 36cqw, 210px);
+  left: calc(27% - clamp(60px, 18cqw, 105px));
+  bottom: 17%;
+}
+.immersive-game.is-series.input-camera .enemy-plate,
+.immersive-game.is-series.input-camera .hero-plate {
+  width: 46%;
+  max-width: none;
+  padding: 8px;
+}
+.immersive-game.is-series.input-camera .enemy-plate {
+  left: 8px;
+  top: 10px;
+}
+.immersive-game.is-series.input-camera .hero-plate {
+  right: 8px;
+  bottom: 48px;
+}
+.immersive-game.is-series.input-camera .enemy-plate strong {
+  font-size: 18px;
+}
+.immersive-game.is-series.input-camera .battle-log {
+  font-size: 11px;
+  padding: 7px 10px;
+  bottom: 8px;
+}
+.immersive-game.is-series.input-manual .adventure-sidebar {
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(calc(100% + 20px));
+}
+.immersive-game.is-series.input-manual.camera-expanded .adventure-sidebar {
+  visibility: visible;
+  pointer-events: auto;
+  transform: none;
+  bottom: 86px;
+}
+.immersive-game .manual-exercise-guide {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  top: 22%;
+  transform: translateX(-50%);
+  width: min(340px, 38%);
+  padding: 18px 20px;
+  border: 1px solid #e2d2988c;
+  border-radius: 12px;
+  background: #15372de8;
+  box-shadow: 0 5px 25px #163c2377;
+  backdrop-filter: blur(5px);
+  text-align: center;
+  color: #eaf0d1;
+}
+.immersive-game .manual-exercise-guide strong {
+  display: block;
+  font-size: 24px;
+  color: #f2db9e;
+}
+.immersive-game .manual-exercise-guide p {
+  font-size: 13px;
+  line-height: 1.45;
+}
+.immersive-game .manual-exercise-guide small {
+  font-size: 11px;
+  color: #c4d8b9;
+}
+@media (max-width: 760px) {
+  .immersive-game {
+    --game-header: 52px;
+    --game-dock: 214px;
+  }
+  .immersive-game .game-header {
+    padding: 0 10px;
+    gap: 10px;
+  }
+  .immersive-game .game-header .brand {
+    font-size: 20px;
+  }
+  .immersive-game .game-header .brand small,
+  .immersive-game .game-header nav,
+  .immersive-game .save-status {
+    display: none;
+  }
+  .immersive-game .game-header .brand-mark {
+    width: 30px;
+    height: 30px;
+    font-size: 22px;
+  }
+  .immersive-game .header-actions {
+    gap: 7px;
+  }
+  .immersive-game .game-hud-controls {
+    gap: 5px;
+  }
+  .immersive-game .game-hud-controls button {
+    padding: 6px 8px;
+    font-size: 10px;
+    min-height: 34px;
+  }
+  .immersive-game .game-hud-player {
+    left: 10px;
+    top: 10px;
+    width: 190px;
+    padding: 8px;
+    gap: 7px;
+  }
+  .immersive-game .game-hud-player .profile-portrait {
+    width: 35px;
+    height: 47px;
+  }
+  .immersive-game .game-hud-player strong {
+    font-size: 13px;
+  }
+  .immersive-game .game-hud-objective {
+    top: 10px;
+    right: 10px;
+    width: 158px;
+    padding: 9px;
+    font-size: 10px;
+  }
+  .immersive-game .game-hud-objective strong {
+    font-size: 11px;
+  }
+  .immersive-game .game-hud-objective small {
+    font-size: 9px;
+  }
+  .immersive-game .quick-actions {
+    bottom: max(8px, env(safe-area-inset-bottom));
+    padding: 4px;
+    gap: 0;
+    max-width: calc(100% - 16px);
+  }
+  .immersive-game .quick-actions button {
+    font-size: 9px;
+    padding: 7px;
+    gap: 4px;
+    min-height: 42px;
+  }
+  .immersive-game .world-touch-pad {
+    bottom: 75px !important;
+  }
+  .immersive-game .world-interact {
+    bottom: 77px !important;
+    font-size: 10px !important;
+    max-width: 54% !important;
+  }
+  .immersive-game .attack-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    margin-bottom: 8px;
+  }
+  .immersive-game .attack-card {
+    min-height: 62px;
+    padding: 7px 9px;
+  }
+  .immersive-game .attack-card strong {
+    font-size: 13px;
+    margin: 3px 0;
+  }
+  .immersive-game .attack-card small {
+    font-size: 8px;
+  }
+  .immersive-game .attack-card .type-tag {
+    font-size: 8px;
+    padding: 2px 5px;
+  }
+  .immersive-game .battle-actions {
+    padding: 9px 10px;
+  }
+  .immersive-game .battle-actions > .button-row {
+    gap: 4px;
+  }
+  .immersive-game .battle-actions button:not(.attack-card) {
+    padding: 6px 8px;
+    min-height: 30px;
+    font-size: 10px;
+  }
+  .immersive-game .battle-stage {
+    background-position: 50% center;
+  }
+  .immersive-game .enemy-plate,
+  .immersive-game .hero-plate {
+    width: 43%;
+    max-width: none;
+    padding: 7px 9px;
+  }
+  .immersive-game .enemy-plate {
+    left: 10px;
+    top: 10px;
+  }
+  .immersive-game .enemy-plate strong {
+    font-size: 18px;
+  }
+  .immersive-game .hero-plate {
+    right: 10px;
+    bottom: 45px;
+  }
+  .immersive-game .hero-plate strong {
+    font-size: 12px;
+  }
+  .immersive-game .enemy-plate small,
+  .immersive-game .hero-plate small {
+    font-size: 9px;
+  }
+  .immersive-game .enemy-plate .type-row {
+    margin: 3px 0;
+  }
+  .immersive-game .combat-sprite.enemy {
+    width: 120px;
+    height: 120px;
+    left: calc(74% - 60px);
+    top: calc(49% - 112px);
+  }
+  .immersive-game .combat-sprite.hero {
+    width: 145px;
+    height: 145px;
+    left: calc(25% - 72px);
+    bottom: 12%;
+  }
+  .immersive-game .battle-log {
+    font-size: 10px;
+    padding: 7px 10px;
+    bottom: 8px;
+  }
+  .immersive-game .manual-exercise-guide {
+    top: 27%;
+    left: 50%;
+    width: calc(100% - 30px);
+    max-width: 300px;
+    padding: 12px;
+    transform: translateX(-50%);
+  }
+  .immersive-game .manual-exercise-guide strong {
+    font-size: 20px;
+  }
+  .immersive-game.is-series {
+    --game-dock: 82px;
+  }
+  .immersive-game.is-series .series-command-dock {
+    height: 82px;
+    min-height: 82px;
+    padding: 7px 10px;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .immersive-game .series-command-dock button {
+    padding: 8px 10px;
+    font-size: 11px;
+    min-height: 36px;
+  }
+  .immersive-game .series-dock-title {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    max-width: 35%;
+    font-size: 10px;
+  }
+  .immersive-game .series-dock-title strong {
+    font-size: 12px;
+  }
+  .immersive-game.is-series.input-camera .battle-stage {
+    inset: 0 0 auto;
+    width: 100%;
+    height: 100px;
+    background-position: center 42%;
+  }
+  .immersive-game.is-series.input-camera .adventure-sidebar {
+    left: 0;
+    top: 100px;
+    bottom: 82px;
+    right: 0;
+    width: 100%;
+  }
+  .immersive-game.is-series.input-camera .camera-card {
+    padding: 5px;
+    border-left: 0;
+    border-top: 1px solid var(--game-line);
+  }
+  .immersive-game.is-series.input-camera .combat-sprite {
+    display: none;
+  }
+  .immersive-game.is-series.input-camera .enemy-plate,
+  .immersive-game.is-series.input-camera .hero-plate {
+    width: 42%;
+    top: 7px;
+    bottom: auto;
+    padding: 6px 8px;
+    background: #15352be8;
+  }
+  .immersive-game.is-series.input-camera .enemy-plate {
+    left: 8px;
+  }
+  .immersive-game.is-series.input-camera .hero-plate {
+    right: 8px;
+  }
+  .immersive-game.is-series.input-camera .enemy-plate strong {
+    font-size: 14px;
+  }
+  .immersive-game.is-series.input-camera .enemy-plate > div:first-child small {
+    display: none;
+  }
+  .immersive-game.is-series.input-camera .battle-log {
+    display: none;
+  }
+  .immersive-game.is-series.input-manual .battle-stage {
+    bottom: 82px;
+  }
+  .immersive-game .camera-expanded .camera-card {
+    max-height: 100%;
+  }
+}
+@media (max-height: 550px) and (orientation: landscape) {
+  .immersive-game {
+    --game-header: 46px;
+    --game-dock: 127px;
+  }
+  .immersive-game .game-header {
+    height: 46px;
+    padding: 0 12px;
+  }
+  .immersive-game .game-header .brand small {
+    display: none;
+  }
+  .immersive-game .game-hud-player {
+    top: 9px;
+    left: 10px;
+    padding: 6px 9px;
+    width: 215px;
+  }
+  .immersive-game .game-hud-player .profile-portrait {
+    height: 42px;
+    width: 34px;
+  }
+  .immersive-game .game-hud-objective {
+    top: 9px;
+    right: 10px;
+    padding: 8px 11px;
+    width: 240px;
+  }
+  .immersive-game .quick-actions {
+    min-height: 38px;
+    bottom: 7px;
+  }
+  .immersive-game .quick-actions button {
+    min-height: 30px;
+    padding: 5px 9px;
+    font-size: 10px;
+  }
+  .immersive-game .world-touch-pad {
+    bottom: 58px !important;
+  }
+  .immersive-game .world-interact {
+    bottom: 60px !important;
+  }
+  .immersive-game .attack-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 7px;
+    margin-bottom: 6px;
+  }
+  .immersive-game .attack-card {
+    min-height: 64px;
+    padding: 6px 10px;
+  }
+  .immersive-game .attack-card strong {
+    font-size: 13px;
+    margin: 3px 0;
+  }
+  .immersive-game .attack-card small {
+    font-size: 9px;
+  }
+  .immersive-game .battle-actions {
+    padding: 7px 12px;
+  }
+  .immersive-game .battle-actions button:not(.attack-card) {
+    min-height: 28px;
+    padding: 5px 9px;
+    font-size: 10px;
+  }
+  .immersive-game .enemy-plate,
+  .immersive-game .hero-plate {
+    padding: 6px 9px;
+    width: 185px;
+    max-width: 31%;
+  }
+  .immersive-game .enemy-plate {
+    top: 8px;
+    left: 10px;
+  }
+  .immersive-game .enemy-plate strong {
+    font-size: 17px;
+  }
+  .immersive-game .enemy-plate small,
+  .immersive-game .hero-plate small {
+    font-size: 8px;
+  }
+  .immersive-game .enemy-plate .type-row {
+    margin: 2px 0;
+  }
+  .immersive-game .hero-plate {
+    right: 10px;
+    bottom: 37px;
+  }
+  .immersive-game .battle-log {
+    padding: 5px 10px;
+    font-size: 10px;
+    bottom: 6px;
+  }
+  .immersive-game .combat-sprite.enemy {
+    width: 125px;
+    height: 125px;
+    left: calc(74% - 62px);
+    top: calc(53% - 117px);
+  }
+  .immersive-game .combat-sprite.hero {
+    width: 135px;
+    height: 135px;
+    left: calc(28% - 67px);
+    bottom: 10%;
+  }
+  .immersive-game.is-series {
+    --game-dock: 58px;
+  }
+  .immersive-game.is-series .series-command-dock {
+    height: 58px;
+    min-height: 58px;
+    padding: 7px 12px;
+    flex-wrap: nowrap;
+  }
+  .immersive-game .series-command-dock button {
+    min-height: 35px;
+    padding: 7px 12px;
+    font-size: 11px;
+  }
+  .immersive-game .series-dock-title {
+    position: static;
+    margin-right: auto;
+    max-width: 32%;
+  }
+  .immersive-game .series-dock-title strong {
+    font-size: 13px;
+  }
+  .immersive-game.is-series.input-camera .battle-stage {
+    inset: 0 60% 58px 0;
+    width: 40%;
+    height: auto;
+  }
+  .immersive-game.is-series.input-camera .adventure-sidebar {
+    inset: 0 0 58px 40%;
+    width: auto;
+  }
+  .immersive-game.is-series.input-camera .combat-sprite {
+    display: block;
+  }
+  .immersive-game.is-series.input-camera .combat-sprite.enemy {
+    width: 95px;
+    height: 95px;
+    left: calc(75% - 47px);
+    top: calc(54% - 89px);
+  }
+  .immersive-game.is-series.input-camera .combat-sprite.hero {
+    width: 105px;
+    height: 105px;
+    left: calc(25% - 52px);
+    bottom: 12%;
+  }
+  .immersive-game.is-series.input-camera .enemy-plate,
+  .immersive-game.is-series.input-camera .hero-plate {
+    width: 45%;
+    max-width: none;
+    padding: 5px 7px;
+  }
+  .immersive-game.is-series.input-camera .enemy-plate strong {
+    font-size: 13px;
+  }
+  .immersive-game.is-series.input-camera .enemy-plate > div:first-child small {
+    display: none;
+  }
+  .immersive-game.is-series.input-camera .hero-plate {
+    top: auto;
+    bottom: 28px;
+  }
+  .immersive-game.is-series.input-camera .battle-log {
+    display: block;
+    font-size: 9px;
+    padding: 4px 7px;
+    bottom: 4px;
+  }
+  .immersive-game.is-series.input-manual .battle-stage {
+    bottom: 58px;
+  }
+  .immersive-game .manual-exercise-guide {
+    top: 15%;
+    width: 32%;
+    max-width: 300px;
+    padding: 10px;
+  }
+  .immersive-game .manual-exercise-guide strong {
+    font-size: 18px;
+  }
+  .immersive-game .manual-exercise-guide p {
+    font-size: 11px;
+    margin: 5px 0;
+  }
+  .immersive-game .manual-exercise-guide small {
+    font-size: 9px;
+  }
+}
+@media (max-width: 380px) and (orientation: portrait) {
+  .immersive-game .game-hud-objective {
+    top: 94px;
+    width: 155px;
+  }
+  .immersive-game .game-header .brand > span:last-child {
+    display: none;
+  }
+  .immersive-game .quick-actions button {
+    font-size: 8px;
+    padding: 6px;
+  }
+  .immersive-game .attack-card strong {
+    font-size: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .immersive-game * {
+    scroll-behavior: auto !important;
+  }
+  .immersive-game .adventure-sidebar {
+    transition: none;
+  }
+  .immersive-game .attack-card:hover {
+    transform: none;
+  }
+}
 /* The village continues behind the translucent application bar. */
-.immersive-game.mode-explore .game-main{inset:0}.immersive-game.mode-explore .game-hud-player,.immersive-game.mode-explore .game-hud-objective{top:calc(var(--game-header) + 14px)}.immersive-game .hud-portrait{display:block;width:45px;height:58px;flex:0 0 45px}.immersive-game .game-hud-player>div{flex:1;min-width:0}.immersive-game .game-hud-player>div>small{display:flex;align-items:center;gap:5px}.immersive-game .xp-track{height:3px;border-radius:3px;background:#081e1a;overflow:hidden;margin:0 0 5px}.immersive-game .xp-track span{display:block;height:100%;background:#e3c57c}.immersive-game .game-hud-objective>span{display:block;font-size:8px;letter-spacing:1.4px;margin-bottom:6px;color:#a9c4a5}
+.immersive-game.mode-explore .game-main {
+  inset: 0;
+}
+.immersive-game.mode-explore .game-hud-player,
+.immersive-game.mode-explore .game-hud-objective {
+  top: calc(var(--game-header) + 14px);
+}
+.immersive-game .hud-portrait {
+  display: block;
+  width: 45px;
+  height: 58px;
+  flex: 0 0 45px;
+}
+.immersive-game .game-hud-player > div {
+  flex: 1;
+  min-width: 0;
+}
+.immersive-game .game-hud-player > div > small {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.immersive-game .xp-track {
+  height: 3px;
+  border-radius: 3px;
+  background: #081e1a;
+  overflow: hidden;
+  margin: 0 0 5px;
+}
+.immersive-game .xp-track span {
+  display: block;
+  height: 100%;
+  background: #e3c57c;
+}
+.immersive-game .game-hud-objective > span {
+  display: block;
+  font-size: 8px;
+  letter-spacing: 1.4px;
+  margin-bottom: 6px;
+  color: #a9c4a5;
+}
 /* Four familiar RPG choices, then four exercise choices: a single command surface. */
-.immersive-game.mode-battle:not(.is-series){--game-dock:196px}.immersive-game .rpg-command-menu{max-width:1120px;margin:0 auto}.immersive-game .battle-menu-heading{display:flex;align-items:center;gap:12px;min-height:25px;margin:0 0 8px}.immersive-game .battle-menu-heading>strong{font-size:15px;color:#f0dda6}.immersive-game .battle-menu-heading>small{font-size:10px;color:#b2c9ab;margin-left:auto}.immersive-game .battle-menu-heading>button{padding:4px 8px!important;min-height:25px!important;display:flex;align-items:center;gap:4px;font-size:11px}.immersive-game .rpg-action-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:8px}.immersive-game .rpg-action-grid>button{min-height:86px!important;display:grid;grid-template-columns:34px 1fr;grid-template-rows:1fr 1fr;text-align:left;align-items:center;column-gap:10px;padding:12px 16px!important;background:linear-gradient(135deg,#315442,#1d4036)!important;border:1px solid #c2bc7a80!important;border-radius:9px!important;box-shadow:inset 0 2px #cddd9b18,0 3px #09261e}.immersive-game .rpg-action-grid>button>svg,.immersive-game .rpg-action-grid>button>[role=img]{grid-row:1/3;grid-column:1;color:#e4cf91;width:30px;height:42px;display:block}.immersive-game .rpg-action-grid>button>strong{font-size:19px;color:#f3e0a3;align-self:end}.immersive-game .rpg-action-grid>button>small{font-size:10px;color:#bdd2b6;align-self:start;margin-top:4px}.immersive-game .rpg-action-grid>button.command-attack{background:linear-gradient(135deg,#77602e,#4e4d2d)!important;border-color:#e0c880!important}.immersive-game .rpg-action-grid>button:hover{filter:brightness(1.18)}.immersive-game .rpg-action-grid>button:disabled{opacity:.4}.immersive-game .attack-matchup{display:flex;align-items:center;gap:6px;margin-top:5px;font-size:9px;color:#e4d39a}.immersive-game .attack-matchup b{font-weight:600}.immersive-game .attack-matchup em{font-size:8px;background:#d0c77933;color:#f8e7a2;padding:2px 4px;border-radius:3px;font-style:normal}.immersive-game .battle-utilities{display:flex;align-items:center;justify-content:flex-end;gap:14px;font-size:10px;color:#b9cbb2}.immersive-game .battle-utilities>button{display:flex;gap:5px;align-items:center;min-height:28px!important;padding:5px 10px!important;font-size:10px}.immersive-game .battle-utilities .check{margin:0;font-size:10px}.immersive-game .battle-utilities>small{font-size:9px}
+.immersive-game.mode-battle:not(.is-series) {
+  --game-dock: 196px;
+}
+.immersive-game .rpg-command-menu {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+.immersive-game .battle-menu-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 25px;
+  margin: 0 0 8px;
+}
+.immersive-game .battle-menu-heading > strong {
+  font-size: 15px;
+  color: #f0dda6;
+}
+.immersive-game .battle-menu-heading > small {
+  font-size: 10px;
+  color: #b2c9ab;
+  margin-left: auto;
+}
+.immersive-game .battle-menu-heading > button {
+  padding: 4px 8px !important;
+  min-height: 25px !important;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+}
+.immersive-game .rpg-action-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.immersive-game .rpg-action-grid > button {
+  min-height: 86px !important;
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  grid-template-rows: 1fr 1fr;
+  text-align: left;
+  align-items: center;
+  column-gap: 10px;
+  padding: 12px 16px !important;
+  background: linear-gradient(135deg, #315442, #1d4036) !important;
+  border: 1px solid #c2bc7a80 !important;
+  border-radius: 9px !important;
+  box-shadow:
+    inset 0 2px #cddd9b18,
+    0 3px #09261e;
+}
+.immersive-game .rpg-action-grid > button > svg,
+.immersive-game .rpg-action-grid > button > [role="img"] {
+  grid-row: 1/3;
+  grid-column: 1;
+  color: #e4cf91;
+  width: 30px;
+  height: 42px;
+  display: block;
+}
+.immersive-game .rpg-action-grid > button > strong {
+  font-size: 19px;
+  color: #f3e0a3;
+  align-self: end;
+}
+.immersive-game .rpg-action-grid > button > small {
+  font-size: 10px;
+  color: #bdd2b6;
+  align-self: start;
+  margin-top: 4px;
+}
+.immersive-game .rpg-action-grid > button.command-attack {
+  background: linear-gradient(135deg, #77602e, #4e4d2d) !important;
+  border-color: #e0c880 !important;
+}
+.immersive-game .rpg-action-grid > button:hover {
+  filter: brightness(1.18);
+}
+.immersive-game .rpg-action-grid > button:disabled {
+  opacity: 0.4;
+}
+.immersive-game .attack-matchup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+  font-size: 9px;
+  color: #e4d39a;
+}
+.immersive-game .attack-matchup b {
+  font-weight: 600;
+}
+.immersive-game .attack-matchup em {
+  font-size: 8px;
+  background: #d0c77933;
+  color: #f8e7a2;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-style: normal;
+}
+.immersive-game .battle-utilities {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  font-size: 10px;
+  color: #b9cbb2;
+}
+.immersive-game .battle-utilities > button {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  min-height: 28px !important;
+  padding: 5px 10px !important;
+  font-size: 10px;
+}
+.immersive-game .battle-utilities .check {
+  margin: 0;
+  font-size: 10px;
+}
+.immersive-game .battle-utilities > small {
+  font-size: 9px;
+}
 /* RPG windows are separate scroll surfaces, never a tall web page behind the map. */
-.immersive-game .modal-backdrop{position:fixed;inset:0;z-index:100;background:#071e1ba8;backdrop-filter:blur(5px);padding:24px;display:grid;place-items:center;overflow:hidden}.immersive-game .modal{width:min(720px,100%);max-width:100%;max-height:calc(100dvh - 48px);overflow:auto;overscroll-behavior:contain;background:linear-gradient(145deg,#193d32,#102c28);color:#eaf0d5;border:2px solid #d5bf7b;border-radius:13px;padding:26px 30px;box-shadow:0 0 0 4px #17382d,0 16px 80px #03110dbb,inset 0 1px #e4d69b4d;scrollbar-color:#829463 #173a2c}.immersive-game .modal h1,.immersive-game .modal h2,.immersive-game .modal h3{color:#f2dda0}.immersive-game .modal h2{font-size:27px}.immersive-game .modal p,.immersive-game .modal small{color:#c1d2b9}.immersive-game .modal .eyebrow{color:#d6c28a}.immersive-game .modal .close-modal,.immersive-game .modal .close-button{color:#e7d9a9}.immersive-game .modal button{border-color:#c3bd8177;color:#e9dfb6}.immersive-game .modal button:not(.primary):not(.close-modal):not(.close-button){background-color:#234b3c}.immersive-game .modal button.primary{background:#dfc780;color:#203c2b;border-color:#f4dfa0}.immersive-game .modal input,.immersive-game .modal select,.immersive-game .modal textarea{background:#0e2824;color:#eaf0d5;border-color:#6f8d65}.immersive-game .modal .card,.immersive-game .modal .inventory-item,.immersive-game .modal .shop-item,.immersive-game .modal .setting-row,.immersive-game .modal .attack-row,.immersive-game .modal .phase-preview{background:#254637;color:#ebedcf;border-color:#9aa46b55}.immersive-game .modal .notice{background:#4a4930;color:#f0deb0;border-color:#c4ae6e}.immersive-game .modal .notice p{color:#e2d5b2}.immersive-game .modal .type-tag{color:#233c2c}.immersive-game .modal .welcome-icon{background:#335740;color:#ead297}.immersive-game .modal .stat-grid>div,.immersive-game .modal .menu-stats>div{background:#224939;color:#dfdfbb}.immersive-game .toast{position:fixed;z-index:150;bottom:85px;left:50%;transform:translateX(-50%);max-width:calc(100% - 30px);background:#12392fee;border:1px solid #dfcb8a;color:#f4e8c0;box-shadow:0 6px 25px #08211980}
+.immersive-game .modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #071e1ba8;
+  backdrop-filter: blur(5px);
+  padding: 24px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.immersive-game .modal {
+  width: min(720px, 100%);
+  max-width: 100%;
+  max-height: calc(100dvh - 48px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: linear-gradient(145deg, #193d32, #102c28);
+  color: #eaf0d5;
+  border: 2px solid #d5bf7b;
+  border-radius: 13px;
+  padding: 26px 30px;
+  box-shadow:
+    0 0 0 4px #17382d,
+    0 16px 80px #03110dbb,
+    inset 0 1px #e4d69b4d;
+  scrollbar-color: #829463 #173a2c;
+}
+.immersive-game .modal h1,
+.immersive-game .modal h2,
+.immersive-game .modal h3 {
+  color: #f2dda0;
+}
+.immersive-game .modal h2 {
+  font-size: 27px;
+}
+.immersive-game .modal p,
+.immersive-game .modal small {
+  color: #c1d2b9;
+}
+.immersive-game .modal .eyebrow {
+  color: #d6c28a;
+}
+.immersive-game .modal .close-modal,
+.immersive-game .modal .close-button {
+  color: #e7d9a9;
+}
+.immersive-game .modal button {
+  border-color: #c3bd8177;
+  color: #e9dfb6;
+}
+.immersive-game
+  .modal
+  button:not(.primary):not(.close-modal):not(.close-button) {
+  background-color: #234b3c;
+}
+.immersive-game .modal button.primary {
+  background: #dfc780;
+  color: #203c2b;
+  border-color: #f4dfa0;
+}
+.immersive-game .modal input,
+.immersive-game .modal select,
+.immersive-game .modal textarea {
+  background: #0e2824;
+  color: #eaf0d5;
+  border-color: #6f8d65;
+}
+.immersive-game .modal .card,
+.immersive-game .modal .inventory-item,
+.immersive-game .modal .shop-item,
+.immersive-game .modal .setting-row,
+.immersive-game .modal .attack-row,
+.immersive-game .modal .phase-preview {
+  background: #254637;
+  color: #ebedcf;
+  border-color: #9aa46b55;
+}
+.immersive-game .modal .notice {
+  background: #4a4930;
+  color: #f0deb0;
+  border-color: #c4ae6e;
+}
+.immersive-game .modal .notice p {
+  color: #e2d5b2;
+}
+.immersive-game .modal .type-tag {
+  color: #233c2c;
+}
+.immersive-game .modal .welcome-icon {
+  background: #335740;
+  color: #ead297;
+}
+.immersive-game .modal .stat-grid > div,
+.immersive-game .modal .menu-stats > div {
+  background: #224939;
+  color: #dfdfbb;
+}
+.immersive-game .toast {
+  position: fixed;
+  z-index: 150;
+  bottom: 85px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100% - 30px);
+  background: #12392fee;
+  border: 1px solid #dfcb8a;
+  color: #f4e8c0;
+  box-shadow: 0 6px 25px #08211980;
+}
 /* These classes are triggered only by canonical battle events, never timers that deal damage. */
-.immersive-game .damage-burst{position:absolute;z-index:8;left:76%;top:22%;font:900 clamp(28px,4cqw,60px)/1 system-ui,sans-serif;color:#fff0ad;text-shadow:3px 3px #652d22,-2px -2px #652d22,2px -2px #652d22,-2px 2px #652d22;pointer-events:none;animation:earned-damage .7s ease-out both}.immersive-game .battle-hit .combat-sprite.enemy{animation:earned-impact .28s ease-out}.immersive-game .battle-transform .combat-sprite.enemy{animation:phase-glow 1.2s ease-in-out infinite}.immersive-game .battle-victory:after{background:radial-gradient(ellipse at 50% 30%,#ffe8a63a,transparent 70%)}.immersive-game .battle-victory .combat-sprite.enemy{opacity:.35;filter:grayscale(.5)}.immersive-game .battle-victory .combat-sprite.hero{filter:drop-shadow(0 0 12px #ffe5a0)}
-@keyframes earned-damage{0%{opacity:0;transform:translate(-50%,12px) scale(.8)}25%{opacity:1;transform:translate(-50%,-2px) scale(1.15)}100%{opacity:0;transform:translate(-50%,-44px) scale(1)}}@keyframes earned-impact{0%,100%{translate:0}25%{translate:8px 0;filter:brightness(1.8) drop-shadow(0 0 8px #ffe5a1)}65%{translate:-4px 0}}@keyframes phase-glow{50%{filter:brightness(1.4) drop-shadow(0 0 20px #f3dc9d)}}
-@media(max-width:760px){.immersive-game.mode-battle:not(.is-series){--game-dock:292px}.immersive-game .battle-menu-heading{margin-bottom:6px;gap:7px;flex-wrap:wrap;min-height:24px}.immersive-game .battle-menu-heading>strong{font-size:12px}.immersive-game .battle-menu-heading>small{display:none}.immersive-game .battle-menu-heading>button{margin-left:auto}.immersive-game .rpg-action-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.immersive-game .rpg-action-grid>button{min-height:83px!important;padding:10px!important;grid-template-columns:26px 1fr;column-gap:7px}.immersive-game .rpg-action-grid>button>svg,.immersive-game .rpg-action-grid>button>[role=img]{width:24px;height:36px}.immersive-game .rpg-action-grid>button>strong{font-size:16px}.immersive-game .rpg-action-grid>button>small{font-size:9px}.immersive-game .attack-grid .attack-card{min-height:96px}.immersive-game .attack-matchup{font-size:9px}.immersive-game .battle-utilities{gap:9px;justify-content:space-between}.immersive-game .battle-utilities>small{font-size:8px}.immersive-game .hud-portrait{width:35px;height:46px;flex-basis:35px}.immersive-game .game-hud-player{width:180px}.immersive-game .game-hud-objective{width:168px}.immersive-game .modal-backdrop{padding:14px}.immersive-game .modal{max-height:calc(100dvh - 28px);padding:20px 18px;border-radius:10px}.immersive-game .modal h2{font-size:24px}.immersive-game .manual-exercise-guide{top:20%;max-width:250px;width:65%;padding:10px}.immersive-game .manual-exercise-guide h2{font-size:15px;margin:0 0 7px;color:#f0dba0}.immersive-game .manual-exercise-guide strong{font-size:30px}.immersive-game .manual-exercise-guide p{font-size:11px;margin:7px 0}.immersive-game .manual-exercise-guide small{font-size:9px}.immersive-game .series-command-dock .manual-fallback{font-size:9px;max-width:38%;padding:6px;line-height:1.2}.immersive-game .series-command-dock .primary{font-size:10px;max-width:45%;line-height:1.2}.immersive-game .series-dock-title{max-width:27%}}
-@media(max-height:550px) and (orientation:landscape){.immersive-game.mode-battle:not(.is-series){--game-dock:150px}.immersive-game .battle-menu-heading{min-height:20px;margin-bottom:5px}.immersive-game .battle-menu-heading>strong{font-size:12px}.immersive-game .battle-menu-heading>small{display:block;font-size:8px}.immersive-game .rpg-action-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:6px}.immersive-game .rpg-action-grid>button{min-height:68px!important;padding:8px 10px!important;grid-template-columns:25px 1fr;column-gap:7px}.immersive-game .rpg-action-grid>button>strong{font-size:15px}.immersive-game .rpg-action-grid>button>small{font-size:8px}.immersive-game .rpg-action-grid>button>svg{width:22px}.immersive-game .attack-grid .attack-card{min-height:76px}.immersive-game .attack-matchup{font-size:8px;margin-top:3px}.immersive-game .battle-utilities{gap:10px}.immersive-game .battle-utilities>small{font-size:8px}.immersive-game .modal-backdrop{padding:12px}.immersive-game .modal{max-height:calc(100dvh - 24px);padding:18px 24px}.immersive-game .manual-exercise-guide{width:32%;top:15%;max-width:290px;padding:10px}.immersive-game .manual-exercise-guide h2{font-size:17px;margin:0 0 6px;color:#f0dba0}.immersive-game .manual-exercise-guide strong{font-size:26px}.immersive-game .manual-exercise-guide p{font-size:11px;margin:5px 0}.immersive-game .series-command-dock .manual-fallback{max-width:36%;font-size:10px}.immersive-game .series-command-dock .primary{font-size:11px}.immersive-game .series-dock-title{max-width:27%}}
-@media(prefers-reduced-motion:reduce){.immersive-game .battle-hit .combat-sprite.enemy,.immersive-game .battle-transform .combat-sprite.enemy,.immersive-game .damage-burst{animation:none}.immersive-game .damage-burst{opacity:1}}
+.immersive-game .damage-burst {
+  position: absolute;
+  z-index: 8;
+  left: 76%;
+  top: 22%;
+  font:
+    900 clamp(28px, 4cqw, 60px)/1 system-ui,
+    sans-serif;
+  color: #fff0ad;
+  text-shadow:
+    3px 3px #652d22,
+    -2px -2px #652d22,
+    2px -2px #652d22,
+    -2px 2px #652d22;
+  pointer-events: none;
+  animation: earned-damage 0.7s ease-out both;
+}
+.immersive-game .battle-hit .combat-sprite.enemy {
+  animation: earned-impact 0.28s ease-out;
+}
+.immersive-game .battle-transform .combat-sprite.enemy {
+  animation: phase-glow 1.2s ease-in-out infinite;
+}
+.immersive-game .battle-victory:after {
+  background: radial-gradient(ellipse at 50% 30%, #ffe8a63a, transparent 70%);
+}
+.immersive-game .battle-victory .combat-sprite.enemy {
+  opacity: 0.35;
+  filter: grayscale(0.5);
+}
+.immersive-game .battle-victory .combat-sprite.hero {
+  filter: drop-shadow(0 0 12px #ffe5a0);
+}
+@keyframes earned-damage {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 12px) scale(0.8);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -2px) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -44px) scale(1);
+  }
+}
+@keyframes earned-impact {
+  0%,
+  100% {
+    translate: 0;
+  }
+  25% {
+    translate: 8px 0;
+    filter: brightness(1.8) drop-shadow(0 0 8px #ffe5a1);
+  }
+  65% {
+    translate: -4px 0;
+  }
+}
+@keyframes phase-glow {
+  50% {
+    filter: brightness(1.4) drop-shadow(0 0 20px #f3dc9d);
+  }
+}
+@media (max-width: 760px) {
+  .immersive-game.mode-battle:not(.is-series) {
+    --game-dock: 292px;
+  }
+  .immersive-game .battle-menu-heading {
+    margin-bottom: 6px;
+    gap: 7px;
+    flex-wrap: wrap;
+    min-height: 24px;
+  }
+  .immersive-game .battle-menu-heading > strong {
+    font-size: 12px;
+  }
+  .immersive-game .battle-menu-heading > small {
+    display: none;
+  }
+  .immersive-game .battle-menu-heading > button {
+    margin-left: auto;
+  }
+  .immersive-game .rpg-action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .immersive-game .rpg-action-grid > button {
+    min-height: 83px !important;
+    padding: 10px !important;
+    grid-template-columns: 26px 1fr;
+    column-gap: 7px;
+  }
+  .immersive-game .rpg-action-grid > button > svg,
+  .immersive-game .rpg-action-grid > button > [role="img"] {
+    width: 24px;
+    height: 36px;
+  }
+  .immersive-game .rpg-action-grid > button > strong {
+    font-size: 16px;
+  }
+  .immersive-game .rpg-action-grid > button > small {
+    font-size: 9px;
+  }
+  .immersive-game .attack-grid .attack-card {
+    min-height: 96px;
+  }
+  .immersive-game .attack-matchup {
+    font-size: 9px;
+  }
+  .immersive-game .battle-utilities {
+    gap: 9px;
+    justify-content: space-between;
+  }
+  .immersive-game .battle-utilities > small {
+    font-size: 8px;
+  }
+  .immersive-game .hud-portrait {
+    width: 35px;
+    height: 46px;
+    flex-basis: 35px;
+  }
+  .immersive-game .game-hud-player {
+    width: 180px;
+  }
+  .immersive-game .game-hud-objective {
+    width: 168px;
+  }
+  .immersive-game .modal-backdrop {
+    padding: 14px;
+  }
+  .immersive-game .modal {
+    max-height: calc(100dvh - 28px);
+    padding: 20px 18px;
+    border-radius: 10px;
+  }
+  .immersive-game .modal h2 {
+    font-size: 24px;
+  }
+  .immersive-game .manual-exercise-guide {
+    top: 20%;
+    max-width: 250px;
+    width: 65%;
+    padding: 10px;
+  }
+  .immersive-game .manual-exercise-guide h2 {
+    font-size: 15px;
+    margin: 0 0 7px;
+    color: #f0dba0;
+  }
+  .immersive-game .manual-exercise-guide strong {
+    font-size: 30px;
+  }
+  .immersive-game .manual-exercise-guide p {
+    font-size: 11px;
+    margin: 7px 0;
+  }
+  .immersive-game .manual-exercise-guide small {
+    font-size: 9px;
+  }
+  .immersive-game .series-command-dock .manual-fallback {
+    font-size: 9px;
+    max-width: 38%;
+    padding: 6px;
+    line-height: 1.2;
+  }
+  .immersive-game .series-command-dock .primary {
+    font-size: 10px;
+    max-width: 45%;
+    line-height: 1.2;
+  }
+  .immersive-game .series-dock-title {
+    max-width: 27%;
+  }
+}
+@media (max-height: 550px) and (orientation: landscape) {
+  .immersive-game.mode-battle:not(.is-series) {
+    --game-dock: 150px;
+  }
+  .immersive-game .battle-menu-heading {
+    min-height: 20px;
+    margin-bottom: 5px;
+  }
+  .immersive-game .battle-menu-heading > strong {
+    font-size: 12px;
+  }
+  .immersive-game .battle-menu-heading > small {
+    display: block;
+    font-size: 8px;
+  }
+  .immersive-game .rpg-action-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 7px;
+    margin-bottom: 6px;
+  }
+  .immersive-game .rpg-action-grid > button {
+    min-height: 68px !important;
+    padding: 8px 10px !important;
+    grid-template-columns: 25px 1fr;
+    column-gap: 7px;
+  }
+  .immersive-game .rpg-action-grid > button > strong {
+    font-size: 15px;
+  }
+  .immersive-game .rpg-action-grid > button > small {
+    font-size: 8px;
+  }
+  .immersive-game .rpg-action-grid > button > svg {
+    width: 22px;
+  }
+  .immersive-game .attack-grid .attack-card {
+    min-height: 76px;
+  }
+  .immersive-game .attack-matchup {
+    font-size: 8px;
+    margin-top: 3px;
+  }
+  .immersive-game .battle-utilities {
+    gap: 10px;
+  }
+  .immersive-game .battle-utilities > small {
+    font-size: 8px;
+  }
+  .immersive-game .modal-backdrop {
+    padding: 12px;
+  }
+  .immersive-game .modal {
+    max-height: calc(100dvh - 24px);
+    padding: 18px 24px;
+  }
+  .immersive-game .manual-exercise-guide {
+    width: 32%;
+    top: 15%;
+    max-width: 290px;
+    padding: 10px;
+  }
+  .immersive-game .manual-exercise-guide h2 {
+    font-size: 17px;
+    margin: 0 0 6px;
+    color: #f0dba0;
+  }
+  .immersive-game .manual-exercise-guide strong {
+    font-size: 26px;
+  }
+  .immersive-game .manual-exercise-guide p {
+    font-size: 11px;
+    margin: 5px 0;
+  }
+  .immersive-game .series-command-dock .manual-fallback {
+    max-width: 36%;
+    font-size: 10px;
+  }
+  .immersive-game .series-command-dock .primary {
+    font-size: 11px;
+  }
+  .immersive-game .series-dock-title {
+    max-width: 27%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .immersive-game .battle-hit .combat-sprite.enemy,
+  .immersive-game .battle-transform .combat-sprite.enemy,
+  .immersive-game .damage-burst {
+    animation: none;
+  }
+  .immersive-game .damage-burst {
+    opacity: 1;
+  }
+}
+.immersive-game .header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #e7e5c6;
+}
+.immersive-game .header-right .local-pill {
+  color: #b4c9aa;
+  font-size: 10px;
+}
+.immersive-game .game-header .icon-button {
+  color: #e7dbaf;
+  background: transparent;
+}
+.immersive-game .menu-character {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 18px;
+  border: 1px solid #b4b77c66;
+  border-radius: 10px;
+  background: #244937;
+  margin: 16px 0;
+}
+.immersive-game .menu-character-portrait {
+  display: block;
+  flex-shrink: 0;
+  width: 96px;
+  height: 114px;
+}
+.immersive-game .menu-character h3 {
+  margin: 0 0 8px;
+}
+.immersive-game .menu-character p {
+  margin: 6px 0;
+  font-size: 12px;
+}
+.immersive-game .menu-badges {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.immersive-game .rest-scene {
+  text-align: center;
+  padding: 20px 12px;
+}
+.immersive-game .rest-scene > svg {
+  color: #d9ce8a;
+  width: 50px;
+  height: 50px;
+  margin: 10px auto;
+}
+.immersive-game .rest-scene h2 {
+  font-size: 32px;
+}
+.immersive-game .rest-scene .primary {
+  margin-top: 12px;
+  min-height: 44px;
+  padding: 12px 22px;
+}
+@media (max-width: 760px) {
+  .immersive-game .header-right {
+    gap: 8px;
+  }
+  .immersive-game .header-right .local-pill,
+  .immersive-game .header-right .avatar {
+    display: none;
+  }
+  .immersive-game .game-hud-controls .arena-toggle {
+    font-size: 0;
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    padding: 7px;
+    display: grid;
+    place-items: center;
+  }
+  .immersive-game .game-hud-controls .arena-toggle svg {
+    width: 18px;
+    height: 18px;
+  }
+  .immersive-game .menu-character {
+    padding: 10px;
+    gap: 12px;
+  }
+  .immersive-game .menu-character-portrait {
+    width: 72px;
+    height: 90px;
+  }
+}
+.immersive-game .game-hud-objective {
+  display: block;
+  text-align: left;
+}
+.immersive-game .game-hud-objective strong {
+  line-height: 1.25;
+}
+.immersive-game .game-hud-objective small {
+  display: block;
+  line-height: 1.45;
+}
+@media (max-height: 550px) and (orientation: landscape) {
+  .immersive-game.mode-battle:not(.is-series) .combat-sprite.enemy {
+    width: min(115px, 55cqh);
+    height: min(115px, 55cqh);
+    left: calc(70% - min(57.5px, 27.5cqh));
+    top: 4%;
+  }
+  .immersive-game.mode-battle:not(.is-series) .combat-sprite.hero {
+    width: min(120px, 62cqh);
+    height: min(120px, 62cqh);
+    left: calc(28% - min(60px, 31cqh));
+    bottom: 12%;
+  }
+  .immersive-game.mode-battle:not(.is-series) .enemy-plate {
+    max-width: 24%;
+    padding: 5px 8px;
+  }
+  .immersive-game.mode-battle:not(.is-series)
+    .enemy-plate
+    > div:first-child
+    small {
+    display: none;
+  }
+  .immersive-game.mode-battle:not(.is-series) .enemy-plate strong {
+    font-size: 15px;
+  }
+  .immersive-game.mode-battle:not(.is-series) .hero-plate {
+    max-width: 24%;
+    bottom: 30px;
+    padding: 5px 8px;
+  }
+  .immersive-game.mode-battle:not(.is-series) .hero-plate strong {
+    font-size: 12px;
+  }
+  .immersive-game.mode-battle:not(.is-series) .battle-log {
+    bottom: 4px;
+    padding: 4px 10px;
+    font-size: 9px;
+  }
+}
+@media (max-width: 760px) and (orientation: portrait) {
+  .immersive-game.is-series .series-command-dock {
+    height: 108px;
+    min-height: 108px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: 25px 1fr;
+    gap: 5px;
+    padding: 7px 10px;
+  }
+  .immersive-game.is-series .series-dock-title {
+    position: static;
+    grid-column: 1/-1;
+    max-width: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+  }
+  .immersive-game.is-series .series-dock-title strong {
+    font-size: 13px;
+  }
+  .immersive-game.is-series .series-command-dock button,
+  .immersive-game.is-series .series-command-dock .primary {
+    max-width: none;
+    width: auto;
+    min-height: 39px;
+    line-height: 1.2;
+    font-size: 10px;
+    padding: 7px;
+    justify-content: center;
+  }
+  .immersive-game.is-series .series-command-dock .manual-fallback {
+    max-width: none;
+    font-size: 9px;
+  }
+  .immersive-game.is-series.input-camera .adventure-sidebar {
+    bottom: 108px;
+  }
+  .immersive-game.is-series.input-manual .battle-stage {
+    bottom: 108px;
+  }
+  .immersive-game.is-series.input-manual .manual-exercise-guide {
+    left: 12px;
+    top: 25%;
+    width: 53%;
+    max-width: none;
+    transform: none;
+    padding: 10px;
+  }
+  .immersive-game.is-series.input-manual .manual-exercise-guide > small {
+    font-size: 8px;
+  }
+  .immersive-game.is-series.input-manual .manual-exercise-guide strong {
+    font-size: 25px;
+  }
+  .immersive-game.is-series.input-manual .manual-exercise-guide p {
+    font-size: 10px;
+  }
+  .immersive-game.is-series.input-manual .combat-sprite.enemy {
+    left: calc(81% - 50px);
+    width: 100px;
+    height: 100px;
+    top: calc(46% - 94px);
+  }
+  .immersive-game.is-series.input-manual .combat-sprite.hero {
+    left: calc(23% - 65px);
+    width: 130px;
+    height: 130px;
+    bottom: 13%;
+  }
+}
+.immersive-game .battle-actions {
+  min-height: 0;
+}
+.immersive-game .adventure-cloud-status {
+  position: absolute;
+  z-index: 55;
+  top: calc(var(--game-header) + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(540px, calc(100% - 28px));
+  max-height: min(38dvh, 300px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  margin: 0 !important;
+  padding: 12px 16px;
+  background: #263f2af5;
+  border: 1px solid #ddc77e;
+  border-radius: 9px;
+  box-shadow: 0 5px 24px #08291baa;
+  color: #f3e4b4;
+  font-size: 12px;
+}
+.immersive-game .adventure-cloud-status p {
+  margin: 6px 0;
+  color: #d6e1be;
+}
+.immersive-game .adventure-cloud-status button {
+  background: #405937;
+  color: #f4e7bb;
+  border: 1px solid #c8bb7b88;
+  border-radius: 5px;
+  padding: 7px 11px;
+}
+.immersive-game .adventure-cloud-status strong {
+  color: #f4d793;
+}
