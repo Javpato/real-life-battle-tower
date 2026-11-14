@@ -1,64 +1,223 @@
 import {useEffect,useRef,useState} from 'react';
 import Phaser from 'phaser';
 import type {WorldProps} from '../core/contracts';
-import {WORLD_MAPS,resolveWorldPosition,isWalkable,type Facing,type Resident,type Portal} from '../core/worldMaps';
+import {WORLD_MAPS,ROOM_DETAILS,resolveWorldPosition,isWalkable,type Facing,type Resident,type Portal,type Furniture} from '../core/worldMaps';
 import {paintMap} from './art';
 import {ASSET_MANIFEST,assetUrl,characterArt,frameRect,type SheetId} from './assets';
+import {PortalInteraction} from './portalInteraction';
+import './world.css';
 
-type ExtendedProps=WorldProps&{avatar?:'male'|'female';mapId?:string;facing?:Facing;onTransition?:(id:string)=>void;onPosition?:(p:{x:number;y:number;facing?:Facing})=>void;quests?:Record<string,number>;defeated?:string[]};
+type ExtendedProps=Omit<WorldProps,'onTransition'>&{
+ onTransition?:(id:string)=>Promise<boolean>|boolean|void;
+ onInspect?:(id:string)=>void;
+ tutorialStage?:number;quests?:Record<string,number>;defeated?:string[];
+};
+type Target={id:string;label:string;x:number;y:number;labelY:number;kind:'resident'|'portal'|'detail';resident?:Resident;portal?:Portal;furniture?:Furniture};
+type ScreenAnchor={id:string;x:number;y:number};
 const directions:Facing[]=['down','left','right','up'];
 const icons=['heal','shop','alchemy','gym','battle','quest','story'];
+const sheets:SheetId[]=['traveler','femaleWalk','battleCast','villagers','indicators','buildings','scenery','terrain','furniture'];
+
 export default function World(props:ExtendedProps){
- const host=useRef<HTMLDivElement>(null),latest=useRef(props),controls=useRef({up:false,down:false,left:false,right:false,interact:false});latest.current=props;
- const [nearby,setNearby]=useState(''),[ready,setReady]=useState(false),[loadError,setLoadError]=useState(false),[transition,setTransition]=useState(false);
- const mapId=props.mapId??'starter_town',map=WORLD_MAPS[mapId]??WORLD_MAPS.starter_town;
+ const host=useRef<HTMLDivElement>(null),latest=useRef(props);
+ const labelNodes=useRef<Record<string,HTMLSpanElement|null>>({});
+ const targetLabel=useRef<HTMLButtonElement>(null);
+ const controls=useRef({up:false,down:false,left:false,right:false,interact:false});
+ latest.current=props;
+ const [nearby,setNearby]=useState<{id:string;label:string;kind:Target['kind']}|null>(null);
+ const [ready,setReady]=useState(false),[loadError,setLoadError]=useState(false),[transition,setTransition]=useState(false);
+ const [portalStatus,setPortalStatus]=useState('');
+ const map=WORLD_MAPS[props.mapId??'starter_town']??WORLD_MAPS.starter_town;
+
  useEffect(()=>{
-  if(!host.current)return;let alive=true;setReady(false);setNearby('');setTransition(true);const timer=setTimeout(()=>{if(alive)setTransition(false);},240);
+  if(!host.current)return;
+  let alive=true,portalMessage='';
+  const status=(message:string)=>{portalMessage=message;if(alive)setPortalStatus(message);};
+  setReady(false);setNearby(null);setPortalStatus('');setTransition(true);
+  const arrivalTimer=setTimeout(()=>{if(alive)setTransition(false);},200);
   class AdventureWorld extends Phaser.Scene{
-   player!:Phaser.GameObjects.Sprite;keys!:Record<string,Phaser.Input.Keyboard.Key>;direction=0;walking=0;lastSave=0;lastNear='';lastInteract=-500;wasMoving=false;pending=false;wasPaused=false;transitioning=false;interactionPending=false;
-   residents:{data:Resident;sprite:Phaser.GameObjects.Sprite;icon:Phaser.GameObjects.Image;row:number;baseScale:number}[]=[];activityProps:Phaser.GameObjects.Container[]=[];marker!:Phaser.GameObjects.Text;
-   preload(){for(const sheet of ['traveler','femaleWalk','battleCast','villagers','indicators','buildings','scenery','terrain','furniture'] as SheetId[])this.load.image(sheet,assetUrl(sheet));this.load.on('loaderror',()=>{if(alive)setLoadError(true);});}
-   create(){
-    for(const sheet of ['traveler','femaleWalk','battleCast','villagers','indicators','buildings','scenery','terrain','furniture'] as SheetId[]){const texture=this.textures.get(sheet),source=texture.getSourceImage() as HTMLImageElement;const c=document.createElement('canvas');c.width=source.width;c.height=source.height;const g=c.getContext('2d',{willReadFrequently:true})!;g.drawImage(source,0,0);const pixels=g.getImageData(0,0,c.width,c.height).data;for(let i=0;i<ASSET_MANIFEST.sheets[sheet].columns*ASSET_MANIFEST.sheets[sheet].rows;i++){const f=frameRect(sheet,i);let l=f.width,t=f.height,r=-1,b=-1;for(let y=0;y<f.height;y++)for(let x=0;x<f.width;x++)if(pixels[((f.y+y)*c.width+f.x+x)*4+3]>128){l=Math.min(l,x);t=Math.min(t,y);r=Math.max(r,x);b=Math.max(b,y);}if(r<0){l=0;t=0;r=f.width-1;b=f.height-1;}texture.add(i,0,f.x+l,f.y+t,r-l+1,b-t+1);}}
-    this.textures.addCanvas('ground',paintMap(map,this.textures.get('terrain').getSourceImage() as HTMLImageElement));this.add.image(0,0,'ground').setOrigin(0);
-    for(const b of map.buildings){const s=this.add.image(b.x+b.w/2,b.y+b.h,'buildings',b.frame).setOrigin(.5,1).setDepth(b.y+b.h-15);s.setScale(b.w/s.width);this.add.text(s.x,s.y+4,b.name,{fontFamily:'monospace',fontSize:'8px',color:'#fff0ce',backgroundColor:'#304840',padding:{x:4,y:2}}).setOrigin(.5,0).setDepth(s.y+1);}
-    if(map.kind==='interior'){const gym=map.id.startsWith('gym_')||map.id==='rival_arena';const left=gym?5:map.id==='general_store'?3:map.id==='alchemy_lab'?4:['mentor_house','willow_house'].includes(map.id)?1:0;const table=map.id==='general_store'?6:map.id==='alchemy_lab'?4:gym?5:map.id==='starter_house'?7:2;for(const [frame,x,y,w]of[[left,72,112,72],[1,301,86,70],[table,76,190,60]]){const item=this.add.image(x,y,'furniture',frame).setOrigin(.5,1).setDepth(y);item.setScale(w/item.width);}}
-    for(const d of map.decorations){const image=this.add.image(d.x,d.y,'scenery',d.frame).setOrigin(.5,1).setDepth(d.y);image.setScale(d.width/image.width);}
-    for(const p of map.portals){const x=p.x+p.w/2,y=p.y+p.h/2;this.add.rectangle(x,y,p.w-8,5,0xe5c782,.8).setDepth(y-1);if(map.kind!=='interior'&&p.to.includes('town')||map.kind==='route'){this.add.text(x,y-15,p.label,{fontFamily:'monospace',fontSize:'8px',color:'#fff1d0',backgroundColor:'#344c43',padding:{x:4,y:3}}).setOrigin(.5,1);}}
-    for(const n of map.npcs){const a=characterArt(n.id),row=a.frame;const sprite=this.add.sprite(n.x,n.y,a.sheet,a.frame).setOrigin(.5,1).setDepth(n.y).setInteractive({useHandCursor:true});const baseScale=40/sprite.height;sprite.setScale(baseScale);const icon=this.add.image(n.x,n.y-43,'indicators',icons.indexOf(n.icon)).setOrigin(.5).setDepth(n.y+1);sprite.on('pointerdown',()=>{if(this.player&&Phaser.Math.Distance.Between(this.player.x,this.player.y,sprite.x,sprite.y)<48)this.interact(n);});this.residents.push({data:n,sprite,icon,row,baseScale});if(['read','cook','rest'].includes(n.activity)){const g=this.add.graphics();g.fillStyle(n.activity==='cook'?0x483f3e:0xe5d4a1);g.fillRect(-9,-14,18,10);g.lineStyle(1,0x725947);g.lineBetween(0,-14,0,-4);const prop=this.add.container(n.x,n.y,[g]).setDepth(n.y+2);if(n.activity==='cook'){const steam=this.add.rectangle(0,-20,2,3,0xf2e5be,.5);prop.add(steam);this.tweens.add({targets:steam,y:-27,alpha:0,duration:1500,repeat:-1});}this.activityProps.push(prop);}}
-    if(map.id==='summit_rest'){this.add.rectangle(72,96,64,34,0xe5d4a1,.01).setInteractive({useHandCursor:true}).on('pointerdown',()=>{if(this.player&&Phaser.Math.Distance.Between(this.player.x,this.player.y,115,110)<55)this.interact({id:'healer',name:'Rest bed',x:115,y:110,activity:'rest',icon:'heal'});});}
-    const p=resolveWorldPosition({mapId:map.id,...latest.current.position,facing:latest.current.facing});this.direction=directions.indexOf(p.facing);const heroSheet=latest.current.avatar==='female'?'femaleWalk':'traveler';this.player=this.add.sprite(p.x,p.y,heroSheet,this.direction*4).setOrigin(.5,1).setDepth(p.y);this.player.setScale(40/this.player.height);
-    this.cameras.main.setBounds(0,0,map.width,map.height).startFollow(this.player,true,.15,.15).setRoundPixels(true);const resize=()=>{const w=this.scale.width,h=this.scale.height;this.cameras.main.setZoom(map.kind==='interior'?Math.max(1,Math.min(w/420,h/310)):Math.max(1.4,Math.min(w/540,h/340)));if(map.kind==='interior'){this.cameras.main.stopFollow();this.cameras.main.removeBounds();this.cameras.main.centerOn(map.width/2,map.height/2);}};resize();this.scale.on('resize',resize);
-    this.keys=this.input.keyboard!.addKeys('W,A,S,D,UP,DOWN,LEFT,RIGHT,E,ENTER,SHIFT',false) as Record<string,Phaser.Input.Keyboard.Key>;const queue=(e:KeyboardEvent)=>{const target=e.target;if(!latest.current.paused&&!e.repeat&&!(target instanceof HTMLElement&&(['INPUT','TEXTAREA','SELECT'].includes(target.tagName)||(target.tagName==='BUTTON'&&e.key==='Enter'))))this.pending=true;};this.input.keyboard!.on('keydown-E',queue);this.input.keyboard!.on('keydown-ENTER',queue);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>{this.scale.off('resize',resize);this.input.keyboard?.off('keydown-E',queue);this.input.keyboard?.off('keydown-ENTER',queue);});
-    this.marker=this.add.text(0,0,'',{fontFamily:'monospace',fontSize:'9px',color:'#fff2d2',backgroundColor:'#304740',padding:{x:5,y:4}}).setOrigin(.5,1).setDepth(10000);if(alive)setReady(true);
+   player!:Phaser.GameObjects.Sprite;keys!:Record<string,Phaser.Input.Keyboard.Key>;
+   direction=0;walking=0;lastSave=0;lastInteract=-500;lastNear='';wasMoving=false;
+   pending=false;wasPaused=false;interactionPending=false;portalGate=new PortalInteraction();
+   anchors:ScreenAnchor[]=[];
+   residents:{data:Resident;sprite:Phaser.GameObjects.Sprite;icon:Phaser.GameObjects.Image;row:number;baseScale:number}[]=[];
+
+   doorGuide?:Phaser.GameObjects.Ellipse;
+   preload(){
+    for(const sheet of sheets)this.load.image(sheet,assetUrl(sheet));
+    this.load.on('loaderror',()=>{if(alive)setLoadError(true);});
    }
-   save(){if(this.transitioning||this.interactionPending||latest.current.paused)return;const p={x:Math.round(this.player.x),y:Math.round(this.player.y),facing:directions[this.direction]};if(latest.current.onPosition)latest.current.onPosition(p);else latest.current.onMove?.(p);}
-   interact(n:Resident|Portal){if(latest.current.paused||this.transitioning||this.time.now-this.lastInteract<400)return;this.lastInteract=this.time.now;this.pending=false;controls.current.interact=false;this.save();if('to'in n){if((n.badges??0)>latest.current.badges.length){setNearby('Three badges open the Summit Arena');return;}this.transitioning=true;this.wasMoving=false;setTransition(true);latest.current.onTransition?.(n.id);setTimeout(()=>{if(alive){this.transitioning=false;setTransition(false);}},500);}else {this.wasMoving=false;this.interactionPending=true;this.input.keyboard?.resetKeys();latest.current.onInteract(n.id);}}
-   update(time:number,delta:number){if(!this.player)return;const focus=document.activeElement,typing=focus instanceof HTMLElement&&(['INPUT','TEXTAREA','SELECT'].includes(focus.tagName)||focus.isContentEditable);if(latest.current.paused||(this.interactionPending&&time-this.lastInteract>1200))this.interactionPending=false;const paused=latest.current.paused||typing||this.transitioning||this.interactionPending;if(paused||this.wasPaused){this.pending=false;controls.current.interact=false;this.input.keyboard?.resetKeys();}this.wasPaused=paused;
-    let dx=0,dy=0;if(!paused){dx=Number(this.keys.D.isDown||this.keys.RIGHT.isDown||controls.current.right)-Number(this.keys.A.isDown||this.keys.LEFT.isDown||controls.current.left);dy=Number(this.keys.S.isDown||this.keys.DOWN.isDown||controls.current.down)-Number(this.keys.W.isDown||this.keys.UP.isDown||controls.current.up);}
+   registerAtlas(sheet:SheetId){
+    const texture=this.textures.get(sheet),source=texture.getSourceImage() as HTMLImageElement;
+    const c=document.createElement('canvas');c.width=source.width;c.height=source.height;
+    const g=c.getContext('2d',{willReadFrequently:true})!;g.drawImage(source,0,0);
+    const pixels=g.getImageData(0,0,c.width,c.height).data;
+    const spec=ASSET_MANIFEST.sheets[sheet];
+    for(let i=0;i<spec.columns*spec.rows;i++){
+     const f=frameRect(sheet,i);let l=f.width,t=f.height,r=-1,b=-1;
+     for(let y=0;y<f.height;y++)for(let x=0;x<f.width;x++)if(pixels[((f.y+y)*c.width+f.x+x)*4+3]>128){l=Math.min(l,x);t=Math.min(t,y);r=Math.max(r,x);b=Math.max(b,y);}
+     if(r<0){l=0;t=0;r=f.width-1;b=f.height-1;}
+     texture.add(i,0,f.x+l,f.y+t,r-l+1,b-t+1);
+    }
+   }
+   create(){
+    for(const sheet of sheets)this.registerAtlas(sheet);
+    this.textures.addCanvas('ground',paintMap(map,this.textures.get('terrain').getSourceImage() as HTMLImageElement));
+    this.add.image(0,0,'ground').setOrigin(0);
+    map.buildings.forEach((b,index)=>{
+     const image=this.add.image(b.x+b.w/2,b.y+b.h,'buildings',b.frame).setOrigin(.5,1).setDepth(b.y+b.h-15);
+     image.setScale(b.w/image.width);
+     this.anchors.push({id:`building-${index}`,x:image.x,y:image.y-image.displayHeight-7});
+    });
+    for(const item of map.furniture){
+     const image=this.add.image(item.x,item.y,'furniture',item.frame).setOrigin(.5,1).setDepth(item.y);
+     image.setScale(item.width/image.width);
+     if(item.detailId||item.action)image.setInteractive({useHandCursor:true}).on('pointerdown',()=>{
+      const target=this.detailTarget(item);
+      if(this.player&&Phaser.Math.Distance.Between(this.player.x,this.player.y,target.x,target.y)<46)void this.interact(target);
+     });
+    }
+    for(const d of map.decorations){const image=this.add.image(d.x,d.y,'scenery',d.frame).setOrigin(.5,1).setDepth(d.y);image.setScale(d.width/image.width);}
+    if(map.id==='starter_house_bedroom'){this.doorGuide=this.add.ellipse(192,248,26,11,0xe9d083,.24).setStrokeStyle(2,0xf6e0a2,.85).setDepth(1);this.tweens.add({targets:this.doorGuide,alpha:.35,scaleX:1.15,scaleY:1.15,duration:900,yoyo:true,repeat:-1});}
+    for(const portal of map.portals){const x=portal.x+portal.w/2,y=portal.y+portal.h/2;this.add.rectangle(x,y,portal.w-8,4,0xe5c782,.65).setDepth(y-1);}
+    for(const resident of map.npcs){
+     const art=characterArt(resident.id);
+     const sprite=this.add.sprite(resident.x,resident.y,art.sheet,art.frame).setOrigin(.5,1).setDepth(resident.y).setInteractive({useHandCursor:true});
+     const baseScale=40/sprite.height;sprite.setScale(baseScale);
+     const icon=this.add.image(resident.x,resident.y-46,'indicators',icons.indexOf(resident.icon)).setOrigin(.5).setDepth(resident.y+1);
+     sprite.on('pointerdown',()=>{if(this.player&&Phaser.Math.Distance.Between(this.player.x,this.player.y,sprite.x,sprite.y)<48)void this.interact(this.residentTarget(resident,sprite));});
+     this.residents.push({data:resident,sprite,icon,row:art.frame,baseScale});
+     if(['read','cook','rest'].includes(resident.activity)){
+      const g=this.add.graphics();g.fillStyle(resident.activity==='cook'?0x483f3e:0xe5d4a1);g.fillRect(-8,-14,16,9);g.lineStyle(1,0x725947);g.lineBetween(0,-14,0,-5);
+      const prop=this.add.container(resident.x,resident.y,[g]).setDepth(resident.y+2);
+      if(resident.activity==='cook'){const steam=this.add.rectangle(0,-20,2,3,0xf2e5be,.5);prop.add(steam);this.tweens.add({targets:steam,y:-27,alpha:0,duration:1500,repeat:-1});}
+     }
+    }
+    const position=resolveWorldPosition({mapId:map.id,...latest.current.position,facing:latest.current.facing});
+    this.direction=directions.indexOf(position.facing);
+    this.player=this.add.sprite(position.x,position.y,latest.current.avatar==='female'?'femaleWalk':'traveler',this.direction*4).setOrigin(.5,1).setDepth(position.y);
+    this.player.setScale(40/this.player.height);
+    this.cameras.main.setBounds(0,0,map.width,map.height).startFollow(this.player,true,.15,.15).setRoundPixels(true);
+    const resize=()=>{
+     const w=this.scale.width,h=this.scale.height,camera=this.cameras.main;
+     camera.setZoom(map.kind==='interior'?Math.max(1,Math.min(w/420,h/310)):Math.max(1.4,Math.min(w/540,h/340)));
+     if(map.kind==='interior'){camera.stopFollow();camera.removeBounds();camera.centerOn(map.width/2,map.height/2);}
+    };
+    resize();this.scale.on('resize',resize);
+    this.keys=this.input.keyboard!.addKeys('W,A,S,D,UP,DOWN,LEFT,RIGHT,E,ENTER,SHIFT',false) as Record<string,Phaser.Input.Keyboard.Key>;
+    const queue=(event:KeyboardEvent)=>{
+     const target=event.target;
+     const editing=target instanceof HTMLElement&&(['INPUT','TEXTAREA','SELECT'].includes(target.tagName)||(target.tagName==='BUTTON'&&event.key==='Enter'));
+     if(!latest.current.paused&&!event.repeat&&!editing)this.pending=true;
+    };
+    this.input.keyboard!.on('keydown-E',queue);this.input.keyboard!.on('keydown-ENTER',queue);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>{this.scale.off('resize',resize);this.input.keyboard?.off('keydown-E',queue);this.input.keyboard?.off('keydown-ENTER',queue);});
+    if(alive)setReady(true);
+   }
+   residentTarget(data:Resident,sprite:Phaser.GameObjects.Sprite):Target{return {id:data.id,label:data.name,x:sprite.x,y:sprite.y,labelY:sprite.y-58,kind:'resident',resident:data};}
+   portalTarget(portal:Portal):Target{return {id:portal.id,label:portal.label,x:portal.x+portal.w/2,y:portal.y+portal.h/2,labelY:portal.y-12,kind:'portal',portal};}
+   detailTarget(item:Furniture):Target{return {id:item.detailId??item.id,label:item.action==='heal'?'Rest and recover':ROOM_DETAILS[item.detailId??'']?.title??'Look closer',x:item.x,y:item.footprint.y+item.footprint.h+15,labelY:item.y-35,kind:'detail',furniture:item};}
+   save(){
+    if(this.portalGate.pending||this.interactionPending||latest.current.paused)return;
+    const position={x:Math.round(this.player.x),y:Math.round(this.player.y),facing:directions[this.direction]};
+    if(latest.current.onPosition)latest.current.onPosition(position);else latest.current.onMove?.(position);
+   }
+   async interact(target:Target){
+    if(latest.current.paused||this.portalGate.pending||this.time.now-this.lastInteract<350)return;
+    if(target.portal&&this.portalGate.latchedId===target.id)return;
+    this.lastInteract=this.time.now;this.pending=false;controls.current.interact=false;
+    this.save();this.wasMoving=false;
+    if(target.portal){
+     status('Entering…');
+     const accepted=await this.portalGate.request(target.id,async()=>{
+      if((target.portal!.badges??0)>latest.current.badges.length)return false;
+      return (await latest.current.onTransition?.(target.id))===true;
+     });
+     if(!alive)return;
+     if(accepted){setTransition(true);status('');}
+     else {status((target.portal.badges??0)>latest.current.badges.length?'The arena needs all three badges. You can still explore.':'The doorway is unavailable. Step away to try again.');this.wasMoving=false;this.save();}
+     return;
+    }
+    this.interactionPending=true;this.input.keyboard?.resetKeys();
+    if(target.furniture?.action==='heal')latest.current.onInteract('healer');
+    else if(target.furniture?.detailId)latest.current.onInspect?.(target.furniture.detailId);
+    else latest.current.onInteract(target.id);
+   }
+   positionLabel(node:HTMLElement|null|undefined,x:number,y:number,context=false){
+    if(!node)return;
+    const camera=this.cameras.main,point={x:(x-camera.worldView.x)*camera.zoom+camera.x,y:(y-camera.worldView.y)*camera.zoom+camera.y};
+    const visible=point.x>0&&point.x<this.scale.width&&point.y>40&&point.y<this.scale.height-30;
+    node.style.visibility=visible?'visible':'hidden';
+    node.style.left=`${Math.round(Math.max(100,Math.min(this.scale.width-100,point.x)))}px`;
+    node.style.top=`${Math.round(context?Math.min(this.scale.height-115,Math.max(60,point.y)):point.y)}px`;
+   }
+   update(time:number,delta:number){
+    if(!this.player)return;
+    this.doorGuide?.setVisible((latest.current.tutorialStage??6)===0);
+    const focus=document.activeElement;
+    const typing=focus instanceof HTMLElement&&(['INPUT','TEXTAREA','SELECT'].includes(focus.tagName)||focus.isContentEditable);
+    if(latest.current.paused||(this.interactionPending&&time-this.lastInteract>1200))this.interactionPending=false;
+    const paused=latest.current.paused||typing||this.interactionPending;
+    if(paused||this.wasPaused){this.pending=false;controls.current.interact=false;this.input.keyboard?.resetKeys();}
+    this.wasPaused=paused;
+    let dx=0,dy=0;
+    if(!paused){dx=Number(this.keys.D.isDown||this.keys.RIGHT.isDown||controls.current.right)-Number(this.keys.A.isDown||this.keys.LEFT.isDown||controls.current.left);dy=Number(this.keys.S.isDown||this.keys.DOWN.isDown||controls.current.down)-Number(this.keys.W.isDown||this.keys.UP.isDown||controls.current.up);}
     const free=(x:number,y:number)=>isWalkable(map.id,x,y,false)&&!this.residents.some(n=>Math.abs(n.sprite.x-x)<13&&Math.abs(n.sprite.y-y)<12);
-    if(dx||dy){if(document.activeElement instanceof HTMLButtonElement)document.activeElement.blur();const distance=(this.keys.SHIFT.isDown?132:78)*Math.min(delta,45)/1000/Math.hypot(dx,dy);if(free(this.player.x+dx*distance,this.player.y))this.player.x+=dx*distance;if(free(this.player.x,this.player.y+dy*distance))this.player.y+=dy*distance;this.direction=Math.abs(dx)>Math.abs(dy)?(dx<0?1:2):(dy<0?3:0);this.walking+=delta;}
+    if(dx||dy){
+     if(document.activeElement instanceof HTMLButtonElement)document.activeElement.blur();
+     const distance=(this.keys.SHIFT.isDown?132:78)*Math.min(delta,45)/1000/Math.hypot(dx,dy);
+     if(free(this.player.x+dx*distance,this.player.y))this.player.x+=dx*distance;
+     if(free(this.player.x,this.player.y+dy*distance))this.player.y+=dy*distance;
+     this.direction=Math.abs(dx)>Math.abs(dy)?(dx<0?1:2):(dy<0?3:0);this.walking+=delta;
+    }
     this.player.setFrame(this.direction*4+(dx||dy?Math.floor(this.walking/145)%4:0)).setDepth(this.player.y);
     if((time-this.lastSave>1200&&(dx||dy))||(this.wasMoving&&!dx&&!dy)){this.lastSave=time;this.save();}this.wasMoving=Boolean(dx||dy);
-    let nearest:Resident|Portal|undefined,dist=48,nx=0,ny=0;
-    for(const n of this.residents){const d=Phaser.Math.Distance.Between(this.player.x,this.player.y,n.sprite.x,n.sprite.y);const active=n.data.activity==='walk'&&!paused&&d>65;if(active){const offset=Math.sin(time/1700+n.data.x)*18;n.sprite.x=n.data.x+offset;n.sprite.setFlipX(Math.cos(time/1700+n.data.x)<0);n.sprite.y=n.data.y+Math.sin(time/130)*1.1;n.sprite.setAngle(Math.sin(time/230)*2);}else if(d<65){const xx=this.player.x-n.sprite.x,yy=this.player.y-n.sprite.y;n.sprite.setFlipX(xx<0);n.sprite.setAngle(0);n.sprite.y=n.data.y;void yy;}else{n.sprite.setFrame(n.row);n.sprite.y=n.data.y+(n.data.activity==='train'?Math.sin(time/450)*2:0);n.sprite.setScale(n.baseScale,n.baseScale*(1+Math.sin(time/(n.data.activity==='train'?450:1400))*.018));n.sprite.setAngle(n.data.activity==='read'?Math.sin(time/1800)*2:0);}
-     n.sprite.setDepth(n.sprite.y);n.icon.setPosition(n.sprite.x,n.sprite.y-43+Math.sin(time/700)*1.5).setDepth(n.sprite.y+1);const done=latest.current.defeated?.includes(n.data.id);const q=n.data.id.replace('quest-','');n.icon.setVisible(!done&&!(n.data.icon==='quest'&&(latest.current.quests?.[q]??0)>0));if(d<dist){nearest=n.data;dist=d;nx=n.sprite.x;ny=n.sprite.y-45;}}
-    if(map.id==='summit_rest'){const d=Phaser.Math.Distance.Between(this.player.x,this.player.y,115,110);if(d<dist){nearest={id:'healer',name:'Rest bed',x:115,y:110,activity:'rest',icon:'heal'};dist=d;nx=115;ny=85;}}
-    for(const p of map.portals){const x=p.x+p.w/2,y=p.y+p.h/2,d=Phaser.Math.Distance.Between(this.player.x,this.player.y,x,y);if(d<dist){nearest=p;dist=d;nx=x;ny=y-12;}}
-    const label=nearest?('label'in nearest?nearest.label:nearest.name):'';if(label!==this.lastNear){this.lastNear=label;if(alive)setNearby(label);}this.marker.setVisible(Boolean(nearest)&&!paused);if(nearest){this.marker.setPosition(nx,ny).setText('[E] '+label);if(!paused&&(this.pending||controls.current.interact||('to'in nearest&&time>800&&(dx||dy)&&this.player.x>=nearest.x&&this.player.x<=nearest.x+nearest.w&&this.player.y>=nearest.y&&this.player.y<=nearest.y+nearest.h)))this.interact(nearest);}else{this.pending=false;controls.current.interact=false;}
+    const latched=map.portals.find(p=>p.id===this.portalGate.latchedId);
+    const inside=Boolean(latched&&this.player.x>=latched.x-9&&this.player.x<=latched.x+latched.w+9&&this.player.y>=latched.y-9&&this.player.y<=latched.y+latched.h+9);
+    this.portalGate.leaveThreshold(inside);
+    if(!this.portalGate.latchedId&&portalMessage)status('');
+    let nearest:Target|undefined,dist=48;
+    for(const n of this.residents){
+     const d=Phaser.Math.Distance.Between(this.player.x,this.player.y,n.sprite.x,n.sprite.y),walking=n.data.activity==='walk'&&!paused&&d>65;
+     if(walking){n.sprite.x=n.data.x+Math.sin(time/1700+n.data.x)*18;n.sprite.setFlipX(Math.cos(time/1700+n.data.x)<0);n.sprite.y=n.data.y+Math.sin(time/130)*1.1;n.sprite.setAngle(Math.sin(time/230)*2);}
+     else if(d<65){n.sprite.setFlipX(this.player.x<n.sprite.x);n.sprite.setAngle(0);n.sprite.y=n.data.y;}
+     else{n.sprite.setFrame(n.row);n.sprite.y=n.data.y+(n.data.activity==='train'?Math.sin(time/450)*2:0);n.sprite.setScale(n.baseScale,n.baseScale*(1+Math.sin(time/(n.data.activity==='train'?450:1400))*.018));n.sprite.setAngle(n.data.activity==='read'?Math.sin(time/1800)*2:0);}
+     n.sprite.setDepth(n.sprite.y);n.icon.setPosition(n.sprite.x,n.sprite.y-46+Math.sin(time/700)*1.5).setDepth(n.sprite.y+1);
+     n.icon.setVisible(!latest.current.defeated?.includes(n.data.id)&&!(n.data.icon==='quest'&&(latest.current.quests?.[n.data.id.replace('quest-','')]??0)>0));
+     if(d<dist){nearest=this.residentTarget(n.data,n.sprite);dist=d;}
+    }
+    for(const item of map.furniture){const target=this.detailTarget(item),d=Phaser.Math.Distance.Between(this.player.x,this.player.y,target.x,target.y);if(d<Math.min(dist,36)&&nearest?.kind!=='resident'){nearest=target;dist=d;}}
+    for(const portal of map.portals){const target=this.portalTarget(portal),d=Phaser.Math.Distance.Between(this.player.x,this.player.y,target.x,target.y);if(d<dist){nearest=target;dist=d;}}
+    const id=nearest?.id??'';
+    if(id!==this.lastNear){this.lastNear=id;if(alive)setNearby(nearest?{id:nearest.id,label:nearest.label,kind:nearest.kind}:null);}
+    for(const anchor of this.anchors){const node=labelNodes.current[anchor.id];this.positionLabel(node,anchor.x,anchor.y);if(node&&nearest?.kind==='portal'&&map.buildings[Number(anchor.id.split('-')[1])]?.name===nearest.label)node.style.visibility='hidden';}
+    if(nearest){
+     this.positionLabel(targetLabel.current,nearest.x,nearest.labelY,true);
+     const portal=nearest.portal,entering=portal&&time>800&&(dx||dy)&&this.player.x>=portal.x&&this.player.x<=portal.x+portal.w&&this.player.y>=portal.y&&this.player.y<=portal.y+portal.h;
+     if(!paused&&(this.pending||controls.current.interact||entering))void this.interact(nearest);
+    }else{this.pending=false;controls.current.interact=false;}
    }
   }
-  const game=new Phaser.Game({type:Phaser.CANVAS,parent:host.current,width:host.current.clientWidth,height:host.current.clientHeight,pixelArt:true,roundPixels:true,backgroundColor:'#263c38',antialias:false,scene:AdventureWorld,scale:{mode:Phaser.Scale.RESIZE,autoCenter:Phaser.Scale.CENTER_BOTH},audio:{noAudio:true},input:{activePointers:3}});const observer=new ResizeObserver(entries=>{const b=entries[0]?.contentRect;if(b?.width&&b.height)game.scale.resize(Math.round(b.width),Math.round(b.height));});observer.observe(host.current);const clear=()=>{controls.current={up:false,down:false,left:false,right:false,interact:false};};window.addEventListener('blur',clear);return()=>{alive=false;clearTimeout(timer);observer.disconnect();window.removeEventListener('blur',clear);game.destroy(true);};
+  const game=new Phaser.Game({type:Phaser.CANVAS,parent:host.current,width:host.current.clientWidth,height:host.current.clientHeight,pixelArt:true,roundPixels:true,backgroundColor:'#263c38',antialias:false,scene:AdventureWorld,scale:{mode:Phaser.Scale.RESIZE,autoCenter:Phaser.Scale.CENTER_BOTH},audio:{noAudio:true},input:{activePointers:3}});
+  const observer=new ResizeObserver(entries=>{const b=entries[0]?.contentRect;if(b?.width&&b.height)game.scale.resize(Math.round(b.width),Math.round(b.height));});observer.observe(host.current);
+  const clear=()=>{controls.current={up:false,down:false,left:false,right:false,interact:false};};window.addEventListener('blur',clear);
+  return()=>{alive=false;clearTimeout(arrivalTimer);observer.disconnect();window.removeEventListener('blur',clear);game.destroy(true);};
  },[map.id,props.avatar]);
  useEffect(()=>{if(props.paused)controls.current={up:false,down:false,left:false,right:false,interact:false};},[props.paused]);
- const hold=(d:'up'|'down'|'left'|'right')=>({onPointerDown:(e:React.PointerEvent<HTMLButtonElement>)=>{e.preventDefault();e.currentTarget.setPointerCapture(e.pointerId);controls.current[d]=true;},onPointerUp:()=>{controls.current[d]=false;},onPointerCancel:()=>{controls.current[d]=false;},onLostPointerCapture:()=>{controls.current[d]=false;}});
- const bs:React.CSSProperties={width:42,height:42,border:'2px solid #e3cc9366',borderRadius:7,color:'#fff3cf',background:'#344e47ee',fontSize:17,touchAction:'none',cursor:'pointer'};
- return <div aria-label="Everstride game world" data-map-id={map.id} style={{width:'100%',height:'100%',minHeight:260,position:'relative',overflow:'hidden',background:'#263c38',isolation:'isolate'}}>
-  <div ref={host} style={{width:'100%',height:'100%',imageRendering:'pixelated'}}/>
-  <div className="world-region-label" style={{position:'absolute',left:16,top:14,pointerEvents:'none',color:'#fff1cd',textShadow:'0 2px #324c40',fontFamily:'monospace',fontSize:10}}>{map.region}<br/><strong style={{fontSize:16}}>{map.name}</strong></div>
-  {!ready&&<div style={{position:'absolute',inset:0,display:'grid',placeItems:'center',color:'#f6e7c1'}}>{loadError?'Artwork could not load. Please reconnect and reload.':'Opening the world…'}</div>}
-  {!props.paused&&<><div className="world-touch-pad" style={{position:'absolute',bottom:16,left:16,display:'grid',gridTemplateColumns:'repeat(3,42px)',gap:3}}><span/><button aria-label="Move up" style={bs} {...hold('up')}>↑</button><span/><button aria-label="Move left" style={bs} {...hold('left')}>←</button><button aria-label="Move down" style={bs} {...hold('down')}>↓</button><button aria-label="Move right" style={bs} {...hold('right')}>→</button></div><button className="world-interact" disabled={!nearby} onClick={()=>{controls.current.interact=true;}} style={{position:'absolute',right:16,bottom:18,padding:'14px 18px',border:'2px solid #e9ce8c',borderRadius:8,background:nearby?'#f0d69b':'#344e47dd',color:nearby?'#354c40':'#f2e4c0',fontSize:12,maxWidth:'52%'}}>{nearby?`E · ${nearby}`:'WASD / arrows · Shift to run'}</button></>}
-  <div aria-hidden="true" style={{position:'absolute',inset:0,background:'#142b2b',opacity:transition?1:0,transition:'opacity 220ms',pointerEvents:'none',zIndex:20}}/>
+ const hold=(direction:'up'|'down'|'left'|'right')=>({onPointerDown:(event:React.PointerEvent<HTMLButtonElement>)=>{event.preventDefault();event.currentTarget.setPointerCapture(event.pointerId);controls.current[direction]=true;},onPointerUp:()=>{controls.current[direction]=false;},onPointerCancel:()=>{controls.current[direction]=false;},onLostPointerCapture:()=>{controls.current[direction]=false;}});
+ return <div className="adventure-world" aria-label="Everstride game world" data-map-id={map.id} data-guide="world-move">
+  <div ref={host} className="world-canvas"/>
+  <div className="world-label-layer" aria-hidden={props.paused} style={{visibility:props.paused?'hidden':undefined}}>
+   {map.buildings.map((building,index)=><span className="world-map-label" ref={node=>{labelNodes.current[`building-${index}`]=node;}} key={`building-${index}`}>{building.name}</span>)}
+   {nearby&&!props.paused&&<button ref={targetLabel} data-guide={nearby.kind==='portal'?'world-door':undefined} className="world-nearby-label" onClick={()=>{controls.current.interact=true;}}><kbd>E</kbd><span>{nearby.label}</span></button>}
+  </div>
+  <div className="world-region-label"><span>{map.region}</span><strong>{map.name}</strong></div>
+  {!ready&&<div className="world-loading">{loadError?'Artwork could not load. Please reconnect and reload.':'Opening the world…'}</div>}
+  {!props.paused&&<>
+   <div className="world-touch-pad" data-guide="world-move"><span/><button aria-label="Move up" {...hold('up')}>↑</button><span/><button aria-label="Move left" {...hold('left')}>←</button><button aria-label="Move down" {...hold('down')}>↓</button><button aria-label="Move right" {...hold('right')}>→</button></div>
+   <button className="world-interact" data-guide="world-interact" disabled={!nearby} onClick={()=>{controls.current.interact=true;}}>{nearby?`${nearby.kind==='detail'?'Inspect':'Interact'} · ${nearby.label}`:'WASD / arrows · Shift to run'}</button>
+  </>}
+  {portalStatus&&<div className="world-portal-status" role="status">{portalStatus}</div>}
+  <div className="world-arrival" aria-hidden="true" style={{opacity:transition?1:0}}/>
  </div>;
 }

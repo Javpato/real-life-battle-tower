@@ -45,12 +45,15 @@ export function paintMap(map:WorldMap,terrain?:HTMLImageElement){
  const box=(x:number,y:number,w:number,h:number,color:string)=>{g.fillStyle=color;g.fillRect(Math.round(x),Math.round(y),w,h);};
  const material=(frame:number,x:number,y:number,w:number,h:number)=>{if(!terrain)return;const size=terrain.width/2,tile=64;g.save();g.beginPath();g.rect(x,y,w,h);g.clip();for(let yy=Math.floor(y/tile)*tile;yy<y+h;yy+=tile)for(let xx=Math.floor(x/tile)*tile;xx<x+w;xx+=tile)g.drawImage(terrain,(frame%2)*size,Math.floor(frame/2)*size,size,size,xx,yy,tile,tile);g.restore();};
  if(map.kind==='interior'){
-  box(0,0,c.width,c.height,'#382a35');box(16,16,352,256,'#d2b784');box(16,47,352,225,'#957052');
-  for(let y=48;y<272;y+=16)for(let x=16;x<368;x+=32){box(x,y,31,15,(x+y)%3?'#aa805a':'#b78d62');box(x+3,y+3,22,1,'#c29c70');}
-  box(20,18,344,27,'#f0d9a5');box(20,42,344,6,'#5d473b');
+  const style=map.roomStyle;
+  box(0,0,c.width,c.height,'#382a35');box(16,16,352,256,style?.wall??'#d2b784');box(16,47,352,225,'#957052');
+  if(style?.floor==='stone'){material(2,16,48,352,224);for(let y=48;y<272;y+=24)box(16,y,352,1,'#727b6955');}
+  else for(let y=48;y<272;y+=16)for(let x=16;x<368;x+=32){box(x,y,31,15,(x+y)%3?'#aa805a':'#b78d62');box(x+3,y+3,22,1,'#c29c70');}
+  box(20,18,344,27,style?.wall??'#f0d9a5');box(20,42,344,6,style?.trim??'#5d473b');
   // Warm window, bed, desk, chair, bookshelf and rug. Each retains a matching collision.
   box(164,18,54,26,'#624b47');box(168,20,46,20,'#77bfc2');box(171,22,18,17,'#afd7cf');box(190,20,3,22,'#ead09a');
-  box(150,162,85,53,map.id.includes('gym')?'#ad604e':'#657e78');box(154,166,77,45,map.id.includes('gym')?'#c78b68':'#8ba59a');box(160,172,65,33,map.id.includes('gym')?'#995648':'#607d74');
+  const rug=style?.rugBounds??{x:150,y:162,w:85,h:53};box(rug.x,rug.y,rug.w,rug.h,style?.rug??'#657e78');box(rug.x+4,rug.y+4,rug.w-8,rug.h-8,'#e2cda2');box(rug.x+7,rug.y+7,rug.w-14,rug.h-14,style?.rug??'#607d74');
+  for(let x=rug.x+4;x<rug.x+rug.w-4;x+=8){box(x,rug.y-2,3,2,'#d9c295');box(x,rug.y+rug.h,3,2,'#d9c295');}
   box(168,267,48,21,'#e6c58b');box(174,272,36,3,'#705744');
   if(map.id==='starter_house'){box(304,112,32,24,'#ead7a5');for(let y=114;y<136;y+=5)box(305,y,30,2,'#85644c');}
   for(const x of [122,246]){box(x,27,6,8,'#ffdf8a');box(x-2,34,10,3,'#99704f');}
