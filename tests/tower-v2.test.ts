@@ -13,7 +13,8 @@ function completeTrial(s:PlayerSave){while(s.activity.kind==='trial'&&!s.activit
 function camera(s:PlayerSave,index:number,duration=2000,uninterrupted=true){const unit:ExerciseUnit={id:`camera-${++seq}`,exerciseId:'squat',quality:.9,confidence:.9,verified:true,timestamp:(index+1)*10000,cycle:{startedAt:(index+1)*10000-duration,endedAt:(index+1)*10000,uninterrupted}};return send(s,{kind:'unit',sessionId:activeSeries(s)!.id,unit});}
 
 describe('six types and hybrids',()=>{
- it('retains the original triangle with two advantages and two resistances per row',()=>{
+ it('retains the original triangle with six distinct profiles, two advantages and two resistances per row',()=>{
+  expect(new Set(TYPES.map(type=>JSON.stringify(TYPES.map(target=>TYPE_CHART[type][target])))).size).toBe(6);
   for(const t of TYPES){expect(TYPE_CHART[t][t]).toBe(1);expect(Object.values(TYPE_CHART[t]).filter(n=>n===1.5)).toHaveLength(2);expect(Object.values(TYPE_CHART[t]).filter(n=>n===.75)).toHaveLength(2);}
   expect(effectiveness('leg',['arm'])).toBe(1.5);expect(effectiveness('arm',['back'])).toBe(1.5);expect(effectiveness('back',['leg'])).toBe(1.5);
  });
