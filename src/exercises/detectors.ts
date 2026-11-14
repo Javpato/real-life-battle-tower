@@ -1096,7 +1096,10 @@ export class ExerciseDetector {
     } else this.stableSince = undefined;
     return {
       state: "return",
-      message: "Return fully to the starting position.",
+      message:
+        this.exerciseId === "sitstand"
+          ? "Sit back on the same chair and pause briefly. No need to go lower."
+          : "Return fully to the starting position.",
     };
   }
   private unit(

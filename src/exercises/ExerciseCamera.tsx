@@ -149,7 +149,7 @@ export default function ExerciseCamera(props: Props) {
       }
     }
     lifecycle.current?.stop();
-    detector.current.pause();
+    detector.current.beginCalibration();
     calibrated.current.clear();
     poseFilter.current.reset();
     setModel(next);
@@ -493,6 +493,7 @@ export default function ExerciseCamera(props: Props) {
     if (latest.current.source === "phone") return;
     setCamera(snapshot);
     if (snapshot.status === "requesting") {
+      detector.current.beginCalibration();
       calibrated.current.clear();
       detector.current.pause();
       resetTiming();
@@ -514,6 +515,7 @@ export default function ExerciseCamera(props: Props) {
       void refreshDevices();
     } else if (snapshot.status === "off" || snapshot.status === "error") {
       detector.current.pause();
+      detector.current.beginCalibration();
       calibrated.current.clear();
       resetTiming();
       setPhase(snapshot.status);
@@ -656,7 +658,7 @@ export default function ExerciseCamera(props: Props) {
     }
   }, [props.exerciseId, props.sessionId, partialSquat]);
   useEffect(() => {
-    detector.current.pause();
+    detector.current.beginCalibration();
     calibrated.current.clear();
     lifecycle.current?.invalidateFrames();
     poseFilter.current.reset();
@@ -707,6 +709,7 @@ export default function ExerciseCamera(props: Props) {
     detector.current.pause();
     poseFilter.current.reset();
     resetTiming();
+    detector.current.beginCalibration();
     calibrated.current.clear();
     phoneTimestamp.current = -Infinity;
     phoneArrival.current = -Infinity;
@@ -750,6 +753,7 @@ export default function ExerciseCamera(props: Props) {
       ) {
         detector.current.pause();
         poseFilter.current.reset();
+        detector.current.beginCalibration();
         calibrated.current.clear();
         stableSince.current = null;
         countdownAt.current = null;
@@ -776,6 +780,7 @@ export default function ExerciseCamera(props: Props) {
       if (performance.now() - phoneArrival.current > 500) {
         detector.current.pause();
         poseFilter.current.reset();
+        detector.current.beginCalibration();
         calibrated.current.clear();
         stableSince.current = null;
         countdownAt.current = null;
@@ -823,6 +828,7 @@ export default function ExerciseCamera(props: Props) {
     detector.current.pause();
     lifecycle.current?.invalidateFrames();
     resetTiming();
+    detector.current.beginCalibration();
     calibrated.current.clear();
     poseFilter.current.reset();
     if (
@@ -832,7 +838,7 @@ export default function ExerciseCamera(props: Props) {
       setPhase("framing");
     setMessage(
       value
-        ? "Rest as long as you need. Your progress and calibration are kept."
+        ? "Rest as long as you need. Your progress is kept; resume to calibrate again."
         : "Return to the starting position.",
     );
   };
@@ -1022,6 +1028,7 @@ export default function ExerciseCamera(props: Props) {
             type="button"
             onClick={() => {
               setPartialSquat(true);
+              detector.current.beginCalibration();
               calibrated.current.clear();
             }}
           >
@@ -1042,21 +1049,18 @@ export default function ExerciseCamera(props: Props) {
           <summary>
             Camera tracking · {model === "full" ? "Full" : "Fast (Lite)"}
           </summary>
+          <p>These are camera models, not exercise difficulty levels.</p>
           <p>
-            These are camera models, not exercise difficulty levels.
-          </p>
-          <p>
-            <strong>Fast (Lite) — recommended:</strong> the smaller model, already
-            included. Start here, especially if the skeleton feels delayed.
+            <strong>Fast (Lite) — recommended:</strong> the smaller model,
+            already included. Start here, especially if the skeleton feels
+            delayed.
           </p>
           <p>
             <strong>Full:</strong> a larger download to try if tracking is
             unreliable. It needs more processing and may respond more slowly;
             better counts are not guaranteed.
           </p>
-          <p>
-            Both run on this device. Neither changes how far you must move.
-          </p>
+          <p>Both run on this device. Neither changes how far you must move.</p>
           <div>
             <button
               type="button"
@@ -1075,6 +1079,16 @@ export default function ExerciseCamera(props: Props) {
                 : fullModelUrl
                   ? "Use Full"
                   : "Download Full"}
+            </button>
+            <button
+              type="button"
+              aria-label="Close camera model options"
+              onClick={(event) => {
+                const options = event.currentTarget.closest("details");
+                if (options) options.open = false;
+              }}
+            >
+              Done
             </button>
           </div>
           {modelNotice && <p role="status">{modelNotice}</p>}
@@ -1150,7 +1164,7 @@ export default function ExerciseCamera(props: Props) {
             type="button"
             data-guide="camera-recalibrate"
             onClick={() => {
-              detector.current.pause();
+              detector.current.beginCalibration();
               lifecycle.current?.invalidateFrames();
               calibrated.current.delete(calibrationGroup(props.exerciseId));
               resetTiming();

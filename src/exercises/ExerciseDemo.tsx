@@ -40,7 +40,8 @@ export const EXERCISE_GUIDES: Record<
       "Lie on your back with knees bent and feet planted about hip-width apart. Let your shoulders and hips rest on the floor, with arms relaxed beside you.",
     movement:
       "Raise your hips gently while your shoulders and feet stay supported, then lower to the floor. One lift and complete return counts once.",
-    camera: "Low side view · show one shoulder, hip and knee. Feet are not checked when outside the frame",
+    camera:
+      "Low side view · show one shoulder, hip and knee. Feet are not checked when outside the frame",
     note: "Lift through a comfortable range without forcing your back into an arch. This is a game exercise, not a rehabilitation prescription.",
     source:
       "https://www.cuh.nhs.uk/patient-information/general-stability-exercises1/",
