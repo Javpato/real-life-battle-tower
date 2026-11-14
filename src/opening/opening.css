@@ -7,3 +7,5 @@
 /* Tutorial actions sit above the exploration dock, never behind its buttons. */
 .immersive-game .tutorial-ribbon{z-index:60;bottom:88px}
 @media(max-height:550px){.immersive-game .tutorial-ribbon{bottom:72px}}
+
+.title-male-art{object-fit:contain;object-position:center bottom;image-rendering:auto}

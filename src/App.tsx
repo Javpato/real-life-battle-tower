@@ -232,6 +232,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
   function interact(id: string) {
     if (b || panel || quest || adventure.locked) return;
     if(id === "trainer-1" && (journey?.tutorialStage??6)<4){void dispatch({kind:"setTutorial",stage:2}); V("tutorial");return;}
+    if((journey?.tutorialStage??6)<6 && id!=='healer'){notify('Meet Moss outside your home to finish your training first.');return;}
     if (id.startsWith("trainer") || id.startsWith("leader") || id === "rival") {
       if (id === "rival" && p.badges.length < 3) {
         notify(
@@ -553,9 +554,9 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                     mapId={journey?.location.mapId}
                     avatar={journey?.avatar}
                     facing={journey?.location.facing}
-                    onTransition={(portalId)=>void dispatch({kind:'portal',portalId})}
-                    onPosition={(position)=>{if(!adventure.locked)void dispatch({kind:'location',mapId:journey?.location.mapId??'starter_town',x:position.x,y:position.y,facing:position.facing??'down'})}}
-                    onMove={(position)=>{if(!adventure.locked)void dispatch({kind:'location',mapId:journey?.location.mapId??'starter_town',x:position.x,y:position.y,facing:position.facing??'down'})}}
+                    onTransition={(portalId)=>{const to=WORLD_MAPS[journey?.location.mapId??'starter_town']?.portals.find(p=>p.id===portalId)?.to;if((journey?.tutorialStage??6)<6&&to&&!['starter_house_bedroom','starter_house','starter_town','rest_house'].includes(to)){notify('Finish your first training with Moss before exploring further.');return;}void dispatch({kind:'portal',portalId})}}
+                    onPosition={(position)=>{if(!adventure.locked&&!quest&&!b&&!panel)void dispatch({kind:'location',mapId:journey?.location.mapId??'starter_town',x:position.x,y:position.y,facing:position.facing??'down'})}}
+                    onMove={(position)=>{if(!adventure.locked&&!quest&&!b&&!panel)void dispatch({kind:'location',mapId:journey?.location.mapId??'starter_town',x:position.x,y:position.y,facing:position.facing??'down'})}}
                     onInteract={interact}
                   />
                   <div className="world-caption">
@@ -1064,7 +1065,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
           </div>
         </section>
       )}
-      {!b && !panel && !quest && journey && journey.tutorialStage<6 && <aside className="tutorial-ribbon"><strong>{journey.tutorialStage===0?(journey.location.mapId==='starter_house_bedroom'?'WASD / ARROWS TO MOVE · FIND THE DOOR':'WALK TO THE FRONT DOOR'):journey.tutorialStage===1?'MEET MOSS OUTSIDE · PRESS E TO TALK':journey.tutorialStage<4?'TALK TO MOSS FOR YOUR FIRST BATTLE':journey.tutorialStage===4?'WELL DONE! YOU EARNED XP AND COINS':'THREE GYMS. THREE BADGES. YOUR OWN PATH.'}</strong>{journey.tutorialStage===4&&<p>Use coins at Jun’s shop to buy supplies and improve skills.</p>}{journey.tutorialStage===5&&<p>Visit Terra, Flint and Zephyr. Explore Fernway Trail, then meet Rowan at Summit Hollow.</p>}{journey.tutorialStage>=4&&<button onClick={()=>void dispatch({kind:'setTutorial',stage:journey.tutorialStage+1})}>Continue</button>}<button onClick={()=>void dispatch({kind:'setTutorial',stage:6})}>Skip tutorial</button></aside>}
+      {!b && !panel && !quest && journey && journey.tutorialStage<6 && <aside className="tutorial-ribbon"><strong>{journey.tutorialStage===0?(journey.location.mapId==='starter_house_bedroom'?'WASD / ARROWS TO MOVE · FIND THE DOOR':'WALK TO THE FRONT DOOR'):journey.tutorialStage===1?'MEET MOSS OUTSIDE · PRESS E TO TALK':journey.tutorialStage<4?'TALK TO MOSS FOR YOUR FIRST BATTLE':journey.tutorialStage===4?'WELL DONE! YOU EARNED XP AND COINS':'THREE GYMS. THREE BADGES. YOUR OWN PATH.'}</strong>{journey.tutorialStage===4&&<p>Use coins at Jun’s shop to buy supplies and improve skills.</p>}{journey.tutorialStage===5&&<p>Visit Terra, Flint and Zephyr. Explore Fernway Trail, then meet Rowan at Summit Hollow.</p>}{journey.tutorialStage>=4&&<button onClick={()=>void dispatch({kind:'setTutorial',stage:journey.tutorialStage+1})}>Continue</button>}</aside>}
       {welcome && (
         <div className="modal-backdrop">
           <section className="modal welcome-modal">

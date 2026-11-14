@@ -59,9 +59,7 @@ try {
     .getByRole("button", { name: "Skip introduction", exact: true })
     .click();
   await expect(page.locator(".world-frame canvas")).toBeVisible();
-  await page
-    .getByRole("button", { name: "Skip tutorial", exact: true })
-    .click();
+  await expect(page.getByRole("button", { name: "Skip tutorial", exact: true })).toHaveCount(0);
   const original = await saved();
   await page.keyboard.down("d");
   await page.waitForTimeout(450);
@@ -71,7 +69,7 @@ try {
     .toBeGreaterThan(original.snapshot.journey.location.x);
   await expect
     .poll(async () => (await saved()).snapshot.journey.tutorialStage)
-    .toBe(6);
+    .toBe(0);
   await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page
     .getByRole("button", { name: "Save & return to title", exact: true })

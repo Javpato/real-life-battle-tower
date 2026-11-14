@@ -1,0 +1,7 @@
+import {describe,it,expect} from 'vitest';
+import {initialAdventure,normalizeAdventure,applyAdventureCommand} from '../src/core/commands';
+describe('mandatory new-adventure tutorial',()=>{
+ it('cannot skip stages or start a regular encounter',()=>{const s=normalizeAdventure(initialAdventure(),false);expect(()=>applyAdventureCommand(s,{kind:'setTutorial',stage:6})).toThrow('COMPLETE_TUTORIAL_STEPS');expect(()=>applyAdventureCommand(s,{kind:'startBattle',enemyId:'trainer-1',specialization:null})).toThrow('COMPLETE_TUTORIAL_FIRST');expect(()=>applyAdventureCommand(s,{kind:'startQuest',exercise:'squat'})).toThrow('COMPLETE_TUTORIAL_FIRST')});
+ it('unlocks only after practice victory and rewards/gym explanations',()=>{let s=normalizeAdventure(initialAdventure(),false);s=applyAdventureCommand(s,{kind:'startTutorialBattle'});s=applyAdventureCommand(s,{kind:'beginAttack',attackId:'squat'});s=applyAdventureCommand(s,{kind:'manualRemaining',sessionId:s.battle!.sessionId});s=applyAdventureCommand(s,{kind:'finishBattle'});expect(()=>applyAdventureCommand(s,{kind:'setTutorial',stage:6})).toThrow();s=applyAdventureCommand(s,{kind:'setTutorial',stage:5});s=applyAdventureCommand(s,{kind:'setTutorial',stage:6});expect(applyAdventureCommand(s,{kind:'startBattle',enemyId:'trainer-1',specialization:null}).battle).not.toBeNull()});
+ it('preserves old completed adventures',()=>{expect(normalizeAdventure(initialAdventure()).journey?.tutorialStage).toBe(6)})
+});
