@@ -547,6 +547,8 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                     key={adventure.mode + ":" + (adventure.saveId ?? "local") + ":" + journey?.location.mapId}
                     paused={!!panel || !!quest || welcome || adventure.locked}
                     badges={p.badges}
+                    quests={p.quests}
+                    defeated={p.defeated}
                     position={journey?.location ?? p.position}
                     mapId={journey?.location.mapId}
                     avatar={journey?.avatar}
@@ -1138,7 +1140,8 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
               disabled={adventure.locked && panel !== "devices"}
               style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
             >
-              {panel === 'tutorial' && <><BattleSprite id="trainer-1" className="profile-portrait"/><h3>Moss · Your first steps</h3><p>Let's try a short practice battle. Choose Attack, then Squat. The guide will help you position your camera. Three complete movements are enough. You can also choose manual mode.</p><p>Every valid repetition deals damage immediately. Pause whenever you need a break.</p><button className="primary" onClick={async()=>{if(await dispatch({kind:'startTutorialBattle'}))V(null)}}>Practice with Moss</button></>}
+              {panel === 'map' && <section aria-label="Valley map"><svg viewBox="0 0 600 310" role="img" aria-label="Willowmere connected by Fernway Trail to Summit Hollow" style={{width:'100%',background:'#203c3b',borderRadius:8}}><path d="M95 220 Q200 290 295 165 T500 75" stroke="#d3b67a" strokeWidth="16" fill="none"/>{[[95,220,'Willowmere'],[295,165,'Fernway Trail'],[500,75,'Summit Hollow']].map(([x,y,name])=><g key={name}><rect x={Number(x)-30} y={Number(y)-30} width="60" height="50" fill="#eed5a0" stroke="#8a6142" strokeWidth="5"/><text x={x} y={Number(y)+45} textAnchor="middle" fill="#fff1ce" fontSize="17">{name}</text></g>)}</svg><p>You are in {WORLD_MAPS[journey?.location.mapId??'starter_town']?.name}. The three gyms are in Willowmere. Follow the southern trail to Summit Hollow; Rowan's arena requires all three badges.</p></section>}
+              {panel === 'tutorial'  && <><BattleSprite id="trainer-1" className="profile-portrait"/><h3>Moss · Your first steps</h3><p>Let's try a short practice battle. Choose Attack, then Squat. The guide will help you position your camera. Three complete movements are enough. You can also choose manual mode.</p><p>Every valid repetition deals damage immediately. Pause whenever you need a break.</p><button className="primary" onClick={async()=>{if(await dispatch({kind:'startTutorialBattle'}))V(null)}}>Practice with Moss</button></>}
               {panel === "preview" && encounter && (
                 <>
                   <p>
@@ -1453,7 +1456,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                       </p>
                     </div>
                   </section>
-                  <div className="button-row"><button onClick={()=>{V(null);setReplayIntro(true)}}>Replay introduction</button><button disabled={adventure.busy||adventure.pending>0} onClick={async()=>{if(b&&!b.paused)await dispatch({kind:'pause',paused:true});onReturnToTitle?.()}}>Save & return to title</button></div>
+                  <div className="button-row"><button onClick={()=>V("map")}>World map</button><button onClick={()=>{V(null);setReplayIntro(true)}}>Replay introduction</button><button disabled={adventure.busy||adventure.pending>0} onClick={async()=>{if(b&&!b.paused)await dispatch({kind:'pause',paused:true});onReturnToTitle?.()}}>Save & return to title</button></div>
                   <div className="menu-badges">
                     {(["leg", "arm", "back"] as Element[]).map((type) => (
                       <span

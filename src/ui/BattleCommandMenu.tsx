@@ -98,7 +98,7 @@ export default function BattleCommandMenu({
       </div>
       {battleMenu === "attacks" ? (
         <div className="attack-grid">
-          {p.equipped.map((id) => {
+          {(b.enemy.id==='tutorial-moss'?['squat']:p.equipped).map((id) => {
             const a = attackFor(id, p);
             const multiplier = effectiveness(a.type, b.enemy.phases[b.phase]);
             const sameType = stab(a.type, b.type ? [b.type] : []) > 1;
@@ -119,7 +119,7 @@ export default function BattleCommandMenu({
                 </span>
                 <strong>{a.name}</strong>
                 <small>
-                  {a.units}{" "}
+                  {b.enemy.id==='tutorial-moss'?3:a.units}{" "}
                   {a.exercise === "superman" ? "seconds" : "repetitions"} ·{" "}
                   {EXERCISE_GUIDES[a.exercise].title.split(" · ")[1]}
                 </small>

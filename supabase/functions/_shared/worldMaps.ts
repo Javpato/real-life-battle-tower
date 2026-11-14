@@ -36,7 +36,7 @@ resident(rest,'healer','The healer',192,118,'stand','heal');resident(shop,'shop'
 resident(leg,'leader-leg','Terra',192,118,'train','gym');resident(arm,'leader-arm','Flint',192,118,'train','gym');resident(back,'leader-back','Zephyr',192,118,'train','gym');resident(arena,'rival','Rowan',192,118,'stand','story');
 resident(oak,'quest-squat','Ollie',192,118,'train','quest');resident(willow,'quest-pushup','Ada',192,118,'read','quest');resident(mentor,'quest-birddog','Noor',192,118,'read','quest');resident(summitHouse,'quest-lunge','Finn',192,118,'rest','quest');
 // Rest point reuses the healer interaction; it does not create another character identity.
-resident(summitRest,'healer','Rest attendant',192,118,'stand','heal');
+// Summit Rest uses its bed as a rest interaction in the renderer.
 function connect(a:WorldMap,b:WorldMap,ax:number,ay:number,bx:number,by:number){a.spawns[b.id]=spawn(ax,ay-40,'up');b.spawns[a.id]=spawn(bx,by+40,'down');a.portals.push({id:`${a.id}:${b.id}`,x:ax-28,y:ay-12,w:56,h:28,to:b.id,spawn:a.id,label:b.name});b.portals.push({id:`${b.id}:${a.id}`,x:bx-28,y:by-12,w:56,h:28,to:a.id,spawn:b.id,label:a.name});}
 connect(town,route,640,930,384,40);connect(route,summit,384,1110,480,40);
 // Route pools and groves make two traversable alternatives around a central glade.
