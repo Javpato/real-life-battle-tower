@@ -1,5 +1,13 @@
 # Battle Tower v2 — verification
 
+## Public GitHub publication — 2026-11-15
+
+- Public repository: https://github.com/Javpato/real-life-battle-tower . Source, tracked art sources/runtime assets, documentation, tests and backend migrations are published on `main`. A scan of 2,078 Git blobs found no matching private-key/token/service-role patterns or oversized GitHub objects. `.env.local`, dependencies, local backend state and player saves were not uploaded.
+- Live game: https://javpato.github.io/real-life-battle-tower/ . GitHub Actions run `43655754404` passed unit tests, shared-source parity, both local SQL suites, subdirectory production build and Pages deployment. Only the existing public Supabase URL/publishable key are supplied as build configuration; this publication did not deploy or change the backend.
+- Public JS, WASM and pose-model downloads all returned HTTP 200 with appropriate MIME types. Hosted camera pairing passed against the real backend: desktop approval, actual MediaPipe with synthetic camera, WebRTC data channel, optional direct video and disconnect cleanup. The game camera also initialized inside a floor-one battle at 915×412, with zero page errors. Reports and screenshot: `docs/verification/github-pages/`. These checks do not establish physical iPhone or exercise accuracy.
+- Android demo: https://github.com/Javpato/real-life-battle-tower/releases/tag/demo-2026-11-15 . The previously verified signed debug APK is attached with its SHA256; no runtime game source changed during publication, so the existing APK was retained.
+- This public HTTPS site replaces the temporary tunnel for sharing. It does not depend on the development computer remaining awake. Create new phone invitations from this address; browser-local saves on old hosts are not automatically transferred.
+
 ## Temporary demo tunnel recovery — 2026-11-15
 
 - The previous `implementing-satisfy-warm-raise.trycloudflare.com` address returned Cloudflare HTTP 530 while the local MediaPipe module returned HTTP 200. Its tunnel process was no longer running. This failure was hosting-related; no frontend or Supabase change was needed.

@@ -4,6 +4,8 @@ Cozylight's physical RPG: **YOUR BODY IS YOUR WEAPON. HOW HIGH CAN YOU CLIMB?**
 
 **[Play in your browser](https://javpato.github.io/real-life-battle-tower/)** · [Source code](https://github.com/Javpato/real-life-battle-tower)
 
+[Download the Android demo APK](https://github.com/Javpato/real-life-battle-tower/releases/tag/demo-2026-11-15) (signed debug build).
+
 Run `npm install`, then `npm run dev`. The game starts with title, three independent saves and the tower menu. On the save screen, **Explore a local preview** opens the isolated developer profile with every skill and specialization available. Infinite Tower preparation exposes a preview starting floor. Preview never writes a normal slot or synchronizes.
 
 ## Playing

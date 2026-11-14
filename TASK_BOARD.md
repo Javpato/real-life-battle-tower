@@ -1,5 +1,13 @@
 # Battle Tower v2 delivery
 
+## Public hosting — 2026-11-15
+
+- Published source/assets/tests on https://github.com/Javpato/real-life-battle-tower and the live HTTPS game on https://javpato.github.io/real-life-battle-tower/ . Main pushes build, validate and deploy through GitHub Actions.
+- Published the verified Android debug/demo APK as release `demo-2026-11-15`. Local environment files and private credentials are excluded.
+- Verified the public game camera and real hosted camera-pair/WebRTC flow using synthetic video. GitHub Pages no longer depends on the temporary tunnel. Physical iPhone validation remains pending.
+
+## Game implementation
+
 - Implemented: six distinct types, mean dual-type attacks, single STAB, four initial learned/equipped attacks, trial opportunities every3floors, boss rewards every5floors,20boss cycle, temporary upgrades and evidence-aware Flash.
 - Implemented:90skills,15perdiscipline; all available in Training Grounds;10fixed-loadout challenges; unrestricted routine composition; six trees and interactive matchup codex.
 - Integrated:60 illustrated characters,16poses each,32additional hero back poses;128px native exports, portraits,6arenas,title/hub,24icons, revised minigame renderer and unified support screens. All60current sources reviewed; zero unresolved art validation issues. See art-production/v2/validation.json.
