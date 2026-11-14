@@ -99,6 +99,7 @@ export default function ExerciseCamera(props: Props) {
   const [countdown, setCountdown] = useState(3),
     [quality, setQuality] = useState<number | null>(null),
     [nextSide, setNextSide] = useState<"left" | "right" | undefined>();
+  const [missingJoints, setMissingJoints] = useState<string[]>([]);
   const [rejections, setRejections] = useState(0),
     [autoStart, setAutoStart] = useState(true);
   const [selection, setSelection] = useState<CameraSelection>({
@@ -165,6 +166,7 @@ export default function ExerciseCamera(props: Props) {
     }
     const o = observePose(p.exerciseId, frame) as RichObservation;
     const fresh = o.fresh !== false;
+    setMissingJoints(o.visible && fresh ? [] : (o.missingJoints ?? []));
     if (
       pausedRef.current ||
       p.paused ||
@@ -188,6 +190,7 @@ export default function ExerciseCamera(props: Props) {
       // Let the detector handle brief occlusion. It must see missing frames to pause held time safely.
       const result = detector.current.update(frame) as RichFeedback;
       setNextSide(result.nextSide ?? detector.current.expectedSide);
+      setMissingJoints(result.missingJoints ?? []);
       setStatus(
         result.unit
           ? "valid"
@@ -673,6 +676,7 @@ export default function ExerciseCamera(props: Props) {
         target={props.target}
         status={hudStatus}
         message={hudMessage}
+        missingJoints={missingJoints}
         nextSide={nextSide}
         quality={quality}
         countdown={hudStatus === "countdown" ? countdown : undefined}

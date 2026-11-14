@@ -20,6 +20,7 @@ export type ExerciseHudProps = {
   target: number;
   status: ExerciseVisualState;
   message: string;
+  missingJoints?: string[];
   nextSide?: "left" | "right";
   quality: number | null;
   countdown?: number;

@@ -8,23 +8,7 @@ import {
   stopExerciseSpeech,
 } from "../audio/exerciseFeedback";
 import { EXERCISE_GUIDES } from "./ExerciseDemo";
-import { STARTING_CUES } from "./exercisePresentation";
-const labels: Record<ExerciseHudProps["status"], string> = {
-  "no-body": "I CAN’T SEE YOU",
-  partial: "PARTLY IN VIEW",
-  insufficient: "ADJUST THE CAMERA",
-  ready: "READY TO BEGIN",
-  moving: "KEEP GOING",
-  return: "RETURN TO START",
-  valid: "NICE WORK!",
-  incomplete: "TRY THE FULL MOVEMENT",
-  hold: "HOLD STEADY",
-  paused: "REST — NO TIME LIMIT",
-  off: "CAMERA IS OFF",
-  loading: "STARTING CAMERA",
-  error: "CAMERA NEEDS ATTENTION",
-  countdown: "GET READY",
-};
+import { STARTING_CUES, exerciseHeadline } from "./exercisePresentation";
 export default function ExerciseHUD(props: ExerciseHudProps) {
   const {
     exerciseId,
@@ -107,8 +91,7 @@ export default function ExerciseHUD(props: ExerciseHudProps) {
         : complete
           ? "valid"
           : status;
-  const title =
-    complete && effective !== "error" ? "SERIES COMPLETE" : labels[effective];
+  const title = exerciseHeadline(props);
   return (
     <section
       className={`exercise-hud state-${effective}${pulse ? " rep-pulse" : ""}`}
