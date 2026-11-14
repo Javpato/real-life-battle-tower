@@ -9,44 +9,64 @@ export type Decoration={frame:number;x:number;y:number;width:number};
 export type RoomDetail={id:string;title:string;text:string};
 export type Furniture={id:string;frame:number;x:number;y:number;width:number;footprint:Rect;detailId?:string;action?:'heal'};
 export type RoomStyle={floor:'wood'|'stone';wall:string;trim:string;rug:string;rugBounds:Rect};
+export type GroundRegion=Rect&{kind:'road'|'plaza'|'meadow'|'flowers'|'water'};
 export type Building=Rect&{frame:number;name:string};
-export type WorldMap={id:string;name:string;region:string;kind:'town'|'route'|'summit'|'interior';width:number;height:number;spawns:Record<string,{x:number;y:number;facing:Facing}>;obstacles:Rect[];portals:Portal[];npcs:Resident[];buildings:Building[];decorations:Decoration[];furniture:Furniture[];roomStyle?:RoomStyle};
+export type WorldMap={id:string;name:string;region:string;kind:'town'|'route'|'summit'|'interior';width:number;height:number;spawns:Record<string,{x:number;y:number;facing:Facing}>;obstacles:Rect[];portals:Portal[];npcs:Resident[];buildings:Building[];decorations:Decoration[];ground:GroundRegion[];furniture:Furniture[];roomStyle?:RoomStyle};
 const maps:Record<string,WorldMap>={};
 const roomDetails:Record<string,RoomDetail>={};
 export const ROOM_DETAILS:Readonly<Record<string,RoomDetail>>=roomDetails;
 const spawn=(x:number,y:number,facing:Facing='down')=>({x,y,facing});
-function outdoor(id:string,name:string,kind:WorldMap['kind'],width:number,height:number){const m:WorldMap={id,name,region:'GREENHAVEN VALLEY',kind,width,height,spawns:{safe:spawn(width/2,height/2)},obstacles:[],portals:[],npcs:[],buildings:[],decorations:[],furniture:[]};maps[id]=m;return m;}
-const town=outdoor('starter_town','Willowmere','town',1152,960);
-const route=outdoor('training_route','Fernway Trail','route',768,1152);
-const summit=outdoor('rival_town','Summit Hollow','summit',960,768);
+function outdoor(id:string,name:string,kind:WorldMap['kind'],width:number,height:number){const m:WorldMap={id,name,region:'GREENHAVEN VALLEY',kind,width,height,spawns:{safe:spawn(width/2,height/2)},obstacles:[],portals:[],npcs:[],buildings:[],decorations:[],ground:[],furniture:[]};maps[id]=m;return m;}
+const town=outdoor('starter_town','Willowmere','town',960,832);
+const route=outdoor('training_route','Fernway Trail','route',640,960);
+const summit=outdoor('rival_town','Summit Hollow','summit',768,704);
 function room(id:string,name:string){const m=outdoor(id,name,'interior',384,288);m.spawns={safe:spawn(192,216),entry:spawn(192,232,'up')};m.obstacles=[{x:0,y:0,w:384,h:47},{x:0,y:0,w:16,h:288},{x:368,y:0,w:16,h:288},{x:0,y:272,w:167,h:16},{x:217,y:272,w:167,h:16}];return m;}
 function doorway(parent:WorldMap,id:string,name:string,x:number,y:number,frame:number){const inside=room(id,name);parent.buildings.push({x:x-64,y:y-104,w:128,h:104,frame,name});parent.obstacles.push({x:x-59,y:y-80,w:118,h:67});parent.spawns[id]=spawn(x,y+32);inside.portals.push({id:`${id}:exit`,x:168,y:258,w:48,h:28,to:parent.id,spawn:id,label:'Outside'});parent.portals.push({id:`${id}:enter`,x:x-18,y:y-5,w:36,h:24,to:id,spawn:'entry',label:name});return inside;}
-const home=doorway(town,'starter_house','Your home',200,230,6);
+const home=doorway(town,'starter_house','Your home',160,216,6);
 const bedroom=room('starter_house_bedroom','Your room');bedroom.spawns.new_game=spawn(192,144);bedroom.spawns.safe=spawn(192,144);home.spawns.stairs=spawn(318,140);home.portals.push({id:'bedroom:enter',x:304,y:112,w:32,h:24,to:bedroom.id,spawn:'entry',label:'Your room'});bedroom.portals.push({id:'bedroom:exit',x:168,y:258,w:48,h:28,to:home.id,spawn:'stairs',label:'Downstairs'});
-const mentor=doorway(town,'mentor_house','Trail House',480,230,6);
-const rest=doorway(town,'rest_house','Rest House',800,230,0);
-const shop=doorway(town,'general_store','General Store',200,450,1);
-const lab=doorway(town,'alchemy_lab','Alchemy',480,450,2);
-const leg=doorway(town,'gym_leg','Root Dojo',880,450,4);
-const arm=doorway(town,'gym_arm','Ember Hall',200,710,5);
-const back=doorway(town,'gym_back','Wind Sanctum',480,710,3);
-const oak=doorway(town,'oak_house','Oak Cottage',880,710,6);
-const willow=doorway(town,'willow_house','Willow Cottage',200,900,6);
-const summitRest=doorway(summit,'summit_rest','Summit Rest',180,310,0);
-const summitHouse=doorway(summit,'summit_house','Lookout Cottage',760,310,6);
-const arena=doorway(summit,'rival_arena','Summit Arena',480,240,7);summit.portals.find(p=>p.to==='rival_arena')!.badges=3;
+const mentor=doorway(town,'mentor_house','Trail House',384,216,6);
+const rest=doorway(town,'rest_house','Rest House',608,216,0);
+const shop=doorway(town,'general_store','General Store',832,216,1);
+const lab=doorway(town,'alchemy_lab','Alchemy',160,432,2);
+const leg=doorway(town,'gym_leg','Root Dojo',384,432,4);
+const arm=doorway(town,'gym_arm','Ember Hall',608,432,5);
+const back=doorway(town,'gym_back','Wind Sanctum',832,432,3);
+const oak=doorway(town,'oak_house','Oak Cottage',832,648,6);
+const willow=doorway(town,'willow_house','Willow Cottage',160,648,6);
+const summitRest=doorway(summit,'summit_rest','Summit Rest',160,344,0);
+const summitHouse=doorway(summit,'summit_house','Lookout Cottage',608,344,6);
+const arena=doorway(summit,'rival_arena','Summit Arena',384,216,7);summit.portals.find(p=>p.to==='rival_arena')!.badges=3;
 function resident(m:WorldMap,id:string,name:string,x:number,y:number,activity:Resident['activity'],icon:Resident['icon']){m.npcs.push({id,name,x,y,activity,icon});}
-resident(town,'trainer-1','Moss',280,292,'walk','story');resident(route,'trainer-2','Pip',430,400,'train','battle');resident(route,'trainer-3','Fern',270,790,'walk','battle');
+resident(town,'trainer-1','Moss',280,292,'walk','story');resident(route,'trainer-2','Pip',448,400,'train','battle');resident(route,'trainer-3','Fern',304,790,'walk','battle');
 resident(rest,'healer','The healer',192,118,'stand','heal');resident(shop,'shop','Jun',192,118,'stand','shop');resident(lab,'alchemy','Mira',192,118,'cook','alchemy');
 resident(leg,'leader-leg','Terra',192,118,'train','gym');resident(arm,'leader-arm','Flint',192,118,'train','gym');resident(back,'leader-back','Zephyr',192,118,'train','gym');resident(arena,'rival','Rowan',192,118,'stand','story');
 resident(oak,'quest-squat','Ollie',192,118,'train','quest');resident(willow,'quest-pushup','Ada',192,118,'read','quest');resident(mentor,'quest-birddog','Noor',192,118,'read','quest');resident(summitHouse,'quest-lunge','Finn',192,118,'rest','quest');
 // Rest point reuses the healer interaction; it does not create another character identity.
 // Summit Rest uses its bed as a rest interaction in the renderer.
 function connect(a:WorldMap,b:WorldMap,ax:number,ay:number,bx:number,by:number){a.spawns[b.id]=spawn(ax,ay-40,'up');b.spawns[a.id]=spawn(bx,by+40,'down');a.portals.push({id:`${a.id}:${b.id}`,x:ax-28,y:ay-12,w:56,h:28,to:b.id,spawn:a.id,label:b.name});b.portals.push({id:`${b.id}:${a.id}`,x:bx-28,y:by-12,w:56,h:28,to:a.id,spawn:b.id,label:a.name});}
-connect(town,route,640,930,384,40);connect(route,summit,384,1110,480,40);
-// Route pools and groves make two traversable alternatives around a central glade.
-route.obstacles.push({x:90,y:440,w:180,h:210},{x:510,y:610,w:160,h:240});
-town.spawns.safe=spawn(640,520);summit.spawns.safe=spawn(480,430);
+connect(town,route,480,800,304,40);connect(route,summit,304,920,384,40);
+// Original handheld-RPG structure: repeated blocks, short front paths and connected streets.
+// Ground regions are a shared map contract, never inferred from collision rectangles.
+function ground(m:WorldMap,kind:GroundRegion['kind'],x:number,y:number,w:number,h:number){m.ground.push({kind,x,y,w,h});if(kind==='water')m.obstacles.push({x,y,w,h});}
+const road=(m:WorldMap,x:number,y:number,w:number,h:number)=>ground(m,'road',x,y,w,h);
+for(const y of [256,472,688])road(town,128,y,736,48);
+for(const x of [248,456,696])road(town,x,256,48,480);
+road(town,456,64,48,744);
+for(const b of town.buildings)road(town,b.x+b.w/2-16,b.y+b.h-4,32,60);
+ground(town,'plaza',336,552,288,184);road(town,456,736,48,72);
+for(const r of [{x:80,y:80,w:128,h:32},{x:336,y:80,w:96,h:32},{x:560,y:80,w:96,h:32},{x:784,y:80,w:96,h:32},{x:64,y:512,w:144,h:32},{x:752,y:512,w:144,h:32}])ground(town,'flowers',r.x,r.y,r.w,r.h);
+ground(town,'water',72,748,136,40);ground(town,'meadow',752,736,144,56);
+// A bent main trail and two connected side loops create short, legible exploration choices.
+road(route,280,32,48,216);road(route,184,224,288,48);road(route,184,224,48,536);
+road(route,184,488,288,48);road(route,424,224,48,536);road(route,184,712,144,48);road(route,280,712,192,48);road(route,280,712,48,224);
+ground(route,'water',64,368,96,160);ground(route,'water',504,568,80,168);
+for(const r of [{x:56,y:128,w:128,h:160},{x:488,y:112,w:96,h:160},{x:272,y:312,w:96,h:112},{x:264,y:560,w:112,h:96},{x:56,y:648,w:96,h:192},{x:432,y:800,w:144,h:80}])ground(route,'meadow',r.x,r.y,r.w,r.h);
+ground(route,'flowers',272,432,96,32);ground(route,'flowers',344,816,48,64);
+road(summit,360,32,48,80);road(summit,360,216,48,440);road(summit,248,96,272,48);road(summit,248,112,48,320);road(summit,472,112,48,320);road(summit,128,384,512,48);
+for(const b of summit.buildings)road(summit,b.x+b.w/2-16,b.y+b.h-4,32,b.y+b.h<300?188:60);
+ground(summit,'plaza',256,432,256,144);ground(summit,'water',96,544,128,96);ground(summit,'flowers',544,544,128,96);
+ground(summit,'flowers',288,80,192,32);
+town.spawns.safe=spawn(480,496);summit.spawns.safe=spawn(384,408);
 // Each interior owns its furnishings, collision footprints and narrative details.
 // Coordinates identify object feet, so the same metadata drives rendering and navigation.
 function furnish(m:WorldMap,id:string,frame:number,x:number,y:number,width:number,depth:number,title:string,text:string,action?:'heal'){
@@ -119,18 +139,34 @@ style(arena,'#d9cfe0','#897296',{x:126,y:154,w:131,h:80},'stone');
 furnish(arena,'summit-equipment-west',5,57,112,59,32,'A balanced challenge','The summit draws on all three kinds of strength. No single specialization answers every phase.');
 furnish(arena,'summit-equipment-east',5,327,112,59,32,'Prepared for change','Rowan changes his approach throughout the encounter. Watch, adapt, and keep control of your effort.');
 furnish(arena,'challenger-record',2,65,228,54,27,'The summit record','The ledger honors completed journeys, not flawless ones. Defeat is a reason to rest and return.');place(arena,'rival',192,117,'stand');
-// Detailed original foliage and landmarks have matching compact foot collisions.
-function decorate(m:WorldMap,frame:number,x:number,y:number,width:number,solid=false){if(m.kind==='route'&&frame<=2&&m.obstacles.some(o=>o.w>50&&x>=o.x-8&&x<=o.x+o.w+8&&y>=o.y&&y<=o.y+o.h+12))return;m.decorations.push({frame,x,y,width});if(solid)m.obstacles.push({x:x-6,y:y-9,w:12,h:10});}
-for(const m of [town,route,summit]){for(let x=34;x<m.width-25;x+=48){if(!m.portals.some(p=>Math.abs(p.x+p.w/2-x)<70&&p.y<75))decorate(m,x%3?0:1,x,45,72);if(!m.portals.some(p=>Math.abs(p.x+p.w/2-x)<70&&p.y>m.height-80))decorate(m,x%3?0:1,x,m.height-7,72);}for(let y=100;y<m.height-50;y+=53){decorate(m,0,17,y,70);decorate(m,1,m.width-17,y,70);}}
-for(const b of town.buildings){decorate(town,3,b.x-18,b.y+b.h-5,34);decorate(town,3,b.x+b.w+17,b.y+b.h-5,34);decorate(town,5,b.x+b.w+34,b.y+b.h+24,32);}
-for(const [x,y]of [[80,325],[85,580],[355,340],[365,570],[365,830],[725,310],[735,610],[1030,340],[1040,560],[1040,830],[740,835],[95,810]])decorate(town,0,x,y,85,true);
-for(const [x,y]of [[580,550],[700,550],[580,650],[700,650]])decorate(town,3,x,y,42);
-decorate(town,4,640,600,70,true);decorate(town,5,565,610,42);decorate(town,5,715,610,42);
-for(let y=150;y<1050;y+=98)for(const x of [75,145,600,685])decorate(route,(y+x)%3===0?1:0,x,y+(x%3)*9,80,true);
-for(const [x,y]of [[240,230],[500,340],[460,540],[275,875],[510,965]])decorate(route,3,x,y,42);
-decorate(route,5,480,315,42);decorate(route,6,530,980,55);
-for(const [x,y]of [[90,430],[265,470],[710,460],[870,440],[280,620],[680,620]])decorate(summit,2,x,y,82,true);
-decorate(summit,4,480,510,75,true);decorate(summit,5,365,500,46);decorate(summit,5,595,500,46);
+// Existing detailed scenery is arranged into deliberate groves, flower beds and plaza furniture.
+function decorate(m:WorldMap,frame:number,x:number,y:number,width:number,solid=false){
+ if(m.ground.some(r=>r.kind==='water'&&x>=r.x-8&&x<=r.x+r.w+8&&y>=r.y&&y<=r.y+r.h+12))return;
+ m.decorations.push({frame,x,y,width});if(solid)m.obstacles.push({x:x-6,y:y-9,w:12,h:10});
+}
+function grove(m:WorldMap,x:number,y:number,w:number,h:number,frame=0){
+ for(let yy=y;yy<y+h;yy+=48)for(let xx=x;xx<x+w;xx+=48){
+  if(m.ground.some(r=>['road','plaza','water','flowers'].includes(r.kind)&&xx>r.x-28&&xx<r.x+r.w+28&&yy>r.y-8&&yy<r.y+r.h+48))continue;
+  if(m.buildings.some(b=>xx>b.x-42&&xx<b.x+b.w+42&&yy>b.y-32&&yy<b.y+b.h+48))continue;
+  if(m.npcs.some(n=>Math.hypot(n.x-xx,n.y-yy)<50)||Object.values(m.spawns).some(p=>Math.hypot(p.x-xx,p.y-yy)<30))continue;
+  decorate(m,frame,xx,yy,68,true);
+ }
+}
+for(const m of [town,route,summit]){
+ const tree=m.kind==='summit'?2:0;
+ // Tree belts frame the playable area, leaving the real route openings unobstructed.
+ for(let x=24;x<m.width;x+=40){for(const y of [48,m.height-4])if(!m.portals.some(p=>Math.abs(p.x+p.w/2-x)<64&&Math.abs(p.y-y)<80))decorate(m,tree,x,y,64);}
+ for(let y=96;y<m.height-32;y+=44){decorate(m,tree,16,y,64);decorate(m,tree,m.width-16,y,64);}
+ for(const b of m.buildings){decorate(m,3,b.x-12,b.y+b.h-8,28);decorate(m,3,b.x+b.w+12,b.y+b.h-8,28);}
+ for(const r of m.ground.filter(r=>r.kind==='flowers'))for(let x=r.x+16;x<r.x+r.w;x+=32)for(let y=r.y+22;y<r.y+r.h+8;y+=28)decorate(m,3,x,y,30);
+}
+for(const r of [{x:64,y:96,w:848,h:80},{x:64,y:344,w:848,h:64},{x:56,y:560,w:192,h:64},{x:704,y:560,w:192,h:64},{x:56,y:752,w:368,h:48},{x:544,y:752,w:368,h:48}])grove(town,r.x,r.y,r.w,r.h);
+decorate(town,4,480,632,64,true);decorate(town,5,392,632,42,true);decorate(town,5,568,632,42,true);
+for(const [x,y]of [[368,584],[592,584],[368,704],[592,704]])decorate(town,3,x,y,32);
+for(const r of [{x:56,y:104,w:160,h:192},{x:496,y:104,w:96,h:192},{x:48,y:568,w:120,h:304},{x:512,y:320,w:80,h:208},{x:256,y:336,w:128,h:96},{x:256,y:568,w:128,h:96},{x:432,y:808,w:160,h:96}])grove(route,r.x,r.y,r.w,r.h);
+decorate(route,5,376,264,42,true);decorate(route,6,360,704,40,true);decorate(route,6,536,536,40,true);
+for(const r of [{x:64,y:128,w:192,h:144},{x:512,y:128,w:192,h:144},{x:48,y:464,w:160,h:48},{x:560,y:464,w:160,h:48},{x:48,y:656,w:672,h:32}])grove(summit,r.x,r.y,r.w,r.h,2);
+decorate(summit,4,384,528,64,true);decorate(summit,5,304,528,40,true);decorate(summit,5,464,528,40,true);
 export const WORLD_MAPS:Readonly<Record<string,WorldMap>>=maps;
 export const initialSpawn=():WorldPosition=>({mapId:bedroom.id,...bedroom.spawns.new_game});
 export function isWalkable(mapId:string,x:number,y:number,includeNPCs=true){const m=maps[mapId];return Boolean(m&&Number.isFinite(x)&&Number.isFinite(y)&&x>=20&&y>=52&&x<=m.width-20&&y<=m.height-20&&!m.obstacles.some(o=>x+6>o.x&&x-6<o.x+o.w&&y>o.y&&y-6<o.y+o.h)&&(!includeNPCs||!m.npcs.some(n=>Math.abs(n.x-x)<13&&Math.abs(n.y-y)<12)));}

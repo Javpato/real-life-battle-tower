@@ -61,11 +61,23 @@ export function paintMap(map:WorldMap,terrain?:HTMLImageElement){
  }else{
   const grass=map.kind==='summit'?'#73918c':map.kind==='route'?'#4f805d':'#83a86f';box(0,0,c.width,c.height,grass);material(0,0,0,c.width,c.height);
   for(let y=12;y<c.height;y+=24)for(let x=12;x<c.width;x+=24){const n=(x*31+y*17)%13;box(x+n,y+n,2,3,map.kind==='route'?'#709967':'#a5b77d');if(n%4===0)box(x+n+3,y+n+2,2,2,'#e5ca91');}
-  const path=(x:number,y:number,w:number,h:number)=>{box(x-3,y-3,w+6,h+6,'#697c58');box(x,y,w,h,map.kind==='summit'?'#b0b3a1':'#c3b285');material(map.kind==='summit'?2:1,x,y,w,h);};
-  if(map.kind==='town'){path(620,48,40,900);for(const y of [270,490,750,920])path(160,y,760,32);for(const x of [320,980])path(x,270,32,650);for(const b of map.buildings)path(b.x+b.w/2-14,b.y+b.h-2,28,54);path(550,520,180,155);material(2,552,522,176,151);}
-  if(map.kind==='summit'){path(458,35,44,660);path(150,350,640,36);path(180,310,30,52);path(742,310,30,52);path(370,390,220,105);}
-  if(map.kind==='route'){path(365,35,40,1080);path(285,280,180,34);path(285,280,34,460);path(285,706,120,34);path(395,910,160,34);}
-  for(const o of map.obstacles){if(o.w<50||map.buildings.some(b=>Math.abs(b.x+5-o.x)<4))continue;box(o.x,o.y,o.w,o.h,'#47777a');box(o.x+6,o.y+6,o.w-12,o.h-12,'#659a99');material(3,o.x+6,o.y+6,o.w-12,o.h-12);for(let y=o.y+16;y<o.y+o.h;y+=25)box(o.x+12,y,30,2,'#a3c8b1');}
+  // Shared rectangular regions create consistent 16px-aligned streets and planted blocks.
+  for(const r of map.ground.filter(r=>r.kind==='meadow')){
+   box(r.x,r.y,r.w,r.h,map.kind==='summit'?'#638879':'#4f794a');
+   for(let y=r.y+4;y<r.y+r.h;y+=8)for(let x=r.x+4;x<r.x+r.w;x+=8){box(x,y,2,4,'#739653');box(x+3,y-1,2,4,'#7da65b');}
+  }
+  for(const r of map.ground.filter(r=>r.kind==='flowers')){box(r.x-2,r.y-2,r.w+4,r.h+4,'#778b5e');box(r.x,r.y,r.w,r.h,'#647951');}
+  // Paint all street edges first; intersections never retain a seam across the road.
+  const roads=map.ground.filter(r=>r.kind==='road'||r.kind==='plaza');
+  for(const r of roads){box(r.x-3,r.y-3,r.w+6,r.h+6,'#738456');box(r.x-1,r.y-1,r.w+2,r.h+2,'#c1b282');}
+  for(const r of roads){material(r.kind==='plaza'||map.kind==='summit'?2:1,r.x,r.y,r.w,r.h);}
+  for(const r of map.ground.filter(r=>r.kind==='plaza')){
+   for(let x=r.x+8;x<r.x+r.w;x+=16){box(x,r.y+5,8,2,'#c9c9a4');box(x,r.y+r.h-7,8,2,'#c9c9a4');}
+  }
+  for(const r of map.ground.filter(r=>r.kind==='water')){
+   box(r.x-6,r.y-6,r.w+12,r.h+12,'#738456');box(r.x-3,r.y-3,r.w+6,r.h+6,'#b0b68d');material(3,r.x,r.y,r.w,r.h);
+   for(let y=r.y+14;y<r.y+r.h;y+=24)for(let x=r.x+12;x<r.x+r.w-16;x+=40)box(x,y,20,2,'#aed2c5');
+  }
   // Foliage and landmarks use the original transparent scenery atlas in World.
 
  }

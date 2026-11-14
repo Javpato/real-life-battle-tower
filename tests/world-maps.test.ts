@@ -24,3 +24,29 @@ describe('distinct furnished interiors',()=>{
   }
  });
 });
+
+describe('ordered exterior streets',()=>{
+ it('connects every exterior doorway and route opening using the actual road network',()=>{
+  for(const m of Object.values(WORLD_MAPS).filter(m=>m.kind!=='interior')){
+   const roads=m.ground.filter(r=>r.kind==='road'||r.kind==='plaza');
+   const onRoad=(x:number,y:number)=>roads.some(r=>x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h)&&isWalkable(m.id,x,y);
+   const start=Object.values(m.spawns).find(p=>onRoad(p.x,p.y))!;expect(start,m.id).toBeDefined();
+   const queue=[start],visited=new Set<string>(),reached=new Set<string>();
+   for(let i=0;i<queue.length;i++){const p=queue[i];for(const door of m.portals)if(Math.hypot(p.x-door.x-door.w/2,p.y-door.y-door.h/2)<40)reached.add(door.id);
+    for(const [dx,dy]of[[8,0],[-8,0],[0,8],[0,-8]]){const x=p.x+dx,y=p.y+dy,key=`${x},${y}`;if(!visited.has(key)&&onRoad(x,y)){visited.add(key);queue.push({x,y,facing:'down'});}}
+   }
+   expect(m.portals.filter(p=>!reached.has(p.id)).map(p=>p.id),m.id).toEqual([]);
+  }
+ });
+ it('keeps water visible and collidable, with consistent exterior building footprints',()=>{
+  for(const m of Object.values(WORLD_MAPS).filter(m=>m.kind!=='interior')){
+   for(const r of m.ground.filter(r=>r.kind==='water')){expect(m.obstacles).toContainEqual({x:r.x,y:r.y,w:r.w,h:r.h});expect(isWalkable(m.id,r.x+r.w/2,r.y+r.h/2)).toBe(false);}
+   for(const b of m.buildings){expect(b.w).toBe(128);expect(b.h).toBe(104);}
+  }
+ });
+ it('repairs saved coordinates from the previous larger layouts without changing map identity',()=>{
+  for(const old of [{mapId:'starter_town',x:1040,y:830},{mapId:'starter_town',x:200,y:932},{mapId:'training_route',x:384,y:1070},{mapId:'rival_town',x:760,y:342}]){
+   const next=resolveWorldPosition({...old,facing:'left'});expect(next.mapId).toBe(old.mapId);expect(isWalkable(next.mapId,next.x,next.y)).toBe(true);
+  }
+ });
+});
