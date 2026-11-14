@@ -28,6 +28,7 @@ try{
  await phone.evaluate(async()=>{window.media=await navigator.mediaDevices.getUserMedia({video:true,audio:false});await window.peer.setPreview(window.media.getVideoTracks()[0]);});await expect.poll(()=>desktop.evaluate(()=>window.previews.at(-1)),{timeout:10000}).toBe(true);
  await phone.evaluate(()=>window.peer.setPreview(null));await expect.poll(()=>desktop.evaluate(()=>window.previews.at(-1))).toBe(false);
  await expect.poll(()=>desktop.evaluate(()=>window.frames.at(-1)),{timeout:1500}).toBe(null);
+ await phone.evaluate(()=>window.peer.stopPose());await expect.poll(()=>desktop.evaluate(()=>window.frames.at(-1))).toBe(null);
  const before=await desktop.evaluate(()=>window.frames.filter(Boolean).length);await phone.evaluate(()=>window.peer.sendPose({timestamp:performance.now()-2000,width:640,height:480,landmarks:[]}));await new Promise(r=>setTimeout(r,150));assert.equal(await desktop.evaluate(()=>window.frames.filter(Boolean).length),before);
  await phone.evaluate(()=>{window.peer.close();window.media.getTracks().forEach(t=>t.stop());});await expect.poll(()=>desktop.evaluate(()=>window.frames.at(-1))).toBe(null);await desktop.evaluate(()=>window.peer.close());
  assert(signals.every(s=>!JSON.stringify(s).includes('landmarks')&&!JSON.stringify(s).includes('data:image')),'Media or poses passed through signaling');

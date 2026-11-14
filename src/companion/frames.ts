@@ -3,6 +3,7 @@ export type PosePacket={type:'pose';sequence:number;sentAt:number;frame:PoseFram
 /** Clock interval from a round-trip probe, no asserted one-way network latency. */
 export class CompanionFrameGate{
  private offset?:{low:number;high:number};private sequence=-1;private sourceStamp=-Infinity;private lastStamp=-Infinity;
+ invalidate(sequence:number){if(!Number.isSafeInteger(sequence)||sequence<=this.sequence)return false;this.sequence=sequence;return true;}
  synchronize(sentAt:number,remoteNow:number,receivedAt:number){if(![sentAt,remoteNow,receivedAt].every(Number.isFinite)||receivedAt<sentAt||receivedAt-sentAt>250)return false;this.offset={low:sentAt-remoteNow,high:receivedAt-remoteNow};return true;}
  accept(value:unknown,now:number):(PoseFrame&{receivedAt:number;inferenceMs?:number})|null{
   const p=value as PosePacket;if(!this.offset||!p||p.type!=='pose'||!Number.isSafeInteger(p.sequence)||p.sequence<=this.sequence||!Number.isFinite(p.sentAt))return null;
