@@ -47,3 +47,12 @@ Hosted Supabase authorization remains unchanged and does not block local gamepla
 | Exercise preparation, giant counter, local video and concise feedback | pose_android_feasibility / feature/exercise-presentation | integrated and verified | actual App and isolated HUD; synthetic camera only |
 | Native immersive window and visual regression suite | sync_review / test/immersive-qa | native compiled; browser flows verified | no physical Android device connected |
 | Final screenshots, public release and matching Android package | Astra + QA | verified; packaging final source | full browser suite and synthetic actual-App damage flow passed |
+
+
+## Cozylight overhaul integration
+
+- Root: opening, narrative/tutorial composition, per-slot game/journal integration, map help, responsive title, final QA/publication. Worktree `feature/overhaul-opening`.
+- Save/platform agent: UUID slots, migration/recovery, cloud isolation/import, canonical journey commands and SQL tests. Worktree `feature/overhaul-saves`.
+- World/art agent: three exteriors, fourteen interiors, directional miniature art, heroine, icons and feet anchors. Worktree `feature/overhaul-world`.
+- Camera agent: preparation, voice, five-second recalibration, one-click guides, actual-App and offline QA. Worktree `feature/overhaul-camera`.
+- Exact test evidence and external blockers are recorded at the top of QA.md. Existing public project identity is preserved.

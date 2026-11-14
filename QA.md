@@ -1,3 +1,52 @@
+# Cozylight overhaul — November 14, 2026
+
+This section supersedes older feature-coverage statements below. Earlier release records are retained as history.
+
+Implemented: cinematic Cozylight/title opening; selectable male/female protagonists; three real UUID-backed adventures and per-adventure journals; atomic legacy migration with immutable recovery; explicit cloud linkage/import and read-only offline caches; introduction and persistent tutorial; three exterior maps and fourteen reciprocal interiors; directional mini sprites and original PNG indicators; visual-foot battle anchoring; delayed recalibration and useful voice preparation.
+
+## Current automated evidence
+
+- **231 tests across 23 files passed**, TypeScript/Vite production build passed, and generated browser/Edge reducer parity passed.
+- PostgreSQL platform tests passed: full canonical manual campaign, RLS, membership, leases, receipts, wallet, journal conflicts, three distinct cloud saves, retry idempotency, fourth-save rejection and foreign-owner isolation.
+- `tests/opening-browser.mjs`: real UI creation of both protagonists, independent slots, reload, intro persistence, first-click Settings close, four viewport bounds; touch startup/character creation at 844×390.
+- `tests/save-slots-browser.mjs`: real IndexedDB migration and immutable malformed-data recovery, concurrent slot creation, journal isolation, deletion guards for unresolved cloud work, UUID recreation, offline linked cache read-only behavior.
+- `tests/overhaul-camera-browser.mjs`: actual game UI, Settings/inventory/help/map/shop/demo first-click closes; synthetic accepted movement and repeated five-second recalibration preserving progress. Shop/Moss placement and pose signals in this test are explicitly fixtures.
+- Real MediaPipe model/WASM and worker initialization passed in `tests/camera-browser-smoke.mjs` on an isolated development cache: fake camera hardware, permissions/retry, three restart cycles, front/back changes, stale devices and no units from a blank body image. This is not physical movement validation.
+- `tests/overhaul-offline-browser.mjs`: production service worker, actual UI-created female save and keyboard movement, offline title/three slots/continue with matching saved position and progression, completed intro/tutorial, and accessible journal. No adventure state injection.
+- Existing `tests/ui-smoke.mjs` updated for the opening: food registration, persistence, profile calculation and mobile overflow passed with zero page errors.
+- World geometry tests verify reciprocal destinations, valid spawns, gate behavior and reachable interior exits. Real keyboard/manual tutorial victory and visual battle anchors were verified at 1920×1080, 1366×768 and 844×390.
+
+## Corrected defects found during integration
+
+- Recalibrate immediately acquired the nearby-phone posture: now five seconds to reposition, then one second of fresh stable posture, preserving credited units and alternating side.
+- Camera transport-ready falsely announced posture recognition: preparation and recognition states are now separate.
+- Exercise guides could reopen after dismissal: dismissal is scoped to the active session.
+- Tutorial Skip was underneath the exploration dock: the ribbon now clears the dock and receives a real first click.
+- A focused menu button prevented E interaction after closing: world input now restores interaction on movement/E.
+- Door crossing could enqueue an old-map movement after the portal command: transition now stops further position writes.
+- Small interior scenes were left-aligned: camera bounds center rooms within the viewport.
+- Shared development dependency caches interrupted MediaPipe: per-checkout cache and eager MediaPipe optimization prevent worktree interference.
+
+## Maps and interiors
+
+Exteriors: `starter_town` (Willowmere), `training_route` (Fernway Trail), `rival_town` (Summit Hollow).
+
+Interiors: `starter_house_bedroom`, `starter_house`, `mentor_house`, `oak_house`, `willow_house`, `rest_house`, `general_store`, `alchemy_lab`, `gym_leg`, `gym_arm`, `gym_back`, `summit_house`, `summit_rest`, `rival_arena`.
+
+## Art and screenshots
+
+Preserved original combat PNGs. Added female front/back illustration, 48×48 exploration frames for all sixteen identities, seven transparent indicator sprites, title landscape and replaceable Cozylight mark. Four directions each have idle/walking frames. Activities use movement and props; large combat actions use anchored presentation animations, not newly drawn individual attack frames. Provenance and prompt details are in ASSET_GUIDE.md.
+
+Real browser captures are in ignored `releases/screenshots/`: logo, desktop/landscape title, character selection, empty/local slots, introduction, room, battle anchor layouts, camera/recalibration and offline screens. Generated camera and synthetic motion captures are QA fixtures, not people exercising. No genuine linked-cloud screenshot is claimed.
+
+## Remaining external validation
+
+- Hosted Supabase auth currently returns **Anonymous sign-ins are disabled**. Owner CLI returns **AccessTokenRequiredError**. The new SQL/Edge changes have not been deployed; live linked saves cannot be claimed. Local play remains independent and usable. See docs/PLATFORM.md.
+- Nine exercises require real-person movement, framing, lighting and device speech trials. Android camera, Health Connect, actual steps, gamepad hardware and physical fullscreen/cutouts require hardware acceptance.
+- New local-import provenance represents explicit imported local progress, not cryptographic proof of physical exercise.
+
+---
+
 # QA record and delivery limits
 
 This document reports the implemented build, not the full master-prompt wish list. Status was inspected during the November 13–14, 2026 sprint. “Connected” means a feature has a reachable application flow; it does not mean it was physically validated or deployed to a public service.
