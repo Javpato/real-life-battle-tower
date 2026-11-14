@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import JournalSettings, {
   JournalReminderBanner,
   useJournalPreferences,
@@ -59,6 +59,7 @@ export default function Journal({
   storageScope = "local",
   onDeleteJournal,
   onGuideEvent,
+  syncPanel,
 }: {
   state: NutritionState;
   onChange: (n: NutritionState) => void;
@@ -67,6 +68,7 @@ export default function Journal({
   storageScope?: "local" | "cloud";
   onDeleteJournal?: () => void | Promise<void>;
   onGuideEvent?: (event:string) => void;
+  syncPanel?: ReactNode;
 }) {
   const prefs = useJournalPreferences();
   const scannerRef = useRef<(() => void) | null>(null);
@@ -150,6 +152,7 @@ export default function Journal({
     }
   }
   async function scan() {
+    scannerRef.current?.();
     const generation=++scannerGeneration.current;
     A(true);
     S("Allow camera access to scan a packaged product.");
@@ -160,7 +163,7 @@ export default function Journal({
         undefined,
         "barcode-video",
         (result) => {
-          if (result) {
+          if (result && generation===scannerGeneration.current) {
             scannerRef.current?.();
             SS(null);
             void lookup(result.getText());
@@ -171,6 +174,7 @@ export default function Journal({
       scannerRef.current = () => controls.stop();
       SS(() => () => controls.stop());
     } catch (e) {
+      if(generation!==scannerGeneration.current)return;
       S("Camera unavailable. Enter the barcode or use the label form.");
     }
   }
@@ -396,6 +400,7 @@ export default function Journal({
                 : "YOUR JOURNAL"}
           </span>
         </div>
+        {syncPanel && <div className="journal-sync-panel" data-guide="journal-sync">{syncPanel}</div>}
         <JournalReminderBanner state={s} />
         {status && (
           <div className="notice" role="status">
