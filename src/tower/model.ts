@@ -22,7 +22,7 @@ export type WorkoutActivity={kind:'workout';id:string;name:string;entries:Workou
 export type Activity={kind:'idle'}|TrialActivity|TowerRun|WorkoutActivity;
 export type RunRecord={bestFloor:number;bestVerifiedFloor:number;runs:number;wins:number};
 export type HistoryEntry={id:string;kind:'tower'|'workout';name:string;completed:number;skipped:number;verified:number;manual:number;result:'complete'|'incomplete'|'lost'|'abandoned';at:number;seed?:number;workoutResults?:WorkoutEntryResult[];timing?:Omit<WorkoutTiming,'lastTick'>};
-export type PlayerSave={version:1;name:string;avatar:'male'|'female';debug:boolean;skills:Record<string,SkillProgress>;loadout:string[];specialization:Element|null;availableSpecializations:Element[];activity:Activity;records:Record<string,RunRecord>;history:HistoryEntry[];routines:Routine[];settings:{muted:boolean;reducedMotion:boolean;difficulty:'easy'|'normal'|'hard'};completedTrials:number;lastOperationIds:string[]};
+export type PlayerSave={version:1;name:string;avatar:'male'|'female';debug:boolean;skills:Record<string,SkillProgress>;loadout:string[];specialization:Element|null;availableSpecializations:Element[];activity:Activity;records:Record<string,RunRecord>;history:HistoryEntry[];routines:Routine[];settings:{muted:boolean;reducedMotion:boolean;difficulty:'easy'|'normal'|'hard'};completedTrials:number;lastOperationIds:string[];importProvenance?:'local-unverified'};
 export type Challenge={id:string;name:string;description:string;floors:number;seed:number;types:Element[];skillIds:string[];specialization?:Element;bossEvery?:number};
 /** Commands contain intent only. Stats, rewards, records and generated encounters are authoritative. */
 export type TowerCommand = (
