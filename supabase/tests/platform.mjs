@@ -91,7 +91,7 @@ await actor(bob);assert.equal((await rpc('select public.read_adventure_control($
 // Execute the same shared reducer and fenced SQL transaction through the complete adventure.
 // Manual units are deliberately marked unverified; this is not a physical-camera test.
 const {initialAdventure,applyAdventureCommand}=await import('../functions/_shared/commands.ts');
-const {attackFor,effectiveness}=await import('../functions/_shared/game.ts');
+const {attackFor,effectiveness,available}=await import('../functions/_shared/game.ts');
 await actor(eve);const journeySave=(await rpc('select public.create_game_save($1) result',['Journey test'])).saveId;
 let journey;
 async function dispatchJourney(command){
@@ -105,6 +105,9 @@ async function dispatchJourney(command){
 }
 await dispatchJourney({kind:'initialize'});
 for(const enemyId of ['trainer-1','leader-leg','leader-arm','leader-back','rival']){
+ // Equip skills earned from earlier encounters; no unlocked fields are injected.
+ const earned=available(journey.player),loadout=['leg','arm','back'].map(type=>earned.filter(a=>a.type===type).sort((a,b)=>b.damage-a.damage)[0]?.id).filter(Boolean);
+ await dispatchJourney({kind:'equip',attackIds:loadout});
  await dispatchJourney({kind:'heal'});
  while(journey.player.items.potion<6&&journey.player.coins>=15)await dispatchJourney({kind:'purchaseItem',item:'potion'});
  await dispatchJourney({kind:'startBattle',enemyId,specialization:null});

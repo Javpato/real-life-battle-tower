@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import {
   attackFor,
+  sortedAttacks,
   effectiveness,
   stab,
   type Battle,
@@ -98,7 +99,7 @@ export default function BattleCommandMenu({
       </div>
       {battleMenu === "attacks" ? (
         <div className="attack-grid">
-          {(b.enemy.id==='tutorial-moss'?['squat','sitstand']:p.equipped).map((id) => {
+          {(b.enemy.id==='tutorial-moss'?['squat','sitstand']:sortedAttacks(p).filter(a=>p.equipped.includes(a.id)).map(a=>a.id)).map((id) => {
             const a = attackFor(id, p);
             const multiplier = effectiveness(a.type, b.enemy.phases[b.phase]);
             const sameType = stab(a.type, b.type ? [b.type] : []) > 1;

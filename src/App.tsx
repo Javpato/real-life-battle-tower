@@ -721,6 +721,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                             ? `+${b.enemy.xp} XP · +${b.enemy.coins} coins`
                             : "Return to the Rest House. Your progress is kept."}
                         </p>
+                        {b.turn==='won'&&available(win(p,b)).some(a=>!available(p).some(old=>old.id===a.id))&&<p>New skills: {available(win(p,b)).filter(a=>!available(p).some(old=>old.id===a.id)).map(a=>a.name).join(', ')}. Equip them in your satchel.</p>}
                         <button data-guide="battle-finish" className="primary" onClick={finishBattle}>
                           Continue adventure <ChevronRight size={18} />
                         </button>
@@ -818,8 +819,8 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                     </button>
                     {b.turn === "exercise" && (
                       <small>
-                        Input mode stays fixed during the series. Camera preview
-                        can always be restarted.
+                        Camera mode can be resumed here. Already accepted
+                        movements are kept.
                       </small>
                     )}
                   </div>
@@ -1009,7 +1010,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                 onClick={() => {
                   C(false);
                   notify(
-                    "Manual continuation is unverified. Already earned damage is kept. Camera mode is available next turn.",
+                    "Manual continuation is unverified. Already earned damage is kept. Use camera mode to resume guided detection.",
                   );
                 }}
               >
@@ -1257,6 +1258,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                     {sortedAttacks(p,true).map((a) => (
                       <button
                         key={a.id}
+                        data-attack-id={a.id}
                         disabled={!available(p).some(move=>move.id===a.id)}
                         aria-pressed={p.equipped.includes(a.id)}
                         className={

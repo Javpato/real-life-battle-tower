@@ -2270,5 +2270,6 @@
 .attack-card.equipped {border:3px solid #ffe49b!important;background:linear-gradient(125deg,#426b48,#234d42)!important;box-shadow:0 0 0 2px #a77f38,0 0 22px #ffe09955,inset 0 0 18px #e9d08022!important;color:#fff6d8!important}
 .attack-card.equipped strong {color:#fff2ab!important}.attack-card[disabled] {opacity:.65;filter:saturate(.55)}.attack-card em{font-size:13px;line-height:1.4;color:#eedca4}
 .immersive-game.is-series.input-camera .adventure-sidebar {width:auto!important;min-width:0!important}
-.immersive-game.is-series.input-camera .exercise-camera-stage {grid-template-columns:minmax(0,1.3fr) minmax(240px,1fr)}
-@media(max-width:900px){.immersive-game.is-series.input-camera .exercise-camera-stage {grid-template-columns:minmax(0,1fr) minmax(180px,.9fr)}}
+
+
+.attack-card:focus-visible,.attack-card:hover:not(:disabled){outline:3px solid #ffe5a2;outline-offset:3px;box-shadow:0 0 25px #ffe69b75!important}
