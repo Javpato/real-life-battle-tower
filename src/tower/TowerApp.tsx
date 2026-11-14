@@ -5,6 +5,8 @@ import { CompanionControl } from "../companion";
 import type { PoseFrame } from "../exercises/detectors";
 import { healthPlatform } from "../platform/health";
 import { useTower } from "./useTower";
+import { VictoryAnnouncement } from "./victorySpeech";
+import { speakExercise, stopExerciseSpeech } from "../audio/exerciseFeedback";
 import { effectiveness, stab, isLegacySkill } from "./engine";
 import { TYPE_NAMES, skillTypes } from "./typeChart";
 import { DISCIPLINES, SkillTypes } from "./TypeCodex";
@@ -247,6 +249,18 @@ export default function TowerApp({
       (activity?.kind === "workout" && activity.status === "active") ||
       run?.battle?.turn === "exercise");
   const previousActivity = useRef(activity?.kind);
+  const victoryAnnouncement = useRef(new VictoryAnnouncement());
+  useEffect(() => {
+    const text = victoryAnnouncement.current.observe(run?.battle ?? null);
+    let voiceEnabled = true;
+    try { voiceEnabled = localStorage.getItem("everstride-exercise-voice") !== "off"; } catch { /* Storage may be unavailable. */ }
+    if (text && !save?.settings.muted && voiceEnabled) {
+      // Child exercise audio is already stopped before this parent effect runs.
+      try { speakExercise(text, true); } catch { /* Speech support never blocks combat. */ }
+    }
+  }, [run?.battle?.id, run?.battle?.turn, run?.battle?.enemy.name, save?.settings.muted]);
+  useEffect(() => { if (save?.settings.muted) stopExerciseSpeech(); }, [save?.settings.muted]);
+  useEffect(() => () => stopExerciseSpeech(), []);
   async function send(command: TowerCommand) {
     const ok = await tower.send(command);
     if (ok) setMessage("");
@@ -640,6 +654,8 @@ export default function TowerApp({
                     const s = SKILL_BY_ID[id];
                     const attackingTypes =
                       current.contentVersion === 1 ? [s.type] : skillTypes(s);
+                    const matchup = effectiveness(attackingTypes, b.enemy.phases[b.phase]);
+                    const matchupLabel = matchup > 1 ? "Super effective" : matchup < 1 ? "Not very effective" : "Effective";
                     return (
                       <button
                         key={id}
@@ -653,18 +669,14 @@ export default function TowerApp({
                           ))}
                         </span>{" "}
                         {s.name}
+                        <small className={`bt-effectiveness ${matchup > 1 ? "strong" : matchup < 1 ? "resisted" : "neutral"}`} data-multiplier={matchup}>
+                          {matchupLabel} · ×{Number(matchup.toFixed(4))}
+                        </small>
                         <small>
                           {s.units} {s.unit} · {s.damage} power{" "}
                           {stab(attackingTypes, current.specialization) > 1
                             ? "· STAB ×1.25"
                             : ""}{" "}
-                          · Matchup ×
-                          {Number(
-                            effectiveness(
-                              attackingTypes,
-                              b.enemy.phases[b.phase],
-                            ).toFixed(4),
-                          )}
                           {(current.powerUps?.[id] ?? 0) > 0
                             ? ` · +${current.powerUps![id] * 10}% ascent power`
                             : ""}

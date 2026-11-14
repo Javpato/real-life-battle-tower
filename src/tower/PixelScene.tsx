@@ -1,4 +1,5 @@
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
+import type {CSSProperties} from 'react';
 import {SKILLS,SKILL_BY_ID} from './catalog';
 import {TYPES,TYPE_NAMES} from './typeChart';
 import {ART_ROOT,PixelCharacter} from './CharacterSprite';
@@ -32,7 +33,10 @@ export default function PixelScene(props:PixelSceneProps){
  useLayoutEffect(()=>{const el=sceneElement.current;if(!el)return;const update=()=>{const scale=Math.min(el.clientWidth/480,el.clientHeight/270);setPlane({width:480*scale,height:270*scale})};update();const observer=new ResizeObserver(update);observer.observe(el);return()=>observer.disconnect()},[scene]);
  useEffect(()=>{const increased=progress>previous.current;previous.current=progress;if(scene!=='battle'||paused||!increased)return;setStriking(true);const timer=setTimeout(()=>setStriking(false),560);return()=>clearTimeout(timer)},[progress,scene,paused]);
  if(scene==='minigame')return <TrainingScene {...props}/>;
+ // Native pixel multiples keep the approved faces sharp at title size.
+ const availableTitleSize=Math.min(plane.width*.315,plane.height*.67);
+ const titleSize=availableTitleSize>=128?Math.floor(availableTitleSize/128)*128:Math.max(32,Math.floor(availableTitleSize/32)*32);
  const playerAction:CharacterAction=outcome==='won'?'victory':outcome==='lost'||outcome==='enemy'?'impact':striking?'attack':'idle';
  const enemyAction:CharacterAction=outcome==='transform'?'transform':outcome==='enemy'?'attack':striking||outcome==='won'?'impact':'idle';
- return <div ref={sceneElement} className={`pixel-scene pixel-scene-${scene} ${striking?'is-striking':''} ${className}`} data-scene={scene} role="img" aria-label={scene==='battle'?'Battle Tower arena':scene==='hub'?'Battle Tower and the surrounding valley':'Battle Tower title landscape'}><div className="pixel-scene-plane" style={{width:plane.width,height:plane.height}}><img className="pixel-scene-background" src={`${ART_ROOT}${scene==='battle'?`arena-${Math.abs(zone)%6}`:scene}.png`} alt=""/>{scene==='battle'?<><span className="pixel-combatant pixel-combatant-hero"><PixelCharacter hero={hero} variant="back" action={playerAction}/></span><span className="pixel-combatant pixel-combatant-enemy"><PixelCharacter id={enemy} action={enemyAction}/></span></>:scene==='title'?<div className="pixel-title-party"><PixelCharacter hero="male" variant="title"/><PixelCharacter hero="female" variant="title"/></div>:<span className="pixel-hub-hero"><PixelCharacter hero={hero}/></span>}</div></div>;
+ return <div ref={sceneElement} className={`pixel-scene pixel-scene-${scene} ${striking?'is-striking':''} ${className}`} data-scene={scene} role="img" aria-label={scene==='battle'?'Battle Tower arena':scene==='hub'?'Battle Tower and the surrounding valley':'Battle Tower title landscape'}><div className="pixel-scene-plane" style={{width:plane.width,height:plane.height}}><img className="pixel-scene-background" src={`${ART_ROOT}${scene==='battle'?`arena-${Math.abs(zone)%6}`:scene}.png`} alt=""/>{scene==='battle'?<><span className="pixel-combatant pixel-combatant-hero"><PixelCharacter hero={hero} variant="back" action={playerAction}/></span><span className="pixel-combatant pixel-combatant-enemy"><PixelCharacter id={enemy} action={enemyAction}/></span></>:scene==='title'?<div className="pixel-title-party" style={{'--title-sprite-size':`${titleSize}px`} as CSSProperties}><PixelCharacter hero="male" variant="title"/><PixelCharacter hero="female" variant="title"/></div>:<span className="pixel-hub-hero"><PixelCharacter hero={hero}/></span>}</div></div>;
 }

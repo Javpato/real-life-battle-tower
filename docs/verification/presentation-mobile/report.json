@@ -1,0 +1,154 @@
+{
+  "passed": true,
+  "sizes": [
+    [
+      1920,
+      1080
+    ],
+    [
+      1366,
+      768
+    ],
+    [
+      1280,
+      720
+    ],
+    [
+      915,
+      412
+    ],
+    [
+      800,
+      360
+    ]
+  ],
+  "anchors": [
+    {
+      "width": 1920,
+      "height": 1080,
+      "x": 0.383331037332966,
+      "y": 0.9259241118077325
+    },
+    {
+      "width": 1366,
+      "height": 768,
+      "x": 0.3833315387100248,
+      "y": 0.9259188361408882
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "x": 0.38332243771337254,
+      "y": 0.9259039256198347
+    },
+    {
+      "width": 915,
+      "height": 412,
+      "x": 0.38332942127637376,
+      "y": 0.9259087537091988
+    },
+    {
+      "width": 800,
+      "height": 360,
+      "x": 0.3833035218651699,
+      "y": 0.9258771929824562
+    }
+  ],
+  "phases": 1,
+  "speech": [
+    {
+      "text": "1 seconds.",
+      "lang": "en-US"
+    },
+    {
+      "text": "2 seconds.",
+      "lang": "en-US"
+    },
+    {
+      "text": "3 seconds.",
+      "lang": "en-US"
+    },
+    {
+      "text": "4 seconds.",
+      "lang": "en-US"
+    },
+    {
+      "text": "5 seconds.",
+      "lang": "en-US"
+    },
+    {
+      "text": "6 seconds.",
+      "lang": "en-US"
+    },
+    {
+      "text": "7 seconds.",
+      "lang": "en-US"
+    },
+    {
+      "text": "Series complete. You can rest.",
+      "lang": "en-US"
+    },
+    {
+      "text": "1 seconds.",
+      "lang": "en-US"
+    },
+    {
+      "text": "2 seconds.",
+      "lang": "en-US"
+    },
+    {
+      "text": "3 seconds.",
+      "lang": "en-US"
+    },
+    {
+      "text": "4 seconds.",
+      "lang": "en-US"
+    },
+    {
+      "text": "1.",
+      "lang": "en-US"
+    },
+    {
+      "text": "2.",
+      "lang": "en-US"
+    },
+    {
+      "text": "3.",
+      "lang": "en-US"
+    },
+    {
+      "text": "4.",
+      "lang": "en-US"
+    },
+    {
+      "text": "5.",
+      "lang": "en-US"
+    },
+    {
+      "text": "Series complete. You can rest.",
+      "lang": "en-US"
+    },
+    {
+      "text": "1.",
+      "lang": "en-US"
+    },
+    {
+      "text": "2.",
+      "lang": "en-US"
+    },
+    {
+      "text": "3.",
+      "lang": "en-US"
+    },
+    {
+      "text": "4.",
+      "lang": "en-US"
+    },
+    {
+      "text": "You defeated Terra!",
+      "lang": "en-US"
+    }
+  ],
+  "errors": [],
+  "realSpeakerTested": false
+}

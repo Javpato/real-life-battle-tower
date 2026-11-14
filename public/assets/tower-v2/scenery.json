@@ -51,5 +51,15 @@
     "crystal": "icon-crystal.png",
     "stairs": "icon-stairs.png",
     "gloves": "icon-gloves.png"
+  },
+  "hubFeet": {
+    "hero": [
+      0.38333333333333336,
+      0.9259259259259259
+    ],
+    "spritePivot": [
+      64,
+      122
+    ]
   }
 }

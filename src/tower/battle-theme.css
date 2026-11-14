@@ -107,3 +107,10 @@ html[data-journal-theme=dark] .tower-support .journal-rpg :is(input,select,texta
  .bt .bt-battle:not(.bt-battle-series *) .bt-moves+ .bt-row{margin-top:6px!important;gap:8px;justify-content:flex-end}
  .bt .bt-battle:not(.bt-battle-series *) .bt-moves+ .bt-row>button{min-height:44px;padding:6px 14px}
 }
+
+/* Text and multiplier make matchups readable without relying on color alone. */
+.bt .bt-moves>button small.bt-effectiveness{font-size:11px;line-height:1.25;font-weight:800;margin:3px 0}
+.bt .bt-moves .bt-effectiveness.strong{color:#245b39}
+.bt .bt-moves .bt-effectiveness.resisted{color:#923e31}
+.bt .bt-moves .bt-effectiveness.neutral{color:#4b5265}
+@media(max-height:550px) and (orientation:landscape){.bt .bt-battle:not(.bt-battle-series *) .bt-moves>button small.bt-effectiveness{font-size:10px;margin:2px 0}}
