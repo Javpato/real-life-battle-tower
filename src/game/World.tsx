@@ -205,7 +205,7 @@ export default function World(props:ExtendedProps){
  },[map.id,props.avatar]);
  useEffect(()=>{if(props.paused)controls.current={up:false,down:false,left:false,right:false,interact:false};},[props.paused]);
  const hold=(direction:'up'|'down'|'left'|'right')=>({onPointerDown:(event:React.PointerEvent<HTMLButtonElement>)=>{event.preventDefault();event.currentTarget.setPointerCapture(event.pointerId);controls.current[direction]=true;},onPointerUp:()=>{controls.current[direction]=false;},onPointerCancel:()=>{controls.current[direction]=false;},onLostPointerCapture:()=>{controls.current[direction]=false;}});
- return <div className="adventure-world" aria-label="Everstride game world" data-map-id={map.id} data-guide="world-move">
+ return <div className="adventure-world" aria-label="Everstride game world" data-map-id={map.id}>
   <div ref={host} className="world-canvas"/>
   <div className="world-label-layer" aria-hidden={props.paused} style={{visibility:props.paused?'hidden':undefined}}>
    {map.buildings.map((building,index)=><span className="world-map-label" ref={node=>{labelNodes.current[`building-${index}`]=node;}} key={`building-${index}`}>{building.name}</span>)}
