@@ -4,6 +4,8 @@ This section supersedes older feature-coverage statements below. Earlier release
 
 Implemented: cinematic Cozylight/title opening; selectable male/female protagonists; three real UUID-backed adventures and per-adventure journals; atomic legacy migration with immutable recovery; explicit cloud linkage/import and read-only offline caches; introduction and persistent tutorial; three exterior maps and fourteen reciprocal interiors; restored detailed exploration sprites, extra NPC animation and original PNG indicators; visual-foot battle anchoring; delayed recalibration and useful voice preparation.
 
+Delivery state: this overhaul is available locally at `http://localhost:4173`. The existing public Site still serves the preceding release: automatic approval review rejected source export/publication pending explicit authorization for that destination. The local production archive and APK are prepared independently; no new public deployment is claimed.
+
 ## Full campaign and Android acceptance
 
 Real keyboard/touch-menu/manual-play campaign completed on Medium through all three leaders and Rowan. The final visual build was tested across legitimate persistent browser sessions, including a real defeat, recovery at the Rest House, purchases/upgrades paid with earned coins, a successful Rowan retry and reload with identical XP/coins, three badges and ending flag. No progress was injected; final runner exited zero with no page errors. A navigation-helper lattice oscillation was corrected in the test, not by changing gameplay. `tests/adventure-smoke.mjs` now runs this complete flow.
@@ -37,7 +39,7 @@ Android debug packaging passes Gradle and APK signature verification. The APK we
 - Recalibrate immediately acquired the nearby-phone posture: now five seconds to reposition, then one second of fresh stable posture, preserving credited units and alternating side.
 - Camera transport-ready falsely announced posture recognition: preparation and recognition states are now separate.
 - Exercise guides could reopen after dismissal: dismissal is scoped to the active session.
-- Tutorial Skip was underneath the exploration dock: the ribbon now clears the dock and receives a real first click.
+- The tutorial ribbon was underneath the exploration dock: it now clears the dock. Tutorial skipping was subsequently removed at the user's request.
 - A focused menu button prevented E interaction after closing: world input now restores interaction on movement/E.
 - Door crossing could enqueue an old-map movement after the portal command: transition now stops further position writes.
 - Small interior scenes were left-aligned: camera bounds center rooms within the viewport.
