@@ -742,6 +742,19 @@ export class ExerciseDetector {
     this.lostAt = undefined;
     this.observedSide = undefined;
   }
+  /** Explicitly begin fresh calibration after repositioning or changing chairs.
+   * Unlike ordinary pause, removes the old pose from preparation eligibility.
+   * Completed unit IDs and accepted anatomical alternation remain untouched.
+   */
+  beginCalibration(): void {
+    this.pause();
+    this.reference = undefined;
+    this.holdMs = 0;
+    this.start = this.peak = this.motionStart = 0;
+    this.movement = this.totalMotion = 0;
+    this.estimatedCycle = false;
+    this.side = undefined;
+  }
   /** Acquire a fresh starting reference without changing accepted units or alternation. */
   recalibrate(frame: PoseFrame): boolean {
     const reference = observeEvidence(

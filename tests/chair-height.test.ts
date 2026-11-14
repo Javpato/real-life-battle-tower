@@ -204,3 +204,51 @@ it("matches the actual-App regression coordinates at a normal high chair", () =>
   expect(units).toHaveLength(1);
   expect(units[0].verified).toBe(true);
 });
+describe("explicit calibration resets preparation reference only", () => {
+  it("ordinary pause retains the seat; explicit calibration admits a different chair and camera position", () => {
+    const d = new ExerciseDetector("sitstand");
+    expect(d.recalibrate(chairFrame(0, 90, 0))).toBe(true);
+    const changed = chairFrame(1000, 145, 0, 0.22, 0.24, 0.8);
+    for (const p of changed.landmarks) p.y += 0.07;
+    expect(d.observe(changed).ready).toBe(false);
+    d.pause();
+    expect(d.observe(changed).ready).toBe(false);
+    d.beginCalibration();
+    expect(d.observe(changed).ready).toBe(true);
+    expect(d.recalibrate(changed)).toBe(true);
+    expect(d.observe(changed).ready).toBe(true);
+    expect(d.update({ ...changed, timestamp: 1080 }).unit).toBeUndefined();
+  });
+  it("keeps completed unit sequence while a second chair is calibrated and used", () => {
+    const { d, units } = run(90);
+    expect(units).toHaveLength(1);
+    d.beginCalibration();
+    expect(d.recalibrate(chairFrame(4000, 145, 0))).toBe(true);
+    const later: ExerciseUnit[] = [];
+    for (let dt = 80; dt <= 3200; dt += 80) {
+      const q =
+        dt <= 640
+          ? 0
+          : dt <= 1280
+            ? (dt - 640) / 640
+            : dt <= 1760
+              ? 1
+              : dt <= 2400
+                ? 1 - (dt - 1760) / 640
+                : 0;
+      const result = d.update(chairFrame(4000 + dt, 145, q));
+      if (result.unit) later.push(result.unit);
+    }
+    expect(later).toHaveLength(1);
+    expect(units[0].id).toMatch(/:1$/);
+    expect(later[0].id).toBe(units[0].id.replace(/:1$/, ":2"));
+  });
+  it("never resets the accepted alternating side or awards a unit when beginning calibration", () => {
+    const d = new ExerciseDetector("lunge", "accepted-side", "left");
+    expect(d.expectedSide).toBe("right");
+    expect(d.beginCalibration()).toBeUndefined();
+    expect(d.expectedSide).toBe("right");
+    d.beginCalibration();
+    expect(d.expectedSide).toBe("right");
+  });
+});
