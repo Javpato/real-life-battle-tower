@@ -973,3 +973,7 @@
     font-size: 18px;
   }
 }
+.exercise-model-options{font-size:.75rem;color:#d1dbe8;padding:.45rem .65rem;border:1px solid #617987;border-radius:8px;background:#101b2c}
+.exercise-model-options summary{cursor:pointer;min-height:28px;display:flex;align-items:center}
+.exercise-model-options p{margin:.5rem 0;line-height:1.4}
+.exercise-model-options div{display:flex;gap:.5rem;flex-wrap:wrap}

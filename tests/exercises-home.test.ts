@@ -245,3 +245,8 @@ describe("per-joint confidence floors with strong measured anchors", () => {
     expect(observePose("lunge", f).extended).toBe(false);
   });
 });
+describe('baseline proportion invariance',()=>{
+ it.each<Home>(['sitstand','bridge'])('%s keeps full cycles at different image scales',(id)=>{
+  for(const scale of [.6,.85,1.15])expect(cycle(id,1,f=>{for(const p of f.landmarks){p.x=.5+(p.x-.5)*scale;p.y=.5+(p.y-.5)*scale;}})).toHaveLength(1);
+ });
+});

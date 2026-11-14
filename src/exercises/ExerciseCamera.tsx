@@ -10,6 +10,7 @@ import {
   CameraLifecycle,
   type CameraSelection,
   type CameraSnapshot,
+  type CameraMetrics,
 } from "./cameraLifecycle";
 import ExerciseDemo, { EXERCISE_GUIDES } from "./ExerciseDemo";
 import ExerciseHUD from "./ExerciseHUD";
@@ -94,6 +95,29 @@ export default function ExerciseCamera(props: Props) {
   const latest = useRef(props);
   latest.current = props;
   const lifecycle = useRef<CameraLifecycle | null>(null);
+  const [fullModelUrl,setFullModelUrl]=useState<string|null>(null),[model,setModel]=useState<'lite'|'full'>('lite'),[modelBusy,setModelBusy]=useState(false),[modelNotice,setModelNotice]=useState('');
+  const fullUrlRef=useRef<string|null>(null),downloadRef=useRef<AbortController|null>(null),metricsAt=useRef(0);
+  const [metrics,setMetrics]=useState<CameraMetrics|null>(null);
+  useEffect(()=>()=>{downloadRef.current?.abort();if(fullUrlRef.current)URL.revokeObjectURL(fullUrlRef.current);},[]);
+  const chooseModel=async(next:'lite'|'full')=>{
+    if(latest.current.source==='phone')return;
+    let url=fullUrlRef.current;
+    if(next==='full'&&!url){
+      setModelBusy(true);setModelNotice('Downloading optional Full model. Camera images are never uploaded.');
+      const controller=new AbortController();downloadRef.current=controller;
+      try{
+        const remote='https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task';
+        const cache=typeof caches!=='undefined'?await caches.open('everstride-optional-pose-model-v1'):null;
+        let response=await cache?.match(remote);
+        if(!response){response=await fetch(remote,{signal:controller.signal});if(!response.ok)throw new Error('Model download failed');await cache?.put(remote,response.clone());}
+        const blob=await response.blob();if(controller.signal.aborted)return;
+        url=URL.createObjectURL(blob);fullUrlRef.current=url;setFullModelUrl(url);
+      }catch{if(!controller.signal.aborted)setModelNotice('Full model could not download. Lite remains available; retry when connected.');return;}
+      finally{if(!controller.signal.aborted)setModelBusy(false);}
+    }
+    lifecycle.current?.stop();detector.current.pause();calibrated.current.clear();poseFilter.current.reset();
+    setModel(next);setMetrics(null);setModelNotice(`${next==='full'?'Full':'Lite'} selected. Enable camera for fresh calibration. Compare on your device; performance is not guaranteed.`);
+  };
   const poseFilter=useRef(new PoseFilter()),phoneTimestamp=useRef(-Infinity),phoneArrival=useRef(-Infinity);
   const [partialSquat,setPartialSquat]=useState(false);
   const detector = useRef(
@@ -497,11 +521,12 @@ export default function ExerciseCamera(props: Props) {
       },
       init: {
         type: "init",
-        modelUrl: new URL("models/pose_landmarker_lite.task", base).href,
+        modelUrl: model === "full" && fullModelUrl ? fullModelUrl : new URL("models/pose_landmarker_lite.task", base).href,
         wasmUrl: new URL("models/wasm", base).href,
       },
       onState: (snapshot) => cameraStateRef.current(snapshot),
       onPose: (frame) => receiveRef.current(frame),
+      onMetrics: value=>{const now=performance.now();if(now-metricsAt.current>500){metricsAt.current=now;setMetrics(value);}},
     });
     lifecycle.current = controller;
     const change = async () => {
@@ -547,7 +572,7 @@ export default function ExerciseCamera(props: Props) {
       controller.dispose();
       if (lifecycle.current === controller) lifecycle.current = null;
     };
-  }, []);
+  }, [model,fullModelUrl]);
   useEffect(() => {
     pendingUnit.current = null;
     detectorSession.current = sessionKey(props);
@@ -630,7 +655,7 @@ export default function ExerciseCamera(props: Props) {
     if(props.source!=='phone')return;
     const frame=props.externalPoseFrame,now=performance.now();
     if(!frame||!Number.isFinite(frame.timestamp)||frame.timestamp>now+50||now-frame.timestamp>500||frame.timestamp<=phoneTimestamp.current||frame.landmarks.length!==33||!Number.isFinite(frame.width)||!Number.isFinite(frame.height)||frame.width<=0||frame.height<=0){
-      if(!frame||!Number.isFinite(frame?.timestamp)||now-(frame?.timestamp??0)>500){detector.current.pause();poseFilter.current.reset();stableSince.current=null;countdownAt.current=null;setStatus('no-body');setMessage('Phone tracking paused. Reconnect or move back into view.');}
+      if(!frame||!Number.isFinite(frame?.timestamp)||now-(frame?.timestamp??0)>500){detector.current.pause();poseFilter.current.reset();calibrated.current.clear();stableSince.current=null;countdownAt.current=null;setPhase('framing');setStatus('no-body');setMessage('Phone tracking paused. Reconnect or move back into view.');}
       return;
     }
     phoneTimestamp.current=frame.timestamp;phoneArrival.current=now;
@@ -638,11 +663,12 @@ export default function ExerciseCamera(props: Props) {
   },[props.source,props.externalPoseFrame]);
   useEffect(()=>{
     if(props.source!=='phone')return;
-    const timer=setInterval(()=>{if(performance.now()-phoneArrival.current>500){detector.current.pause();poseFilter.current.reset();stableSince.current=null;countdownAt.current=null;setStatus('no-body');setMessage('Waiting for fresh phone tracking. Your completed units are kept.');}},200);
+    const timer=setInterval(()=>{if(performance.now()-phoneArrival.current>500){detector.current.pause();poseFilter.current.reset();calibrated.current.clear();stableSince.current=null;countdownAt.current=null;setPhase('framing');setStatus('no-body');setMessage('Waiting for fresh phone tracking. Your completed units are kept.');}},200);
     return()=>clearInterval(timer);
   },[props.source]);
   const startCamera = async (next = selectionRef.current) => {
     if (!video.current || latest.current.source === "phone") return;
+    if(latest.current.mode === "manual") latest.current.onRequestCameraMode?.();
     try {
       localStorage.setItem(
         "everstride-guide-" + latest.current.exerciseId,
@@ -852,6 +878,7 @@ export default function ExerciseCamera(props: Props) {
       {props.source==='phone'&&<p className="exercise-note">Phone tracking · video stays on your phone unless you explicitly share its preview.</p>}
       {props.exerciseId==='squat'&&!partialSquat&&(status==='partial'||status==='insufficient')&&<button type="button" onClick={()=>{setPartialSquat(true);calibrated.current.clear();}}>Feet out of frame? Count visible hip movement (estimated)</button>}
       {partialSquat&&props.exerciseId==='squat'&&<p className="exercise-note">Cropped squat estimate · feet and knee depth are not verified. Stand tall for a fresh reference. <button type="button" onClick={()=>setPartialSquat(false)}>Use full-leg tracking</button></p>}
+      {props.source!=='phone'&&<details className="exercise-model-options"><summary>Recognition model · {model==='full'?'Full':'Lite'}</summary><p>Lite is included. Full is an optional download, processed on this device. Compare measured latency; neither model guarantees correct repetitions.</p><div><button type="button" disabled={modelBusy||model==='lite'} onClick={()=>void chooseModel('lite')}>Use Lite</button><button type="button" disabled={modelBusy||model==='full'} onClick={()=>void chooseModel('full')}>{modelBusy?'Downloading…':fullModelUrl?'Use Full':'Download and use Full'}</button></div>{modelNotice&&<p role="status">{modelNotice}</p>}{metrics&&<p>Last capture-to-result: {Math.round(metrics.captureLatencyMs)} ms{metrics.inferenceMs!==undefined?` · inference: ${Math.round(metrics.inferenceMs)} ms`:''} · stale frames discarded: {metrics.droppedStale}. No inference queue.</p>}</details>}
       <ExerciseHUD
         exerciseId={props.exerciseId}
         progress={props.progress}
