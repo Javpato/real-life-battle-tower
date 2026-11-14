@@ -42,7 +42,7 @@ export default function Reports({ state }: { state: NutritionState }) {
     SELECT(null);
   }
   return (
-    <section className="card">
+    <section className="card" data-guide="journal-reports">
       <div className="card-title">
         <h2>The bigger picture</h2>
         <span className="eyebrow">YOUR RECORDED HISTORY</span>

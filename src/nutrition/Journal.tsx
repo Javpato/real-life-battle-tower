@@ -33,6 +33,8 @@ import {
   ChevronRight,
   Info,
   Star,
+  BookOpen,
+  X,
 } from "lucide-react";
 import {
   type NutritionState,
@@ -48,6 +50,7 @@ import {
   csv,
   recipe,
 } from "./engine";
+import "./journal-rpg.css";
 export default function Journal({
   state: s,
   onChange: set,
@@ -55,6 +58,7 @@ export default function Journal({
   onDiscover,
   storageScope = "local",
   onDeleteJournal,
+  onGuideEvent,
 }: {
   state: NutritionState;
   onChange: (n: NutritionState) => void;
@@ -62,10 +66,13 @@ export default function Journal({
   onDiscover: (code: string) => void;
   storageScope?: "local" | "cloud";
   onDeleteJournal?: () => void | Promise<void>;
+  onGuideEvent?: (event:string) => void;
 }) {
   const prefs = useJournalPreferences();
   const scannerRef = useRef<(() => void) | null>(null);
-  useEffect(() => () => scannerRef.current?.(), []);
+  const scannerGeneration=useRef(0),guideCallback=useRef(onGuideEvent);
+  guideCallback.current=onGuideEvent;
+  useEffect(()=>{guideCallback.current?.('journal:opened');return()=>{scannerGeneration.current++;scannerRef.current?.();};},[]);
   const [tab, T] = useState("Today"),
     [date, D] = useState(today()),
     [add, A] = useState(false),
@@ -88,6 +95,8 @@ export default function Journal({
     [yieldG, Y] = useState(400),
     [recipeIds, RI] = useState<string[]>([]),
     [scanStop, SS] = useState<(() => void) | null>(null);
+  useEffect(()=>{guideCallback.current?.(`journal:tab:${tab}`);},[tab]);
+  const closeJournal=()=>{scannerGeneration.current++;scannerRef.current?.();scannerRef.current=null;onClose();};
   const entries = s.entries.filter((e) => e.date === date && !e.planned),
     totals = total(entries),
     summary = dailyEnergySummary(s, date),
@@ -141,6 +150,7 @@ export default function Journal({
     }
   }
   async function scan() {
+    const generation=++scannerGeneration.current;
     A(true);
     S("Allow camera access to scan a packaged product.");
     try {
@@ -157,6 +167,7 @@ export default function Journal({
           }
         },
       );
+      if(generation!==scannerGeneration.current){controls.stop();return;}
       scannerRef.current = () => controls.stop();
       SS(() => () => controls.stop());
     } catch (e) {
@@ -257,15 +268,15 @@ export default function Journal({
     );
   };
   return (
-    <div className="journal">
-      <aside className="journal-nav">
-        <button className="brand" onClick={onClose}>
-          <span className="brand-mark">✦</span>
+    <div className="journal journal-rpg" data-guide="journal" aria-label="Field journal">
+      <aside className="journal-nav" data-guide="journal-tabs" aria-label="Journal chapters">
+        <button className="brand" onClick={closeJournal}>
+          <span className="brand-mark"><BookOpen size={27}/></span>
           <span>
-            everstride<small>YOUR EVERYDAY ADVENTURE</small>
+            Field journal<small>EVERSTRIDE · PERSONAL NOTES</small>
           </span>
         </button>
-        <div className="nav-caption">YOUR FIELD JOURNAL</div>
+        <div className="nav-caption">CHAPTERS OF YOUR DAY</div>
         {[
           ["Today", Flame],
           ["Food", Utensils],
@@ -276,6 +287,8 @@ export default function Journal({
           const I = Icon as typeof Flame;
           return (
             <button
+              data-guide={`journal-tab-${String(name).toLowerCase()}`}
+              aria-current={tab===name?"page":undefined}
               className={tab === name ? "selected" : ""}
               key={name as string}
               onClick={() => {
@@ -283,7 +296,7 @@ export default function Journal({
                 S("");
               }}
             >
-              <I size={19} />
+              <I size={19} aria-hidden="true" />
               {name as string}
             </button>
           );
@@ -297,23 +310,16 @@ export default function Journal({
             </strong>
             <p>Your journal supports your life. It doesn’t score it.</p>
           </div>
-          <button onClick={onClose}>
+          <button onClick={closeJournal}>
             <ArrowLeft size={17} />
             Return to adventure
           </button>
         </div>
       </aside>
-      <main className="journal-main">
+      <main className="journal-main" data-journal-chapter={tab}>
         <header className="journal-top">
-          <button
-            className="mobile-back"
-            onClick={onClose}
-            aria-label="Return to adventure"
-          >
-            <ArrowLeft size={18} />
-          </button>
           <span>
-            <span className="status-dot" /> PERSONAL JOURNAL{" "}
+            <BookOpen size={18} aria-hidden="true"/> FIELD JOURNAL{" "}
             <small>
               {storageScope === "cloud"
                 ? "Shared across linked devices"
@@ -323,14 +329,16 @@ export default function Journal({
           <button
             className="icon-button"
             onClick={() => T("Profile")}
+            data-guide="journal-settings"
             aria-label="Profile"
           >
             <Settings2 size={20} />
           </button>
+          <button className="journal-exit" data-guide="journal-close" onClick={closeJournal} aria-label="Return to adventure"><span>Return to adventure</span><X size={20}/></button>
         </header>
         <div className="journal-heading">
           <div>
-            <div className="eyebrow">MAKE ROOM FOR YOURSELF</div>
+            <div className="eyebrow">YOUR ADVENTURE, BETWEEN THE PAGES</div>
             <h1>
               {tab === "Today"
                 ? "A good day starts here."
@@ -356,6 +364,7 @@ export default function Journal({
           </div>
           <button
             className="primary"
+            data-guide="journal-add"
             onClick={() => {
               A(true);
               F(null);
@@ -366,7 +375,7 @@ export default function Journal({
             Add food
           </button>
         </div>
-        <div className="date-row">
+        <div className="date-row" data-guide="journal-date">
           <button onClick={() => changeDate(-1)} aria-label="Previous day">
             <ChevronLeft size={18} />
           </button>
@@ -545,7 +554,7 @@ export default function Journal({
                   A breath of fresh air.
                   <br />A new path through the village.
                 </p>
-                <button onClick={onClose}>
+                <button onClick={closeJournal}>
                   Back to the village{" "}
                   <ArrowLeft
                     size={16}
@@ -634,7 +643,7 @@ export default function Journal({
         {tab === "Food" && (
           <>
             <MealList />
-            <section className="card">
+            <section className="card" data-guide="journal-recipes">
               <h2>Your kitchen notebook</h2>
               <p className="muted">
                 Save a recipe from entries on this date. Enter its final cooked
@@ -731,7 +740,7 @@ export default function Journal({
                 already included in your activity factor; extra food credit
                 defaults to zero.
               </p>
-              <form
+              <form data-guide="journal-activity-form"
                 className="form-grid"
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -880,7 +889,7 @@ export default function Journal({
             <div className="two-col">
               <section className="card">
                 <h2>Check in with yourself</h2>
-                <form
+                <form data-guide="journal-weight-form"
                   className="form-grid"
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -1030,7 +1039,7 @@ export default function Journal({
         {tab === "Profile" && (
           <>
             <JournalSettings state={s} onChange={set} />
-            <section className="card">
+            <section className="card" data-guide="journal-profile-form">
               <h2>A profile that goes at your pace</h2>
               <p className="muted">
                 Everything is optional. Missing inputs mean no personalized
@@ -1259,21 +1268,23 @@ export default function Journal({
       </main>
       {add && (
         <div className="modal-backdrop">
-          <section className="modal food-modal">
+          <section className="modal food-modal" role="dialog" aria-modal="true" aria-label="Add to your journal" data-guide="journal-food-dialog">
             <div className="card-title">
               <div>
                 <div className="eyebrow">A MOMENT TO NOURISH</div>
                 <h2>Add to your journal</h2>
               </div>
               <button
+                data-guide="journal-food-close"
                 onClick={() => {
                   A(false);
+                  scannerGeneration.current++;
                   scanStop?.();
                   SS(null);
                 }}
                 aria-label="Close"
               >
-                ✕
+                <X size={22}/>
               </button>
             </div>
             {status && <p className="notice">{status}</p>}
@@ -1281,7 +1292,7 @@ export default function Journal({
               <>
                 <h3>{food.name}</h3>
                 <p className="tiny">{food.source}</p>
-                <div className="form-grid">
+                <div className="form-grid" data-guide="journal-portion">
                   <label>
                     Quantity ({food.basis ?? "g"})
                     <input
@@ -1309,7 +1320,7 @@ export default function Journal({
                   </small>
                 </p>
                 <div className="button-row">
-                  <button className="primary" onClick={saveFood}>
+                  <button className="primary" data-guide="journal-confirm-food" onClick={saveFood}>
                     Confirm {date > today() ? "planned meal" : "food eaten"}
                   </button>
                   <button
@@ -1379,7 +1390,7 @@ export default function Journal({
                       </button>
                     ))}
                 </div>
-                <button className="secondary" onClick={scan}>
+                <button className="secondary" data-guide="journal-scanner" onClick={scan}>
                   <ScanLine size={18} />
                   Scan a barcode
                 </button>
@@ -1396,13 +1407,14 @@ export default function Journal({
                 <div className="divider">
                   <span>OR ADD FROM A LABEL</span>
                 </div>
-                <div className="form-grid">
+                <div className="form-grid" data-guide="journal-manual">
                   {Object.keys(newFood).map((k) => (
                     <label key={k}>
                       {k === "name"
                         ? "Food name"
                         : `${k === "kcal" ? "Energy (kcal)" : k + " (g)"} per 100 g`}
                       <input
+                        aria-label={k === "name" ? "Food name" : `${k} per 100 g`}
                         type={k === "name" ? "text" : "number"}
                         min="0"
                         step="any"
@@ -1417,7 +1429,7 @@ export default function Journal({
                     </label>
                   ))}
                 </div>
-                <button className="primary" onClick={manual}>
+                <button className="primary" data-guide="journal-manual-review" onClick={manual}>
                   Review portion <ChevronRight size={16} />
                 </button>
                 <p className="tiny">
