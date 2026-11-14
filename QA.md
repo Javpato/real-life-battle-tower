@@ -14,6 +14,8 @@ Current acceptance: **255 tests in27 files**, TypeScript/production build and sh
 
 `ui-smoke.mjs` exposed a real journal race: food appeared before the passive write committed and immediate reload could lose it. Local changes now serialize writes and update visible records only after IndexedDB commits; hydration never writes defaults back. Actual App manual entry, immediate reload, profile calculation and mobile regression now pass with zero page errors. The test waits for committed visible content, not a fixed delay. Local read errors preserve existing data and offer retry.
 
+Final production offline acceptance passed against shell `3714f557b8e59028`: real UI-created female save, movement, offline reload/continue, guide persistence and journal access, zero page errors. Android package `fd65118` was built and signed; all30 bundled web files match dist exactly. SHA256 and byte count are recorded in `releases/android-build-evidence.json`. Hardware installation remains pending.
+
 Main changed areas: `src/game/World.tsx`, map/furniture geometry, portal acknowledgement helper, `src/story/residents.ts`, App/core onboarding and import compatibility, BattleCommandMenu, the new `src/tutorial/` guide system, nutrition UI/fieldbook CSS, generated Edge copies and browser/domain tests. No new character identity or nutrition calculation model was introduced. Physical exercise and hosted Supabase limitations from the preceding release still apply. No new public publication is authorized or claimed.
 
 ---
