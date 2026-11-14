@@ -20,14 +20,14 @@ async function fixture(mapId,{position,badges=['leg','arm','back'],stage=6}={}){
   await persistSlotSnapshot(slot.saveId,s);
  },{mapId,position,badges,stage});
  await page.reload();await page.getByRole('button',{name:'PRESS ANYTHING TO START'}).click();await page.getByRole('button',{name:'Continue ▸'}).first().click();
- await expect(page.locator(`[data-map-id="${mapId}"]`)).toBeVisible();await expect(page.getByText('Opening the world…',{exact:true})).toHaveCount(0);await page.waitForTimeout(250);
+ await expect(page.locator(`[data-map-id="${mapId}"]`)).toBeVisible();await expect(page.getByText('Opening the world…',{exact:true})).toHaveCount(0);await page.waitForTimeout(1100);
 }
 async function key(key,ms){await page.keyboard.down(key);await page.waitForTimeout(ms);await page.keyboard.up(key);await page.waitForTimeout(120);}
 async function leaveAndReturn(map){
  const exit=map.portals.find(p=>p.id.endsWith(':exit'));expect(exit).toBeTruthy();
- await key('s',180);await page.keyboard.press('e');await expect(page.locator(`[data-map-id="${exit.to}"]`)).toBeVisible();await page.waitForTimeout(350);
+ await key('s',180);await page.keyboard.press('e');await expect(page.locator(`[data-map-id="${exit.to}"]`)).toBeVisible();await expect(page.getByText('Opening the world…',{exact:true})).toHaveCount(0);await page.waitForTimeout(1100);
  const parent=WORLD_MAPS[exit.to],entry=parent.portals.find(p=>p.to===map.id);expect(entry).toBeTruthy();
- await page.keyboard.press('e');await expect(page.locator(`[data-map-id="${map.id}"]`)).toBeVisible();await page.waitForTimeout(250);
+ await page.keyboard.press('e');await expect(page.locator(`[data-map-id="${map.id}"]`)).toBeVisible();await page.waitForTimeout(1100);
 }
 try{
  for(const map of (process.env.SKIP_ROOM_ROUND_TRIPS==='1'?[]:Object.values(WORLD_MAPS).filter(m=>m.kind==='interior'))){
@@ -44,7 +44,7 @@ try{
  const fonts=await page.locator('.world-map-label').evaluateAll(nodes=>nodes.map(node=>({size:parseFloat(getComputedStyle(node).fontSize),transform:getComputedStyle(node).transform})));expect(fonts.every(f=>f.size>=12)).toBe(true);
  await page.setViewportSize({width:1366,height:768});await page.screenshot({path:'/tmp/everstride-world-labels-1366.png'});
  // Rejected server-facing callback: the tutorial blocks the route, not houses.
- await fixture('starter_town',{position:{x:640,y:905,facing:'down'},badges:[],stage:1});
+ await fixture('starter_town',{position:{x:480,y:775,facing:'down'},badges:[],stage:1});
  await page.evaluate(()=>{window.__qaFades=[];new MutationObserver(()=>window.__qaFades.push(document.querySelector('.world-arrival')?.style.opacity)).observe(document.querySelector('.world-arrival'),{attributes:true,attributeFilter:['style']});});
  await key('s',800);expect((await snapshot()).journey.location.mapId).toBe('starter_town');
  await expect(page.locator('.world-portal-status')).toBeVisible();
