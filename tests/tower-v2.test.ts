@@ -31,6 +31,13 @@ describe('v2 progression and resumable trials',()=>{
   expect(run(send(s,{kind:'startRun',mode:'endless'})).contentVersion).toBe(2);
   s.loadout.pop();expect(()=>send(s,{kind:'startRun',mode:'endless'})).toThrow('SKILL_LOCKED');
  });
+ it('requires all four equipped slots when leaving a v2 camp, not only at expedition start',()=>{
+  let s=send(initialSave(),{kind:'startRun',mode:'endless'});s=send(s,{kind:'equip',skillIds:['mini-squat']});expect(()=>send(s,{kind:'startFloor'})).toThrow('FOUR_SKILLS_REQUIRED');
+  s=send(s,{kind:'equip',skillIds:['mini-squat','knee-pushup','birddog','short-superman']});expect(run(send(s,{kind:'startFloor'})).status).toBe('battle');
+ });
+ it('challenge loadouts do not silently inherit personal Flash variants',()=>{
+  let s=initialSave('Challenge','male',true);s.progression!.flashSkills=['squat'];s.flashEquipped=['squat'];s=send(s,{kind:'startRun',mode:'challenge',challengeId:'leg'});expect(run(s).flashEquipped).toEqual([]);expect(s.flashEquipped).toEqual(['squat']);
+ });
  it('earns an opportunity every third floor in every expedition without duplicate settlement',()=>{
   let s=winAt(initialSave(),3);expect(s.progression!.trialTokens).toBe(1);const before=structuredClone(s);
   s=send(s,{kind:'settleFloor',battleId:'old-receipt'});expect(s).toEqual(before);
