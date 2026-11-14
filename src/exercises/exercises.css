@@ -666,14 +666,20 @@
   }
   .immersive-game .exercise-next-side {
     padding: 0 0 4px;
-    gap: 5px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    min-width: 0;
   }
   .immersive-game .exercise-next-side small {
     font-size: 8px;
-    max-width: 65px;
+    max-width: 100%;
   }
   .immersive-game .exercise-next-side strong {
     font-size: 24px;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: break-word;
   }
   .immersive-game .exercise-big-feedback {
     text-align: left;
