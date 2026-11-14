@@ -1,5 +1,5 @@
 import {describe,it,expect,vi} from 'vitest';
-import {PortalInteraction} from './portalInteraction';
+import {PortalInteraction,ArrivalProtection} from './portalInteraction';
 
 describe('acknowledged doorway interaction',()=>{
  it('waits for the command and never assumes success from elapsed time',async()=>{
@@ -24,5 +24,23 @@ describe('acknowledged doorway interaction',()=>{
   gate.leaveThreshold(false);expect(gate.latchedId).toBe('first');
   const second=vi.fn(async()=>true);expect(await gate.request('second',second)).toBe(false);expect(second).not.toHaveBeenCalled();
   resolve(false);await request;gate.leaveThreshold(false);expect(await gate.request('second',second)).toBe(true);
+ });
+});
+
+
+describe('arrival input protection',()=>{
+ it('requires a full second after arrival for keyboard, touch and automatic crossing',()=>{
+  const guard=new ArrivalProtection();guard.arrive(5000);
+  expect(guard.ready(5999)).toBe(false);expect(guard.press('KeyE',5500)).toBe(false);
+  guard.release('KeyE');expect(guard.ready(6000)).toBe(true);expect(guard.press('KeyE',6000)).toBe(true);
+ });
+ it('requires release and a new press for a key held through the map transition',()=>{
+  const guard=new ArrivalProtection();expect(guard.press('KeyE',100)).toBe(true);guard.arrive(200);
+  expect(guard.press('KeyE',1500)).toBe(false);expect(guard.ready(1500)).toBe(false);
+  guard.release('KeyE');expect(guard.press('KeyE',1600)).toBe(true);
+ });
+ it('clears carried touch gestures without making a repeated press valid',()=>{
+  const guard=new ArrivalProtection();guard.press('pointer:1',100);guard.arrive(200);
+  expect(guard.ready(1300)).toBe(false);guard.release('pointer:1');expect(guard.press('pointer:1',1301)).toBe(true);
  });
 });

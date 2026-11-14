@@ -4,7 +4,7 @@ import type {WorldProps} from '../core/contracts';
 import {WORLD_MAPS,ROOM_DETAILS,resolveWorldPosition,isWalkable,type Facing,type Resident,type Portal,type Furniture} from '../core/worldMaps';
 import {paintMap} from './art';
 import {ASSET_MANIFEST,assetUrl,characterArt,frameRect,type SheetId} from './assets';
-import {PortalInteraction} from './portalInteraction';
+import {PortalInteraction,ArrivalProtection} from './portalInteraction';
 import './world.css';
 
 type ExtendedProps=Omit<WorldProps,'onTransition'>&{
@@ -22,11 +22,21 @@ export default function World(props:ExtendedProps){
  const host=useRef<HTMLDivElement>(null),latest=useRef(props);
  const labelNodes=useRef<Record<string,HTMLSpanElement|null>>({});
  const targetLabel=useRef<HTMLButtonElement>(null);
+ const arrival=useRef(new ArrivalProtection()),pointerAccepted=useRef(false);
  const controls=useRef({up:false,down:false,left:false,right:false,interact:false});
  latest.current=props;
  const [nearby,setNearby]=useState<{id:string;label:string;kind:Target['kind']}|null>(null);
  const [ready,setReady]=useState(false),[loadError,setLoadError]=useState(false),[transition,setTransition]=useState(false);
  const [portalStatus,setPortalStatus]=useState('');
+ useEffect(()=>{
+  const release=(event:KeyboardEvent)=>arrival.current.release(event.code);
+  const pointerDown=(event:PointerEvent)=>{pointerAccepted.current=arrival.current.press(`pointer:${event.pointerId}`,performance.now());};
+  const pointerUp=(event:PointerEvent)=>arrival.current.release(`pointer:${event.pointerId}`);
+  const clear=()=>{arrival.current.clear();pointerAccepted.current=false;};
+  window.addEventListener('keyup',release);window.addEventListener('pointerdown',pointerDown,true);window.addEventListener('pointerup',pointerUp,true);window.addEventListener('pointercancel',pointerUp,true);window.addEventListener('blur',clear);
+  return()=>{window.removeEventListener('keyup',release);window.removeEventListener('pointerdown',pointerDown,true);window.removeEventListener('pointerup',pointerUp,true);window.removeEventListener('pointercancel',pointerUp,true);window.removeEventListener('blur',clear);};
+ },[]);
+ const queueTouch=(event:React.MouseEvent)=>{if(arrival.current.ready(performance.now())&&(event.detail===0||pointerAccepted.current))controls.current.interact=true;};
  const map=WORLD_MAPS[props.mapId??'starter_town']??WORLD_MAPS.starter_town;
 
  useEffect(()=>{
@@ -61,6 +71,7 @@ export default function World(props:ExtendedProps){
     }
    }
    create(){
+    controls.current={up:false,down:false,left:false,right:false,interact:false};this.pending=false;pointerAccepted.current=false;
     for(const sheet of sheets)this.registerAtlas(sheet);
     this.textures.addCanvas('ground',paintMap(map,this.textures.get('terrain').getSourceImage() as HTMLImageElement));
     this.add.image(0,0,'ground').setOrigin(0);
@@ -108,11 +119,11 @@ export default function World(props:ExtendedProps){
     const queue=(event:KeyboardEvent)=>{
      const target=event.target;
      const editing=target instanceof HTMLElement&&(['INPUT','TEXTAREA','SELECT'].includes(target.tagName)||(target.tagName==='BUTTON'&&event.key==='Enter'));
-     if(!latest.current.paused&&!event.repeat&&!editing)this.pending=true;
+     if(arrival.current.press(event.code,performance.now())&&!latest.current.paused&&!event.repeat&&!editing)this.pending=true;
     };
     this.input.keyboard!.on('keydown-E',queue);this.input.keyboard!.on('keydown-ENTER',queue);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>{this.scale.off('resize',resize);this.input.keyboard?.off('keydown-E',queue);this.input.keyboard?.off('keydown-ENTER',queue);});
-    if(alive)setReady(true);
+    arrival.current.arrive(performance.now());if(alive)setReady(true);
    }
    residentTarget(data:Resident,sprite:Phaser.GameObjects.Sprite):Target{return {id:data.id,label:data.name,x:sprite.x,y:sprite.y,labelY:sprite.y-58,kind:'resident',resident:data};}
    portalTarget(portal:Portal):Target{return {id:portal.id,label:portal.label,x:portal.x+portal.w/2,y:portal.y+portal.h/2,labelY:portal.y-12,kind:'portal',portal};}
@@ -123,6 +134,7 @@ export default function World(props:ExtendedProps){
     if(latest.current.onPosition)latest.current.onPosition(position);else latest.current.onMove?.(position);
    }
    async interact(target:Target){
+    if(!arrival.current.ready(performance.now())){this.pending=false;controls.current.interact=false;return;}
     if(latest.current.paused||this.portalGate.pending||this.time.now-this.lastInteract<350)return;
     if(target.portal&&this.portalGate.latchedId===target.id)return;
     this.lastInteract=this.time.now;this.pending=false;controls.current.interact=false;
@@ -211,7 +223,8 @@ export default function World(props:ExtendedProps){
     for(const anchor of this.anchors){const node=labelNodes.current[anchor.id];this.positionLabel(node,anchor.x,anchor.y);if(node&&nearest?.kind==='portal'&&map.buildings[Number(anchor.id.split('-')[1])]?.name===nearest.label)node.style.visibility='hidden';}
     if(nearest){
      this.positionLabel(targetLabel.current,nearest.x,nearest.labelY,true);
-     const portal=nearest.portal,entering=portal&&time>800&&(dx||dy)&&this.player.x>=portal.x&&this.player.x<=portal.x+portal.w&&this.player.y>=portal.y&&this.player.y<=portal.y+portal.h;
+     const portal=nearest.portal,entering=portal&&arrival.current.ready(performance.now())&&(dx||dy)&&this.player.x>=portal.x&&this.player.x<=portal.x+portal.w&&this.player.y>=portal.y&&this.player.y<=portal.y+portal.h;
+     if(!arrival.current.ready(performance.now())){this.pending=false;controls.current.interact=false;}
      if(!paused&&(this.pending||controls.current.interact||entering))void this.interact(nearest);
     }else{this.pending=false;controls.current.interact=false;}
    }
@@ -227,13 +240,13 @@ export default function World(props:ExtendedProps){
   <div ref={host} className="world-canvas"/>
   <div className="world-label-layer" aria-hidden={props.paused} style={{visibility:props.paused?'hidden':undefined}}>
    {map.buildings.map((building,index)=><span className="world-map-label" ref={node=>{labelNodes.current[`building-${index}`]=node;}} key={`building-${index}`}>{building.name}</span>)}
-   {nearby&&!props.paused&&<button ref={targetLabel} data-guide={nearby.kind==='portal'?'world-door':undefined} className="world-nearby-label" onClick={()=>{controls.current.interact=true;}}><kbd>E</kbd><span>{nearby.label}</span></button>}
+   {nearby&&!props.paused&&<button ref={targetLabel} data-guide={nearby.kind==='portal'?'world-door':undefined} className="world-nearby-label" onClick={queueTouch}><kbd>E</kbd><span>{nearby.label}</span></button>}
   </div>
   <div className="world-region-label"><span>{map.region}</span><strong>{map.name}</strong></div>
   {!ready&&<div className="world-loading">{loadError?'Artwork could not load. Please reconnect and reload.':'Opening the world…'}</div>}
   {!props.paused&&<>
    <div className="world-touch-pad" data-guide="world-move"><span/><button aria-label="Move up" {...hold('up')}>↑</button><span/><button aria-label="Move left" {...hold('left')}>←</button><button aria-label="Move down" {...hold('down')}>↓</button><button aria-label="Move right" {...hold('right')}>→</button></div>
-   <button className="world-interact" data-guide="world-interact" disabled={!nearby} onClick={()=>{controls.current.interact=true;}}>{nearby?`${nearby.kind==='detail'?'Inspect':'Interact'} · ${nearby.label}`:'WASD / arrows · Shift to run'}</button>
+   <button className="world-interact" data-guide="world-interact" disabled={!nearby} onClick={queueTouch}>{nearby?`${nearby.kind==='detail'?'Inspect':'Interact'} · ${nearby.label}`:'WASD / arrows · Shift to run'}</button>
   </>}
   {portalStatus&&<div className="world-portal-status" role="status">{portalStatus}</div>}
   <div className="world-arrival" aria-hidden="true" style={{opacity:transition?1:0}}/>
