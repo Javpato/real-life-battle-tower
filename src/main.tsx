@@ -5,6 +5,7 @@ import OfflineStatus from "./ui/OfflineStatus";
 import { registerOfflineSupport } from "./services/offline";
 void registerOfflineSupport();
 import "./ui/styles.css";
+import "./ui/immersive.css";
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <App />
