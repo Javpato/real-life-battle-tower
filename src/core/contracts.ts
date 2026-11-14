@@ -1,4 +1,4 @@
-export type Element = 'leg' | 'arm' | 'back';
+export type Element = 'leg' | 'arm' | 'back' | 'core' | 'cardio' | 'mobility';
 export type ExerciseId = 'squat' | 'lunge' | 'pushup' | 'diamond' | 'superman' | 'birddog' | 'sitstand' | 'wallpushup' | 'bridge';
-export type ExerciseUnit = { id:string; exerciseId:ExerciseId; quality:number; confidence:number; side?:'left'|'right'; verified:boolean; timestamp:number };
+export type ExerciseUnit = { id:string; exerciseId:ExerciseId; quality:number; confidence:number; side?:'left'|'right'; verified:boolean; timestamp:number; cycle?:{startedAt:number;endedAt:number;uninterrupted:boolean} };
 export type ExerciseCameraProps = {exerciseId:ExerciseId; target:number; progress:number; active:boolean; onUnit:(unit:ExerciseUnit)=>void; onError?:(message:string)=>void};

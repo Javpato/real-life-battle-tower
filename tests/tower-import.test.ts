@@ -1,9 +1,9 @@
 import {describe,it,expect} from 'vitest';
-import {initialSave,applyCommand,activeSeries} from '../src/tower/engine';
+import {initialSave,applyCommand,activeSeries,trialRequirement} from '../src/tower/engine';
 import {validateTowerImport} from '../src/tower/importSave';
 import type {PlayerSave,TowerCommand} from '../src/tower/model';
 let sequence=0;const send=(s:PlayerSave,c:TowerCommand)=>applyCommand(s,c,{uuid:()=>`import-${++sequence}`,now:()=>1000});
-function earned(){let s=initialSave('Traveller','female');for(const skill of ['mini-squat','squat']){s=send(s,{kind:'startTrial',skillId:skill});for(let i=0;i<3;i++)s=send(s,{kind:'unit',sessionId:activeSeries(s)!.id,unit:{id:`unit-${++sequence}`,exerciseId:'squat',quality:.9,confidence:.9,verified:true,timestamp:1000+i*1000}});s=send(s,{kind:'finishTrial'});}return s;}
+function earned(){let s=initialSave('Traveller','female');s.progression!.trialTokens=1;for(const skill of ['mini-squat','squat']){s=send(s,{kind:'startTrial',skillId:skill});for(let i=0;i<trialRequirement(skill);i++)s=send(s,{kind:'unit',sessionId:activeSeries(s)!.id,unit:{id:`unit-${++sequence}`,exerciseId:'squat',quality:.9,confidence:.9,verified:true,timestamp:1000+i*1000}});s=send(s,{kind:'finishTrial'});}return s;}
 function historySave(){let s=earned();s=send(s,{kind:'saveRoutine',routine:{id:'morning',name:'Morning',entries:[{skillId:'squat',target:3}],restSeconds:20}});s=send(s,{kind:'startWorkout',routineId:'morning'});for(let i=0;i<3;i++)s=send(s,{kind:'unit',sessionId:activeSeries(s)!.id,unit:{id:`work-${++sequence}`,exerciseId:'squat',quality:.9,confidence:.9,verified:true,timestamp:1000+i*1000}});return send(s,{kind:'closeActivity'});}
 describe('explicit fresh-schema tower import',()=>{
  it('accepts a fresh idle save and adds explicit local provenance without mutating input',()=>{
@@ -11,7 +11,7 @@ describe('explicit fresh-schema tower import',()=>{
  });
  it('preserves earned skills, profile, loadout, routine targets and preferences',()=>{
   const s=historySave();s.settings={muted:true,reducedMotion:true,difficulty:'hard'};s.lastOperationIds=['local-receipt'];const next=validateTowerImport(s);
-  expect(next.name).toBe('Traveller');expect(next.avatar).toBe('female');expect(next.loadout).toEqual(s.loadout);expect(next.routines).toEqual(s.routines);expect(next.settings).toEqual(s.settings);expect(next.completedTrials).toBe(2);expect(next.skills.squat).toMatchObject({unlocked:true,totalUnits:3,mastery:3,verifiedUnits:0,manualUnits:3,trialVerification:'manual'});expect(next.lastOperationIds).toEqual([]);
+  expect(next.name).toBe('Traveller');expect(next.avatar).toBe('female');expect(next.loadout).toEqual(s.loadout);expect(next.routines).toEqual(s.routines);expect(next.settings).toEqual(s.settings);expect(next.completedTrials).toBe(1);expect(next.skills.squat).toMatchObject({unlocked:true,totalUnits:6,mastery:6,verifiedUnits:0,manualUnits:6,trialVerification:'manual'});expect(next.lastOperationIds).toEqual([]);
  });
  it('demotes imported camera records and technical stars without erasing completed achievements',()=>{
   const s=historySave();s.records.endless={bestFloor:12,bestVerifiedFloor:12,runs:2,wins:0};s.records['challenge:leg']={bestFloor:5,bestVerifiedFloor:5,runs:1,wins:1};s.availableSpecializations=['leg'];s.specialization='leg';
@@ -21,7 +21,7 @@ describe('explicit fresh-schema tower import',()=>{
  it('rejects test saves and all removed RPG schema shapes',()=>{
   expect(()=>validateTowerImport(initialSave('QA','male',true))).toThrow('TEST_SAVE_LOCAL_ONLY');
   for(const field of ['xp','level','player','journey'])expect(()=>validateTowerImport({...initialSave(),[field]:0})).toThrow('LEGACY_SAVE_UNSUPPORTED');
-  expect(()=>validateTowerImport({...initialSave(),version:2})).toThrow('UNSUPPORTED_TOWER_VERSION');
+  expect(()=>validateTowerImport({...initialSave(),version:3})).toThrow('UNSUPPORTED_TOWER_VERSION');
  });
  it.each([
   (s:any)=>s.skills.squat.totalUnits=NaN,

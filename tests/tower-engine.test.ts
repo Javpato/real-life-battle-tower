@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {initialSave,applyCommand,activeSeries,availableSlots,effectiveness,stab} from '../src/tower/engine';
+import {initialSave,applyCommand,activeSeries,availableSlots,effectiveness,stab,canLearnSkill} from '../src/tower/engine';
 import {SKILLS,SKILL_BY_ID,INITIAL_SKILLS,CHALLENGES,canAttemptTrial} from '../src/tower/catalog';
 import {generateFloor,MAX_FLOOR} from '../src/tower/generation';
 import type {PlayerSave,TowerCommand,TowerRun,WorkoutActivity} from '../src/tower/model';
@@ -13,18 +13,18 @@ function start(skill='squat',floor=1){let s=initialSave('QA','male',true);s=send
 function winFloor(s:PlayerSave){for(let guard=0;guard<2000;guard++){const b=run(s).battle!;if(b.turn==='won')return send(s,{kind:'settleFloor',battleId:b.id});if(b.turn==='lost')throw Error('fixture lost');if(b.turn==='player')s=send(s,{kind:'beginAttack',skillId:run(s).loadout[0]});else if(b.turn==='exercise')s=manual(s);else if(b.turn==='enemy')s=send(s,{kind:'resolveEnemy'});else if(b.turn==='transform')s=send(s,{kind:'continuePhase'});}throw Error('fixture infinite loop');}
 
 describe('fresh tower saves and earned skills',()=>{
- it('has thirty unique skills and four initial trials, no XP or levels',()=>{
-  const s=initialSave();expect(SKILLS).toHaveLength(30);expect(new Set(SKILLS.map(s=>s.id)).size).toBe(30);
-  expect(SKILLS.filter(k=>canAttemptTrial(s,k.id)).map(k=>k.id).sort()).toEqual([...INITIAL_SKILLS].sort());
-  expect(Object.values(s.skills).filter(k=>k.unlocked)).toHaveLength(0);expect(s).not.toHaveProperty('xp');expect(s).not.toHaveProperty('level');expect(s).not.toHaveProperty('journey');
+ it('has ninety unique skills and four initial attacks, no XP or levels',()=>{
+  const s=initialSave();expect(SKILLS).toHaveLength(90);expect(new Set(SKILLS.map(s=>s.id)).size).toBe(90);
+  expect(SKILLS.filter(k=>canLearnSkill(s,k.id)).map(k=>k.id).sort()).toEqual([...INITIAL_SKILLS].sort());
+  expect(Object.values(s.skills).filter(k=>k.unlocked)).toHaveLength(4);expect(s).not.toHaveProperty('xp');expect(s).not.toHaveProperty('level');expect(s).not.toHaveProperty('journey');
  });
- it('unlocks each skill only after a completed trial, grows loadout and marks manual proof',()=>{
-  let s=initialSave();expect(()=>send(s,{kind:'startRun',mode:'endless'})).toThrow('SKILL_LOCKED');
-  expect(()=>send(s,{kind:'startTrial',skillId:'diamond'})).toThrow('TRIAL_LOCKED');
-  s=send(s,{kind:'startTrial',skillId:'mini-squat'});expect(()=>send(s,{kind:'finishTrial'})).toThrow('TRIAL_NOT_FINISHED');
-  s=manual(manual(manual(s)));s=send(s,{kind:'finishTrial'});expect(s.skills['mini-squat'].trialVerification).toBe('manual');expect(s.loadout).toEqual(['mini-squat']);expect(availableSlots(s)).toBe(1);
-  for(const skill of INITIAL_SKILLS.slice(1))s=trial(s,skill);expect(availableSlots(s)).toBe(4);expect(s.completedTrials).toBe(4);
-  const before=s.completedTrials;s=trial(s,'mini-squat');expect(s.completedTrials).toBe(before);
+ it('keeps starters available and only spends a trial opportunity on a new completed unlock',()=>{
+  let s=initialSave();expect(send(s,{kind:'startRun',mode:'endless'}).activity.kind).toBe('tower');
+  expect(()=>send(s,{kind:'startTrial',skillId:'squat'})).toThrow('TRIAL_LOCKED');
+  s.progression!.trialTokens=1;s=send(s,{kind:'startTrial',skillId:'squat'});expect(()=>send(s,{kind:'finishTrial'})).toThrow('TRIAL_NOT_FINISHED');
+  while(!('completed'in s.activity&&s.activity.completed))s=manual(s);s=send(s,{kind:'finishTrial'});
+  expect(s.skills.squat.trialVerification).toBe('manual');expect(s.progression!.trialTokens).toBe(0);expect(s.loadout).toEqual([...INITIAL_SKILLS]);expect(availableSlots(s)).toBe(4);
+  expect(s.completedTrials).toBe(1);s=trial(s,'squat');expect(s.completedTrials).toBe(1);expect(s.skills.squat.unlocked).toBe(true);
  });
  it('refuses camera credit for a movement variant without its own recognizer',()=>{
   let s=send(initialSave('QA','male',true),{kind:'startTrial',skillId:'pause-squat'});const sessionId=activeSeries(s)!.id;
@@ -34,7 +34,7 @@ describe('fresh tower saves and earned skills',()=>{
  it('allows later camera accreditation without repeated unlock or extra slots',()=>{
   let s=trial(initialSave(),'birddog');s=send(s,{kind:'startTrial',skillId:'birddog'});
   for(let i=0;i<4;i++)s=send(s,{kind:'unit',sessionId:activeSeries(s)!.id,unit:{id:`camera-${i}`,exerciseId:'birddog',quality:1,confidence:1,verified:true,timestamp:i,side:i%2?'right':'left'}});
-  s=send(s,{kind:'finishTrial'});expect(s.skills.birddog.trialVerification).toBe('verified');expect(s.completedTrials).toBe(1);expect(s.loadout).toEqual(['birddog']);
+  s=send(s,{kind:'finishTrial'});expect(s.skills.birddog.trialVerification).toBe('verified');expect(s.completedTrials).toBe(0);expect(s.loadout).toEqual([...INITIAL_SKILLS]);
  });
  it('requires debug state for floor jumping, never a player name',()=>{
   let s=trial(initialSave('admin'),'mini-squat');expect(()=>send(s,{kind:'startRun',mode:'endless',floor:100})).toThrow('DEBUG_FLOOR_ONLY');
@@ -102,7 +102,7 @@ describe('custom workouts are not combat',()=>{
   expect((s.activity as WorkoutActivity).status).toBe('complete');expect(s.history[0]).toMatchObject({completed:2,skipped:1,manual:6,result:'incomplete'});expect(s.activity).not.toHaveProperty('battle');expect(s.activity).not.toHaveProperty('hp');
  });
  it('validates unlocked exercises, exact alternating targets and immutable routine snapshots',()=>{
-  expect(()=>send(initialSave(),{kind:'startWorkout',entries:[{skillId:'squat',target:3}]})).toThrow('SKILL_LOCKED');
+  expect(send(initialSave(),{kind:'startWorkout',entries:[{skillId:'squat',target:3}]}).activity.kind).toBe('workout');
   let s=initialSave('QA','male',true);expect(()=>send(s,{kind:'startWorkout',entries:[{skillId:'birddog',target:3}]})).toThrow('INVALID_WORKOUT_TARGET');
   const routine={id:'daily',name:'Daily',entries:[{skillId:'squat',target:3}],restSeconds:20};s=send(s,{kind:'saveRoutine',routine});s=send(s,{kind:'startWorkout',routineId:'daily'});routine.entries[0].target=99;expect((s.activity as WorkoutActivity).entries[0].target).toBe(3);
  });
@@ -124,7 +124,7 @@ it('retains manual deduplication within long series even after operation receipt
 it('marks mixed trials honestly and does not turn a mixed run into a camera record',()=>{
  let s=send(initialSave(),{kind:'startTrial',skillId:'short-superman'});const sessionId=activeSeries(s)!.id;
  s=send(s,{kind:'unit',sessionId,unit:{id:'verified',exerciseId:'superman',quality:1,confidence:1,verified:true,timestamp:1}});
- for(let i=0;i<4;i++)s=manual(s);s=send(s,{kind:'finishTrial'});expect(s.skills['short-superman'].trialVerification).toBe('mixed');
+ for(let i=0;i<5;i++)s=manual(s);s=send(s,{kind:'finishTrial'});expect(s.skills['short-superman'].trialVerification).toBe('mixed');
  s=send(s,{kind:'startRun',mode:'endless'});s=send(s,{kind:'startFloor'});s=winFloor(s);expect(s.records.endless.bestVerifiedFloor).toBe(0);
 });
 it('new experimental patterns and pending variants expose their capability honestly',()=>{

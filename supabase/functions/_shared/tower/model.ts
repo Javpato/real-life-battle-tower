@@ -2,7 +2,7 @@
 import type {Element, ExerciseId, ExerciseUnit} from '../contracts.ts';
 export type {Element, ExerciseUnit};
 export type Skill = {
- id:string; name:string; type:Element; exercise:ExerciseId; tier:1|2|3; units:number;
+ id:string; name:string; type:Element; types?:[Element]|[Element,Element]; equipment?:'none'|'wall'|'chair'|'support'; impact?:'none'|'low'|'jump'; detectorFamily?:string; demonstration?:string; alternativeId?:string; exercise:ExerciseId; tier:1|2|3; units:number;
  unit:'reps'|'seconds'; damage:number; trialTarget:number; prerequisite:string|null;
  description:string; cue:string; alternating:boolean; detector:'supported'|'manual'; detectorStatus:'configured'|'experimental'|'pending'; qualityMetric?:'movement-control'|'observed-amplitude'|'none';
 };
@@ -12,8 +12,8 @@ export type Series={id:string;skillId:string;target:number;progress:number;seen:
 export type TowerEnemy={id:string;name:string;title:string;artId:string;hp:number;attack:number;defense:number;speed:number;phases:Element[][];thresholds:number[];boss:boolean};
 export type TowerBattle={id:string;enemy:TowerEnemy;enemyHp:number;playerHp:number;maxHp:number;phase:number;turn:'player'|'exercise'|'enemy'|'transform'|'won'|'lost';series:Series|null;defending:boolean;fatigue:Record<Element,number>;rng:number;log:string;hitSerial:number;lastDamage:number;verified:number;manual:number};
 export type RunMode='endless'|'challenge';
-export type TowerRun={kind:'tower';id:string;mode:RunMode;challengeId?:string;seed:number;contentVersion:1;floor:number;lastSettledFloor:number;loadout:string[];specialization:Element|null;status:'ready'|'battle'|'between'|'lost'|'complete';battle:TowerBattle|null;hp:number;maxHp:number;verified:number;manual:number;cleared:number;startedAt:number;difficulty:'easy'|'normal'|'hard'};
-export type TrialActivity={kind:'trial';id:string;skillId:string;series:Series;completed:boolean};
+export type TowerRun={kind:'tower';id:string;mode:RunMode;challengeId?:string;seed:number;contentVersion:1|2;powerUps?:Record<string,number>;pendingBossReward?:{floor:number};flashEquipped?:string[];floor:number;lastSettledFloor:number;loadout:string[];specialization:Element|null;status:'ready'|'battle'|'between'|'lost'|'complete';battle:TowerBattle|null;hp:number;maxHp:number;verified:number;manual:number;cleared:number;startedAt:number;difficulty:'easy'|'normal'|'hard'};
+export type TrialActivity={kind:'trial';id:string;skillId:string;series:Series;completed:boolean;returnRun?:TowerRun;trialKind?:'skill'|'flash';flashStage?:'reference'|'test';referenceCycles?:number[];cadenceMs?:number;legacy?:boolean};
 export type WorkoutEntry={skillId:string;target:number};
 export type Routine={id:string;name:string;entries:WorkoutEntry[];restSeconds:number};
 export type QualityMetrics={samples:number;mean:number;minimum:number;standardDeviation:number;metric:'movement-control'|'observed-amplitude'};
@@ -23,13 +23,13 @@ export type WorkoutActivity={kind:'workout';id:string;name:string;entries:Workou
 export type Activity={kind:'idle'}|TrialActivity|TowerRun|WorkoutActivity;
 export type RunRecord={bestFloor:number;bestVerifiedFloor:number;runs:number;wins:number};
 export type HistoryEntry={id:string;kind:'tower'|'workout';name:string;completed:number;skipped:number;verified:number;manual:number;result:'complete'|'incomplete'|'lost'|'abandoned';at:number;seed?:number;workoutResults?:WorkoutEntryResult[];timing?:Omit<WorkoutTiming,'lastTick'>};
-export type PlayerSave={version:1;name:string;avatar:'male'|'female';debug:boolean;skills:Record<string,SkillProgress>;loadout:string[];specialization:Element|null;availableSpecializations:Element[];activity:Activity;records:Record<string,RunRecord>;history:HistoryEntry[];routines:Routine[];settings:{muted:boolean;reducedMotion:boolean;difficulty:'easy'|'normal'|'hard'};completedTrials:number;lastOperationIds:string[];importProvenance?:'local-unverified'};
+export type PlayerSave={version:1|2;progression?:{trialTokens:number;flashTokens:number;flashSkills:string[];flashCadence:Record<string,number>;flashVerification?:Record<string,'verified'|'manual'|'mixed'>};flashEquipped?:string[];migration?:{from:1;preservedActiveRules:boolean};name:string;avatar:'male'|'female';debug:boolean;skills:Record<string,SkillProgress>;loadout:string[];specialization:Element|null;availableSpecializations:Element[];activity:Activity;records:Record<string,RunRecord>;history:HistoryEntry[];routines:Routine[];settings:{muted:boolean;reducedMotion:boolean;difficulty:'easy'|'normal'|'hard'};completedTrials:number;lastOperationIds:string[];importProvenance?:'local-unverified'};
 export type Challenge={id:string;name:string;description:string;floors:number;seed:number;types:Element[];skillIds:string[];specialization?:Element;bossEvery?:number};
 /** Commands contain intent only. Stats, rewards, records and generated encounters are authoritative. */
 export type TowerCommand = (
  |{kind:'rename';name:string}|{kind:'settings';muted?:boolean;reducedMotion?:boolean;difficulty?:'easy'|'normal'|'hard'}
  |{kind:'equip';skillIds:string[]}|{kind:'specialize';type:Element|null}
- |{kind:'startTrial';skillId:string}|{kind:'finishTrial'}
+ |{kind:'startTrial';skillId:string}|{kind:'finishTrial'}|{kind:'startFlashTrial';skillId:string}|{kind:'equipFlash';skillId:string;enabled:boolean}|{kind:'chooseBossReward';choice:'power'|'flash'|'heal';skillId?:string}
  |{kind:'startRun';mode:RunMode;challengeId?:string;seed?:number;floor?:number}|{kind:'startFloor'}
  |{kind:'beginAttack';skillId:string}|{kind:'unit';sessionId:string;unit:ExerciseUnit}
  |{kind:'manualUnit';sessionId:string}|{kind:'pause';paused:boolean}|{kind:'cancelSeries'}

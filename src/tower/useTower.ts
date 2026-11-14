@@ -1,7 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {readSave,writeSave} from '../services/storage';
 import {gameSync,supabaseClient} from '../services/sync';
-import {initialSave,applyCommand} from './engine';
+import {initialSave,applyCommand,migrateSave} from './engine';
 import type {PlayerSave,TowerCommand} from './model';
 export type TowerSlot={slot:1|2|3;save:PlayerSave|null;updatedAt:string|null;cloudId?:string;revision?:number};
 const KEY='battle-tower:slots:v1';
@@ -11,7 +11,7 @@ export function useTower(){
  const current=useRef<PlayerSave|null>(null),slotRef=useRef<1|2|3|null>(null),all=useRef(slots),queue=useRef(Promise.resolve()),remote=useRef<{id:string;epoch:number;revision:number}|null>(null);
  const publish=(s:PlayerSave|null)=>{current.current=s;setActive(s);};
  const persist=async(next:TowerSlot[])=>{await writeSave(KEY,next);all.current=next;setSlots(next);};
- useEffect(()=>{let disposed=false;void readSave<TowerSlot[]>(KEY).then(s=>{if(disposed)return;if(s&&s.length===3){all.current=s;setSlots(s);}setReady(true);}).catch(e=>{setError(String(e));setReady(true);});return()=>{disposed=true;};},[]);
+ useEffect(()=>{let disposed=false;void readSave<TowerSlot[]>(KEY).then(async s=>{if(disposed)return;if(s&&s.length===3){if(s.some(v=>v.save?.version===1)&&!await readSave(`${KEY}:migration-backup`))await writeSave(`${KEY}:migration-backup`,s);const upgraded=s.map(v=>({...v,save:v.save?migrateSave(v.save):null}));if(disposed)return;await writeSave(KEY,upgraded);all.current=upgraded;setSlots(upgraded);}setReady(true);}).catch(e=>{setError(String(e));setReady(true);});return()=>{disposed=true;};},[]);
  useEffect(()=>{const timer=setInterval(()=>{const r=remote.current;if(r)void gameSync.control(r.id,'renew',r.epoch).then(v=>{if(!v.ok){setError(v.error);setCloudStatus('Control lost — reconnect before continuing');remote.current=null;}});},25000);return()=>clearInterval(timer);},[]);
  async function saveActive(s:PlayerSave){if(slotRef.current===null)return;const next=all.current.map(v=>v.slot===slotRef.current?{...v,save:s,updatedAt:new Date().toISOString(),...(remote.current?{cloudId:remote.current.id,revision:remote.current.revision}:{})}:v);await persist(next);}
  function send(command:TowerCommand):Promise<boolean>{
@@ -33,7 +33,7 @@ export function useTower(){
  if(!next){const init=await supabaseClient.functions.invoke('tower-command',{body:{saveId:id,operationId:crypto.randomUUID(),leaseEpoch:lease.data.epoch,expectedRevision:read.data.revision,command:current.current?{kind:'importLocal',snapshot:current.current}:{kind:'initialize',name:'Adventurer',avatar:'male'}}});if(init.error||init.data?.error)throw Error(init.data?.error??init.error?.message);next=init.data.snapshot;remote.current.revision=init.data.revision;}
  // Recover a response lost in transit with the original operation id, never mint another reward.
  const pending=await readSave<Record<string,unknown>>(`battle-tower:pending:${id}`);if(pending){const retry=await supabaseClient.functions.invoke('tower-command',{body:{...pending,leaseEpoch:lease.data.epoch}});if(retry.error||retry.data?.error)throw Error(retry.data?.error??retry.error?.message);if(retry.data.revision>=remote.current.revision){next=retry.data.snapshot;remote.current.revision=retry.data.revision;}await writeSave(`battle-tower:pending:${id}`,null);}
- if(!next)throw Error('Cloud returned no save');await saveActive(next);publish(next);setCloudStatus('Cloud connected');
+ if(!next)throw Error('Cloud returned no save');next=migrateSave(next);await saveActive(next);publish(next);setCloudStatus('Cloud connected');
  }catch(e){remote.current=null;setError(String(e));setCloudStatus('Cloud not connected');}}
  async function connectCloud(){if(current.current?.debug||!slotRef.current){setError('Developer preview is local only');return;}const entry=all.current[slotRef.current-1];if(entry.cloudId){await attachCloud(entry.cloudId);return;}if(current.current?.activity.kind!=='idle'){setError('Finish or abandon the current activity before linking this local save.');return;}const auth=await gameSync.authenticate();if(!auth.ok){setError(auth.error);return;}const created=await gameSync.createSave('Battle Tower',crypto.randomUUID());if(!created.ok){setError(created.error);return;}await attachCloud(created.data.saveId);}
  async function disconnectCloud(){await queue.current;const r=remote.current;if(r)void gameSync.control(r.id,'release',r.epoch);remote.current=null;setCloudStatus('Cloud disconnected — cached view');}

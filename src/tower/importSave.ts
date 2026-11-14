@@ -1,5 +1,5 @@
 import {initialSave,normalizeWorkoutEntries} from './engine';
-import {SKILLS,SKILL_BY_ID,CHALLENGES} from './catalog';
+import {SKILLS,SKILL_BY_ID,CHALLENGES,INITIAL_SKILLS} from './catalog';
 import {MAX_FLOOR,TYPES} from './generation';
 import type {Element,HistoryEntry,PlayerSave,WorkoutEntryResult} from './model';
 
@@ -41,33 +41,39 @@ function historyEntry(raw:unknown):HistoryEntry{
  * Pure reconstruction prevents unknown nested properties entering canonical storage.
  */
 export function validateTowerImport(raw:unknown):PlayerSave{
- const r=object(raw);requireImport(r.version===1,'UNSUPPORTED_TOWER_VERSION');
+ const r=object(raw);requireImport((r.version===1||r.version===2),'UNSUPPORTED_TOWER_VERSION');
  requireImport(!Object.hasOwn(r,'xp')&&!Object.hasOwn(r,'level')&&!Object.hasOwn(r,'player')&&!Object.hasOwn(r,'journey'),'LEGACY_SAVE_UNSUPPORTED');
  requireImport(r.debug===false,'TEST_SAVE_LOCAL_ONLY');
  requireImport(object(r.activity).kind==='idle','FINISH_CURRENT_ACTIVITY');
- exactKeys(r,['version','name','avatar','debug','skills','loadout','specialization','availableSpecializations','activity','records','history','routines','settings','completedTrials','lastOperationIds','importProvenance']);
+ exactKeys(r,['version','name','avatar','debug','skills','loadout','specialization','availableSpecializations','activity','records','history','routines','settings','completedTrials','lastOperationIds','importProvenance','progression','flashEquipped','migration']);
  exactKeys(object(r.activity),['kind']);
  const name=string(r.name,20);requireImport(name.trim().length>0);requireImport(r.avatar==='male'||r.avatar==='female');
- const save=initialSave(name,r.avatar),skills=object(r.skills);requireImport(Object.keys(skills).length===SKILLS.length);
+ const save=initialSave(name,r.avatar),skills=object(r.skills);requireImport(Object.keys(skills).length>=30&&Object.keys(skills).length<=SKILLS.length);
  for(const id of Object.keys(skills))skillId(id);
- for(const skill of SKILLS){const p=object(skills[skill.id]);exactKeys(p,['unlocked','mastery','totalUnits','verifiedUnits','manualUnits','trialVerification']);const unlocked=bool(p.unlocked),totalUnits=integer(p.totalUnits),verifiedUnits=integer(p.verifiedUnits,totalUnits),manualUnits=integer(p.manualUnits,totalUnits),mastery=integer(p.mastery,totalUnits);
+ for(const skill of SKILLS){if(skills[skill.id]===undefined)continue;const p=object(skills[skill.id]);exactKeys(p,['unlocked','mastery','totalUnits','verifiedUnits','manualUnits','trialVerification']);const unlocked=bool(p.unlocked),totalUnits=integer(p.totalUnits),verifiedUnits=integer(p.verifiedUnits,totalUnits),manualUnits=integer(p.manualUnits,totalUnits),mastery=integer(p.mastery,totalUnits);
   requireImport(verifiedUnits+manualUnits===totalUnits);requireImport(p.trialVerification===null||['verified','manual','mixed'].includes(String(p.trialVerification)));
-  requireImport(!unlocked||p.trialVerification!==null);requireImport(unlocked||p.trialVerification===null);
-  save.skills[skill.id]={unlocked,mastery,totalUnits,verifiedUnits:0,manualUnits:totalUnits,trialVerification:unlocked?'manual':null};
+  requireImport(!unlocked||p.trialVerification!==null||INITIAL_SKILLS.includes(skill.id as typeof INITIAL_SKILLS[number]));requireImport(unlocked||p.trialVerification===null);
+  save.skills[skill.id]={unlocked,mastery,totalUnits,verifiedUnits:0,manualUnits:totalUnits,trialVerification:unlocked&&p.trialVerification!==null?'manual':null};
  }
  for(const skill of SKILLS)requireImport(!save.skills[skill.id].unlocked||!skill.prerequisite||save.skills[skill.prerequisite].unlocked,'IMPORT_PREREQUISITE_MISSING');
- save.completedTrials=integer(r.completedTrials,SKILLS.length);const unlocked=SKILLS.filter(k=>save.skills[k.id].unlocked).length;requireImport(save.completedTrials===unlocked);
+ save.completedTrials=integer(r.completedTrials,SKILLS.length);const unlocked=SKILLS.filter(k=>save.skills[k.id].unlocked).length;requireImport(save.completedTrials<=unlocked&&save.completedTrials>=Math.max(0,unlocked-4));
  save.loadout=uniqueStrings(r.loadout,4,60).map(skillId);requireImport(save.loadout.every(id=>save.skills[id].unlocked)&&(!unlocked||save.loadout.length>0));
- save.availableSpecializations=uniqueStrings(r.availableSpecializations,3,4).map(type);
+ save.availableSpecializations=uniqueStrings(r.availableSpecializations,6,8).map(type);
  save.specialization=r.specialization===null?null:type(r.specialization);requireImport(save.specialization===null||save.availableSpecializations.includes(save.specialization));
  const settings=object(r.settings);exactKeys(settings,['muted','reducedMotion','difficulty']);save.settings.muted=bool(settings.muted);save.settings.reducedMotion=bool(settings.reducedMotion);requireImport(settings.difficulty==='easy'||settings.difficulty==='normal'||settings.difficulty==='hard');save.settings.difficulty=settings.difficulty;
  const records=object(r.records);requireImport(Object.keys(records).length<=CHALLENGES.length+1);
  for(const [key,rawRecord] of Object.entries(records)){const challenge=CHALLENGES.find(c=>key===`challenge:${c.id}`);requireImport(key==='endless'||challenge,'UNKNOWN_IMPORT_RECORD');const rec=object(rawRecord);exactKeys(rec,['bestFloor','bestVerifiedFloor','runs','wins']);const bestFloor=integer(rec.bestFloor,challenge?.floors??MAX_FLOOR);integer(rec.bestVerifiedFloor,bestFloor);const runs=integer(rec.runs),wins=integer(rec.wins,runs);requireImport(wins===0||bestFloor===(challenge?.floors??MAX_FLOOR));save.records[key]={bestFloor,bestVerifiedFloor:0,runs,wins};}
  for(const specialization of save.availableSpecializations)requireImport((save.records[`challenge:${specialization}`]?.wins??0)>0,'IMPORT_SPECIALIZATION_UNEARNED');
- save.routines=array(r.routines,30).map(rawRoutine=>{const routine=object(rawRoutine);exactKeys(routine,['id','name','entries','restSeconds']);const entries=array(routine.entries,100).map(rawEntry=>{const e=object(rawEntry);exactKeys(e,['skillId','target']);const id=skillId(e.skillId),target=integer(e.target,1000,1);requireImport(save.skills[id].unlocked&&(!SKILL_BY_ID[id].alternating||target%2===0));return {skillId:id,target};});requireImport(entries.length>0);return {id:string(routine.id,100),name:string(routine.name,60),entries:normalizeWorkoutEntries(save,entries),restSeconds:integer(routine.restSeconds,600)};});
+ save.routines=array(r.routines,30).map(rawRoutine=>{const routine=object(rawRoutine);exactKeys(routine,['id','name','entries','restSeconds']);const entries=array(routine.entries,100).map(rawEntry=>{const e=object(rawEntry);exactKeys(e,['skillId','target']);const id=skillId(e.skillId),target=integer(e.target,1000,1);requireImport(!SKILL_BY_ID[id].alternating||target%2===0);return {skillId:id,target};});requireImport(entries.length>0);return {id:string(routine.id,100),name:string(routine.name,60),entries:normalizeWorkoutEntries(save,entries),restSeconds:integer(routine.restSeconds,600)};});
  requireImport(new Set(save.routines.map(x=>x.id)).size===save.routines.length);
  save.history=array(r.history,200).map(historyEntry);requireImport(new Set(save.history.map(x=>x.id)).size===save.history.length);
  uniqueStrings(r.lastOperationIds,256);save.lastOperationIds=[];
  if(r.importProvenance!==undefined)requireImport(r.importProvenance==='local-unverified');
+ if(r.progression!==undefined){const p=object(r.progression);exactKeys(p,['trialTokens','flashTokens','flashSkills','flashCadence','flashVerification']);const flash=uniqueStrings(p.flashSkills,4,60).map(skillId);requireImport(flash.every(id=>['mini-squat','squat','knee-pushup','pushup'].includes(id)&&save.skills[id].unlocked));object(p.flashCadence);if(p.flashVerification!==undefined)object(p.flashVerification);save.progression={trialTokens:integer(p.trialTokens),flashTokens:integer(p.flashTokens),flashSkills:flash,flashCadence:{},flashVerification:Object.fromEntries(flash.map(id=>[id,'manual' as const]))};}
+ if(r.flashEquipped!==undefined){save.flashEquipped=uniqueStrings(r.flashEquipped,4,60).map(skillId);requireImport(save.flashEquipped.every(id=>save.progression!.flashSkills.includes(id)));}
+ if(r.migration!==undefined){const m=object(r.migration);exactKeys(m,['from','preservedActiveRules']);requireImport(m.from===1);save.migration={from:1,preservedActiveRules:bool(m.preservedActiveRules)};}
+ // Free starter availability does not fabricate a successful trial.
+ for(const id of INITIAL_SKILLS)save.skills[id].unlocked=true;
+ for(const id of INITIAL_SKILLS)if(save.loadout.length<4&&!save.loadout.includes(id))save.loadout.push(id);
  save.importProvenance='local-unverified';return save;
 }
