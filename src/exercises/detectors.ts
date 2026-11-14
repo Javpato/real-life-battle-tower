@@ -1,3 +1,4 @@
+import {PoseFilter} from "./poseFilter";
 import type { ExerciseId, ExerciseUnit } from "../core/contracts";
 
 export type Landmark = {
@@ -12,6 +13,11 @@ export type PoseFrame = {
   landmarks: Landmark[];
   width: number;
   height: number;
+  rawLandmarks?: Landmark[];
+  spikeJoints?: number[];
+  captureLatencyMs?: number;
+  inferenceMs?: number;
+  receivedAt?: number;
 };
 export type Side = "left" | "right";
 export type ObservationStatus =
@@ -29,6 +35,7 @@ export type Observation = {
   missingJoints?: string[];
   observedSide?: Side;
   fresh?: boolean;
+  estimated?: boolean;
 };
 export type DetectorFeedback = {
   state: "ready" | "moving" | "return" | "tracking-lost" | "hold";
@@ -91,10 +98,13 @@ export function angle(a: Landmark, b: Landmark, c: Landmark): number {
 /** Fresh exercise-specific anatomical evidence; mirroring is a display operation only.
  * preferredObservedSide locks the measured chain during a cycle, never inventing a hidden side.
  */
+export type PoseReference={side?:Side;scale:number;hipY:number;hipAngle:number};
+export type RecognitionOptions={allowPartialSquat?:boolean;reference?:PoseReference};
 export function observePose(
   exercise: ExerciseId,
   frame: PoseFrame,
   preferredObservedSide?: Side,
+  options: RecognitionOptions = {},
 ): Observation {
   const empty: Observation = {
     visible: false,
@@ -238,7 +248,7 @@ export function observePose(
       );
     const c = chain(g.side),
       bend = angle(p[c.hip], p[c.knee], p[c.ankle]);
-    const scale = Math.max(
+    const scale = options.reference?.side === g.side ? options.reference.scale : Math.max(
       0.06,
       (distance(c.hip, c.knee) + distance(c.knee, c.ankle)) * 0.6,
     );
@@ -291,26 +301,25 @@ export function observePose(
   if (exercise === "bridge") {
     const groups = candidates.map((c) => ({
         side: c.side,
-        ids: [c.shoulder, c.hip, c.knee, c.ankle],
+        ids: [c.shoulder, c.hip, c.knee],
       })),
       g = select(groups);
     if (!g)
       return unavailable(
         groups.map((g) => g.ids),
-        "Use a low side view showing one shoulder, hip, bent knee and ankle. Start lying on your back with hips down.",
+        "Use a low side view showing one shoulder, hip and knee. Feet are not checked when outside the frame. Start with hips down.",
       );
     const c = chain(g.side),
-      scale = Math.max(0.06, distance(c.shoulder, c.hip)),
+      scale = options.reference?.side === g.side ? options.reference.scale : Math.max(0.06, distance(c.shoulder, c.hip)),
       hipAngle = angle(p[c.shoulder], p[c.hip], p[c.knee]),
       kneeAngle = angle(p[c.hip], p[c.knee], p[c.ankle]);
     const floorPosture =
       Math.abs(p[c.shoulder].x - p[c.hip].x) >
         Math.abs(p[c.shoulder].y - p[c.hip].y) * 0.75 &&
-      kneeAngle > 40 &&
-      kneeAngle < 140 &&
-      p[c.ankle].y > p[c.shoulder].y - scale * 0.2;
+      p[c.knee].y < p[c.shoulder].y - scale * 0.2 &&
+      (!good(c.ankle) || (kneeAngle > 40 && kneeAngle < 140 && p[c.ankle].y > p[c.shoulder].y - scale * 0.2));
     return finish({
-      ...base(g.ids, g.side),
+      ...base(good(c.ankle)?[...g.ids,c.ankle]:g.ids, g.side),
       ready:
         floorPosture &&
         p[c.hip].y >= p[c.shoulder].y - scale * 0.12 &&
@@ -322,7 +331,7 @@ export function observePose(
       amplitude: clamp((hipAngle - 120) / 55),
       motion: (p[c.hip].y - p[c.shoulder].y) / scale,
       message:
-        "Start with hips down and knees bent. Lift the hips, then lower back to the starting position.",
+        good(c.ankle) ? "Start with hips down and knees bent. Lift the hips, then lower back to the starting position." : "Hip-lift tracking: show shoulder, hip and knee. Feet are not checked.",
     });
   }
   if (exercise === "squat") {
@@ -331,6 +340,16 @@ export function observePose(
       ids: [c.hip, c.knee, c.ankle],
     }));
     const g = select(groups);
+    if (!g && options.allowPartialSquat) {
+      const upper=select(candidates.map(c=>({side:c.side,ids:[c.shoulder,c.hip,c.knee]})));
+      if(upper){
+        const c=chain(upper.side),ref=options.reference?.side===upper.side?options.reference:undefined;
+        const scale=ref?.scale??Math.max(.06,distance(c.shoulder,c.hip)),bend=angle(p[c.shoulder],p[c.hip],p[c.knee]);
+        const upright=p[c.shoulder].y<p[c.hip].y&&p[c.hip].y<p[c.knee].y;
+        const descent=ref?(p[c.hip].y-ref.hipY)/scale:0;
+        return {...finish({...base(upper.ids,upper.side),estimated:true,ready:upright&&bend>155&&(!ref||Math.abs(descent)<.12),extended:Boolean(ref&&bend<115&&descent>.25),amplitude:clamp((165-bend)/65),motion:p[c.hip].y/scale}),message:ref?'Cropped squat estimate. Lower your hips, then stand tall; feet and knee depth are not verified.':'Cropped squat estimate. Stand tall for fresh calibration before moving.'};
+      }
+    }
     if (!g)
       return unavailable(
         groups.map((g) => g.ids),
@@ -338,7 +357,7 @@ export function observePose(
       );
     const c = chain(g.side),
       bend = angle(p[c.hip], p[c.knee], p[c.ankle]);
-    const scale = Math.max(
+    const scale = options.reference?.side === g.side ? options.reference.scale : Math.max(
       0.06,
       (distance(c.hip, c.knee) + distance(c.knee, c.ankle)) * 0.6,
     );
@@ -563,9 +582,18 @@ export function observePose(
   });
 }
 
+/** Raw visibility and pose phases must support the smoothed display geometry. */
+export function observeEvidence(exercise:ExerciseId,frame:PoseFrame,side?:Side,options:RecognitionOptions={}):Observation{
+ const observed=observePose(exercise,frame,side,options);
+ if(!frame.rawLandmarks)return observed;
+ const raw=observePose(exercise,{...frame,landmarks:frame.rawLandmarks,rawLandmarks:undefined},side,options);
+ return {...observed,visible:raw.visible&&observed.visible,fresh:raw.fresh!==false&&observed.fresh!==false,ready:raw.ready&&observed.ready,extended:raw.extended&&observed.extended,confidence:Math.min(raw.confidence,observed.confidence),missingJoints:raw.visible?observed.missingJoints:raw.missingJoints};
+}
 /** Pure state machine. It reports observed movement, never HP, rewards, or medical form approval. */
 export class ExerciseDetector {
-  private filtered?: Landmark[];
+  private filter = new PoseFilter();
+  private reference?:PoseReference;
+  private estimatedCycle=false;
   private lastFrame?: number;
   private lostAt?: number;
   private observedSide?: Side;
@@ -589,6 +617,7 @@ export class ExerciseDetector {
     sessionId: string = globalThis.crypto?.randomUUID?.() ??
       `session-${Date.now()}-${Math.random()}`,
     previousSide?: Side,
+    private options:RecognitionOptions = {},
   ) {
     // A paused session may remount after a journal visit or reload. Its accepted
     // side comes from canonical state; its new unit IDs must not collide with
@@ -615,7 +644,7 @@ export class ExerciseDetector {
     this.stableSince = undefined;
     this.lastObservation = undefined;
     this.lastFrame = undefined;
-    this.filtered = undefined;
+    this.filter.reset();
     this.holding = false;
     this.lastMotion = undefined;
     this.lostAt = undefined;
@@ -623,7 +652,7 @@ export class ExerciseDetector {
   }
   /** Acquire a fresh starting reference without changing accepted units or alternation. */
   recalibrate(frame: PoseFrame): boolean {
-    const reference = observePose(this.exerciseId, frame);
+    const reference = observeEvidence(this.exerciseId, frame,undefined,this.options);
     if (
       !reference.visible ||
       !reference.fresh ||
@@ -637,57 +666,25 @@ export class ExerciseDetector {
     this.motionStart = reference.motion;
     this.movement = this.totalMotion = 0;
     this.side = undefined;
-    this.filtered = frame.landmarks.map((point) => ({ ...point }));
+    const side=reference.observedSide,c=chain(side??'left'),p=frame.landmarks.map(v=>({...v,x:v.x*frame.width/frame.height}));
+    const distance=(a:number,b:number)=>Math.hypot(p[a].x-p[b].x,p[a].y-p[b].y);
+    const scale=this.exerciseId==='sitstand'||(this.exerciseId==='squat'&&!reference.estimated)?(distance(c.hip,c.knee)+distance(c.knee,c.ankle))*.6:distance(c.shoulder,c.hip);
+    this.reference={side,scale:Math.max(.06,scale),hipY:p[c.hip].y,hipAngle:angle(p[c.shoulder],p[c.hip],p[c.knee])};
     this.lastFrame = frame.timestamp;
     this.lastObservation = frame.timestamp;
     this.observedSide = reference.observedSide;
     return true;
   }
+  observe(frame:PoseFrame):Observation {return observeEvidence(this.exerciseId,frame,this.observedSide,{...this.options,reference:this.reference});}
   update(frame: PoseFrame): DetectorFeedback {
-    if (this.lastFrame !== undefined && frame.timestamp <= this.lastFrame)
-      return { state: "ready", message: "Waiting for a new camera frame." };
-    const raw = observePose(this.exerciseId, frame, this.observedSide);
-    const gap =
-      this.lastFrame === undefined ? 0 : frame.timestamp - this.lastFrame;
-    if (gap > DETECTOR_CONFIG.maximumFrameGapMs && this.lostAt === undefined)
-      this.pause();
-    if (!raw.visible || !raw.fresh) {
-      this.lastFrame = frame.timestamp;
-      return this.updateObservation(raw, frame.timestamp);
-    }
-    if (
-      this.lostAt !== undefined &&
-      frame.timestamp - this.lostAt > DETECTOR_CONFIG.occlusionRetentionMs
-    )
-      this.pause();
-    this.observedSide ??= raw.observedSide;
-    const alpha = gap ? 1 - Math.exp(-gap / DETECTOR_CONFIG.smoothingMs) : 1;
-    // Never smooth a newly visible joint from its inferred/hidden previous location.
-    this.filtered = frame.landmarks.map((p, i) => {
-      const previous = this.filtered?.[i];
-      const reliable =
-        previous &&
-        (previous.visibility ?? 0) >= 0.35 &&
-        (p.visibility ?? 0) >= 0.35;
-      return {
-        ...p,
-        x: reliable ? previous.x + alpha * (p.x - previous.x) : p.x,
-        y: reliable ? previous.y + alpha * (p.y - previous.y) : p.y,
-      };
-    });
-    this.lastFrame = frame.timestamp;
-    const observed = observePose(
-      this.exerciseId,
-      { ...frame, landmarks: this.filtered },
-      this.observedSide,
-    );
-    return this.updateObservation(
-      {
-        ...observed,
-        confidence: Math.min(raw.confidence, observed.confidence),
-      },
-      frame.timestamp,
-    );
+    if(this.lastFrame!==undefined&&frame.timestamp<=this.lastFrame)return {state:'ready',message:'Waiting for a new camera frame.'};
+    if(this.lastFrame!==undefined&&frame.timestamp-this.lastFrame>DETECTOR_CONFIG.maximumFrameGapMs)this.pause();
+    const processed=this.filter.process(frame),observation=this.observe(processed);
+    this.lastFrame=frame.timestamp;
+    if(observation.visible&&observation.fresh)this.observedSide??=observation.observedSide;
+    // Normal startup also captures body proportions once a valid initial pose exists.
+    if(!this.reference&&observation.ready&&observation.fresh&&!observation.estimated){this.recalibrate(processed);this.lastObservation=undefined;}
+    return this.updateObservation(observation,frame.timestamp);
   }
   updateObservation(o: Observation, now: number): DetectorFeedback {
     if (!Number.isFinite(now))
@@ -778,6 +775,7 @@ export class ExerciseDetector {
         this.start = now;
         this.peak = o.amplitude;
         this.side = undefined;
+        this.estimatedCycle=Boolean(o.estimated);
         this.movement = 0;
         this.totalMotion = 0;
       }
@@ -788,6 +786,7 @@ export class ExerciseDetector {
           : "Begin one controlled repetition.",
       };
     }
+    this.estimatedCycle ||= Boolean(o.estimated);
     this.peak = Math.max(this.peak, o.amplitude);
     this.movement = Math.max(
       this.movement,
@@ -911,7 +910,7 @@ export class ExerciseDetector {
       quality: clamp(quality),
       confidence: o.confidence,
       side,
-      verified: true,
+      verified: !this.estimatedCycle && !o.estimated,
       timestamp,
     };
   }

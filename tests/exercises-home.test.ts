@@ -191,7 +191,7 @@ describe("per-joint confidence floors with strong measured anchors", () => {
         cycle(id, 1, (f) => {
           f.landmarks[distal].visibility = 0.1;
         }),
-      ).toHaveLength(0);
+      ).toHaveLength(id === "bridge" ? 1 : 0);
     },
   );
   it("accepts a squat with clear hip/knee and a moderately confident ankle", () => {

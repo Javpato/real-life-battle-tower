@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import type { ExerciseCameraProps, ExerciseUnit } from "../core/contracts";
 import {
   ExerciseDetector,
-  observePose,
   type PoseFrame,
   type Observation,
   type DetectorFeedback,
@@ -17,6 +16,8 @@ import ExerciseHUD from "./ExerciseHUD";
 import type { ExerciseVisualState } from "./exerciseUi";
 import "./exercises.css";
 import { RecalibrationGate } from "./preparation";
+import {PoseFilter} from "./poseFilter";
+import {FeedbackDwell} from "./feedbackDwell";
 import { STARTING_CUES } from "./exercisePresentation";
 import {
   armExerciseAudio,
@@ -32,6 +33,9 @@ type Props = Omit<ExerciseCameraProps, "onUnit"> & {
   mode?: "camera" | "manual";
   paused?: boolean;
   sessionComplete?: boolean;
+  onRequestCameraMode?:()=>void;
+  source?:"webcam"|"phone";
+  externalPoseFrame?:PoseFrame|null;
 };
 type Stage =
   | "off"
@@ -90,8 +94,10 @@ export default function ExerciseCamera(props: Props) {
   const latest = useRef(props);
   latest.current = props;
   const lifecycle = useRef<CameraLifecycle | null>(null);
+  const poseFilter=useRef(new PoseFilter()),phoneTimestamp=useRef(-Infinity),phoneArrival=useRef(-Infinity);
+  const [partialSquat,setPartialSquat]=useState(false);
   const detector = useRef(
-    new ExerciseDetector(props.exerciseId, props.sessionId, props.lastSide),
+    new ExerciseDetector(props.exerciseId, props.sessionId, props.lastSide,{allowPartialSquat:partialSquat}),
   );
   const detectorSession = useRef(sessionKey(props));
   const recalibration = useRef(new RecalibrationGate());
@@ -180,7 +186,8 @@ export default function ExerciseCamera(props: Props) {
       context.stroke();
     }
   };
-  const receivePose = (frame: PoseFrame) => {
+  const receivePose = (rawFrame: PoseFrame) => {
+    const frame=poseFilter.current.process(rawFrame);
     draw(frame);
     const p = latest.current;
     // Render may have changed props before React effects run. Never credit a frame into the next session.
@@ -192,7 +199,7 @@ export default function ExerciseCamera(props: Props) {
       );
       return;
     }
-    const o = observePose(p.exerciseId, frame) as RichObservation;
+    const o = detector.current.observe(frame) as RichObservation;
     const fresh = o.fresh !== false;
     setMissingJoints(o.visible && fresh ? [] : (o.missingJoints ?? []));
     if (
@@ -299,6 +306,7 @@ export default function ExerciseCamera(props: Props) {
               current.exerciseId,
               current.sessionId,
               current.lastSide,
+              {allowPartialSquat:partialSquat},
             );
             lifecycle.current.invalidateFrames();
             setNextSide(detector.current.expectedSide);
@@ -352,8 +360,8 @@ export default function ExerciseCamera(props: Props) {
         calibrated.current.has(calibrationGroup(p.exerciseId)) ||
         frame.timestamp - stableSince.current >= 700
       ) {
+        if(!detector.current.recalibrate(frame)) return;
         calibrated.current.add(calibrationGroup(p.exerciseId));
-        detector.current.pause();
         setPhase("ready");
         setStatus("ready");
         setMessage(
@@ -414,6 +422,7 @@ export default function ExerciseCamera(props: Props) {
   receiveRef.current = receivePose;
   const cameraStateRef = useRef<(snapshot: CameraSnapshot) => void>(() => {});
   cameraStateRef.current = (snapshot) => {
+    if(latest.current.source === "phone") return;
     setCamera(snapshot);
     if (snapshot.status === "requesting") {
       calibrated.current.clear();
@@ -431,6 +440,7 @@ export default function ExerciseCamera(props: Props) {
       setStatus("loading");
     } else if (snapshot.status === "ready") {
       resetTiming();
+      poseFilter.current.reset();
       setPhase("framing");
       setStatus("insufficient");
       void refreshDevices();
@@ -545,8 +555,10 @@ export default function ExerciseCamera(props: Props) {
       props.exerciseId,
       props.sessionId,
       props.lastSide,
+      {allowPartialSquat:partialSquat},
     );
     lifecycle.current?.invalidateFrames();
+    poseFilter.current.reset();
     issued.current = props.progress;
     resetTiming();
     setQuality(null);
@@ -556,15 +568,17 @@ export default function ExerciseCamera(props: Props) {
       !dismissedGuide.current.has(sessionKey(props)) &&
         needsGuide(props.exerciseId),
     );
-    if (lifecycle.current?.currentStatus === "ready") {
+    if (lifecycle.current?.currentStatus === "ready" || props.source === "phone") {
       setPhase("framing");
       setStatus("insufficient");
       setMessage(EXERCISE_GUIDES[props.exerciseId].setup);
     }
-  }, [props.exerciseId, props.sessionId]);
+  }, [props.exerciseId, props.sessionId, partialSquat]);
   useEffect(() => {
     detector.current.pause();
+    calibrated.current.clear();
     lifecycle.current?.invalidateFrames();
+    poseFilter.current.reset();
     issued.current = props.progress;
     resetTiming();
     if (
@@ -572,11 +586,11 @@ export default function ExerciseCamera(props: Props) {
       !props.paused &&
       props.mode !== "manual" &&
       !pausedRef.current &&
-      lifecycle.current?.currentStatus === "ready"
+      (lifecycle.current?.currentStatus === "ready" || props.source === "phone")
     ) {
       setPhase("framing");
       setStatus("insufficient");
-      setMessage("Return to the starting position. Your calibration is kept.");
+      setMessage("Return to the starting position for fresh calibration. Your progress is kept.");
     }
   }, [props.active, props.paused, props.mode]);
   useEffect(() => {
@@ -606,8 +620,29 @@ export default function ExerciseCamera(props: Props) {
     const timer = setInterval(tick, 100);
     return () => clearInterval(timer);
   }, [stage]);
+  useEffect(()=>{
+    detector.current.pause();poseFilter.current.reset();resetTiming();calibrated.current.clear();phoneTimestamp.current=-Infinity;phoneArrival.current=-Infinity;
+    if(props.source==='phone'){
+      lifecycle.current?.stop();setCamera({status:'ready',stream:null,message:'Phone pose source selected. Waiting for a fresh frame.'});setPhase('framing');setStatus('no-body');setMessage('Connect your phone camera and move into its view.');
+    }else{setCamera(initialCamera);setPhase('off');setStatus('off');setMessage(initialCamera.message);}
+  },[props.source]);
+  useEffect(()=>{
+    if(props.source!=='phone')return;
+    const frame=props.externalPoseFrame,now=performance.now();
+    if(!frame||!Number.isFinite(frame.timestamp)||frame.timestamp>now+50||now-frame.timestamp>500||frame.timestamp<=phoneTimestamp.current||frame.landmarks.length!==33||!Number.isFinite(frame.width)||!Number.isFinite(frame.height)||frame.width<=0||frame.height<=0){
+      if(!frame||!Number.isFinite(frame?.timestamp)||now-(frame?.timestamp??0)>500){detector.current.pause();poseFilter.current.reset();stableSince.current=null;countdownAt.current=null;setStatus('no-body');setMessage('Phone tracking paused. Reconnect or move back into view.');}
+      return;
+    }
+    phoneTimestamp.current=frame.timestamp;phoneArrival.current=now;
+    receiveRef.current({timestamp:frame.timestamp,width:frame.width,height:frame.height,landmarks:frame.landmarks,receivedAt:now,inferenceMs:frame.inferenceMs});
+  },[props.source,props.externalPoseFrame]);
+  useEffect(()=>{
+    if(props.source!=='phone')return;
+    const timer=setInterval(()=>{if(performance.now()-phoneArrival.current>500){detector.current.pause();poseFilter.current.reset();stableSince.current=null;countdownAt.current=null;setStatus('no-body');setMessage('Waiting for fresh phone tracking. Your completed units are kept.');}},200);
+    return()=>clearInterval(timer);
+  },[props.source]);
   const startCamera = async (next = selectionRef.current) => {
-    if (!video.current) return;
+    if (!video.current || latest.current.source === "phone") return;
     try {
       localStorage.setItem(
         "everstride-guide-" + latest.current.exerciseId,
@@ -639,7 +674,9 @@ export default function ExerciseCamera(props: Props) {
     detector.current.pause();
     lifecycle.current?.invalidateFrames();
     resetTiming();
-    if (!value && lifecycle.current?.currentStatus === "ready")
+    calibrated.current.clear();
+    poseFilter.current.reset();
+    if (!value && (lifecycle.current?.currentStatus === "ready" || props.source === "phone"))
       setPhase("framing");
     setMessage(
       value
@@ -677,6 +714,9 @@ export default function ExerciseCamera(props: Props) {
             ? "Paused. Your completed units are kept."
             : "Preview only between turns. Choose an exercise to begin."
         : message;
+  const dwell=useRef(new FeedbackDwell());
+  const [stableMessage,setStableMessage]=useState(hudMessage);
+  useEffect(()=>{const update=()=>setStableMessage(dwell.current.update(hudMessage,hudStatus,performance.now()));update();const timer=setInterval(update,100);return()=>clearInterval(timer);},[hudMessage,hudStatus]);
   const mirrored =
     (camera.facingMode ?? selection.facingMode) !== "environment";
   const guide = EXERCISE_GUIDES[props.exerciseId];
@@ -799,7 +839,7 @@ export default function ExerciseCamera(props: Props) {
             visibility: showSkeleton ? "visible" : "hidden",
           }}
         />
-        {!camera.stream && (
+        {!camera.stream && props.source !== "phone" && (
           <div className="exercise-placeholder">
             <div className="exercise-prep-art" aria-hidden="true">
               <ExerciseDemo exerciseId={props.exerciseId} />
@@ -809,12 +849,15 @@ export default function ExerciseCamera(props: Props) {
           </div>
         )}
       </div>
+      {props.source==='phone'&&<p className="exercise-note">Phone tracking · video stays on your phone unless you explicitly share its preview.</p>}
+      {props.exerciseId==='squat'&&!partialSquat&&(status==='partial'||status==='insufficient')&&<button type="button" onClick={()=>{setPartialSquat(true);calibrated.current.clear();}}>Feet out of frame? Count visible hip movement (estimated)</button>}
+      {partialSquat&&props.exerciseId==='squat'&&<p className="exercise-note">Cropped squat estimate · feet and knee depth are not verified. Stand tall for a fresh reference. <button type="button" onClick={()=>setPartialSquat(false)}>Use full-leg tracking</button></p>}
       <ExerciseHUD
         exerciseId={props.exerciseId}
         progress={props.progress}
         target={props.target}
         status={hudStatus}
-        message={hudMessage}
+        message={stableMessage}
         missingJoints={missingJoints}
         nextSide={nextSide}
         quality={quality}
@@ -832,10 +875,12 @@ export default function ExerciseCamera(props: Props) {
       />
       <div className="exercise-camera-controls" aria-label="Camera controls">
         <div className="exercise-actions">
+          {props.mode==='manual'&&props.onRequestCameraMode&&<button type="button" className="exercise-primary" data-guide="camera-use-mode" onClick={props.onRequestCameraMode}>Use camera for this turn</button>}
           <button
             type="button"
             className="exercise-primary"
             data-guide="camera-setup"
+            disabled={props.source==='phone'}
             onClick={() => void startCamera()}
           >
             {camera.status === "error"
@@ -847,7 +892,7 @@ export default function ExerciseCamera(props: Props) {
           <button
             type="button"
             onClick={() => lifecycle.current?.stop()}
-            disabled={camera.status === "off"}
+            disabled={camera.status === "off" || props.source === "phone"}
           >
             Stop camera
           </button>
@@ -917,6 +962,7 @@ export default function ExerciseCamera(props: Props) {
                 Camera facing
                 <select
                   aria-label="Camera facing"
+                  disabled={props.source==='phone'}
                   value={selection.facingMode}
                   onChange={(e) =>
                     changeSelection({
@@ -933,6 +979,7 @@ export default function ExerciseCamera(props: Props) {
                 Camera device
                 <select
                   aria-label="Camera device"
+                  disabled={props.source==='phone'}
                   value={selection.deviceId ?? ""}
                   onChange={(e) =>
                     changeSelection({
