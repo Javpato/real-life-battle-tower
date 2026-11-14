@@ -4,6 +4,12 @@ This section supersedes older feature-coverage statements below. Earlier release
 
 Implemented: cinematic Cozylight/title opening; selectable male/female protagonists; three real UUID-backed adventures and per-adventure journals; atomic legacy migration with immutable recovery; explicit cloud linkage/import and read-only offline caches; introduction and persistent tutorial; three exterior maps and fourteen reciprocal interiors; restored detailed exploration sprites, extra NPC animation and original PNG indicators; visual-foot battle anchoring; delayed recalibration and useful voice preparation.
 
+## Full campaign and Android acceptance
+
+Real keyboard/touch-menu/manual-play campaign completed on Medium through all three leaders and Rowan. The final visual build was tested across legitimate persistent browser sessions, including a real defeat, recovery at the Rest House, purchases/upgrades paid with earned coins, a successful Rowan retry and reload with identical XP/coins, three badges and ending flag. No progress was injected; final runner exited zero with no page errors. A navigation-helper lattice oscillation was corrected in the test, not by changing gameplay. `tests/adventure-smoke.mjs` now runs this complete flow.
+
+Android debug packaging passes Gradle and APK signature verification. The APK web assets are checked byte-for-byte against the final dist; evidence and SHA256 are in `releases/android-build-evidence.json`. Hardware installation/sensors remain unverified.
+
 ## Current automated evidence
 
 - **238 tests across 24 files passed**, TypeScript/Vite production build passed, and generated browser/Edge reducer parity passed.
