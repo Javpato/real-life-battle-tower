@@ -5,7 +5,7 @@ export type Journey={avatar:'male'|'female';introComplete:boolean;tutorialStage:
 export type QuestSession={id:string;exercise:ExerciseId;target:number;progress:number;seen:string[];side?:'left'|'right'};
 export type AdventureSnapshot={player:Player;battle:Battle|null;quest:QuestSession|null;journey?:Journey};
 export type AdventureCommand=
- |{kind:'configureCharacter';name:string;avatar:'male'|'female'}|{kind:'startTutorialBattle'}|{kind:'completeIntro'}|{kind:'setTutorial';stage:number}|{kind:'location';mapId:string;x:number;y:number;facing:WorldPosition['facing']}|{kind:'portal';portalId:string}|{kind:'playTime';seconds:number}
+ |{kind:'startTutorialBattle'}|{kind:'completeIntro'}|{kind:'setTutorial';stage:number}|{kind:'location';mapId:string;x:number;y:number;facing:WorldPosition['facing']}|{kind:'portal';portalId:string}|{kind:'playTime';seconds:number}
  |{kind:'initialize'}|{kind:'move';x:number;y:number}|{kind:'rename';name:string}|{kind:'setDifficulty';difficulty:Player['difficulty']}
  |{kind:'equip';attackIds:string[]}|{kind:'heal'}|{kind:'purchaseItem';item:'potion'|'shield'|'boost'}|{kind:'upgradeAttack';attackId:string}
  |{kind:'startBattle';enemyId:string;specialization:Element|null}|{kind:'beginAttack';attackId:string}
@@ -21,7 +21,7 @@ export const initialAdventure=():AdventureSnapshot=>({player:initialPlayer(),bat
 export function normalizeAdventure(snapshot:AdventureSnapshot,legacy=true):AdventureSnapshot {
  const s=structuredClone(snapshot);s.quest??=null;
  s.journey??={avatar:'male',introComplete:legacy,tutorialStage:legacy?6:0,location:legacy?resolveWorldPosition({mapId:'starter_town',...s.player.position}):initialSpawn(),playSeconds:0};
- s.journey.location=resolveWorldPosition(s.journey.location);return s;
+ s.journey.location=resolveWorldPosition(s.journey.location);if(s.journey.location.mapId==='rival_arena'&&s.player.badges.length<3)s.journey.location=resolveWorldPosition({mapId:'rival_town'});return s;
 }
 function requireRule(condition:unknown,message:string):asserts condition {if(!condition)throw new Error(message);}
 function validUnit(u:ExerciseUnit){return u&&typeof u.id==='string'&&u.id.length>0&&u.id.length<=200&&Number.isFinite(u.quality)&&u.quality>0&&u.quality<=1&&Number.isFinite(u.confidence)&&u.confidence>=0&&u.confidence<=1&&typeof u.verified==='boolean'&&(!u.verified||u.confidence>=.5)&&Number.isFinite(u.timestamp)&&u.timestamp>=0&&(u.side===undefined||u.side==='left'||u.side==='right');}
@@ -32,11 +32,10 @@ export function applyAdventureCommand(snapshot:AdventureSnapshot,command:Adventu
  const playerTurn=()=>{requireRule(b&&b.turn==='player'&&!b.paused,'NOT_PLAYER_TURN');return b;};
  switch(command.kind){
  case 'initialize': return s;
- case 'configureCharacter':idle();requireRule(['male','female'].includes(command.avatar)&&command.name.trim().length>0&&command.name.length<=20,'INVALID_CHARACTER');requireRule(!s.journey!.introComplete,'CHARACTER_ALREADY_CREATED');p.name=command.name.trim();s.journey!.avatar=command.avatar;break;
  case 'startTutorialBattle':idle();requireRule(s.journey!.tutorialStage<4&&!p.defeated.includes('tutorial-moss'),'TUTORIAL_COMPLETED');{const enemy={...enemyFor('trainer-1',p),id:'tutorial-moss',hp:30,thresholds:[0],attack:1,xp:20,coins:10};s.battle=startBattle(enemy,p,null);s.battle.turn='player';}break;
  case 'completeIntro':s.journey!.introComplete=true;break;
  case 'setTutorial':requireRule(Number.isInteger(command.stage)&&command.stage>=0&&command.stage<=6,'INVALID_TUTORIAL');s.journey!.tutorialStage=Math.max(s.journey!.tutorialStage,command.stage);break;
- case 'location':idle();s.journey!.location=resolveWorldPosition(command);p.position={x:s.journey!.location.x,y:s.journey!.location.y};break;
+ case 'location':idle();requireRule(command.mapId===s.journey!.location.mapId,'USE_MAP_PORTAL');requireRule(['up','down','left','right'].includes(command.facing),'INVALID_FACING');s.journey!.location=resolveWorldPosition(command);p.position={x:s.journey!.location.x,y:s.journey!.location.y};break;
  case 'portal':idle();s.journey!.location=resolvePortal(s.journey!.location,command.portalId,p.badges);p.position={x:s.journey!.location.x,y:s.journey!.location.y};break;
  case 'playTime':requireRule(Number.isInteger(command.seconds)&&command.seconds>=0&&command.seconds<=60,'INVALID_PLAY_TIME');s.journey!.playSeconds+=command.seconds;break;
  case 'rename': idle();requireRule(typeof command.name==='string'&&command.name.trim().length>0&&command.name.length<=20,'INVALID_NAME');p.name=command.name.trim();break;

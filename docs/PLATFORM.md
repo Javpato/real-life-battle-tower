@@ -80,3 +80,14 @@ Edits and a recovery draft are written to a cache partitioned by both save and a
 The hook's owner-only `deleteAll()` erases server nutrition content/history and increments the generation, preserving the adventure. An ordinary `update(defaultNutrition())` is an edit/reset of visible records and does not erase historical revisions. Make this distinction clear in deletion UI. The owner's global erase also prevents previously queued records from silently returning on another device; that device must explicitly choose what to do with its pending edits.
 
 Eight model tests cover deterministic isolation, no unrelated default upload, entry-level conflicts and explicit rebase, lost acknowledgements, erasure generation, versioned deletes, and object-based journal settings roundtrip/conflict handling. The PostgreSQL fixture additionally plays an entire manual (unverified) adventure through all three leaders and the three-phase rival using shared commands and fenced server commits. Hosted cross-device and physical hardware validation remain separate checks.
+
+## Three-slot overhaul — hosted verification on 2026-11-14
+
+The fifth migration adds idempotent creation of distinct cloud adventures, capped at three owned saves. An explicit consent action can import a local adventure once into an owner's empty cloud save; the Edge Function validates the snapshot, ownership and revision zero before the normal service-only atomic commit. Receipts make retries safe. Existing cloud records cannot be replaced by imports, and nutrition is not silently uploaded. Local original/recovery copies remain available. Slot deletion removes the local assignment and preserves remote records.
+
+Actual hosted checks were repeated during the overhaul using the owner's configured public project variables, without printing credentials:
+
+- `node --env-file=<owner .env.local> supabase/tests/live.mjs` reached Auth and failed: **Anonymous sign-ins are disabled**. No disposable record was created because the first authentication failed.
+- `npx supabase projects list` failed with **AccessTokenRequiredError**: no existing CLI access token was available.
+
+Consequently the new migration and Edge Function are implemented and locally tested but are not deployed or verified against the hosted project. The owner must enable anonymous Auth and establish a local CLI login before deployment and live multi-device acceptance can run. No password or token should be posted in chat.
