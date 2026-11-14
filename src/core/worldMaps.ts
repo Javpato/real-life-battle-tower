@@ -6,15 +6,20 @@ export type Rect={x:number;y:number;w:number;h:number};
 export type Portal=Rect&{id:string;to:string;spawn:string;label:string;badges?:number};
 export type Resident={id:string;name:string;x:number;y:number;activity:'stand'|'read'|'cook'|'train'|'walk'|'rest';icon:'heal'|'shop'|'alchemy'|'gym'|'battle'|'quest'|'story'};
 export type Decoration={frame:number;x:number;y:number;width:number};
+export type RoomDetail={id:string;title:string;text:string};
+export type Furniture={id:string;frame:number;x:number;y:number;width:number;footprint:Rect;detailId?:string;action?:'heal'};
+export type RoomStyle={floor:'wood'|'stone';wall:string;trim:string;rug:string;rugBounds:Rect};
 export type Building=Rect&{frame:number;name:string};
-export type WorldMap={id:string;name:string;region:string;kind:'town'|'route'|'summit'|'interior';width:number;height:number;spawns:Record<string,{x:number;y:number;facing:Facing}>;obstacles:Rect[];portals:Portal[];npcs:Resident[];buildings:Building[];decorations:Decoration[]};
+export type WorldMap={id:string;name:string;region:string;kind:'town'|'route'|'summit'|'interior';width:number;height:number;spawns:Record<string,{x:number;y:number;facing:Facing}>;obstacles:Rect[];portals:Portal[];npcs:Resident[];buildings:Building[];decorations:Decoration[];furniture:Furniture[];roomStyle?:RoomStyle};
 const maps:Record<string,WorldMap>={};
+const roomDetails:Record<string,RoomDetail>={};
+export const ROOM_DETAILS:Readonly<Record<string,RoomDetail>>=roomDetails;
 const spawn=(x:number,y:number,facing:Facing='down')=>({x,y,facing});
-function outdoor(id:string,name:string,kind:WorldMap['kind'],width:number,height:number){const m:WorldMap={id,name,region:'GREENHAVEN VALLEY',kind,width,height,spawns:{safe:spawn(width/2,height/2)},obstacles:[],portals:[],npcs:[],buildings:[],decorations:[]};maps[id]=m;return m;}
+function outdoor(id:string,name:string,kind:WorldMap['kind'],width:number,height:number){const m:WorldMap={id,name,region:'GREENHAVEN VALLEY',kind,width,height,spawns:{safe:spawn(width/2,height/2)},obstacles:[],portals:[],npcs:[],buildings:[],decorations:[],furniture:[]};maps[id]=m;return m;}
 const town=outdoor('starter_town','Willowmere','town',1152,960);
 const route=outdoor('training_route','Fernway Trail','route',768,1152);
 const summit=outdoor('rival_town','Summit Hollow','summit',960,768);
-function room(id:string,name:string){const m=outdoor(id,name,'interior',384,288);m.spawns={safe:spawn(192,216),entry:spawn(192,232,'up')};m.obstacles=[{x:0,y:0,w:384,h:47},{x:0,y:0,w:16,h:288},{x:368,y:0,w:16,h:288},{x:0,y:272,w:167,h:16},{x:217,y:272,w:167,h:16},{x:36,y:54,w:72,h:58},{x:266,y:54,w:70,h:32},{x:46,y:154,w:60,h:36}];return m;}
+function room(id:string,name:string){const m=outdoor(id,name,'interior',384,288);m.spawns={safe:spawn(192,216),entry:spawn(192,232,'up')};m.obstacles=[{x:0,y:0,w:384,h:47},{x:0,y:0,w:16,h:288},{x:368,y:0,w:16,h:288},{x:0,y:272,w:167,h:16},{x:217,y:272,w:167,h:16}];return m;}
 function doorway(parent:WorldMap,id:string,name:string,x:number,y:number,frame:number){const inside=room(id,name);parent.buildings.push({x:x-64,y:y-104,w:128,h:104,frame,name});parent.obstacles.push({x:x-59,y:y-80,w:118,h:67});parent.spawns[id]=spawn(x,y+32);inside.portals.push({id:`${id}:exit`,x:168,y:258,w:48,h:28,to:parent.id,spawn:id,label:'Outside'});parent.portals.push({id:`${id}:enter`,x:x-18,y:y-5,w:36,h:24,to:id,spawn:'entry',label:name});return inside;}
 const home=doorway(town,'starter_house','Your home',200,230,6);
 const bedroom=room('starter_house_bedroom','Your room');bedroom.spawns.new_game=spawn(192,144);bedroom.spawns.safe=spawn(192,144);home.spawns.stairs=spawn(318,140);home.portals.push({id:'bedroom:enter',x:304,y:112,w:32,h:24,to:bedroom.id,spawn:'entry',label:'Your room'});bedroom.portals.push({id:'bedroom:exit',x:168,y:258,w:48,h:28,to:home.id,spawn:'stairs',label:'Downstairs'});
@@ -42,6 +47,78 @@ connect(town,route,640,930,384,40);connect(route,summit,384,1110,480,40);
 // Route pools and groves make two traversable alternatives around a central glade.
 route.obstacles.push({x:90,y:440,w:180,h:210},{x:510,y:610,w:160,h:240});
 town.spawns.safe=spawn(640,520);summit.spawns.safe=spawn(480,430);
+// Each interior owns its furnishings, collision footprints and narrative details.
+// Coordinates identify object feet, so the same metadata drives rendering and navigation.
+function furnish(m:WorldMap,id:string,frame:number,x:number,y:number,width:number,depth:number,title:string,text:string,action?:'heal'){
+ const detailId=`${m.id}:${id}`;roomDetails[detailId]={id:detailId,title,text};const footprint={x:x-width*.42,y:y-depth,w:width*.84,h:depth};
+ m.furniture.push({id,frame,x,y,width,footprint,detailId,action});m.obstacles.push(footprint);
+}
+function style(m:WorldMap,wall:string,rug:string,rugBounds:Rect,floor:'wood'|'stone'='wood'){m.roomStyle={floor,wall,trim:'#655046',rug,rugBounds};}
+function place(m:WorldMap,id:string,x:number,y:number,activity:Resident['activity']){const n=m.npcs.find(n=>n.id===id);if(n)Object.assign(n,{x,y,activity});}
+style(bedroom,'#ead5aa','#4c7e7c',{x:150,y:162,w:86,h:58});
+furnish(bedroom,'travel-bed',0,70,125,64,42,'A room for your arrival','A neatly folded teal blanket waits beside your travel bag. Willowmere has made room for a new traveler.');
+furnish(bedroom,'arrival-letter',2,300,122,68,30,'A letter from Moss','Welcome to Willowmere. Take a moment to settle in, then meet me outside. Every journey starts with a small, deliberate step. — Moss');
+furnish(bedroom,'travel-supplies',3,76,221,48,31,'Packed for the valley','A water flask, spare laces and a pocket notebook: ordinary things for an extraordinary journey.');
+style(home,'#ead0a4','#b98a59',{x:164,y:150,w:80,h:60});
+furnish(home,'welcome-table',7,104,132,101,41,'The welcome table','Bread, a fresh flower and two empty chairs. The house is a place to rest between journeys, not another challenge to complete.');
+furnish(home,'pantry',3,320,86,59,30,'A shared pantry','Supplies are labeled for the next arriving traveler. Leave the shelf as welcoming as you found it.');
+furnish(home,'valley-stories',1,48,99,48,30,'Stories of the valley','Old journals describe three kinds of strength: a steady foundation, patient control and balance through change.');
+furnish(home,'guest-book',2,302,229,63,28,'The guest book','Travelers leave notes about kind neighbors, useful routes and the small victories that brought them here.');
+style(mentor,'#d7d4b2','#6c8b78',{x:172,y:118,w:63,h:105});
+furnish(mentor,'survey-desk',2,93,134,88,32,'Noor’s working map','Noor marks Fernway’s bends in green ink. A note reads: explore freely, but never mistake a straight line for the only path.');
+furnish(mentor,'map-library',1,299,96,79,35,'A library of routes','Rolled maps and field journals record the valley across seasons. Noor keeps earlier editions so no traveler’s discoveries are lost.');
+furnish(mentor,'chart-table',7,292,217,78,32,'The summit survey','A route toward Summit Hollow is weighted down with smooth river stones. Three gym emblems mark the final arena, not the road.');
+furnish(mentor,'survey-kit',3,48,82,42,25,'A cartographer’s kit','Measuring cord, pencils and waterproof cases are arranged for the next survey.');place(mentor,'quest-birddog',105,175,'read');
+style(rest,'#e9dfbf','#719e8e',{x:135,y:110,w:114,h:119});
+furnish(rest,'clinic-bed-west',0,69,135,59,43,'A quiet recovery bed','Clean sheets and a warm quilt offer a pause from the road. Rest is part of training.','heal');
+furnish(rest,'clinic-bed-east',0,309,135,59,43,'Room to recover','The healer keeps every bed ready. Recovery here never costs coins.','heal');
+furnish(rest,'remedy-cabinet',3,310,228,56,32,'The remedy cabinet','Every jar is carefully labeled. The healer tends to tired travelers with ordinary care, patience and rest.');
+furnish(rest,'clinic-ledger',2,76,225,70,30,'A care ledger','Names fill the pages beside simple reminders: listen, offer water, make room to rest.');place(rest,'healer',192,112,'stand');
+style(shop,'#e9d2a8','#b99156',{x:144,y:167,w:101,h:57});
+furnish(shop,'supply-counter',6,184,118,122,36,'Jun’s supply counter','Jun stocks practical supplies for the trail. Tonics restore vitality; improvements make familiar skills stronger.');
+furnish(shop,'trail-stock',3,59,95,65,34,'Ready for the road','Jun groups supplies by journey length rather than price. Every traveler should know what they are packing.');
+furnish(shop,'order-shelf',3,316,91,58,31,'Tomorrow’s orders','A hand-written list includes bandages for the clinic, bottles for Mira and cord for Ollie.');
+furnish(shop,'shipping-ledger',2,72,220,69,29,'The village delivery ledger','Jun’s deliveries connect the houses, gyms and rest stops. The little shop keeps the valley moving.');place(shop,'shop',268,154,'stand');
+style(lab,'#d9cce4','#8b76a1',{x:139,y:147,w:77,h:83});
+furnish(lab,'research-bench',4,277,132,113,40,'Mira’s research bench','Mira studies the properties of discovered ingredients. Bottles are labeled, observations are dated, and uncertain results stay uncertain.');
+furnish(lab,'ingredient-shelf',3,72,99,75,36,'Ingredient samples','Sealed samples wait beside careful source notes. Discovering an ingredient is different from consuming it.');
+furnish(lab,'research-notes',2,74,225,81,31,'Research in progress','Mira’s notebook links each recipe to its ingredients. A crossed-out guess has been replaced with a measured result.');
+furnish(lab,'reference-books',1,320,229,55,29,'The reference shelf','Recipes, botanical sketches and empty pages leave space for the next discovery.');place(lab,'alchemy',253,173,'cook');
+style(leg,'#dcc9a4','#a58450',{x:130,y:145,w:125,h:87},'stone');
+furnish(leg,'stability-rack',5,73,116,86,32,'Terra’s stability station','A solid stance comes before a powerful movement. Terra teaches controlled weight shifts and a steady return.');
+furnish(leg,'root-training',5,311,116,77,32,'Root training equipment','The equipment is arranged from simple supports to harder challenges. Strength begins with a reliable foundation.');
+furnish(leg,'training-records',2,77,227,65,28,'A record of steady progress','Terra records consistency and control, not just the largest number on a single day.');place(leg,'leader-leg',192,121,'train');
+style(arm,'#e0bca4','#ad6554',{x:142,y:164,w:99,h:66},'stone');
+furnish(arm,'control-station',5,192,116,111,36,'Flint’s control station','Flint’s notes emphasize a complete descent and a controlled return. Speed without control earns no praise here.');
+furnish(arm,'west-training',5,60,221,64,32,'The patient repetition','A simple weight rests beside the words: make each movement deliberate.');
+furnish(arm,'technique-ledger',2,316,221,66,28,'Technique before power','Flint revisits the basics with experienced trainers as carefully as with beginners.');place(arm,'leader-arm',192,161,'train');
+style(back,'#d2e1db','#6f9b9d',{x:175,y:160,w:98,h:66},'stone');
+furnish(back,'balance-library',1,74,99,62,31,'Zephyr’s balance library','Sketches show how opposite limbs work together. A stable center makes room for movement.');
+furnish(back,'breathing-desk',2,299,116,86,31,'A quiet practice','Zephyr’s notes pair effort with a pause. Balance is something to return to, not a pose to force.');
+furnish(back,'balance-equipment',5,78,224,77,33,'The balance corner','Small supports make practice approachable. Zephyr welcomes a careful start.');place(back,'leader-back',235,143,'train');
+style(oak,'#dcc6a7','#8d9162',{x:163,y:157,w:74,h:66});
+furnish(oak,'repair-plans',2,107,131,96,31,'Ollie’s trail repairs','Ollie’s sketches mark worn steps and loose rails along Fernway. His training helps him carry materials safely.');
+furnish(oak,'repair-supplies',3,304,102,72,34,'Supplies for the path','Coils of cord and labeled boxes are ready for the next repair day. Jun’s delivery note is tucked under a jar.');
+furnish(oak,'lifting-practice',5,303,227,64,31,'Practice for practical strength','Ollie practices controlled bends before lifting trail supplies. The work and the training support each other.');place(oak,'quest-squat',111,172,'train');
+style(willow,'#ded1bb','#9b7786',{x:140,y:136,w:72,h:92});
+furnish(willow,'binding-library-west',1,57,94,59,30,'Books waiting for repair','Ada sorts loose pages and damaged covers into careful stacks. Every book has a little history worth preserving.');
+furnish(willow,'binding-library-center',1,158,91,60,30,'Restored volumes','New bindings sit beside well-worn spines. Ada’s work makes old stories usable again.');
+furnish(willow,'binding-workbench',2,293,213,87,32,'Ada’s bookbinding desk','Thread, a weighted open book and patient notes cover the workbench. Careful hands make lasting repairs.');
+furnish(willow,'reference-cabinet',1,307,101,73,34,'The craft shelf','Ada keeps diagrams of stitches and bindings close enough to consult while she works.');place(willow,'quest-pushup',239,167,'read');
+style(summitRest,'#d1dfdd','#6f8b9b',{x:143,y:147,w:97,h:78});
+furnish(summitRest,'western-rest-bed',0,69,148,66,44,'A bed above the valley','The summit rest stop offers a sheltered pause. Recover here before returning to the trail.','heal');
+furnish(summitRest,'eastern-rest-bed',0,309,148,66,44,'A spare warm quilt','A second bed is kept ready for a late-arriving explorer.','heal');
+furnish(summitRest,'shared-breakfast',7,192,103,79,32,'A shared breakfast table','Travelers leave the table clean for whoever arrives next.');
+furnish(summitRest,'summit-pantry',3,72,230,52,29,'Supplies at the summit','Jun’s delivery labels reach all the way to this quiet rest stop.');
+style(summitHouse,'#d6d1c5','#7f99a1',{x:142,y:154,w:97,h:74});
+furnish(summitHouse,'explorer-bed',0,308,126,62,42,'Finn’s returning place','A bed, a folded blanket and a view of the hills make this a home between expeditions.');
+furnish(summitHouse,'expedition-kit',3,72,112,65,33,'Finn’s expedition kit','Supplies are checked before each climb. Finn prefers preparation to a dramatic rescue.');
+furnish(summitHouse,'mountain-journal',2,76,225,76,31,'The mountain journal','Finn records weather, turning points and places to rest. A good journey includes a safe return.');
+furnish(summitHouse,'summit-records',1,311,226,57,29,'Records from higher paths','Older route notes remain on the shelf beside the new ones. The mountains change, so an explorer keeps learning.');place(summitHouse,'quest-lunge',192,137,'rest');
+style(arena,'#d9cfe0','#897296',{x:126,y:154,w:131,h:80},'stone');
+furnish(arena,'summit-equipment-west',5,57,112,59,32,'A balanced challenge','The summit draws on all three kinds of strength. No single specialization answers every phase.');
+furnish(arena,'summit-equipment-east',5,327,112,59,32,'Prepared for change','Rowan changes his approach throughout the encounter. Watch, adapt, and keep control of your effort.');
+furnish(arena,'challenger-record',2,65,228,54,27,'The summit record','The ledger honors completed journeys, not flawless ones. Defeat is a reason to rest and return.');place(arena,'rival',192,117,'stand');
 // Detailed original foliage and landmarks have matching compact foot collisions.
 function decorate(m:WorldMap,frame:number,x:number,y:number,width:number,solid=false){if(m.kind==='route'&&frame<=2&&m.obstacles.some(o=>o.w>50&&x>=o.x-8&&x<=o.x+o.w+8&&y>=o.y&&y<=o.y+o.h+12))return;m.decorations.push({frame,x,y,width});if(solid)m.obstacles.push({x:x-6,y:y-9,w:12,h:10});}
 for(const m of [town,route,summit]){for(let x=34;x<m.width-25;x+=48){if(!m.portals.some(p=>Math.abs(p.x+p.w/2-x)<70&&p.y<75))decorate(m,x%3?0:1,x,45,72);if(!m.portals.some(p=>Math.abs(p.x+p.w/2-x)<70&&p.y>m.height-80))decorate(m,x%3?0:1,x,m.height-7,72);}for(let y=100;y<m.height-50;y+=53){decorate(m,0,17,y,70);decorate(m,1,m.width-17,y,70);}}
