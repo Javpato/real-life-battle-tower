@@ -118,18 +118,20 @@ try {
       });
     },
   );
-  await page.getByText("Recognition model · Lite", { exact: true }).click();
+  await page.getByText("Camera tracking · Fast (Lite)", { exact: true }).click();
+  await page.getByText("These are camera models, not exercise difficulty levels.",{exact:true}).waitFor();
+  await page.getByText("Neither changes how far you must move.",{exact:false}).waitFor();
   await page
-    .getByRole("button", { name: "Download and use Full", exact: true })
+    .getByRole("button", { name: "Download Full", exact: true })
     .click();
-  await page.getByText("Recognition model · Full", { exact: true }).waitFor();
+  await page.getByText("Camera tracking · Full", { exact: true }).waitFor();
   assert.equal(downloads, 1);
   assert.equal(
     await page.evaluate(() => window.__captures),
     1,
     "model download does not start capture",
   );
-  await page.getByRole("button", { name: "Use Lite", exact: true }).click();
+  await page.getByRole("button", { name: "Use Fast (Lite)", exact: true }).click();
   await page.getByRole("button", { name: "Use Full", exact: true }).click();
   assert.equal(downloads, 1, "already downloaded model is reused");
   assert.deepEqual(errors, []);

@@ -116,7 +116,7 @@ export default function ExerciseCamera(props: Props) {
     if (next === "full" && !url) {
       setModelBusy(true);
       setModelNotice(
-        "Downloading optional Full model. Camera images are never uploaded.",
+        "Downloading the larger Full camera model. Your camera images stay on this device.",
       );
       const controller = new AbortController();
       downloadRef.current = controller;
@@ -141,7 +141,7 @@ export default function ExerciseCamera(props: Props) {
       } catch {
         if (!controller.signal.aborted)
           setModelNotice(
-            "Full model could not download. Lite remains available; retry when connected.",
+            "Full could not download. Fast (Lite) is still available. Try again when connected.",
           );
         return;
       } finally {
@@ -155,7 +155,7 @@ export default function ExerciseCamera(props: Props) {
     setModel(next);
     setMetrics(null);
     setModelNotice(
-      `${next === "full" ? "Full" : "Lite"} selected. Enable camera for fresh calibration. Compare on your device; performance is not guaranteed.`,
+      `${next === "full" ? "Full" : "Fast (Lite)"} selected. Enable camera and calibrate again. The exercise movement stays the same.`,
     );
   };
   const poseFilter = useRef(new PoseFilter()),
@@ -1040,12 +1040,22 @@ export default function ExerciseCamera(props: Props) {
       {props.source !== "phone" && (
         <details className="exercise-model-options">
           <summary>
-            Recognition model · {model === "full" ? "Full" : "Lite"}
+            Camera tracking · {model === "full" ? "Full" : "Fast (Lite)"}
           </summary>
           <p>
-            Lite is included. Full is an optional download, processed on this
-            device. Compare measured latency; neither model guarantees correct
-            repetitions.
+            These are camera models, not exercise difficulty levels.
+          </p>
+          <p>
+            <strong>Fast (Lite) — recommended:</strong> the smaller model, already
+            included. Start here, especially if the skeleton feels delayed.
+          </p>
+          <p>
+            <strong>Full:</strong> a larger download to try if tracking is
+            unreliable. It needs more processing and may respond more slowly;
+            better counts are not guaranteed.
+          </p>
+          <p>
+            Both run on this device. Neither changes how far you must move.
           </p>
           <div>
             <button
@@ -1053,7 +1063,7 @@ export default function ExerciseCamera(props: Props) {
               disabled={modelBusy || model === "lite"}
               onClick={() => void chooseModel("lite")}
             >
-              Use Lite
+              Use Fast (Lite)
             </button>
             <button
               type="button"
@@ -1064,7 +1074,7 @@ export default function ExerciseCamera(props: Props) {
                 ? "Downloading…"
                 : fullModelUrl
                   ? "Use Full"
-                  : "Download and use Full"}
+                  : "Download Full"}
             </button>
           </div>
           {modelNotice && <p role="status">{modelNotice}</p>}

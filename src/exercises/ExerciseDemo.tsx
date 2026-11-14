@@ -15,9 +15,9 @@ export const EXERCISE_GUIDES: Record<
   sitstand: {
     title: "Root Rise · Chair sit-to-stand",
     setup:
-      "Sit near the front of a firm chair, feet flat and about hip-width apart. Put the chair against a wall so it cannot slide. Begin with your hips on the seat and hands resting comfortably.",
+      "Sit near the front of a firm chair, feet flat and about hip-width apart. Put the chair against a wall so it cannot slide. Begin resting on the seat and hold still so the camera can learn your chair height.",
     movement:
-      "Lean your chest slightly forward, stand up smoothly, then lower back onto the chair. A complete seated → standing → seated cycle counts once.",
+      "Lean slightly forward, stand up, then sit back onto the same seat and pause briefly. You do not need to lower your hips below the seat. One seated → standing → seated cycle counts once.",
     camera:
       "Side view · show one shoulder, hip, knee and ankle; the far arm may be hidden",
     note: "Use a stable chair without wheels. Rest whenever you need; this game does not verify the chair itself.",
