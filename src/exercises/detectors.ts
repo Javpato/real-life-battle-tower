@@ -692,6 +692,7 @@ export class ExerciseDetector {
   private phase: "initial" | "ready" | "moving" | "return" = "initial";
   private stableSince?: number;
   private start = 0;
+  private cycleUninterrupted = false;
   private peak = 0;
   private side?: Side;
   private lastSide?: Side;
@@ -732,6 +733,7 @@ export class ExerciseDetector {
   }
   /** Pause invalidates an unfinished cycle but preserves completed units, hold fractions and alternation. */
   pause() {
+    this.cycleUninterrupted = false;
     this.phase = "initial";
     this.seatedCandidate = undefined;
     this.stableSince = undefined;
@@ -809,8 +811,10 @@ export class ExerciseDetector {
     });
   }
   update(frame: PoseFrame): DetectorFeedback {
-    if (this.lastFrame !== undefined && frame.timestamp <= this.lastFrame)
+    if (this.lastFrame !== undefined && frame.timestamp <= this.lastFrame) {
+      this.cycleUninterrupted = false;
       return { state: "ready", message: "Waiting for a new camera frame." };
+    }
     if (
       this.lastFrame !== undefined &&
       frame.timestamp - this.lastFrame > DETECTOR_CONFIG.maximumFrameGapMs
@@ -889,18 +893,22 @@ export class ExerciseDetector {
     return this.updateObservation(observation, frame.timestamp);
   }
   updateObservation(o: Observation, now: number): DetectorFeedback {
-    if (!Number.isFinite(now))
+    if (!Number.isFinite(now)) {
+      this.cycleUninterrupted = false;
       return {
         state: "tracking-lost",
         status: "insufficient",
         message: "Waiting for a valid camera timestamp.",
       };
+    }
     if (
       !o.visible ||
       o.fresh === false ||
       !Number.isFinite(o.confidence) ||
       o.confidence < DETECTOR_CONFIG.visibility
     ) {
+      // A brief occlusion may retain rep state, but never earns cadence evidence.
+      this.cycleUninterrupted = false;
       this.lostAt ??= now;
       if (now - this.lostAt > DETECTOR_CONFIG.occlusionRetentionMs) {
         this.pause();
@@ -925,8 +933,10 @@ export class ExerciseDetector {
         this.pause();
       this.lostAt = undefined;
     }
-    if (this.lastObservation !== undefined && now <= this.lastObservation)
+    if (this.lastObservation !== undefined && now <= this.lastObservation) {
+      this.cycleUninterrupted = false;
       return { state: "ready", message: "Waiting for a new frame." };
+    }
     let dt =
       this.lastObservation === undefined ? 0 : now - this.lastObservation;
     if (dt > DETECTOR_CONFIG.maximumFrameGapMs) {
@@ -975,6 +985,7 @@ export class ExerciseDetector {
       if (!o.ready) {
         this.phase = "moving";
         this.start = now;
+        this.cycleUninterrupted = !o.estimated;
         this.peak = o.amplitude;
         this.side = undefined;
         this.estimatedCycle = Boolean(o.estimated);
@@ -1117,6 +1128,13 @@ export class ExerciseDetector {
       side,
       verified: !this.estimatedCycle && !o.estimated,
       timestamp,
+      // Full movement onset -> observed stable return, never inter-rep gaps.
+      ...((this.exerciseId === 'squat' || this.exerciseId === 'pushup') &&
+        !this.estimatedCycle && !o.estimated ? {cycle: {
+          startedAt: this.start,
+          endedAt: timestamp,
+          uninterrupted: this.cycleUninterrupted,
+        }} : {}),
     };
   }
 }

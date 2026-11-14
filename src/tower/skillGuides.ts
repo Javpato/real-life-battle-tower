@@ -1,7 +1,9 @@
+import {ADDITIONAL_GUIDES} from './expandedCatalog';
 /** Physical-skill instructions. These deliberately do not inherit the detector family's
  * guide: a wall sit is a hold, not a squat, even when both share a tracking family. */
 export type SkillGuide={title:string;setup:string;movement:string;camera:string;note:string};
 export const SKILL_GUIDES:Readonly<Record<string,SkillGuide>>={
+ ...ADDITIONAL_GUIDES,
  'mini-squat':{
   title:'Mini Squat',setup:'Stand with feet comfortably apart and your whole body in view.',
   movement:'Bend your knees a little and move your hips back, then return to standing. One down-and-up cycle is one repetition.',
