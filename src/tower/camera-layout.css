@@ -78,9 +78,9 @@
 .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-guide-heading button{min-height:44px;flex-shrink:0;font-size:11px;padding:5px 10px}
 .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-camera>.exercise-note,
 .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-camera>button{grid-column:1/-1;grid-row:auto;font-size:10px;line-height:1.3;min-height:0;margin:0;padding:4px;height:auto}
-@media(min-width:1050px){.bt .bt-battle-series:has(.bt-camera-pane:not(:has(>.bt-panel))){grid-template-columns:minmax(0,40%) minmax(0,60%)}.bt .bt-workout:has(.bt-camera-pane:not(:has(>.bt-panel))){grid-template-columns:minmax(0,40%) minmax(0,60%)}}
+@media(min-width:1050px){.bt .bt-battle-series:not(:has(>.bt-camera-pane>.bt-panel)){grid-template-columns:minmax(0,40%) minmax(0,60%)}.bt .bt-workout:not(:has(>.bt-camera-pane>.bt-panel)){grid-template-columns:minmax(0,40%) minmax(0,60%)}}
 @media(max-height:550px) and (orientation:landscape){
- .bt .bt-battle-series:has(.bt-camera-pane:not(:has(>.bt-panel))),.bt .bt-workout:has(.bt-camera-pane:not(:has(>.bt-panel))){grid-template-columns:minmax(0,28%) minmax(0,72%)}
+ .bt .bt-battle-series:not(:has(>.bt-camera-pane>.bt-panel)),.bt .bt-workout:not(:has(>.bt-camera-pane>.bt-panel)){grid-template-columns:minmax(0,28%) minmax(0,72%)}
  .bt .bt-camera-pane:not(:has(>.bt-panel)){padding:5px;gap:3px}
  .bt .bt-camera-pane:not(:has(>.bt-panel))>.bt-series-controls{gap:3px;width:63%;height:44px}
  .bt .bt-camera-pane:not(:has(>.bt-panel))>.bt-series-controls button{font-size:11px;min-height:44px}
@@ -109,9 +109,26 @@
  .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-start-position>summary>strong{font-size:9px!important;margin-top:1px}
  .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-actions>button{font-size:10px;padding:3px!important;min-height:44px!important}
  .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-camera-settings>summary,.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-model-options>summary{font-size:9px!important;padding:3px!important}
- .bt .bt-battle-series:has(.bt-camera-pane:not(:has(>.bt-panel))) .bt-battle-dock{padding:7px;min-height:0}
- .bt .bt-battle-series:has(.bt-camera-pane:not(:has(>.bt-panel))) .bt-battle-dock h2{font-size:13px}
- .bt .bt-battle-series:has(.bt-camera-pane:not(:has(>.bt-panel))) .bt-battle-dock button{font-size:10px;min-height:44px;padding:4px 7px}
- .bt .bt-battle-series:has(.bt-camera-pane:not(:has(>.bt-panel))) .bt-health{width:115px}
+ .bt .bt-battle-series:not(:has(>.bt-camera-pane>.bt-panel)) .bt-battle-dock{padding:7px;min-height:0}
+ .bt .bt-battle-series:not(:has(>.bt-camera-pane>.bt-panel)) .bt-battle-dock h2{font-size:13px}
+ .bt .bt-battle-series:not(:has(>.bt-camera-pane>.bt-panel)) .bt-battle-dock button{font-size:10px;min-height:44px;padding:4px 7px}
+ .bt .bt-battle-series:not(:has(>.bt-camera-pane>.bt-panel)) .bt-health{width:115px}
 }
 @media(max-width:650px) and (orientation:portrait){.bt .bt-camera-pane:not(:has(>.bt-panel)){min-height:350px;overflow:auto}.bt .bt-camera-pane:not(:has(>.bt-panel))>.exercise-camera{min-height:300px}.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-hud{padding:6px!important;gap:5px}.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-counter>strong{font-size:40px!important}.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-counter-target{font-size:18px!important}.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-big-feedback>strong{font-size:14px!important}.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-big-feedback>p{font-size:10px!important}}
+
+/* Landscape uses one 44px control row so the complete coaching HUD stays in view. */
+@media(max-height:550px) and (orientation:landscape){
+ .bt .bt-camera-pane:not(:has(>.bt-panel))>.bt-technique{display:none}
+ .bt .bt-camera-pane:not(:has(>.bt-panel))>.exercise-camera{grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-rows:44px}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-feed{grid-column:1/5}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-hud{grid-column:5/8;justify-content:center}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-actions>button,
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-camera-settings,
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-model-options{grid-column:span 1;font-size:9px;min-height:44px!important}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-counter{align-items:center;min-height:36px!important}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-counter-target>small{margin-top:1px!important}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-hud-heading>small{font-size:8px!important}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-big-feedback>strong{font-size:13px!important;text-wrap:wrap}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-big-feedback>p{text-wrap:wrap}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-start-position>summary{min-height:0!important}
+}
