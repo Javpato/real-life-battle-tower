@@ -113,7 +113,9 @@ describe('custom workouts are not combat',()=>{
 });
 
 it('retains manual deduplication within long series even after operation receipt eviction',()=>{
- let s=initialSave('QA','male',true);s=send(s,{kind:'startWorkout',entries:[{skillId:'short-superman',target:400}]});
+ let s=initialSave('QA','male',true);s=send(s,{kind:'startWorkout',entries:[{skillId:'short-superman',target:30}]});
+ // An older long series remains deduplicated when its compact receipt list rotates.
+ activeSeries(s)!.target=400;
  const sessionId=activeSeries(s)!.id;
  for(let i=0;i<300;i++)s=send(s,{kind:'manualUnit',sessionId,operationId:`long-${i}`});
  expect(activeSeries(s)!.progress).toBe(300);expect(s.lastOperationIds).not.toContain('long-0');
