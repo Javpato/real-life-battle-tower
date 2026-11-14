@@ -1,3 +1,4 @@
+import { openJournal } from "./browser-controls.mjs";
 import { chromium } from "@playwright/test";
 const browser = await chromium.launch({
   headless: true,
@@ -7,12 +8,12 @@ const browser = await chromium.launch({
 const page = await browser.newPage({ viewport: { width: 1440, height: 1050 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
-await page.goto("http://127.0.0.1:5173");
+await page.goto(process.env.GAME_URL || "http://127.0.0.1:5173");
 await page.getByRole("button", { name: "Take the first step" }).click();
 await page.locator("canvas").waitFor();
 await page.waitForTimeout(1200);
 await page.screenshot({ path: "/tmp/everstride-world.png", fullPage: true });
-await page.getByRole("button", { name: "Open your journal" }).click();
+await openJournal(page);
 await page.getByRole("heading", { name: "A good day starts here." }).waitFor();
 await page.screenshot({ path: "/tmp/everstride-journal.png", fullPage: true });
 await page
@@ -30,7 +31,7 @@ await page.getByRole("button", { name: "Confirm food eaten" }).click();
 if (!(await page.getByText("QA lentil soup", { exact: true }).isVisible()))
   throw new Error("Food not recorded");
 await page.reload();
-await page.getByRole("button", { name: "Open your journal" }).click();
+await openJournal(page);
 if (!(await page.getByText("QA lentil soup", { exact: true }).isVisible()))
   throw new Error("Food did not persist");
 await page
