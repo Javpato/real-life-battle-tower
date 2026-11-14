@@ -132,6 +132,8 @@ try {
       key + " persists offline",
     );
   assert.equal(after.snapshot.journey.avatar, "female");
+  // Phaser entry fade starts after its canvas becomes visible.
+  await page.waitForTimeout(800);
   await page.screenshot({ path: "/tmp/everstride-overhaul-offline-world.png" });
   await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page
