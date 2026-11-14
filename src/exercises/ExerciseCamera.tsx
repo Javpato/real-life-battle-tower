@@ -121,6 +121,7 @@ export default function ExerciseCamera(props: Props) {
     setCountdown(3);
   };
   const beginCountdown = (manual = false) => {
+    setDemo(false);
     detector.current.pause();
     lifecycle.current?.invalidateFrames();
     countdownAt.current = null;

@@ -639,7 +639,7 @@
     font-size: 12px;
   }
   .immersive-game .exercise-hud {
-    grid-template-columns: 130px minmax(0, 1fr);
+    grid-template-columns: 156px minmax(0, 1fr);
     grid-template-rows: auto auto minmax(35px, 1fr) 4px auto;
     grid-template-areas: "counter heading" "counter side" "counter feedback" "progress progress" "posture posture";
     padding: 8px;
@@ -652,7 +652,7 @@
     font-size: 96px !important;
   }
   .immersive-game .exercise-counter-target {
-    font-size: 26px;
+    font-size: 24px;
   }
   .immersive-game .exercise-counter-target small {
     font-size: 8px;

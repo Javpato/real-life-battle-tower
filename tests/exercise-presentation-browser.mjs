@@ -40,8 +40,8 @@ try {
         exerciseId: "lunge",
         sessionId: "presentation",
         lastSide: "left",
-        target: 12,
-        progress: 3,
+        target: 20,
+        progress: 12,
         active: true,
         muted: true,
         mode: "camera",
@@ -61,7 +61,7 @@ try {
     await page.waitForTimeout(120);
     const camera = page.locator("#presentation-camera"),
       counter = camera.getByTestId("exercise-count");
-    await expect(counter).toHaveText("3");
+    await expect(counter).toHaveText("12");
     await expect(camera.getByText("RIGHT", { exact: true })).toBeVisible();
     const measurements = await page.evaluate(() => {
       const root = document.getElementById("presentation-camera"),
