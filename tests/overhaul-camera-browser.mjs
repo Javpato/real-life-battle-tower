@@ -148,14 +148,14 @@ try {
   } else checks.push("Map modal not implemented/visible; not claimed");
   await page.screenshot({ path: "/tmp/everstride-overhaul-room.png" });
   // Return through real UI before changing a test-only saved location.
-  const relocate = async (mapId, x, y) => {
+  const relocate = async (mapId, x, y, tutorialStage) => {
     await menu();
     await page
       .getByRole("button", { name: "Save & return to title", exact: true })
       .click();
     await expect(page.locator(".save-slot")).toHaveCount(3);
     await page.evaluate(
-      async ({ mapId, x, y }) => {
+      async ({ mapId, x, y, tutorialStage }) => {
         const db = await new Promise((resolve, reject) => {
           const r = indexedDB.open("everstride");
           r.onsuccess = () => resolve(r.result);
@@ -171,6 +171,7 @@ try {
             q.onsuccess = () => {
               const s = q.result;
               s.journey.location = { mapId, x, y, facing: "up" };
+              s.journey.tutorialStage = tutorialStage; // Explicit fixture, never a production skip.
               s.player.position = { x, y };
               store.put(s, `adventure:${id}`);
             };
@@ -180,7 +181,7 @@ try {
         });
         db.close();
       },
-      { mapId, x, y },
+      { mapId, x, y, tutorialStage },
     );
     await page.reload();
     await title();
@@ -190,13 +191,13 @@ try {
       .click();
     await expect(page.locator(".immersive-game")).toBeVisible();
   };
-  await relocate("general_store", 192, 150);
+  await relocate("general_store", 192, 150, 6);
   await page.getByRole("button", { name: "E · Jun", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "The little supply shop", exact: true }),
   ).toBeVisible();
   await close("Shop NPC");
-  await relocate("starter_town", 280, 320);
+  await relocate("starter_town", 280, 320, 1);
   await page.getByRole("button", { name: /E · Moss/ }).click();
   await page
     .getByRole("button", { name: "Practice with Moss", exact: true })
@@ -287,6 +288,7 @@ try {
       passed: true,
       checks,
       testLocationFixtures: ["general_store", "starter_town"],
+      testTutorialStageFixtures: [6, 1],
       syntheticPose: true,
       physicalExerciseValidation: false,
       errors,
