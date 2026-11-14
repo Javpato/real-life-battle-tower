@@ -25,6 +25,8 @@ import {
   Minimize2,
 } from "lucide-react";
 import World from "./game/World";
+import {CompanionControl} from "./companion";
+import ExerciseInput, {createPoseInput} from "./ui/ExerciseInput";
 import {GuidedTutorial, HelpGuide, getGuideSteps, type GuideScope, type GuideStep} from "./tutorial";
 import {RESIDENT_STORIES,residentText} from "./story/residents";
 import Introduction from "./opening/Introduction";
@@ -68,7 +70,7 @@ import { useAdventure } from "./services/useAdventure";
 import { useNutritionSync } from "./services/useNutritionSync";
 import NutritionSyncStatus from "./services/NutritionSyncStatus";
 import type { AdventureCommand } from "./core/commands";
-const ExerciseCamera = lazy(() => import("./exercises/ExerciseCamera"));
+
 const typeLabel = (t: Element | null) =>
   t ? { leg: "Leg", arm: "Arm", back: "Back" }[t] : "Neutral";
 const uid = () => crypto.randomUUID();
@@ -114,6 +116,9 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
   );
   const [autoTour,setAutoTour]=useState<{scope:GuideScope;index:number}|null>(null);
   const [cameraExpanded, setCameraExpanded] = useState(false);
+  const [phoneInput]=useState(createPoseInput);
+  const [cameraSource,setCameraSource]=useState<"webcam"|"phone">("webcam");
+  const [phonePanel,setPhonePanel]=useState(false);
   const [hitDamage, setHitDamage] = useState(0);
   const previousHp = useRef<{ id: string; hp: number } | null>(null);
   useEffect(() => {
@@ -419,6 +424,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
               : "Saved locally"}
           </span>
           <div className="game-hud-controls">
+            {(b||quest)&&<button className="arena-toggle" aria-label="Phone camera companion" onClick={()=>setPhonePanel(true)}>Phone camera</button>}
             {b && !(b.turn === "exercise" && camera) && (
               <button
                 className="arena-toggle"
@@ -578,7 +584,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                 <div className="world-frame">
                   <World
                     key={adventure.mode + ":" + (adventure.saveId ?? "local") + ":" + journey?.location.mapId}
-                    paused={!!panel || !!quest || welcome || helpOpen || adventure.locked}
+                    paused={!!panel || !!quest || welcome || helpOpen || phonePanel || adventure.locked}
                     badges={p.badges}
                     quests={p.quests}
                     defeated={p.defeated}
@@ -826,7 +832,9 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                   </div>
                 </div>
                 <Suspense fallback={<p>Preparing camera controls…</p>}>
-                  <ExerciseCamera
+                  <ExerciseInput
+                    input={phoneInput}
+                    source={cameraSource}
                     key={b.id}
                     sessionId={b.sessionId}
                     lastSide={b.side}
@@ -1614,6 +1622,13 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
           </section>
         </div>
       )}
+      <div className="modal-backdrop companion-modal" hidden={!phonePanel}>
+        <section className="modal" role="dialog" aria-modal="true" aria-label="Phone camera connection" onKeyDown={event=>{if(event.key==='Escape'){event.stopPropagation();setPhonePanel(false);}}}>
+          <button className="companion-close" aria-label="Close phone camera connection" onClick={()=>setPhonePanel(false)}>×</button>
+          <CompanionControl onFrame={phoneInput.update} onSourceChange={source=>{phoneInput.update(null);setCameraSource(source);if(source==='phone')void useCameraMode();}}/>
+          <button onClick={()=>setPhonePanel(false)}>Return to exercise</button>
+        </section>
+      </div>
       {quest && (
         <div className="modal-backdrop">
           <section className="modal exercise-quest-modal" role="dialog" aria-modal="true" aria-label="Village exercise challenge">
@@ -1643,7 +1658,9 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
             <details className="quest-camera-preview" open={camera}>
               <summary>{camera ? "Exercise camera and guide" : "Optional camera preview and exercise illustration"}</summary>
               <Suspense fallback={<p>Preparing camera controls…</p>}>
-                <ExerciseCamera
+                <ExerciseInput
+                    input={phoneInput}
+                    source={cameraSource}
                   key={quest.id}
                   sessionId={quest.id}
                   lastSide={quest.side}

@@ -141,7 +141,7 @@ try {
   } else
     checks.push("Exercise help control not visible in fullscreen; not claimed");
   await menu();
-  const map = page.getByRole("button", { name: /^(World map|Map)$/i });
+  const map = page.getByRole("button", { name: "World map", exact:true });
   if (await map.isVisible()) {
     await map.click();
     await close("Map");
@@ -282,6 +282,27 @@ try {
   checks.push(
     "Actual App camera screenshots at desktop and Android landscape sizes",
   );
+  await page.setViewportSize({width:1366,height:768});
+  await page.getByRole('button',{name:'Detection trouble? Continue remaining units manually'}).click();
+  await page.getByRole('button',{name:'I completed the remaining units',exact:true}).click();
+  await page.getByRole('button',{name:/Continue adventure/}).click();
+  await relocate('gym_arm',192,202,6);
+  await page.getByRole('button',{name:'E · Flint',exact:true}).click();
+  await page.getByLabel('Use camera verification').check();
+  await page.getByRole('button',{name:'Begin encounter',exact:true}).click();
+  await page.locator('.command-attack').click();await page.getByRole('button',{name:/Earthbound/}).click();
+  await page.getByRole('button',{name:'Detection trouble? Continue remaining units manually'}).click();
+  await page.getByRole('button',{name:'I completed the remaining units',exact:true}).click();
+  await expect(page.locator('.command-attack')).toBeVisible({timeout:10000});
+  await page.locator('.command-attack').click();await page.getByRole('button',{name:/Earthbound/}).click();
+  await expect(page.locator('.immersive-game')).toHaveClass(/input-manual/);
+  await page.getByRole('button',{name:'Camera controls',exact:true}).click();
+  await camera.getByRole('button',{name:/^(Enable|Restart) camera$/}).click();
+  await expect(page.locator('.immersive-game')).toHaveClass(/input-camera/);
+  await expect(camera).toHaveAttribute('data-exercise-stage','running',{timeout:20000});
+  expect((await page.locator('.adventure-sidebar').boundingBox()).width).toBeGreaterThan(1366*.5);
+  await page.screenshot({path:'/tmp/everstride-camera-restored-fullscreen.png'});
+  checks.push('Manual fallback → next turn → Enable camera resumes recognition and full-width HUD');
   assert.deepEqual(errors, []);
   console.log(
     JSON.stringify({

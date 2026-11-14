@@ -2273,3 +2273,5 @@
 
 
 .attack-card:focus-visible,.attack-card:hover:not(:disabled){outline:3px solid #ffe5a2;outline-offset:3px;box-shadow:0 0 25px #ffe69b75!important}
+
+.companion-modal[hidden]{display:none!important}.companion-modal{z-index:240}.companion-modal .modal{position:relative;max-width:700px}.companion-close{position:absolute;right:10px;top:10px;z-index:1;min-width:44px;min-height:44px}.companion-modal .companion-control{padding-top:55px}

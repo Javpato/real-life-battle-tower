@@ -118,6 +118,12 @@ try {
     "true",
   );
   await expect(card).toContainText("Enter the doorway");
+  for(const [width,height] of [[1366,768],[844,390],[390,844]]){
+    await page.setViewportSize({width,height});await expect(card).toHaveClass(/guided-door/);
+    await expect.poll(async()=>{const rect=await card.boundingBox();return rect.x+rect.width;}).toBeGreaterThan(width-24);
+    if(width<900){await expect(card).toHaveClass(/guided-door-mobile/);await page.getByRole('button',{name:'Minimize',exact:true}).click();await expect(card.locator('p')).toHaveCount(0);await page.getByRole('button',{name:'Show door tip'}).click();await expect(card.locator('p')).toHaveCount(1);}
+    await page.screenshot({path:`/tmp/everstride-door-guide-${width}.png`});
+  }
   await page.getByRole("button", { name: "End guide", exact: true }).click();
   await expect(page.locator(".guided-tutorial")).toHaveCount(0);
   expect(errors).toEqual([]);
