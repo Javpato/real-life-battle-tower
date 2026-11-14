@@ -19,7 +19,7 @@ Cropped squats require an explicit choice, an upright reference, visible shoulde
 
 Transport has at most one captured frame in flight. Responses exceeding 500 ms capture-to-result are delivered as tracking loss, never as old body coordinates. Request IDs prevent old replies consuming a new request. Inference time and capture-to-result time are measured separately and shown in model options; no benchmark is inferred from a single sample. Phone clocks/freshness are validated by the companion receiver and again by the exercise surface. Source changes stop local camera tracks and invalidate old movement evidence.
 
-Correction messages dwell for 800 ms within an unchanged presentation state. Loss, pause, errors, countdown and detector-state changes remain immediate. Speech and the HUD consume the same displayed instruction. Resume requires fresh calibration while canonical completed units and alternation remain intact.
+Nonurgent correction messages, including oscillating partial/ready/insufficient states, dwell for 800 ms. Loss, pause, errors, countdown and accepted-unit notifications remain immediate. Speech and the HUD consume the same displayed instruction. Resume requires fresh calibration while canonical completed units and alternation remain intact.
 
 ## Real labelled clip evaluation
 
@@ -34,3 +34,9 @@ node tests/evaluate-pose-clips.mjs /absolute/path/labelled-clips.json http://127
 The input is an array of `LabelledPoseClip` from `src/exercises/evaluation.ts`. Each clip contains `id`, `exerciseId`, sequential raw `frames` (`timestamp` milliseconds, `width`, `height`, 33 `landmarks` with x/y/visibility/presence), and independently annotated `expected` cycle-return events (`timestamp`, optional anatomical `side`). Use hold-second milestones for Superman. Optional `calibration` is an independently identified starting frame; `allowPartialSquat` records explicit estimate mode. `toleranceMs` defaults to 1000.
 
 The harness only replays local landmark data through the actual detector; it does not upload video or landmarks. It reports count error, unmatched detections, missed annotated events, side-aware matched events and timing offsets. Unmatched detections can include duplicate or mistimed counts and must be reviewed against the source clip. Label stationary/no-exercise, partial cycles, loss, switching sides and pauses separately; do not report only successful positive clips. Landmark replay does not benchmark image inference: record source model, inference timing, camera geometry and device alongside clips, and compare Lite/Full using independent landmark exports of the same footage.
+
+## Practical floor-exercise setup
+
+For this game's 2D joint-angle rules, use a low side or slightly diagonal view with the relevant shoulder, elbow and wrist visible for push-ups, and shoulder, hip and knee visible for bridges. A fixed laptop webcam on a high desk often hides these chains; changing confidence thresholds cannot recover genuinely occluded joints. Move an external webcam, or use the phone companion once its HTTPS signaling deployment is available. The positioning study above used MoveNet and found diagonal views useful in its particular sample; those results do not establish the best angle or accuracy for our MediaPipe implementation.
+
+Wall push-ups and chair rises are available from the start as easier camera setups; manual continuation always remains available. Users should not have to complete a floor exercise merely to progress through the tutorial. Camera calibration measures the visible movement reference, not height, identity, fitness, or medical form safety.

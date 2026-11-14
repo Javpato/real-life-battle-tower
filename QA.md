@@ -1,3 +1,112 @@
+# Camera recovery, earned skills and ordered world — November 14, 2026
+
+This acceptance record supersedes the older releases below. Implemented in coordinated isolated worktrees; existing detailed characters, battle art, saves and backend contracts preserved.
+
+## Delivered changes
+
+- Primary Enable/Restart camera now exits manual mode and restores the large camera HUD. Accepted units survive mode changes, pauses and repeated five-second recalibrations.
+- One Euro smoothing is shared by display and detection; raw visible evidence must also support counting. Isolated jumps, stale responses, missing joints and delayed phone packets cannot create credit. Nonurgent corrections have an800ms dwell. Capture-to-result/inference latency is measured; optional Full model is an explicit download, while Lite remains bundled.
+- Bridge observes shoulder/hip/knee without demanding hidden feet; chair rise and bridge retain calibrated body proportions. Cropped squat is an explicit estimated/unverified mode. Research, rationale, floor-camera guidance and a local labelled-clip evaluation harness are in [DETECTION_RESEARCH.md](docs/DETECTION_RESEARCH.md).
+- Only door guides move to the right-center on desktop and become compact/minimizable on phones. Other guide placement remains unchanged. Contextual tips automatically show on the first visit per save; Help can replay them. Mandatory onboarding remains mandatory.
+- Every map arrival clears queued input, permits movement and prevents re-entry for1000ms; held E/Enter/touch requires release and a new press.
+- Three existing exteriors reorganized: Willowmere960×832, Fernway640×960, Summit768×704. Connected streets, plaza, gym district, woods, loops and water use existing original art. All14 interiors retained; no replacement character or new map ID. Valid saved locations remain unchanged; invalid positions select a safe named spawn in the same map.
+- New games start with squat/chair-rise/wall-push-up. Moss, four resident quests and badges earn the remaining skills. Inventory shows unlock conditions, stable type/tier ordering and clear equipped borders/slot numbers. Legacy saves keep previously available/equipped/upgraded attacks.
+- Create admin test save uses an empty one of the normal three slots: all12 moves, level20, upgrades and badges; ordinary enemies remain available. No overwrite/fourth slot. It is explicitly test-only/local, excluded from cloud import/link, and removal uses the normal confirmation/recovery flow.
+- Phone companion: real QR, temporary single-use invite, explicit desktop challenge confirmation, isolated service-only signaling, direct WebRTC landmark stream and optional peer video. Pose updates rerender the camera only. Closing its drawer preserves connection; switching to webcam/disconnecting stops phone camera resources. [PHONE_COMPANION.md](docs/PHONE_COMPANION.md) documents setup and deployment prerequisites.
+
+## Executed verification
+
+- **286 tests across30 files**, TypeScript/production build, shared core parity and companion protocol parity passed.
+- Embedded PostgreSQL: complete earned-skill campaign, RLS, ownership, receipts/wallet/leases, three independent cloud slots and fourth-slot rejection; separate companion service-only permissions, CAS, expiry and rate limits passed. This is not hosted Supabase acceptance.
+- Actual App camera regression passed first-click Settings/inventory/map/shop/demo closes, synthetic valid rep, two5-second recalibrations preserving progress,1920/1366/844 layouts, and manual fallback → next turn → Enable camera → large active HUD. Synthetic pose signals are explicitly labelled.
+- Real bundled Lite worker browser smoke passed denial/retry, stop/restart, facing change, permission/device races, mode recovery and no-body zero credit. Optional Full download/cache controls were tested with synthetic transport; real Full inference/performance is not claimed.
+- Real IndexedDB migration/recovery/concurrent claims, adventure/journal isolation, linked offline cache, pending-delete guards and reload passed. UI admin creation/deletion, three starter attacks, nine locked attacks, first-visit tips and actual bedroom desktop/mobile door guides passed.
+- All14 interior round trips, interactable details/close, rejected-door recovery, held-key/touch arrival guards and8px reachability sampling across all17 maps passed.
+- A fresh real-play save completed tutorial, all three gyms, earned purchases, route, Rowan and reload with exact coins/XP,3badges and ending. The same legitimate save was resumed after a development reload and runner-only arrival-wait fixes. No progression was injected; final browser errors empty.
+- Two actual Chrome processes passed direct companion transport and integrated QR/confirm/preview/close/fallback UI with mock signaling and fake camera. Stop packets fence queued poses; server traffic contains no image/pose payload.
+- Final production offline shell **2453275b2f5230c8**: UI-created female save, movement, offline restart/continue, persisted avatar/location/intro/tutorial and journal access passed with zero browser errors.
+- Android debug APK rebuilt from final dist:30 web files byte-identical, v2 signature verified,45,945,182bytes. SHA256 `bf4e1e37c04f130cc101e25308b2faf48998253f3c7a69e14a381f91a4dd63eb`. Evidence: `releases/android-build-evidence.json`.
+
+## Visual evidence and remaining validation
+
+Actual runtime screenshots in `releases/screenshots/`: `ordered-town-plaza-1366.png`, `ordered-route-grove-1366.png`, `ordered-summit-square-1366.png`, `door-tip-desktop-game.png`, `door-tip-mobile-game.png`, `earned-moves-new.png`, `admin-slot.png`, `normal-battle-1920.png`, `normal-battle-1366.png`, `normal-battle-844.png`, `camera-restored-fullscreen.png`, `phone-pair-1366.png`, and `campaign-victory.png`. Map placement screenshots use labelled location fixtures; camera images use synthetic input; phone QR uses mock signaling. Campaign/door-guide/progression screenshots are actual UI play.
+
+Physical exercise precision/recall across heights, clothes, light and camera angles remains unmeasured. Real phone Wi-Fi sessions, Android installation/sensors/thermal behavior and Full-model benchmarks remain unvalidated. No accuracy percentage is asserted. Hosted phone pairing needs the new migration/Edge Function and accessible HTTPS; existing hosted save acceptance still needs owner-side Auth/CLI setup. No new public publication is performed or claimed.
+
+## Changed file manifest
+
+- `docs/DETECTION_RESEARCH.md`
+- `docs/PHONE_COMPANION.md`
+- `package-lock.json`
+- `package.json`
+- `scripts/sync-companion.mjs`
+- `src/App.tsx`
+- `src/companion/CompanionControl.tsx`
+- `src/companion/PhoneCompanionScreen.tsx`
+- `src/companion/companion.css`
+- `src/companion/companion.test.ts`
+- `src/companion/frames.ts`
+- `src/companion/index.ts`
+- `src/companion/peer.ts`
+- `src/companion/protocol.ts`
+- `src/companion/transport.ts`
+- `src/core/commands.ts`
+- `src/core/game.ts`
+- `src/core/importSave.ts`
+- `src/core/worldMaps.ts`
+- `src/exercises/ExerciseCamera.tsx`
+- `src/exercises/ExerciseDemo.tsx`
+- `src/exercises/cameraLifecycle.ts`
+- `src/exercises/detectors.ts`
+- `src/exercises/evaluation.ts`
+- `src/exercises/exercises.css`
+- `src/exercises/feedbackDwell.ts`
+- `src/exercises/pose.worker.ts`
+- `src/exercises/poseFilter.ts`
+- `src/game/World.tsx`
+- `src/game/art.ts`
+- `src/game/portalInteraction.test.ts`
+- `src/game/portalInteraction.ts`
+- `src/main.tsx`
+- `src/opening/GameShell.tsx`
+- `src/services/saveSlots.test.ts`
+- `src/services/saveSlots.ts`
+- `src/tutorial/GuidedTutorial.tsx`
+- `src/tutorial/tutorial.css`
+- `src/ui/BattleCommandMenu.tsx`
+- `src/ui/ExerciseInput.tsx`
+- `src/ui/immersive.css`
+- `supabase/config.toml`
+- `supabase/functions/_shared/commands.ts`
+- `supabase/functions/_shared/game.ts`
+- `supabase/functions/_shared/importSave.ts`
+- `supabase/functions/_shared/worldMaps.ts`
+- `supabase/functions/camera-pair/index.ts`
+- `supabase/functions/camera-pair/protocol.ts`
+- `supabase/migrations/202611140006_camera_pair.sql`
+- `supabase/tests/camera-pair.mjs`
+- `supabase/tests/platform.mjs`
+- `tests/camera-browser-smoke.mjs`
+- `tests/camera-lifecycle.test.ts`
+- `tests/camera-sources-browser.mjs`
+- `tests/companion-browser.mjs`
+- `tests/companion-ui-browser.mjs`
+- `tests/detection-refresh.test.ts`
+- `tests/evaluate-pose-clips.mjs`
+- `tests/exercises-combat.test.ts`
+- `tests/exercises-home.test.ts`
+- `tests/fixtures/camera.tsx`
+- `tests/move-progression.test.ts`
+- `tests/overhaul-camera-browser.mjs`
+- `tests/overhaul-world-browser.mjs`
+- `tests/progression-browser.mjs`
+- `tests/tutorial-overlay-browser.mjs`
+- `tests/world-doors-browser.mjs`
+- `tests/world-layout-browser.mjs`
+- `tests/world-maps.test.ts`
+
+---
+
 # Guided adventure and inhabited interiors — November 14, 2026
 
 This latest section supersedes the older walkthrough below.

@@ -1,3 +1,11 @@
+# Current acceptance: camera recovery, progression and ordered maps
+
+Implemented and integrated with parallel isolated worktrees. Root: App, moves/admin, one-time guides, integration and actual-App tests. Camera agent: filtering/calibration/freshness/model options/research. World agent: connected geography, safe arrivals and full campaign. Companion/platform agent: private phone signaling/WebRTC, SQL/browser tests and matching APK.
+
+Final automated evidence:286 tests, final production/offline build,14 interior round trips, actual manual→camera recovery, complete earned campaign through Rowan/reload, direct two-browser companion simulation and matching signed debug APK. See the first section of QA.md for exact boundaries. Physical exercise/phone/native validation and hosted deployment remain pending; no new public publication.
+
+---
+
 # Current follow-up: inhabited world and guided onboarding
 
 Root integrates App, canonical onboarding commands, resident dialogue and regression testing. World agent owns door acknowledgements, crisp labels, room furniture/collisions and visual traversal. Tutorial agent owns measured overlay/help/catalog and accessibility tests. Journal agent owns fieldbook UI, its forms and native package after final build. Isolated worktrees; main updated only after acceptance. Public deployment remains pending authorization.
