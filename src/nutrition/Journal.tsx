@@ -1419,7 +1419,7 @@ export default function Journal({
                         ? "Food name"
                         : `${k === "kcal" ? "Energy (kcal)" : k + " (g)"} per 100 g`}
                       <input
-                        aria-label={k === "name" ? "Food name" : `${k} per 100 g`}
+                        aria-label={k === "name" ? "Food name" : `${k === "kcal" ? "Energy (kcal)" : k + " (g)"} per 100 g`}
                         type={k === "name" ? "text" : "number"}
                         min="0"
                         step="any"

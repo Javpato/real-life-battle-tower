@@ -33,15 +33,13 @@ await page.getByLabel("fat (g) per 100 g").fill("3");
 await page.getByRole("button", { name: "Review portion" }).click();
 await page.getByLabel("Quantity (g)").fill("200");
 await page.getByRole("button", { name: "Confirm food eaten" }).click();
-if (!(await page.getByText("QA lentil soup", { exact: true }).isVisible()))
-  throw new Error("Food not recorded");
+await page.getByText("QA lentil soup", { exact: true }).waitFor({state:"visible"});
 await page.reload();
 await page.waitForTimeout(3200);
 await page.keyboard.press('x');
 await page.getByRole('button',{name:'Continue',exact:false}).first().click();
 await openJournal(page);
-if (!(await page.getByText("QA lentil soup", { exact: true }).isVisible()))
-  throw new Error("Food did not persist");
+await page.getByText("QA lentil soup", { exact: true }).waitFor({state:"visible"});
 await page
   .getByRole("button", { name: "Profile", exact: true })
   .first()

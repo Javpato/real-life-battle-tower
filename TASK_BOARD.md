@@ -1,3 +1,7 @@
+# Current follow-up: inhabited world and guided onboarding
+
+Root integrates App, canonical onboarding commands, resident dialogue and regression testing. World agent owns door acknowledgements, crisp labels, room furniture/collisions and visual traversal. Tutorial agent owns measured overlay/help/catalog and accessibility tests. Journal agent owns fieldbook UI, its forms and native package after final build. Isolated worktrees; main updated only after acceptance. Public deployment remains pending authorization.
+
 # Task board
 
 | Task | Agent | Branch | Dependencies | Status | Evidence / remaining limits |

@@ -25,8 +25,10 @@ import {
   Minimize2,
 } from "lucide-react";
 import World from "./game/World";
+import {GuidedTutorial, HelpGuide, getGuideSteps, type GuideScope, type GuideStep} from "./tutorial";
+import {RESIDENT_STORIES,residentText} from "./story/residents";
 import Introduction from "./opening/Introduction";
-import { WORLD_MAPS } from "./core/worldMaps";
+import { WORLD_MAPS, ROOM_DETAILS } from "./core/worldMaps";
 import { readSlotNutrition, writeSlotNutrition } from "./services/saveSlots";
 import BattleCommandMenu from "./ui/BattleCommandMenu";
 import BattleSprite, { ItemSprite } from "./game/BattleSprite";
@@ -88,6 +90,10 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
   const adventure = useAdventure(localSaveId);
   const journey=adventure.snapshot.journey;
   const heroId=journey?.avatar === "female" ? "hero-female" : "hero";
+  const [helpOpen,setHelpOpen]=useState(false);
+  const [tourScope,setTourScope]=useState<GuideScope|null>(null),[tourIndex,setTourIndex]=useState(0);
+  const [journalTab,setJournalTab]=useState("Today");
+  const [resident,setResident]=useState<string|null>(null),[detail,setDetail]=useState<{title:string;text:string}|null>(null);
   const [replayIntro,setReplayIntro]=useState(false);
   const { player: p, battle: b, quest } = adventure.snapshot;
   const ready = adventure.ready;
@@ -142,9 +148,18 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
   );
   const diary = cloudDiary ? nutritionCloud.state : n;
   const diaryReady = cloudDiary ? nutritionCloud.ready : nutritionReady;
+  const localDiaryWrites=useRef<Promise<void>>(Promise.resolve());
+  const [localDiaryPending,setLocalDiaryPending]=useState(0),[journalReadAttempt,retryJournalRead]=useState(0);
   const updateDiary = (next: NutritionState) => {
-    if (cloudDiary) nutritionCloud.update(next);
-    else N(next);
+    if (cloudDiary) { nutritionCloud.update(next); return; }
+    const snapshot=structuredClone(next),scope=localSaveId;
+    setLocalDiaryPending(count=>count+1);
+    // Show new records only after the atomic IndexedDB write has committed.
+    // Hydrating a save must never write an empty/default journal over that save.
+    localDiaryWrites.current=localDiaryWrites.current.catch(()=>{}).then(async()=>{
+      await (scope?writeSlotNutrition(scope,snapshot):writeSave('nutrition',snapshot));
+      N(snapshot);SE('');
+    }).catch(()=>SE('The journal could not be saved. Please retry this change.')).finally(()=>setLocalDiaryPending(count=>count-1));
   };
   const saveError = adventure.error || journalError;
   const [pauseRequested, PR] = useState(false);
@@ -183,22 +198,12 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
   }, [muted, b?.enemy.id, b?.turn === "won"]);
   useEffect(() => () => stopMusic(), []);
   useEffect(() => {
-    void (localSaveId ? readSlotNutrition<NutritionState>(localSaveId) : readSave<NutritionState>("nutrition"))
-      .then((saved) => {
-        if (saved) N(saved);
-        NR(true);
-      })
-      .catch(() => {
-        SE("Could not open the local journal.");
-        NR(true);
-      });
-  }, []);
-  useEffect(() => {
-    if (nutritionReady)
-      void (localSaveId ? writeSlotNutrition(localSaveId,n) : writeSave("nutrition", n)).catch(() =>
-        SE("Could not save the local journal."),
-      );
-  }, [n, nutritionReady]);
+    let alive=true;NR(false);
+    void (localSaveId ? readSlotNutrition<NutritionState>(localSaveId) : readSave<NutritionState>('nutrition'))
+      .then(saved=>{if(alive){N(saved??defaultNutrition());NR(true);}})
+      .catch(()=>{if(alive){SE('Could not open the local journal. Your saved records have not been changed.');NR(false);}});
+    return ()=>{alive=false;};
+  }, [localSaveId,journalReadAttempt]);
 
   useEffect(() => {
     if (!toast) return;
@@ -231,8 +236,9 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
   }
   function interact(id: string) {
     if (b || panel || quest || adventure.locked) return;
-    if(id === "trainer-1" && (journey?.tutorialStage??6)<4){void dispatch({kind:"setTutorial",stage:2}); V("tutorial");return;}
-    if((journey?.tutorialStage??6)<6 && id!=='healer'){notify('Meet Moss outside your home to finish your training first.');return;}
+    setResident(id);
+    if(id === "trainer-1" && (journey?.tutorialStage??6)<4){void dispatch({kind:"guideEvent",event:"talk"}); if((journey?.tutorialStage??0)===1)void dispatch({kind:"setTutorial",stage:2}); V("tutorial");return;}
+    if((journey?.tutorialStage??6)<6 && (id.startsWith('trainer')||id.startsWith('leader')||id.startsWith('quest')||id==='rival')){V('resident');return;}
     if (id.startsWith("trainer") || id.startsWith("leader") || id === "rival") {
       if (id === "rival" && p.badges.length < 3) {
         notify(
@@ -245,7 +251,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
       V("preview");
     } else if (id.startsWith("quest")) {
       const exercise = id.slice(6) as ExerciseId;
-      void dispatch({ kind: "startQuest", exercise });
+      void exercise; V("resident");
     } else if (id === "healer") {
       V("healer");
     } else V(id);
@@ -309,6 +315,24 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
   useEffect(()=>{if(journey?.location.mapId==='starter_town'&&journey.tutorialStage===0)void adventure.send({kind:'setTutorial',stage:1})},[journey?.location.mapId,journey?.tutorialStage]);
   const previousPanel=useRef<string|null>(null),returnFocus=useRef<HTMLElement|null>(null);
   useEffect(()=>{if(panel&&!previousPanel.current)returnFocus.current=document.activeElement as HTMLElement;if(!panel&&previousPanel.current){requestAnimationFrame(()=>returnFocus.current?.focus())}previousPanel.current=panel},[panel]);
+  function openHelp(){if(b)void dispatch({kind:"pause",paused:true});setHelpOpen(true);}
+  const recordedGuidePanel=useRef<string|null>(null);
+  useEffect(()=>{if(!ready)return;const previous=recordedGuidePanel.current;recordedGuidePanel.current=panel;if(['inventory','map','journal'].includes(panel??'')&&!journey?.guide?.completed.includes(panel!))void dispatch({kind:'guideEvent',event:panel!});if(previous&&!panel&&!journey?.guide?.completed.includes('close'))void dispatch({kind:'guideEvent',event:'close'});},[panel,ready]);
+  const guideDone=(id:string)=>Boolean(journey?.guide?.completed.includes(id));
+  const scope:GuideScope|null=panel==='journal'?({Today:'journal-today',Food:'journal-food',Activity:'journal-activity',Progress:'journal-progress',Profile:'journal-settings'} as Record<string,GuideScope>)[journalTab]??'journal-today':panel==='menu'?'settings':['inventory','map','shop','alchemy','devices'].includes(panel??'')?panel as GuideScope:quest?'quest':b?(b.turn==='exercise'?'camera':'battle'):null;
+  const contextual=scope?getGuideSteps(scope).find(step=>!journey?.guide?.seen.includes(step.id)):undefined;
+  let mandatory:GuideStep|undefined;
+  if(journey && journey.tutorialStage<6 && !b && !quest){
+    if(panel==='tutorial')mandatory=!guideDone('close')?{id:'close',target:'modal-close',title:'Try closing a window',body:'Press the highlighted X once. Then speak to Moss again to begin your practice.'}:{id:'practice',target:'tutorial-practice',title:'Your first friendly match',body:'Choose Attack, then three squats or three chair rises. Camera and manual mode are both available.'};
+    else if(!panel){
+      if(journey.tutorialStage===0)mandatory=!guideDone('move')?{id:'move',target:'world-move',title:'Take a few steps',body:'Use WASD or arrow keys. On a touchscreen, hold a direction on the pad. Walk a short distance.'}:!guideDone('turn')?{id:'turn',target:'world-move',title:'Try another direction',body:'Turn left or right and walk a few more steps. You control the pace.'}:{id:'door',target:'world-door',title:'Find the door',body:'Walk to the lower doorway, then continue through your home to the front door. Press E or the interaction button near a doorway.'};
+      else if(journey.tutorialStage<4)mandatory={id:'talk',target:'world-interact',title:'Meet Moss outside your home',body:'Follow the path to Moss, beside your home. Approach him, then press E or tap the interaction button.'};
+      else if(journey.tutorialStage===5){const missing=['inventory','map','journal'].find(id=>!guideDone(id));if(missing)mandatory={id:missing,target:missing==='inventory'?'open-inventory':missing==='map'?'open-map':'open-journal',title:missing==='inventory'?'Open your satchel':missing==='map'?'Find your next destination':'Open your field journal',body:missing==='inventory'?'Open the highlighted button to see skills and supplies, then close it.':missing==='map'?'Open the map to locate the three gyms and the trail, then close it.':'Open the diary to see where food and movement are recorded. You do not need to enter any personal data.'};}
+    }
+  }
+  if(b?.enemy.id==='tutorial-moss' && !panel){mandatory=b.turn==='player'?{id:'attack',target:'battle-actions',title:'Choose your first move',body:'Press Attack, then choose Squat or Root Rise. Both are a short practice of three movements. Uncheck Camera here if you prefer manual play.'}:b.turn==='exercise'?{id:'practice-movement',target:camera?'camera-setup':'manual-confirm',title:camera?'Prepare, then move at your pace':'Manual practice',body:camera?'Follow the starting-position guide. Each accepted movement deals damage. Rest pauses the series; Recalibrate gives you five seconds to move back into place. You can switch to manual continuation below.':'Try three comfortable movements. Press the highlighted confirmation when finished. Manual completion is recorded as unverified, and the reward is the same.'}:b.turn==='won'?{id:'reward',target:'battle-finish',title:'Your first victory',body:'These are your earned XP and coins. Continue to discover your skills, the map and your journal.'}:undefined;}
+  const activeGuide=helpOpen?null:tourScope?getGuideSteps(tourScope)[tourIndex]:mandatory??contextual??null;
+  const tutorialOverlay=<><GuidedTutorial step={activeGuide} onAcknowledge={id=>{if(tourScope){if(tourIndex+1<getGuideSteps(tourScope).length)setTourIndex(tourIndex+1);else setTourScope(null);}else void dispatch({kind:'guideSeen',id})}} onHelp={()=>openHelp()}/>{helpOpen&&<HelpGuide scope={scope??'settings'} onClose={()=>setHelpOpen(false)} onStartGuide={next=>{setTourScope(next);setTourIndex(0);setHelpOpen(false);}}/>}</>;
   if(ready && journey && (!journey.introComplete || replayIntro))return <Introduction name={p.name} avatar={journey.avatar} onDone={()=>{setReplayIntro(false);if(!journey.introComplete)void dispatch({kind:'completeIntro'})}}/>;
   if (!ready)
     return (
@@ -321,19 +345,21 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
   if (panel === "journal")
     return (
       <>
-        {cloudDiary && <NutritionSyncStatus sync={nutritionCloud} />}
+        {tutorialOverlay}<button className="journal-guide-help" onClick={()=>openHelp()}>Help · Where is this button?</button>
         {diaryReady ? (
           <Journal
             state={diary}
+            syncPanel={cloudDiary?<NutritionSyncStatus sync={nutritionCloud}/>:<p role="status">{journalError||(localDiaryPending?"Saving journal…":"Journal saved on this device")}</p>}
             onChange={updateDiary}
             storageScope={cloudDiary ? "cloud" : "local"}
             onDeleteJournal={cloudDiary ? nutritionCloud.deleteAll : undefined}
             onClose={() => V(null)}
             onDiscover={discover}
+            onGuideEvent={event=>{if(event.startsWith("journal:tab:"))setJournalTab(event.slice(12));}}
           />
         ) : (
           <section className="loading">
-            <h1>Opening your journal…</h1>
+            <h1>{journalError?"Journal unavailable":"Opening your journal…"}</h1>{journalError&&<><p>{journalError}</p><button onClick={()=>retryJournalRead(value=>value+1)}>Retry opening journal</button></>}
             <p>
               {cloudDiary
                 ? nutritionCloud.status
@@ -355,7 +381,8 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
         }
       }}
     >
-      <header className="game-header" inert={Boolean(panel || welcome || quest)}>
+      {tutorialOverlay}
+      <header className="game-header" inert={Boolean(panel || welcome || quest || helpOpen)}>
         <button className="brand" onClick={() => V(null)}>
           <span className="brand-mark">✦</span>
           <span>
@@ -363,7 +390,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
           </span>
         </button>
         <nav>
-          <button
+          <button data-guide="open-journal"
             onClick={() => {
               if (b) void dispatch({ kind: "pause", paused: true });
               V("journal");
@@ -398,7 +425,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
               </button>
             )}
             <button
-              className="icon-button fullscreen-toggle"
+              data-guide="fullscreen" className="icon-button fullscreen-toggle"
               onClick={() => void toggleFullscreen()}
               aria-label={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
               title={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
@@ -409,7 +436,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
           <button
             className="icon-button"
             onClick={() => MU(!muted)}
-            aria-label="Toggle sound"
+            data-guide="sound" aria-label="Toggle sound"
           >
             {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
           </button>
@@ -419,7 +446,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
               if (b) void dispatch({ kind: "pause", paused: true });
               V("menu");
             }}
-            aria-label="Settings"
+            data-guide="open-settings" aria-label="Settings"
           >
             <Settings size={18} />
           </button>
@@ -448,7 +475,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
           </div>
         )}
       <main
-        inert={Boolean(panel || welcome || quest)}
+        inert={Boolean(panel || welcome || quest || helpOpen)}
         className={
           "game-main" + (b?.turn === "exercise" ? " exercise-session" : "")
         }
@@ -546,18 +573,20 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                 <div className="world-frame">
                   <World
                     key={adventure.mode + ":" + (adventure.saveId ?? "local") + ":" + journey?.location.mapId}
-                    paused={!!panel || !!quest || welcome || adventure.locked}
+                    paused={!!panel || !!quest || welcome || helpOpen || adventure.locked}
                     badges={p.badges}
                     quests={p.quests}
                     defeated={p.defeated}
                     position={journey?.location ?? p.position}
                     mapId={journey?.location.mapId}
                     avatar={journey?.avatar}
+                    tutorialStage={journey?.tutorialStage}
                     facing={journey?.location.facing}
-                    onTransition={(portalId)=>{const to=WORLD_MAPS[journey?.location.mapId??'starter_town']?.portals.find(p=>p.id===portalId)?.to;if((journey?.tutorialStage??6)<6&&to&&!['starter_house_bedroom','starter_house','starter_town','rest_house'].includes(to)){notify('Finish your first training with Moss before exploring further.');return;}void dispatch({kind:'portal',portalId})}}
+                    onTransition={async(portalId)=>{const to=WORLD_MAPS[journey?.location.mapId??'starter_town']?.portals.find(p=>p.id===portalId)?.to;if((journey?.tutorialStage??6)<6&&to&&['training_route','rival_town','rival_arena'].includes(to)){notify('Finish your first training with Moss before exploring the trail.');return false;}return dispatch({kind:'portal',portalId})}}
                     onPosition={(position)=>{if(!adventure.locked&&!quest&&!b&&!panel)void dispatch({kind:'location',mapId:journey?.location.mapId??'starter_town',x:position.x,y:position.y,facing:position.facing??'down'})}}
                     onMove={(position)=>{if(!adventure.locked&&!quest&&!b&&!panel)void dispatch({kind:'location',mapId:journey?.location.mapId??'starter_town',x:position.x,y:position.y,facing:position.facing??'down'})}}
                     onInteract={interact}
+                    onInspect={(id)=>{const object=ROOM_DETAILS[id];if(object){setDetail({title:object.title,text:object.text});V("detail");}}}
                   />
                   <div className="world-caption">
                     <span>✦</span>
@@ -687,7 +716,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                             ? `+${b.enemy.xp} XP · +${b.enemy.coins} coins`
                             : "Return to the Rest House. Your progress is kept."}
                         </p>
-                        <button className="primary" onClick={finishBattle}>
+                        <button data-guide="battle-finish" className="primary" onClick={finishBattle}>
                           Continue adventure <ChevronRight size={18} />
                         </button>
                       </div>
@@ -958,7 +987,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
               <button
                 className="primary"
                 disabled={b.paused || adventure.locked}
-                onClick={manualSeries}
+                data-guide="manual-confirm" onClick={manualSeries}
               >
                 <Check size={18} />I completed the remaining units
               </button>
@@ -984,8 +1013,8 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
             )}
           </section>
         )}
-        <div className="quick-actions">
-          <button onClick={() => V("inventory")}>
+        <div className="quick-actions"><button data-guide="open-map" onClick={()=>V("map")}><Map size={18}/> Map</button><button onClick={()=>openHelp()}>Help</button>
+          <button data-guide="open-inventory" onClick={() => V("inventory")}>
             <Backpack size={18} />
             Satchel & skills
           </button>
@@ -1065,7 +1094,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
           </div>
         </section>
       )}
-      {!b && !panel && !quest && journey && journey.tutorialStage<6 && <aside className="tutorial-ribbon"><strong>{journey.tutorialStage===0?(journey.location.mapId==='starter_house_bedroom'?'WASD / ARROWS TO MOVE · FIND THE DOOR':'WALK TO THE FRONT DOOR'):journey.tutorialStage===1?'MEET MOSS OUTSIDE · PRESS E TO TALK':journey.tutorialStage<4?'TALK TO MOSS FOR YOUR FIRST BATTLE':journey.tutorialStage===4?'WELL DONE! YOU EARNED XP AND COINS':'THREE GYMS. THREE BADGES. YOUR OWN PATH.'}</strong>{journey.tutorialStage===4&&<p>Use coins at Jun’s shop to buy supplies and improve skills.</p>}{journey.tutorialStage===5&&<p>Visit Terra, Flint and Zephyr. Explore Fernway Trail, then meet Rowan at Summit Hollow.</p>}{journey.tutorialStage>=4&&<button onClick={()=>void dispatch({kind:'setTutorial',stage:journey.tutorialStage+1})}>Continue</button>}</aside>}
+      {!b && !panel && !quest && journey && journey.tutorialStage>=4 && journey.tutorialStage<6 && !mandatory && <aside className="tutorial-ribbon"><strong>{journey.tutorialStage===0?(journey.location.mapId==='starter_house_bedroom'?'WASD / ARROWS TO MOVE · FIND THE DOOR':'WALK TO THE FRONT DOOR'):journey.tutorialStage===1?'MEET MOSS OUTSIDE · PRESS E TO TALK':journey.tutorialStage<4?'TALK TO MOSS FOR YOUR FIRST BATTLE':journey.tutorialStage===4?'WELL DONE! YOU EARNED XP AND COINS':'THREE GYMS. THREE BADGES. YOUR OWN PATH.'}</strong>{journey.tutorialStage===4&&<p>Use coins at Jun’s shop to buy supplies and improve skills.</p>}{journey.tutorialStage===5&&<p>Visit Terra, Flint and Zephyr. Explore Fernway Trail, then meet Rowan at Summit Hollow.</p>}{journey.tutorialStage>=4&&<button disabled={journey.tutorialStage===5&&!['move','turn','door','talk','close','inventory','map','journal'].every(guideDone)} onClick={()=>void dispatch({kind:'setTutorial',stage:journey.tutorialStage+1})}>Continue</button>}</aside>}
       {welcome && (
         <div className="modal-backdrop">
           <section className="modal welcome-modal">
@@ -1112,7 +1141,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
       )}
       {panel && panel !== "journal" && (
         <div className="modal-backdrop">
-          <section className="modal">
+          <section data-guide={panel==='menu'?'settings':panel??undefined} className="modal">
             <div className="card-title">
               <h2>
                 {panel === "exercises"
@@ -1133,7 +1162,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                                 ? "Your connected adventure"
                                 : "Make yourself at home"}
               </h2>
-              <button onClick={() => V(null)} aria-label="Close">
+              <button data-guide="modal-close" onClick={() => V(null)} aria-label="Close">
                 ✕
               </button>
             </div>
@@ -1142,7 +1171,9 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
               style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
             >
               {panel === 'map' && <section aria-label="Valley map"><svg viewBox="0 0 600 310" role="img" aria-label="Willowmere connected by Fernway Trail to Summit Hollow" style={{width:'100%',background:'#203c3b',borderRadius:8}}><path d="M95 220 Q200 290 295 165 T500 75" stroke="#d3b67a" strokeWidth="16" fill="none"/>{[[95,220,'Willowmere'],[295,165,'Fernway Trail'],[500,75,'Summit Hollow']].map(([x,y,name])=><g key={name}><rect x={Number(x)-30} y={Number(y)-30} width="60" height="50" fill="#eed5a0" stroke="#8a6142" strokeWidth="5"/><text x={x} y={Number(y)+45} textAnchor="middle" fill="#fff1ce" fontSize="17">{name}</text></g>)}</svg><p>You are in {WORLD_MAPS[journey?.location.mapId??'starter_town']?.name}. The three gyms are in Willowmere. Follow the southern trail to Summit Hollow; Rowan's arena requires all three badges.</p></section>}
-              {panel === 'tutorial'  && <><BattleSprite id="trainer-1" className="profile-portrait"/><h3>Moss · Your first steps</h3><p>Let's try a short practice battle. Choose Attack, then Squat. The guide will help you position your camera. Three complete movements are enough. You can also choose manual mode.</p><p>Every valid repetition deals damage immediately. Pause whenever you need a break.</p><button className="primary" onClick={async()=>{if(await dispatch({kind:'startTutorialBattle'}))V(null)}}>Practice with Moss</button></>}
+              {resident && RESIDENT_STORIES[resident] && ['resident','preview','shop','alchemy','healer'].includes(panel) && <section className="resident-story"><BattleSprite id={resident} className="profile-portrait"/><h3>{RESIDENT_STORIES[resident].name} · {RESIDENT_STORIES[resident].role}</h3><p>{residentText(resident,p)}</p>{panel==='resident'&&((journey?.tutorialStage??6)<6?<p>Moss is waiting near your home. Finish your first practice together, then come back for this challenge.</p>:<button className="primary" onClick={async()=>{if(resident.startsWith('quest-')&&await dispatch({kind:'startQuest',exercise:resident.slice(6) as ExerciseId}))V(null)}}>Begin training challenge</button>)}</section>}
+              {panel==='detail'&&detail&&<><h3>{detail.title}</h3><p>{detail.text}</p></>}
+              {panel === 'tutorial'  && <><BattleSprite id="trainer-1" className="profile-portrait"/><h3>Moss · Your first steps</h3><p>Let's try a short practice battle. Choose Attack, then Squat or Root Rise (chair sit-to-stand). The guide will help you position your camera. Three complete movements are enough. You can also choose manual mode.</p><p>Every valid repetition deals damage immediately. Pause whenever you need a break.</p><button data-guide="tutorial-practice" className="primary" disabled={!guideDone("close")} onClick={async()=>{if(await dispatch({kind:'startTutorialBattle'}))V(null)}}>Practice with Moss</button></>}
               {panel === "preview" && encounter && (
                 <>
                   <p>
@@ -1457,7 +1488,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                       </p>
                     </div>
                   </section>
-                  <div className="button-row"><button onClick={()=>V("map")}>World map</button><button onClick={()=>{V(null);setReplayIntro(true)}}>Replay introduction</button><button disabled={adventure.busy||adventure.pending>0||(adventure.mode==='cloud'&&(b?.turn==='exercise'||!!quest))} onClick={async()=>{try{if(b&&!b.paused){if(!await dispatch({kind:'pause',paused:true}))return;}if(adventure.mode==='cloud')await adventure.controller.release();onReturnToTitle?.()}catch(e){notify(String(e))}}}>Save & return to title</button></div>
+                  <div className="button-row"><button onClick={()=>openHelp()}>Help · Where is this button?</button><button onClick={()=>V("map")}>World map</button><button onClick={()=>{V(null);setReplayIntro(true)}}>Replay introduction</button><button disabled={localDiaryPending>0||adventure.busy||adventure.pending>0||(adventure.mode==='cloud'&&(b?.turn==='exercise'||!!quest))} onClick={async()=>{try{if(b&&!b.paused){if(!await dispatch({kind:'pause',paused:true}))return;}if(adventure.mode==='cloud')await adventure.controller.release();onReturnToTitle?.()}catch(e){notify(String(e))}}}>Save & return to title</button></div>
                   <div className="menu-badges">
                     {(["leg", "arm", "back"] as Element[]).map((type) => (
                       <span

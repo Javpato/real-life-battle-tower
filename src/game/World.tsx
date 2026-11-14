@@ -87,8 +87,8 @@ export default function World(props:ExtendedProps){
      const icon=this.add.image(resident.x,resident.y-46,'indicators',icons.indexOf(resident.icon)).setOrigin(.5).setDepth(resident.y+1);
      sprite.on('pointerdown',()=>{if(this.player&&Phaser.Math.Distance.Between(this.player.x,this.player.y,sprite.x,sprite.y)<48)void this.interact(this.residentTarget(resident,sprite));});
      this.residents.push({data:resident,sprite,icon,row:art.frame,baseScale});
-     if(['read','cook','rest'].includes(resident.activity)){
-      const g=this.add.graphics();g.fillStyle(resident.activity==='cook'?0x483f3e:0xe5d4a1);g.fillRect(-8,-14,16,9);g.lineStyle(1,0x725947);g.lineBetween(0,-14,0,-5);
+     if(['read','cook'].includes(resident.activity)){
+      const g=this.add.graphics();if(resident.activity==='cook'){g.fillStyle(0x765237);g.fillEllipse(0,-9,14,9);g.lineStyle(1,0xd6b36a);g.strokeEllipse(0,-12,14,4);g.lineStyle(2,0xd9c29a);g.lineBetween(3,-12,7,-20);}else{g.fillStyle(0xf0dfb1);g.fillPoints([{x:-9,y:-16},{x:0,y:-13},{x:9,y:-16},{x:9,y:-6},{x:0,y:-4},{x:-9,y:-6}],true);g.lineStyle(1,0x947d50);g.lineBetween(0,-13,0,-4);g.lineBetween(-7,-12,-2,-10);g.lineBetween(2,-10,7,-12);}
       const prop=this.add.container(resident.x,resident.y,[g]).setDepth(resident.y+2);
       if(resident.activity==='cook'){const steam=this.add.rectangle(0,-20,2,3,0xf2e5be,.5);prop.add(steam);this.tweens.add({targets:steam,y:-27,alpha:0,duration:1500,repeat:-1});}
      }

@@ -2259,3 +2259,9 @@
 .immersive-game .battle-transform .combat-sprite.enemy .sprite-art{animation:phase-glow 1s ease-in-out infinite;}
 .immersive-game .battle-victory .combat-sprite.hero .sprite-art{filter:drop-shadow(0 0 8px #f2d78b);}
 @media(prefers-reduced-motion:reduce){.immersive-game .combat-sprite .sprite-art{animation:none!important;}}
+
+/* Context is part of the RPG window, with readable type at native resolution. */
+.resident-story { line-height:1.7; padding:16px; margin-bottom:18px; border:1px solid #b99a60; background:#233f36; color:#fff1cd; border-radius:8px; }
+.resident-story .profile-portrait { float:left; width:76px; height:100px; margin-right:18px; }
+.resident-story::after { content:''; display:block; clear:both; }
+.journal-guide-help { position:fixed; z-index:220; bottom:12px; right:18px; border:1px solid #baa16e; border-radius:7px; background:#203f35; color:#fff1ce; padding:9px 13px; font:600 13px system-ui; }

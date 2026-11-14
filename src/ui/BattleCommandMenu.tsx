@@ -53,7 +53,7 @@ export default function BattleCommandMenu({
   );
   return (
     <div
-      className="rpg-command-menu"
+      data-guide="battle-actions" className="rpg-command-menu"
       onKeyDown={(event) => {
         if (
           !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(
@@ -98,13 +98,13 @@ export default function BattleCommandMenu({
       </div>
       {battleMenu === "attacks" ? (
         <div className="attack-grid">
-          {(b.enemy.id==='tutorial-moss'?['squat']:p.equipped).map((id) => {
+          {(b.enemy.id==='tutorial-moss'?['squat','sitstand']:p.equipped).map((id) => {
             const a = attackFor(id, p);
             const multiplier = effectiveness(a.type, b.enemy.phases[b.phase]);
             const sameType = stab(a.type, b.type ? [b.type] : []) > 1;
             return (
               <button
-                className={"attack-card " + a.type}
+                data-guide="battle-movement" className={"attack-card " + a.type}
                 key={id}
                 onClick={() =>
                   void dispatch({ kind: "beginAttack", attackId: a.id })
@@ -159,7 +159,7 @@ export default function BattleCommandMenu({
       ) : (
         <div className="rpg-action-grid">
           <button
-            className="command-attack"
+            data-guide="battle-attack" className="command-attack"
             onClick={() => setBattleMenu("attacks")}
           >
             <Swords size={24} />
@@ -198,7 +198,7 @@ export default function BattleCommandMenu({
         </div>
       )}
       <div className="battle-utilities">
-        <button onClick={() => void dispatch({ kind: "pause", paused: true })}>
+        <button data-guide="battle-pause" onClick={() => void dispatch({ kind: "pause", paused: true })}>
           <Pause size={15} />
           Pause
         </button>

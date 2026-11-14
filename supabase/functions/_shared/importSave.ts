@@ -16,5 +16,6 @@ export function validateLocalImport(value:unknown):AdventureSnapshot{
  for(const record of [p.items,p.upgrades,p.quests])if(!record||typeof record!=='object'||Object.keys(record).length>100||Object.entries(record).some(([k,n])=>k.length>100||!integer(n)))throw Error('INVALID_LOCAL_INVENTORY');
  if(Object.entries(p.upgrades).some(([id,n])=>!attacks.some(a=>a.id===id)||n>4))throw Error('INVALID_LOCAL_UPGRADE');
  if(s.journey&&(!['male','female'].includes(s.journey.avatar)||typeof s.journey.introComplete!=='boolean'||!integer(s.journey.tutorialStage,6)||!integer(s.journey.playSeconds,100000000)))throw Error('INVALID_LOCAL_JOURNEY');
+ if(s.journey?.guide&&(![1].includes(s.journey.guide.version)||!strings(s.journey.guide.completed,30)||!strings(s.journey.guide.seen,200)))throw Error('INVALID_LOCAL_GUIDE');
  return normalizeAdventure({player:p,battle:null,quest:null,journey:s.journey});
 }

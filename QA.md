@@ -1,3 +1,23 @@
+# Guided adventure and inhabited interiors — November 14, 2026
+
+This latest section supersedes the older walkthrough below.
+
+- World labels now use native-resolution DOM text independent of map zoom. Portal requests await acknowledgements, reject without a fade/freeze, and latch until the player leaves the threshold.
+- Fourteen interiors have individual furniture, shared collision geometry and inspectable room details. Existing residents have original contextual stories and retain their services/challenges. Houses and services open during onboarding; ordinary battles, quests and the trail still require Moss.
+- Mandatory guided actions cover walking/turning, doors, interaction, first-click close, a three-unit squat **or chair-rise** practice, rewards, inventory, map and journal. Optional camera/manual paths remain available. Per-save versioned checkpoints survive reload; completed legacy saves remain unlocked.
+- Nonblocking measured highlights and arrows point to real buttons. Fifteen contextual handbook sections teach first-use features, and can be replayed without rewards. Help pauses active play.
+- The whole nutrition journal uses the RPG fieldbook presentation, including forms, reports/settings and visible cloud synchronization controls. Nutrition calculations remain unchanged.
+
+Current acceptance: **255 tests in27 files**, TypeScript/production build and shared browser/Edge parity pass. The embedded PostgreSQL platform suite passes. Actual fresh UI play completed the mandatory tutorial, map/skill/journal visits, route and reload; a second run chose chair rises, beat all three leaders and Rowan across a persisted QA session, then reloaded the same rewards/ending with zero page errors. A test-only undefined NPC variable at the final arena was fixed and the saved session resumed; no campaign progress was injected.
+
+`world-doors-browser.mjs` uses explicitly labelled fixtures: all14 room entrances/exits, detail interaction, first-click close and rejected route recovery passed. Mobile labels were checked clear of the HUD. `tutorial-overlay-browser.mjs` and seven geometry tests verify real target clicks, movement passthrough, missing-target fallback, resizing, reduced motion, focus and replay. Journal browser fixtures cover all tabs, manual data, unknown nutrients, recipes, reports and settings at1366/844/390.
+
+`ui-smoke.mjs` exposed a real journal race: food appeared before the passive write committed and immediate reload could lose it. Local changes now serialize writes and update visible records only after IndexedDB commits; hydration never writes defaults back. Actual App manual entry, immediate reload, profile calculation and mobile regression now pass with zero page errors. The test waits for committed visible content, not a fixed delay. Local read errors preserve existing data and offer retry.
+
+Main changed areas: `src/game/World.tsx`, map/furniture geometry, portal acknowledgement helper, `src/story/residents.ts`, App/core onboarding and import compatibility, BattleCommandMenu, the new `src/tutorial/` guide system, nutrition UI/fieldbook CSS, generated Edge copies and browser/domain tests. No new character identity or nutrition calculation model was introduced. Physical exercise and hosted Supabase limitations from the preceding release still apply. No new public publication is authorized or claimed.
+
+---
+
 # Cozylight overhaul — November 14, 2026
 
 This section supersedes older feature-coverage statements below. Earlier release records are retained as history.

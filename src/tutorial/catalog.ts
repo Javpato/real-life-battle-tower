@@ -47,7 +47,7 @@ export const GUIDE_CATALOG: Readonly<Record<GuideScope, GuideSection>> = {
       [
         "battle-movement",
         "Choose a movement",
-        "Choose a skill you can perform comfortably. The tutorial begins with three squats. Later, equip up to four skills from your inventory.",
+        "Choose a skill you can perform comfortably. The tutorial offers three squats or three chair sit-to-stand movements. Later, equip up to four skills from your inventory.",
         "Open Attack during your turn to see the movement choices.",
       ],
       [
