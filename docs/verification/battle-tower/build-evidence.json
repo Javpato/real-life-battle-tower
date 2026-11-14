@@ -1,0 +1,17 @@
+{
+  "artifact": "releases/battle-tower-debug.apk",
+  "bytes": 15973532,
+  "sha256": "9caf9805e1aad7a98ea3641c21c33b319be9ab860411fc736895abaa7bd574e4",
+  "packagedWebFilesCompared": 81,
+  "allPackagedWebFilesIdentical": true,
+  "offlineShell": "8413d51dcbec4762",
+  "unitTests": 287,
+  "testFiles": 26,
+  "strategicBattleSimulations": 240,
+  "physicalCameraValidation": false,
+  "hostedCloudDeployment": false,
+  "signatureV2Verified": true,
+  "androidEmulatorInstalledAndLaunched": true,
+  "androidRuntimeAndConsoleErrors": 0,
+  "screenshots": 121
+}

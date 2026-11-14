@@ -17,6 +17,9 @@ export type ExerciseVisualState =
   | "recalibrating";
 export type ExerciseHudProps = {
   exerciseId: ExerciseId;
+  guideSetup?: string;
+  guideCamera?: string;
+  startingPosition?: string;
   sessionId?: string;
   progress: number;
   target: number;

@@ -6,6 +6,7 @@ import {readSave,writeSave} from '../services/storage';
 import {useNutritionSync} from '../services/useNutritionSync';
 import NutritionSyncStatus from '../services/NutritionSyncStatus';
 import './support.css';
+import './camera-layout.css';
 function Diary({id,close}:{id:string;close:()=>void}){
  const [local,setLocal]=useState<NutritionState>(defaultNutrition),[ready,setReady]=useState(false),[cloudId,setCloudId]=useState<string|null>(null),[shared,setShared]=useState(false);
  const sync=useNutritionSync(shared?cloudId:null);

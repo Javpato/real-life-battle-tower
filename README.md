@@ -1,80 +1,43 @@
-# Everstride — Real-Life RPG
+# Real-Life Battle Tower
 
-An original pixel village, turn-based exercise combat, and a private nutrition journal. Built for Javpato’s girlfriend and Uriel’s brother. English UI; no generative nutrition AI. This is a working implementation with explicit unfinished integrations, not a claim that every master-spec item has shipped. See QA.md and docs/INTERFACE.md.
+Cozylight's physical RPG: **YOUR BODY IS YOUR WEAPON. HOW HIGH CAN YOU CLIMB?**
 
-Play the current public build: https://everstride-real-life-rpg.transformacion801587.chatgpt.site
+Run `npm install`, then `npm run dev`. The game starts with title, three independent saves and the tower menu. On the save screen, **Explore a local preview** opens the isolated developer profile with every skill and specialization available. Infinite Tower preparation exposes a preview starting floor. Preview never writes a normal slot or synchronizes.
 
-## Cozylight adventure overhaul
+## Playing
 
-The game opens with Cozylight, a two-protagonist title scene, and three independent saved adventures. New adventures choose a character and name, play an original introduction, and begin in a bedroom with a mandatory progressive movement/combat tutorial. Existing saves migrate to slot 1 with a retained recovery copy. Local journals belong to their individual adventure.
+- **Skills:**30 physical skills across Leg, Arm and Back. Four introductory candidates; demonstrate one to begin. Camera, experimental camera and manual-only capabilities are explicitly distinguished. Manual unlocks remain playable.
+- **Infinite Tower:** deterministic seed/floor encounters, bounded growth, minibosses every5 floors, bosses every10, special Warden at50. Four equipment slots; one unlocked skill is enough to start. Techniques and specialization can change at safe points between infinite floors. HP persists within the run, with partial recovery between normal floors and full recovery after guardians. No XP or character levels.
+- **Challenges:**7 finite towers with fixed four-skill loadouts and visible prerequisites. Elemental trials unlock specializations.
+- **Custom Workout:**30 original exercise-controlled scenes, exact goals, ordered routines, automatic series splitting, free rests, skipping marked incomplete, result history and evidence-aware stars. No HP or enemy attacks.
+- **Records:** completed-floor records and workout results; manual/mixed evidence is never promoted to camera verification.
+- **Settings:** fullscreen, reduced motion, voice feedback, camera source/phone pairing, cloud devices, Android steps and cosmetic banners. Nutrition remains a separate local/shared diary.
 
-Explore Willowmere, Fernway Trail and Summit Hollow, with fourteen connected interiors. Existing villagers, trainers, leaders and Rowan retain their identities. Enter a doorway or use E/the touch interaction button near it. Only Rowan's arena requires the three badges. Settings provides the world map, introduction replay and save/return to the title.
+The primary camera runs MediaPipe locally. The phone companion transmits joint positions directly; video preview remains optional. A supported detector is not a medical technique assessment. Mini squat and knee push-up are experimental profiles; unsupported variants remain manual-only. See QA.md for what was actually tested.
 
-The exercise coach is enabled by default and can be silenced. Recalibration provides five seconds to reposition, then requires a fresh stable starting posture; credited progress and side alternation are retained. Camera and manual modes remain available.
+## Architecture
 
-Cloud slot support includes explicit import/linking and read-only offline caches. The hosted backend still requires the owner's anonymous-auth enablement and CLI login before the new migration/Edge Function can be deployed and live sync validated. A linked fixture is not evidence of real hosted sync.
+`src/tower/model.ts`, `catalog.ts`, `generation.ts` and `engine.ts` are the canonical contracts/content/reducer. `useTower.ts` owns atomic local slots and cloud acknowledgements. Camera events cannot directly update rewards. The renderer animates accepted progress only. `skillGuides.ts` contains physical instructions for every variant.
 
-## Run
+New saves use `battle-tower:slots:v1` in the existing IndexedDB storage. The old exploration state is not imported or interpreted. There is no legacy journey/XP compatibility layer. Explicit import of a NEW local tower profile to an empty cloud save validates content and labels imported evidence unverified.
 
-Node 22+ (developed with Node 24). From this directory:
+Original art sources and replacement instructions are in ASSET_GUIDE.md. No old world, character or opening graphics remain in public assets. Asset manifest: `public/assets/tower/manifest.json`.
 
-```sh
-npm ci
-npm run dev
+## Build and checks
+
+```
 npm test
 npm run build
-npm run preview
+node supabase/sync-core.mjs --check
+node supabase/tests/tower.mjs
+node supabase/tests/platform.mjs
+GAME_URL=http://127.0.0.1:5174 node tests/tower-browser.mjs
 ```
 
-The project has its own Git repository; do not use the parent workspace repository. The standard browser build is `dist/`.
+Browser checks require Chrome (default `/usr/bin/google-chrome`) and the local server. `tests/tower-offline.mjs` targets production preview on4174. Browser screenshots use real menu/pointer interaction and explicit manual controls, not injected save progress.
 
-## Play
+For Android: `npx cap sync android`, then run `./gradlew assembleDebug` in `android/` with an installed Android SDK. Package identity remains `app.everstride.rpg`; display name is Battle Tower.
 
-WASD/arrows move; hold Shift to run; E/Enter interacts with a nearby villager. Touch arrows and interaction button are also available. Escape pauses combat/opens the menu. Camera is optional and manual units are clearly marked unverified. Earn three gym badges in any order, then visit Rowan at the summit. The Rest House heals for free; supplies and skills are in the shop. The journal is available from the header and does not award progress for eating or losing weight.
+## Backend release
 
-The adventure fills the viewport. Use the expand icon in the top HUD for browser fullscreen; Escape or the same icon exits. Exploration, battle commands and exercise are separate spatial scenes. Inventories and settings open as RPG overlays. In battle choose Attack, then one of your four equipped skills; the cards show required units, level, type effectiveness and STAB. Camera controls remain available from the top HUD between turns.
-
-Each camera exercise offers a skippable demonstration, explicit starting position, short framing check, countdown and local tracking. You can also choose Start now (start without automatic calibration); that starts evaluation but never fabricates missing movement. Camera controls remain available across pause, manual mode and turns. Pause indefinitely. Canceling a series keeps its damage and consumes the turn; pausing does not. Detection is not a medical assessment. Camera frames stay on device; physical testing remains required.
-
-The Exercise guide shows all nine basic exercises. Chair sit-to-stand, wall push-ups and glute bridges are available in Satchel & skills, alongside the original six exercises. You can equip any four skills between encounters. New detailed PNG atlases, directions and replacement instructions are listed in ASSET_GUIDE.md.
-
-## Local data
-
-IndexedDB holds one atomic adventure snapshot (player plus battle) and the nutrition journal. A suspended encounter resumes paused. Data belongs to the current browser/profile. Clearing browser data removes local saves. Nutrition exports are available under Progress: CSV, complete JSON, and browser Print / Save PDF. JSON export is a backup artifact; restore UI is not yet implemented.
-
-## Nutrition
-
-Mifflin–St Jeor, Katch–McArdle and entered clinical resting measurements are independently testable. Unknown label values stay unknown. OFF product lookup and text search require internet; manual entry and attributed offline product snapshots remain available. Scanning does not log consumption. Portion confirmation is explicit. Recipes preserve ingredient energy through changes in cooked yield. Extra exercise credit defaults to zero to avoid double counting habitual activity.
-
-Optional adult weight scenarios use an experimental deterministic implementation of Hall’s published model; they are not the official NIH planner or validated individual predictions. Its input bounds differ from the separate resting calculator. Proposals require enough completed history and explicit acceptance. See source comments and in-app assumptions.
-
-## Cloud and devices
-
-Copy `.env.example` to `.env.local` and configure `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. The existing project is already configured locally; `.env.local` is ignored by Git. Never put privileged keys in frontend variables. Enable anonymous auth and deploy the migrations in `supabase/migrations/`. See `docs/PLATFORM.md` for implemented RPCs, RLS tests and limitations. The cloud UI uses canonical adventure commands, safe device control and a separate journal with explicit conflict resolution. A configured adapter is not evidence of a deployed backend: hosted verification is currently waiting for anonymous sign-ins and the owner’s local CLI login. The app runs locally without Supabase; local state must not be silently copied over a cloud save.
-
-All devices linked to one cloud save are authorized to access that save’s journal; linking UI explains this. Never link a device belonging to someone who should not see the journal. Game control and nutrition edits have separate concurrency rules.
-
-## Android
-
-Requires JDK 21 (not just a JRE), Android SDK 36 and network for first Gradle build. Health Connect implementation requires Android 8+; device support varies.
-
-```sh
-npm run build
-npx cap sync android
-cd android
-./gradlew assembleDebug
-```
-
-The packaged demonstration APK is `releases/everstride-debug.apk` (ignored by Git). Rebuilding produces `android/app/build/outputs/apk/debug/app-debug.apk`. Debug signing is for this demonstration, not a store release. The Android activity uses landscape immersive mode; swipe from an edge to reveal system navigation. Real-device navigation and cutout behavior remain unverified. Camera and activity permissions are requested when used. Web never invents steps. Health Connect and sensor availability are reported by native code. An emulator cannot validate actual walking. HealthKit is not implemented or verified in this Linux/Android environment.
-
-## Verification
-
-`npm test` covers domain behavior, detectors, platform availability and projections. `tests/ui-smoke.mjs` and `tests/adventure-smoke.mjs` run against the dev server using Chrome at `/usr/bin/google-chrome` in an isolated browser context. Test-only data is never seeded into the production experience. `tests/exercises-browser-smoke.mjs` validates real bundled model loading with a blank frame; this is not physical exercise validation.
-
-## Hosting
-
-Sites deployment identity lives in `.openai/hosting.json`; use the configured static `dist/` directory. Build assets and source revision must match. Camera requires HTTPS or localhost. Downloaded pose model/WASM are served from the same origin. External food queries send only the requested product/search terms; camera footage is never sent.
-
-## Licenses
-
-Original world and exercise illustrations are project-created. Open Food Facts extracts carry ODbL/DbCL attribution in `src/nutrition/foodSearchService.ts`. Food photos, if used, retain their upstream license; no photos are redistributed here. Projection implementation attribution is in `src/nutrition/projection.ts`. MediaPipe runtime and model are official Google assets; preserve upstream notices and review distribution terms before store release. Fonts are Google Fonts DM Sans and Fraunces; a readable system fallback is provided offline.
+Apply migrations through `202611140007_battle_tower.sql` and deploy `tower-command`, retaining camera-pair and journal/device services. Run `node supabase/sync-core.mjs` after changing the canonical reducer. Only the Edge Function has service credentials; SQL rejects client commits, unknown cosmetics and developer saves. Deployed sync must be tested separately from embedded PostgreSQL checks. See QA.md for the present deployment limitation.

@@ -30,6 +30,7 @@ public class MainActivity extends BridgeActivity {
     // Android's supported immersive mode keeps system navigation available by edge swipe.
     // Do not intercept Back, hide the keyboard, or repeatedly hide bars on inset changes.
     // https://developer.android.com/develop/ui/views/layout/immersive
+    getWindow().getDecorView().setBackgroundColor(android.graphics.Color.rgb(21, 37, 62));
     WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
     WindowInsetsControllerCompat controller =
         WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());

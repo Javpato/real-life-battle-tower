@@ -39,13 +39,11 @@ export class GameSync {
   }
   createSave(deviceName='Device',creationId?:string) {return creationId?this.rpc<{saveId:string}>('create_game_save_slot',{device_name:deviceName,creation_id:creationId}):this.rpc<{saveId:string}>('create_game_save',{device_name:deviceName});}
   createPairCode(deviceName='Device') {return this.rpc<{code:string;expiresAt:string;sharesNutrition:true}>('create_pair_code',{device_name:deviceName});}
-  /** Calling this explicitly authorizes adventure AND nutrition access. Show that fact before calling. */
+  /** Calling this explicitly authorizes tower-save AND nutrition access. Show that fact before calling. */
   approvePairCode(saveId:string,code:string) {return this.rpc<{linked:true;deviceName:string;sharesNutrition:true}>('approve_pair_code',{save_id:saveId,code});}
   control(saveId:string,action:'acquire'|'renew'|'safe'|'busy'|'release'|'transfer',epoch?:number,target?:string) {return this.rpc<Lease>('adventure_control_command',{save_id:saveId,action,epoch:epoch??null,target:target??null});}
   requestControl(saveId:string) {return this.rpc<Lease>('request_adventure_control',{save_id:saveId});}
   readControl(saveId:string) {return this.rpc<Lease>('read_adventure_control',{save_id:saveId});}
-  purchase(saveId:string,epoch:number,item:string,operationId:string=crypto.randomUUID()) {return this.rpc<{coins:number;item:string}>('economy_command',{save_id:saveId,operation_id:operationId,epoch,kind:'purchaseItem',item});}
-  upgrade(saveId:string,epoch:number,attack:string,operationId:string=crypto.randomUUID()) {return this.rpc<{coins:number;level:number}>('economy_command',{save_id:saveId,operation_id:operationId,epoch,kind:'upgradeAttack',item:attack});}
   startStepEpoch(saveId:string,source:StepEpoch['source'],difficulty:StepEpoch['difficulty']) {return this.rpc<StepEpoch>('start_step_epoch',{save_id:saveId,source,difficulty});}
   creditSteps(saveId:string,epochId:string,totalSteps:number,operationId:string=crypto.randomUUID()) {return this.rpc<{creditedCoins:number;coins:number;creditedSteps:number;remainingSteps:number}>('credit_steps',{save_id:saveId,operation_id:operationId,epoch_id:epochId,total_steps:totalSteps});}
   writeNutrition(saveId:string,entryId:string,expectedVersion:number,content:Record<string,unknown>,deleted=false,operationId:string=crypto.randomUUID(),generation=1) {

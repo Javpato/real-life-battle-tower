@@ -13,6 +13,8 @@ function CameraFixture() {
     [exercise, setExercise] = useState<ExerciseId>("squat");
   const [source, setSource] = useState<"webcam" | "phone">("webcam"),
     [phoneFrame, setPhoneFrame] = useState<PoseFrame | null>(null);
+  const [phonePreview, setPhonePreview] = useState<MediaStream|null>(null);
+  useEffect(()=>{const receive=(e:Event)=>setPhonePreview((e as CustomEvent<MediaStream|null>).detail);window.addEventListener("test-phone-preview",receive);return()=>window.removeEventListener("test-phone-preview",receive)},[]);
   useEffect(() => {
     const receive = (event: Event) =>
       setPhoneFrame((event as CustomEvent<PoseFrame | null>).detail);
@@ -76,6 +78,7 @@ function CameraFixture() {
       <ExerciseCamera
         source={source}
         externalPoseFrame={phoneFrame}
+        externalPreview={phonePreview}
         onRequestCameraMode={() => {
           setManual(false);
           setPaused(false);

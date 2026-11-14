@@ -7,6 +7,6 @@ describe('unconfigured cloud safety',()=>{
   expect(sync.availability).toBe('unavailable');
   expect(await sync.authenticate()).toMatchObject({ok:false,unavailable:true});
   expect(await sync.createSave()).toMatchObject({ok:false,unavailable:true});
-  expect(await sync.purchase('absent',1,'potion')).toMatchObject({ok:false,unavailable:true});
+  expect(await sync.readControl('absent')).toMatchObject({ok:false,unavailable:true});
  });
 });

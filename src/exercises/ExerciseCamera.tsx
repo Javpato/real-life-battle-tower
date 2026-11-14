@@ -40,6 +40,7 @@ type Props = Omit<ExerciseCameraProps, "onUnit"> & {
   onRequestCameraMode?: () => void;
   source?: "webcam" | "phone";
   externalPoseFrame?: PoseFrame | null;
+  externalPreview?: MediaStream | null;
 };
 type Stage =
   | "off"
@@ -797,6 +798,14 @@ export default function ExerciseCamera(props: Props) {
     }, 200);
     return () => clearInterval(timer);
   }, [props.source]);
+  // A phone preview is opt-in and display-only; accepted evidence still arrives as pose events.
+  useEffect(() => {
+    if (props.source !== 'phone' || !video.current) return;
+    const node = video.current;
+    node.srcObject = props.externalPreview ?? null;
+    if (props.externalPreview) void node.play().catch(() => {});
+    return () => { if (node.srcObject === props.externalPreview) node.srcObject = null; };
+  }, [props.source, props.externalPreview]);
   const startCamera = async (next = selectionRef.current) => {
     if (!video.current || latest.current.source === "phone") return;
     if (latest.current.mode === "manual")
@@ -992,7 +1001,7 @@ export default function ExerciseCamera(props: Props) {
           <ExerciseDemo exerciseId={props.exerciseId} recognitionProfile={props.recognitionProfile} guideOverride={props.guideOverride} hideIllustration={props.hideIllustration} />
         </section>
       )}
-      <div className={`exercise-feed ${camera.stream ? "is-live" : ""}`}>
+      <div className={`exercise-feed ${camera.stream || props.externalPreview ? "is-live" : ""}`}>
         <video
           ref={video}
           muted
@@ -1009,6 +1018,7 @@ export default function ExerciseCamera(props: Props) {
             visibility: showSkeleton ? "visible" : "hidden",
           }}
         />
+        {props.source === "phone" && !props.externalPreview && <div className="exercise-placeholder"><strong>Phone pose tracking</strong><small>Enable the optional video preview on your phone to see it here. Tracking does not require sharing video.</small></div>}
         {!camera.stream && props.source !== "phone" && (
           <div className="exercise-placeholder">
             <div className="exercise-prep-art" aria-hidden="true">
@@ -1109,6 +1119,9 @@ export default function ExerciseCamera(props: Props) {
         </details>
       )}
       <ExerciseHUD
+        guideSetup={guide.setup}
+        guideCamera={guide.camera}
+        startingPosition={props.recognitionProfile==="knee-pushup"?"Knees supported · hands under shoulders":undefined}
         exerciseId={props.exerciseId}
         progress={props.progress}
         target={props.target}

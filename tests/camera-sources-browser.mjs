@@ -53,6 +53,10 @@ try {
     null,
     "phone releases local preview",
   );
+  await page.evaluate(async()=>{const canvas=document.createElement('canvas');canvas.width=320;canvas.height=240;canvas.getContext('2d').fillRect(0,0,320,240);window.__preview=canvas.captureStream(10);window.dispatchEvent(new CustomEvent('test-phone-preview',{detail:window.__preview}));});
+  await page.waitForFunction(()=>document.querySelector('video')?.srcObject===window.__preview);
+  await page.evaluate(()=>{window.dispatchEvent(new CustomEvent('test-phone-preview',{detail:null}));window.__preview.getTracks().forEach(t=>t.stop());});
+  await page.waitForFunction(()=>document.querySelector('video')?.srcObject===null);
   const send = async (kind = "fresh") =>
     page.evaluate((kind) => {
       const p = Array.from({ length: 33 }, () => ({

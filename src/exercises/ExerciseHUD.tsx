@@ -161,13 +161,13 @@ export default function ExerciseHUD(props: ExerciseHudProps) {
       <details className="exercise-start-position">
         <summary>
           <span>STARTING POSITION</span>
-          <strong>{STARTING_CUES[exerciseId]}</strong>
+          <strong>{props.startingPosition ?? STARTING_CUES[exerciseId]}</strong>
           <i aria-hidden="true">＋</i>
         </summary>
         <div className="exercise-posture-popover">
-          <p>{EXERCISE_GUIDES[exerciseId].setup}</p>
+          <p>{props.guideSetup ?? EXERCISE_GUIDES[exerciseId].setup}</p>
           <small className="exercise-camera-angle">
-            CAMERA · {EXERCISE_GUIDES[exerciseId].camera}
+            CAMERA · {props.guideCamera ?? EXERCISE_GUIDES[exerciseId].camera}
           </small>
           <footer>
             <span>
