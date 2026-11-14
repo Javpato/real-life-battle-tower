@@ -190,15 +190,16 @@ try {
       .first()
       .click();
     await expect(page.locator(".immersive-game")).toBeVisible();
+    await expect(page.getByText("Opening the world…",{exact:true})).toHaveCount(0);await page.waitForTimeout(1100);
   };
-  await relocate("general_store", 192, 150, 6);
-  await page.getByRole("button", { name: "E · Jun", exact: true }).click();
+  await relocate("general_store", 268, 192, 6);
+  await page.getByRole("button", { name: "Interact · Jun", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "The little supply shop", exact: true }),
   ).toBeVisible();
   await close("Shop NPC");
   await relocate("starter_town", 280, 320, 1);
-  await page.getByRole("button", { name: /E · Moss/ }).click();
+  await page.getByRole("button", { name: /Interact · Moss/ }).click();
   await page
     .getByRole("button", { name: "Practice with Moss", exact: true })
     .click();
@@ -287,7 +288,7 @@ try {
   await page.getByRole('button',{name:'I completed the remaining units',exact:true}).click();
   await page.getByRole('button',{name:/Continue adventure/}).click();
   await relocate('gym_arm',192,202,6);
-  await page.getByRole('button',{name:'E · Flint',exact:true}).click();
+  await page.getByRole('button',{name:'Interact · Flint',exact:true}).click();
   await page.getByLabel('Use camera verification').check();
   await page.getByRole('button',{name:'Begin encounter',exact:true}).click();
   await page.locator('.command-attack').click();await page.getByRole('button',{name:/Earthbound/}).click();
