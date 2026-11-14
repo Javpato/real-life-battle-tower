@@ -1,0 +1,243 @@
+{
+  "version": 1,
+  "name": "Battle Tower native pixel atlas",
+  "provenance": {
+    "author": "Codex",
+    "source": "scripts/build-tower-art.py",
+    "method": "Original integer-coordinate raster drawing; no input images, image rescaling or proprietary artwork"
+  },
+  "pixelRules": {
+    "outline": "#24334b",
+    "light": "upper-left",
+    "sampling": "nearest",
+    "worldTile": 16
+  },
+  "characters": {
+    "hero-male": {
+      "front": "hero-male-front.png",
+      "still": "hero-male-front-still.png",
+      "back": "hero-male-back.png",
+      "idle": "hero-male-idle.png",
+      "frame": [
+        128,
+        128
+      ],
+      "frames": 4,
+      "foot": [
+        64,
+        117
+      ],
+      "idleFrame": [
+        48,
+        48
+      ]
+    },
+    "hero-female": {
+      "front": "hero-female-front.png",
+      "still": "hero-female-front-still.png",
+      "back": "hero-female-back.png",
+      "idle": "hero-female-idle.png",
+      "frame": [
+        128,
+        128
+      ],
+      "frames": 4,
+      "foot": [
+        64,
+        117
+      ],
+      "idleFrame": [
+        48,
+        48
+      ]
+    },
+    "moss": {
+      "front": "moss-front.png",
+      "still": "moss-front-still.png",
+      "back": null,
+      "idle": "moss-idle.png",
+      "frame": [
+        128,
+        128
+      ],
+      "frames": 4,
+      "foot": [
+        64,
+        117
+      ],
+      "idleFrame": [
+        48,
+        48
+      ]
+    },
+    "pip": {
+      "front": "pip-front.png",
+      "still": "pip-front-still.png",
+      "back": null,
+      "idle": "pip-idle.png",
+      "frame": [
+        128,
+        128
+      ],
+      "frames": 4,
+      "foot": [
+        64,
+        117
+      ],
+      "idleFrame": [
+        48,
+        48
+      ]
+    },
+    "fern": {
+      "front": "fern-front.png",
+      "still": "fern-front-still.png",
+      "back": null,
+      "idle": "fern-idle.png",
+      "frame": [
+        128,
+        128
+      ],
+      "frames": 4,
+      "foot": [
+        64,
+        117
+      ],
+      "idleFrame": [
+        48,
+        48
+      ]
+    },
+    "terra": {
+      "front": "terra-front.png",
+      "still": "terra-front-still.png",
+      "back": null,
+      "idle": "terra-idle.png",
+      "frame": [
+        128,
+        128
+      ],
+      "frames": 4,
+      "foot": [
+        64,
+        117
+      ],
+      "idleFrame": [
+        48,
+        48
+      ]
+    },
+    "flint": {
+      "front": "flint-front.png",
+      "still": "flint-front-still.png",
+      "back": null,
+      "idle": "flint-idle.png",
+      "frame": [
+        128,
+        128
+      ],
+      "frames": 4,
+      "foot": [
+        64,
+        117
+      ],
+      "idleFrame": [
+        48,
+        48
+      ]
+    },
+    "zephyr": {
+      "front": "zephyr-front.png",
+      "still": "zephyr-front-still.png",
+      "back": null,
+      "idle": "zephyr-idle.png",
+      "frame": [
+        128,
+        128
+      ],
+      "frames": 4,
+      "foot": [
+        64,
+        117
+      ],
+      "idleFrame": [
+        48,
+        48
+      ]
+    },
+    "rowan": {
+      "front": "rowan-front.png",
+      "still": "rowan-front-still.png",
+      "back": null,
+      "idle": "rowan-idle.png",
+      "frame": [
+        128,
+        128
+      ],
+      "frames": 4,
+      "foot": [
+        64,
+        117
+      ],
+      "idleFrame": [
+        48,
+        48
+      ]
+    },
+    "warden": {
+      "front": "warden-front.png",
+      "still": "warden-front-still.png",
+      "back": null,
+      "idle": "warden-idle.png",
+      "frame": [
+        128,
+        128
+      ],
+      "frames": 4,
+      "foot": [
+        64,
+        117
+      ],
+      "idleFrame": [
+        48,
+        48
+      ]
+    }
+  },
+  "battle": {
+    "size": [
+      480,
+      270
+    ],
+    "heroFoot": [
+      136,
+      228
+    ],
+    "enemyFoot": [
+      349,
+      170
+    ],
+    "zones": [
+      "arena-0.png",
+      "arena-1.png",
+      "arena-2.png",
+      "arena-3.png",
+      "arena-4.png",
+      "arena-5.png"
+    ]
+  },
+  "icons": {
+    "leg": "icon-leg.png",
+    "arm": "icon-arm.png",
+    "back": "icon-back.png",
+    "coin": "icon-coin.png",
+    "potion": "icon-potion.png",
+    "shield": "icon-shield.png",
+    "star": "icon-star.png",
+    "tower": "icon-tower.png",
+    "bag": "icon-bag.png",
+    "settings": "icon-settings.png",
+    "play": "icon-play.png",
+    "pause": "icon-pause.png"
+  }
+}
