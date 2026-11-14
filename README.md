@@ -4,6 +4,16 @@ An original pixel village, turn-based exercise combat, and a private nutrition j
 
 Play the current public build: https://everstride-real-life-rpg.transformacion801587.chatgpt.site
 
+## Cozylight adventure overhaul
+
+The game opens with Cozylight, a two-protagonist title scene, and three independent saved adventures. New adventures choose a character and name, play an original introduction, and begin in a bedroom with a progressive movement/combat tutorial. Existing saves migrate to slot 1 with a retained recovery copy. Local journals belong to their individual adventure.
+
+Explore Willowmere, Fernway Trail and Summit Hollow, with fourteen connected interiors. Existing villagers, trainers, leaders and Rowan retain their identities. Enter a doorway or use E/the touch interaction button near it. Only Rowan's arena requires the three badges. Settings provides the world map, introduction replay and save/return to the title.
+
+The exercise coach is enabled by default and can be silenced. Recalibration provides five seconds to reposition, then requires a fresh stable starting posture; credited progress and side alternation are retained. Camera and manual modes remain available.
+
+Cloud slot support includes explicit import/linking and read-only offline caches. The hosted backend still requires the owner's anonymous-auth enablement and CLI login before the new migration/Edge Function can be deployed and live sync validated. A linked fixture is not evidence of real hosted sync.
+
 ## Run
 
 Node 22+ (developed with Node 24). From this directory:

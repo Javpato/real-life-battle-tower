@@ -1456,7 +1456,7 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
                       </p>
                     </div>
                   </section>
-                  <div className="button-row"><button onClick={()=>V("map")}>World map</button><button onClick={()=>{V(null);setReplayIntro(true)}}>Replay introduction</button><button disabled={adventure.busy||adventure.pending>0||(adventure.mode==='cloud'&&(b?.turn==='exercise'||!!quest))} onClick={async()=>{try{if(b&&!b.paused){if(!await dispatch({kind:'pause',paused:true}))return;}if(adventure.mode==='cloud')await adventure.controller.release();onReturnToTitle?.()}catch(e){notify(String(e))}}>Save & return to title</button></div>
+                  <div className="button-row"><button onClick={()=>V("map")}>World map</button><button onClick={()=>{V(null);setReplayIntro(true)}}>Replay introduction</button><button disabled={adventure.busy||adventure.pending>0||(adventure.mode==='cloud'&&(b?.turn==='exercise'||!!quest))} onClick={async()=>{try{if(b&&!b.paused){if(!await dispatch({kind:'pause',paused:true}))return;}if(adventure.mode==='cloud')await adventure.controller.release();onReturnToTitle?.()}catch(e){notify(String(e))}}}>Save & return to title</button></div>
                   <div className="menu-badges">
                     {(["leg", "arm", "back"] as Element[]).map((type) => (
                       <span

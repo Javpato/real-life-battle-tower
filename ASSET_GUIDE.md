@@ -69,3 +69,8 @@ Exploration uses independently drawn 48×48 native pixel figures in `overworld-v
 Shared map registry: three exteriors (Willowmere, Fernway Trail, Summit Hollow), fourteen interiors, named spawn points and reciprocal portals. `paintMap` draws deterministic pixel floors, furnishings, windows, rugs, light fixtures, forest edges, paths and ponds. Existing exterior building atlas remains in use. NPCs walk, train, read, cook or rest in logical homes/services. Summit Rest is an interactive bed, not a duplicated named character.
 
 Automated world geometry checks validate every spawn, every reciprocal portal, breadth-first walkability from each safe spawn to every exit, legacy invalid-position recovery and the three-badge arena gate. Physical exercise detection and Android hardware remain separate validation.
+
+
+## Cozylight title landscape
+
+`public/assets/opening/title-landscape.png` was generated with the built-in OpenAI image generation tool for this release, then copied into the project. Prompt: original premium pixel-art RPG valley at blue hour, warm cottage windows, winding trail through forest toward a summit village, night blue/deep purple/emerald/amber palette, clear central sky for title; no characters, text or logos. The title protagonists use the preserved male artwork and the new heroine registry entry. `cozylight.svg` is an original replaceable code-native window mark, animated by the opening stylesheet. Title and introduction scores are original procedural music in `src/audio/music.ts`.

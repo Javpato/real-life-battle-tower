@@ -9,7 +9,12 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 1050 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 await page.goto(process.env.GAME_URL || "http://127.0.0.1:5173");
-await page.getByRole("button", { name: "Take the first step" }).click();
+await page.waitForTimeout(3200);
+await page.keyboard.press('x');
+await page.getByRole('button',{name:'New adventure'}).first().click();
+await page.getByRole('button',{name:'Choose this character'}).click();
+await page.getByRole('button',{name:'Begin adventure'}).click();
+await page.getByRole('button',{name:'Skip introduction'}).click();
 await page.locator("canvas").waitFor();
 await page.waitForTimeout(1200);
 await page.screenshot({ path: "/tmp/everstride-world.png", fullPage: true });
@@ -31,6 +36,9 @@ await page.getByRole("button", { name: "Confirm food eaten" }).click();
 if (!(await page.getByText("QA lentil soup", { exact: true }).isVisible()))
   throw new Error("Food not recorded");
 await page.reload();
+await page.waitForTimeout(3200);
+await page.keyboard.press('x');
+await page.getByRole('button',{name:'Continue',exact:false}).first().click();
 await openJournal(page);
 if (!(await page.getByText("QA lentil soup", { exact: true }).isVisible()))
   throw new Error("Food did not persist");
