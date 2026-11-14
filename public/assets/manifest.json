@@ -102,6 +102,13 @@
       "height": 1261,
       "columns": 4,
       "rows": 4
+    },
+    "furniture": {
+      "path": "assets/world/furniture-v4.png",
+      "width": 1774,
+      "height": 887,
+      "columns": 4,
+      "rows": 2
     }
   },
   "battlefield": {
