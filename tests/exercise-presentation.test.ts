@@ -23,6 +23,11 @@ describe('actionable exercise presentation',()=>{
   expect(exerciseHeadline({...base,status:'ready',missingJoints:['left knee']})).toBe(STARTING_CUES.birddog.toUpperCase());
   expect(exerciseHeadline({...base,status:'valid',nextSide:'right',missingJoints:[]})).toBe('RIGHT ARM + OPPOSITE LEG NEXT');
  });
+ it('promotes posture instructions when joints are present but preparation is incomplete',()=>{
+  expect(exerciseHeadline({...base,status:'insufficient',message:'Settle into the illustrated starting position.'})).toBe(STARTING_CUES.birddog.toUpperCase());
+  expect(exerciseHeadline({...base,exerciseId:'bridge',status:'insufficient',message:'Start with hips down and knees bent. Lift the hips, then lower back to the starting position.'})).toBe(STARTING_CUES.bridge.toUpperCase());
+  expect(exerciseHeadline({...base,exerciseId:'lunge',status:'insufficient',message:'Side unclear. Turn slightly so the front knee and both feet are distinguishable.'})).toBe('SHOW YOUR FRONT KNEE + BOTH FEET');
+ });
  it('retains short correction, completion and whole-frame instructions',()=>{
   expect(exerciseHeadline({...base,status:'incomplete',message:'Slow down and complete the full movement.'})).toContain('SLOW DOWN');
   expect(exerciseHeadline({...base,status:'no-body'})).toBe('MOVE INTO CAMERA VIEW');

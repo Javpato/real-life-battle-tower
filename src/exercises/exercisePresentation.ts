@@ -27,6 +27,9 @@ export function exerciseHeadline(p: Pick<ExerciseHudProps, "exerciseId" | "statu
     if (joint) return `SHOW YOUR ${joint.toUpperCase()}`;
     const observedInstruction = p.message.match(/(?:^|\. )((?:Show|Keep) [^.]+)\./)?.[1];
     if (observedInstruction && observedInstruction.length <= 64) return observedInstruction.toUpperCase();
+    if (/^(Settle into the illustrated starting position|Begin seated|Start with hips down|Keep hands against the wall|Stand tall with both feet visible|Extend one arm and the opposite leg)/i.test(p.message))
+      return STARTING_CUES[p.exerciseId].toUpperCase();
+    if (/^Side unclear\./i.test(p.message)) return "SHOW YOUR FRONT KNEE + BOTH FEET";
     return "KEEP REQUIRED JOINTS IN VIEW";
   }
   if (p.status === "countdown") return "GET READY";
