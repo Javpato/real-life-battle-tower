@@ -1,0 +1,29 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+ExpectError: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+
+Call Log:
+- Timeout 20000ms exceeded while waiting on the predicate
+    at captureRawStack (/home/javpato/Desktop/todoProgra/HACKATHONNXT/real-life-rpg/node_modules/playwright-core/lib/coreBundle.js:9551:17)
+    at callMatcherAsStep (/home/javpato/Desktop/todoProgra/HACKATHONNXT/real-life-rpg/node_modules/playwright/lib/matchers/expect.js:13342:57)
+    at Object.toBe (/home/javpato/Desktop/todoProgra/HACKATHONNXT/real-life-rpg/node_modules/playwright/lib/matchers/expect.js:13334:23)
+    at /home/javpato/Desktop/todoProgra/HACKATHONNXT/real-life-rpg/tests/companion-browser.mjs:25:80 {
+  matcherResult: {
+    pass: false,
+    message: 'expect(received).toBe(expected) // Object.is equality\n' +
+      '\n' +
+      'Expected: true\n' +
+      'Received: false\n' +
+      '\n' +
+      'Call Log:\n' +
+      '- Timeout 20000ms exceeded while waiting on the predicate',
+    name: 'toBe'
+  }
+}
+
+Node.js v24.16.0

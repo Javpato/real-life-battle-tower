@@ -1,0 +1,1549 @@
+{
+  "passed": true,
+  "skillsDiscovered": 90,
+  "completedCount": 90,
+  "manualUnits": 180,
+  "cameraVerifiedUnits": 0,
+  "batches": [
+    {
+      "batch": 1,
+      "completed": 10,
+      "skipped": 0,
+      "manualUnits": 20,
+      "verifiedUnits": 0
+    },
+    {
+      "batch": 2,
+      "completed": 10,
+      "skipped": 0,
+      "manualUnits": 20,
+      "verifiedUnits": 0
+    },
+    {
+      "batch": 3,
+      "completed": 10,
+      "skipped": 0,
+      "manualUnits": 20,
+      "verifiedUnits": 0
+    },
+    {
+      "batch": 4,
+      "completed": 10,
+      "skipped": 0,
+      "manualUnits": 20,
+      "verifiedUnits": 0
+    },
+    {
+      "batch": 5,
+      "completed": 10,
+      "skipped": 0,
+      "manualUnits": 20,
+      "verifiedUnits": 0
+    },
+    {
+      "batch": 6,
+      "completed": 10,
+      "skipped": 0,
+      "manualUnits": 20,
+      "verifiedUnits": 0
+    },
+    {
+      "batch": 7,
+      "completed": 10,
+      "skipped": 0,
+      "manualUnits": 20,
+      "verifiedUnits": 0
+    },
+    {
+      "batch": 8,
+      "completed": 10,
+      "skipped": 0,
+      "manualUnits": 20,
+      "verifiedUnits": 0
+    },
+    {
+      "batch": 9,
+      "completed": 10,
+      "skipped": 0,
+      "manualUnits": 20,
+      "verifiedUnits": 0
+    }
+  ],
+  "completed": [
+    {
+      "id": "mini-squat",
+      "name": "Mini Squat",
+      "type": "leg",
+      "manualOnly": false,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7979
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "squat",
+      "name": "Squat",
+      "type": "leg",
+      "manualOnly": false,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7979
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "pause-squat",
+      "name": "Pause Squat",
+      "type": "leg",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7979
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "assisted-lunge",
+      "name": "Assisted Lunge",
+      "type": "leg",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7978
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "lunge",
+      "name": "Lunge",
+      "type": "leg",
+      "manualOnly": false,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7978
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "sumo-squat",
+      "name": "Sumo Squat",
+      "type": "leg",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7979
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "wall-sit",
+      "name": "Wall Sit",
+      "type": "leg",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7979
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "reverse-lunge",
+      "name": "Reverse Lunge",
+      "type": "leg",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7979
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "tempo-squat",
+      "name": "Tempo Squat",
+      "type": "leg",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7979
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "single-leg-squat",
+      "name": "Single-leg Squat",
+      "type": "leg",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7979
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "wall-pushup",
+      "name": "Wall Push-up",
+      "type": "arm",
+      "manualOnly": false,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7996
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "incline-pushup",
+      "name": "Incline Push-up",
+      "type": "arm",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7996
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "knee-pushup",
+      "name": "Knee Push-up",
+      "type": "arm",
+      "manualOnly": false,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7996
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "high-plank",
+      "name": "High Plank",
+      "type": "arm",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7996
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "pushup",
+      "name": "Push-up",
+      "type": "arm",
+      "manualOnly": false,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7996
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "pause-pushup",
+      "name": "Pause Push-up",
+      "type": "arm",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7996
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "diamond",
+      "name": "Diamond Push-up",
+      "type": "arm",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7996
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "eccentric-pushup",
+      "name": "Eccentric Push-up",
+      "type": "arm",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7996
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "wide-pushup",
+      "name": "Wide Push-up",
+      "type": "arm",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7996
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "archer-pushup",
+      "name": "Archer Push-up",
+      "type": "arm",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7996
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "birddog",
+      "name": "Basic Bird Dog",
+      "type": "back",
+      "manualOnly": false,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7837
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "alternating-birddog",
+      "name": "Alternating Bird Dog",
+      "type": "back",
+      "manualOnly": false,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7837
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "short-superman",
+      "name": "Short Superman",
+      "type": "back",
+      "manualOnly": false,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7837
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "superman",
+      "name": "Superman",
+      "type": "back",
+      "manualOnly": false,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7838
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "back-extension",
+      "name": "Back Extension",
+      "type": "back",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7838
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "snow-angels",
+      "name": "Reverse Snow Angels",
+      "type": "back",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7838
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "pause-birddog",
+      "name": "Pause Bird Dog",
+      "type": "back",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7838
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "alternating-superman",
+      "name": "Alternating Superman",
+      "type": "back",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7838
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "tempo-extension",
+      "name": "Tempo Extension",
+      "type": "back",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7837
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "advanced-birddog",
+      "name": "Advanced Bird Dog",
+      "type": "back",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7838
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "sitstand",
+      "name": "Sit to Stand",
+      "type": "leg",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7979
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "calf-raise",
+      "name": "Calf Raise",
+      "type": "leg",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7979
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "standing-side-leg-raise",
+      "name": "Standing Side Leg Raise",
+      "type": "leg",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7978
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "glute-bridge",
+      "name": "Glute Bridge",
+      "type": "leg",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7979
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "assisted-side-lunge",
+      "name": "Assisted Side Lunge",
+      "type": "leg",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7979
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "wall-scapular-pushup",
+      "name": "Wall Scapular Push-up",
+      "type": "arm",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7996
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "quadruped-scapular-pushup",
+      "name": "Quadruped Scapular Push-up",
+      "type": "arm",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7996
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "quadruped-shoulder-tap",
+      "name": "Quadruped Shoulder Tap",
+      "type": "arm",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7996
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "plank-shoulder-tap",
+      "name": "Plank Shoulder Tap",
+      "type": "arm",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7996
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "close-wall-pushup",
+      "name": "Close Wall Push-up",
+      "type": "arm",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7996
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "prone-w",
+      "name": "Prone W Raise",
+      "type": "back",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7837
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "prone-t",
+      "name": "Prone T Raise",
+      "type": "back",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7837
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "prone-y",
+      "name": "Prone Y Raise",
+      "type": "back",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7838
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "standing-scapular-retraction",
+      "name": "Standing Scapular Retraction",
+      "type": "back",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7838
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "quadruped-hip-extension",
+      "name": "Quadruped Hip Extension",
+      "type": "back",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7838
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "deadbug-heel-tap",
+      "name": "Dead Bug Heel Tap",
+      "type": "core",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 8003
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "deadbug",
+      "name": "Dead Bug",
+      "type": "core",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 8003
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "supine-march",
+      "name": "Supine March",
+      "type": "core",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 8002
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "supine-heel-slide",
+      "name": "Supine Heel Slide",
+      "type": "core",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 8003
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "abdominal-brace",
+      "name": "Guided Abdominal Brace",
+      "type": "core",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 8003
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "forearm-plank",
+      "name": "Forearm Plank",
+      "type": "core",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 8002
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "knee-side-plank",
+      "name": "Knee Side Plank",
+      "type": "core",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 8002
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "side-plank",
+      "name": "Side Plank",
+      "type": "core",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 8002
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "short-crunch",
+      "name": "Short Crunch",
+      "type": "core",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 8003
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "reverse-crunch",
+      "name": "Controlled Reverse Crunch",
+      "type": "core",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 8003
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "hollow-tuck",
+      "name": "Hollow Tuck Hold",
+      "type": "core",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 8003
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "tabletop-hold",
+      "name": "Tabletop Hold",
+      "type": "core",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 8003
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "seated-knee-raise",
+      "name": "Seated Alternating Knee Raise",
+      "type": "core",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 8003
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "standing-cross-knee",
+      "name": "Standing Knee to Elbow",
+      "type": "core",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 8002
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "quadruped-knee-hover",
+      "name": "Quadruped Knee Hover",
+      "type": "core",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 8002
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "march-in-place",
+      "name": "March in Place",
+      "type": "cardio",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7998
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "step-touch",
+      "name": "Step Touch",
+      "type": "cardio",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7998
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "step-jack",
+      "name": "No-jump Jack",
+      "type": "cardio",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7998
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "jumping-jack",
+      "name": "Jumping Jack",
+      "type": "cardio",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7998
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "heel-dig",
+      "name": "Alternating Heel Dig",
+      "type": "cardio",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7998
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "continuous-side-step",
+      "name": "Continuous Side Steps",
+      "type": "cardio",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7997
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "high-knee-march",
+      "name": "High-knee March",
+      "type": "cardio",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7998
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "gentle-jog",
+      "name": "Gentle Jog in Place",
+      "type": "cardio",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7998
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "shadowbox-straight",
+      "name": "Straight Shadowboxing",
+      "type": "cardio",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7998
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "shadowbox-uppercut",
+      "name": "Uppercut Shadowboxing",
+      "type": "cardio",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7998
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "no-jump-skater",
+      "name": "No-jump Skater",
+      "type": "cardio",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7998
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "step-back-reach",
+      "name": "Step Back with Reach",
+      "type": "cardio",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7998
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "standing-climber",
+      "name": "Standing Climber",
+      "type": "cardio",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7998
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "plank-climber",
+      "name": "Plank Climber",
+      "type": "cardio",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7997
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "squat-reach",
+      "name": "Squat with Overhead Reach",
+      "type": "cardio",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7997
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "shoulder-circles",
+      "name": "Shoulder Circles",
+      "type": "mobility",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7946
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "arm-circles",
+      "name": "Arm Circles",
+      "type": "mobility",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7946
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "wall-arm-slide",
+      "name": "Wall Arm Slide",
+      "type": "mobility",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7944
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "standing-chest-opening",
+      "name": "Standing Chest Opening",
+      "type": "mobility",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7944
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "seated-thoracic-rotation",
+      "name": "Seated Thoracic Rotation",
+      "type": "mobility",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7946
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "quadruped-thoracic-rotation",
+      "name": "Quadruped Thoracic Rotation",
+      "type": "mobility",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7946
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "cat-cow",
+      "name": "Cat–Cow",
+      "type": "mobility",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7946
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "quadruped-rockback",
+      "name": "Quadruped Rock Back",
+      "type": "mobility",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7946
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "guided-hip-hinge",
+      "name": "Guided Hip Hinge",
+      "type": "mobility",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7946
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "hip-circles",
+      "name": "Hip Circles",
+      "type": "mobility",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7946
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "standing-ankle-rock",
+      "name": "Standing Ankle Rock",
+      "type": "mobility",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7944
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "seated-ankle-circles",
+      "name": "Seated Ankle Circles",
+      "type": "mobility",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7946
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "seated-knee-extension",
+      "name": "Seated Knee Extension",
+      "type": "mobility",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7946
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "quadruped-wrist-rock",
+      "name": "Quadruped Wrist Rock",
+      "type": "mobility",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7946
+      },
+      "guideAvailable": true
+    },
+    {
+      "id": "standing-side-bend",
+      "name": "Controlled Side Bend",
+      "type": "mobility",
+      "manualOnly": true,
+      "target": 2,
+      "acceptedManualUnits": 2,
+      "cameraVerifiedUnits": 0,
+      "pixels": {
+        "width": 480,
+        "height": 270,
+        "opaque": 129600,
+        "sampledColors": 7946
+      },
+      "guideAvailable": true
+    }
+  ],
+  "screenshots": [
+    "minigame-leg-mini-squat.png",
+    "minigame-arm-wall-pushup.png",
+    "minigame-back-birddog.png",
+    "minigame-core-deadbug-heel-tap.png",
+    "minigame-cardio-march-in-place.png",
+    "minigame-mobility-shoulder-circles.png"
+  ],
+  "generatedAssets": [
+    "/assets/tower-v2/arena-0.png",
+    "/assets/tower-v2/arena-1.png",
+    "/assets/tower-v2/arena-2.png",
+    "/assets/tower-v2/arena-3.png",
+    "/assets/tower-v2/arena-4.png",
+    "/assets/tower-v2/arena-5.png",
+    "/assets/tower-v2/characters/hero-female/front.png",
+    "/assets/tower-v2/characters/hero-male/attack.png",
+    "/assets/tower-v2/characters/hero-male/front.png",
+    "/assets/tower-v2/characters/hero-male/idle.png",
+    "/assets/tower-v2/characters/instructor-2/idle.png",
+    "/assets/tower-v2/hub.png",
+    "/assets/tower-v2/icon-crystal.png",
+    "/assets/tower-v2/icon-record.png",
+    "/assets/tower-v2/icon-settings.png",
+    "/assets/tower-v2/icon-skill.png",
+    "/assets/tower-v2/icon-tower.png",
+    "/assets/tower-v2/icon-training.png",
+    "/assets/tower-v2/icon-trophy.png",
+    "/assets/tower-v2/title.png"
+  ],
+  "oldAssetRequests": [],
+  "errors": [],
+  "failed": [],
+  "physicalDetectionTested": false,
+  "phonePairingTested": false
+}

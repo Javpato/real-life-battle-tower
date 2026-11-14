@@ -1,0 +1,1 @@
+PASS: two actual Chrome peers, desktop confirmation, one-phone claim, direct fresh poses, no default video, explicit video opt-in/off, stale-frame stop, disconnect, no pose/image payloads to signaling. Synthetic pose and fake camera fixtures; not physical-device validation.

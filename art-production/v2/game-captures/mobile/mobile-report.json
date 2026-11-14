@@ -1,0 +1,223 @@
+{
+  "passed": true,
+  "measurements": [
+    {
+      "width": 800,
+      "height": 360,
+      "docWidth": 800,
+      "docHeight": 360,
+      "scene": {
+        "x": 254.2265625,
+        "y": 51.203125,
+        "width": 291.546875,
+        "height": 164,
+        "top": 51.203125,
+        "right": 545.7734375,
+        "bottom": 215.203125,
+        "left": 254.2265625
+      },
+      "buttons": [
+        {
+          "name": "Leg Mini Squat6 reps · 24 power  · Matchup ×1",
+          "rect": {
+            "x": 10,
+            "y": 225.40625,
+            "width": 190.5,
+            "height": 60,
+            "top": 225.40625,
+            "right": 200.5,
+            "bottom": 285.40625,
+            "left": 10
+          }
+        },
+        {
+          "name": "Arm Knee Push-up6 reps · 26 power  · Matchup ×0.75",
+          "rect": {
+            "x": 206.5,
+            "y": 225.40625,
+            "width": 190.5,
+            "height": 60,
+            "top": 225.40625,
+            "right": 397,
+            "bottom": 285.40625,
+            "left": 206.5
+          }
+        },
+        {
+          "name": "BackCore Basic Bird Dog4 reps · 26 power  · Matchup ×1.125",
+          "rect": {
+            "x": 403,
+            "y": 225.40625,
+            "width": 190.5,
+            "height": 60,
+            "top": 225.40625,
+            "right": 593.5,
+            "bottom": 285.40625,
+            "left": 403
+          }
+        },
+        {
+          "name": "Back Short Superman8 seconds · 26 power  · Matchup ×1.5",
+          "rect": {
+            "x": 599.5,
+            "y": 225.40625,
+            "width": 190.5,
+            "height": 60,
+            "top": 225.40625,
+            "right": 790,
+            "bottom": 285.40625,
+            "left": 599.5
+          }
+        },
+        {
+          "name": "Defend",
+          "rect": {
+            "x": 645.96875,
+            "y": 291.40625,
+            "width": 75.21875,
+            "height": 44,
+            "top": 291.40625,
+            "right": 721.1875,
+            "bottom": 335.40625,
+            "left": 645.96875
+          }
+        },
+        {
+          "name": "Rest",
+          "rect": {
+            "x": 729.1875,
+            "y": 291.40625,
+            "width": 60.8125,
+            "height": 44,
+            "top": 291.40625,
+            "right": 790,
+            "bottom": 335.40625,
+            "left": 729.1875
+          }
+        }
+      ],
+      "anchors": [
+        {
+          "role": "hero",
+          "x": 0.31196741518838095,
+          "y": 0.8149771341463414
+        },
+        {
+          "role": "enemy",
+          "x": 0.7699769548207299,
+          "y": 0.6179496951219512
+        }
+      ]
+    },
+    {
+      "width": 915,
+      "height": 412,
+      "docWidth": 915,
+      "docHeight": 412,
+      "scene": {
+        "x": 265.5,
+        "y": 51.203125,
+        "width": 384,
+        "height": 216,
+        "top": 51.203125,
+        "right": 649.5,
+        "bottom": 267.203125,
+        "left": 265.5
+      },
+      "buttons": [
+        {
+          "name": "Leg Mini Squat6 reps · 24 power  · Matchup ×1",
+          "rect": {
+            "x": 10,
+            "y": 277.40625,
+            "width": 219.25,
+            "height": 60,
+            "top": 277.40625,
+            "right": 229.25,
+            "bottom": 337.40625,
+            "left": 10
+          }
+        },
+        {
+          "name": "Arm Knee Push-up6 reps · 26 power  · Matchup ×0.75",
+          "rect": {
+            "x": 235.25,
+            "y": 277.40625,
+            "width": 219.25,
+            "height": 60,
+            "top": 277.40625,
+            "right": 454.5,
+            "bottom": 337.40625,
+            "left": 235.25
+          }
+        },
+        {
+          "name": "BackCore Basic Bird Dog4 reps · 26 power  · Matchup ×1.125",
+          "rect": {
+            "x": 460.5,
+            "y": 277.40625,
+            "width": 219.25,
+            "height": 60,
+            "top": 277.40625,
+            "right": 679.75,
+            "bottom": 337.40625,
+            "left": 460.5
+          }
+        },
+        {
+          "name": "Back Short Superman8 seconds · 26 power  · Matchup ×1.5",
+          "rect": {
+            "x": 685.75,
+            "y": 277.40625,
+            "width": 219.25,
+            "height": 60,
+            "top": 277.40625,
+            "right": 905,
+            "bottom": 337.40625,
+            "left": 685.75
+          }
+        },
+        {
+          "name": "Defend",
+          "rect": {
+            "x": 760.96875,
+            "y": 343.40625,
+            "width": 75.21875,
+            "height": 44,
+            "top": 343.40625,
+            "right": 836.1875,
+            "bottom": 387.40625,
+            "left": 760.96875
+          }
+        },
+        {
+          "name": "Rest",
+          "rect": {
+            "x": 844.1875,
+            "y": 343.40625,
+            "width": 60.8125,
+            "height": 44,
+            "top": 343.40625,
+            "right": 905,
+            "bottom": 387.40625,
+            "left": 844.1875
+          }
+        }
+      ],
+      "anchors": [
+        {
+          "role": "hero",
+          "x": 0.3119710286458333,
+          "y": 0.8149594907407407
+        },
+        {
+          "role": "enemy",
+          "x": 0.7699788411458334,
+          "y": 0.6179832175925926
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "physicalCameraTested": false
+}

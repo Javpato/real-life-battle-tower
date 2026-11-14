@@ -1,0 +1,13 @@
+{
+  "source": "sources/boss-15-before-alpha-fix.png",
+  "sourceSha256": "3378c9da89b8f9ae33b77d47361b3f5c7dd5a4d196f1572d7208e8ab1ba0ddc4",
+  "output": "sources/boss-15.png",
+  "outputSha256": "8bf0eb1fabda2ef9f6f56233e088293ce4b00c6847b16aace7298789fce583af",
+  "method": "Exterior flood fill through alpha<220 or neutral light pixels minRGB>=145 and RGBspread<=30. Stop at dark/colored outlines. RGB values never altered.",
+  "floodPixels": 1204418,
+  "alphaPixelsCleared": 1204418,
+  "status": "superseded-character-source",
+  "visualReview": "Full dark-background source composite and all 16 exported frames inspected; exterior white matte removed, white clothing and hair retained inside outlines, no visible background islands.",
+  "supersededBySourceSha256": "40d2bdeb545f9b1cbc9b32a5c91ec57e5d805c1afed01387192ca925b464a966",
+  "note": "This historical mask applies only to the outputSha256 above. The final blue-haired boss was generated afterward and received no flood mask."
+}

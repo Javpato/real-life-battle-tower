@@ -1,0 +1,60 @@
+{
+  "scope": "Final main branch integration checks; synthetic camera and phone inputs only",
+  "checks": {
+    "sharedParity": "passed",
+    "towerSQL": "passed",
+    "platformSQL": "passed",
+    "mediapipeRealModelBlankFrame": {
+      "result": "passed",
+      "landmarkCount": 0
+    },
+    "cameraSources": "passed",
+    "towerCameraHUD": {
+      "result": "passed",
+      "viewports": [
+        [
+          1920,
+          1080
+        ],
+        [
+          1366,
+          768
+        ],
+        [
+          1280,
+          720
+        ],
+        [
+          915,
+          412
+        ],
+        [
+          800,
+          360
+        ]
+      ]
+    },
+    "phoneCompanion": {
+      "result": "passed on sequential diagnostic and original retry",
+      "initialAttempt": "ICE connection timeout while browser suites ran concurrently",
+      "actualPeers": 2,
+      "realWebRTC": true,
+      "mockSignaling": true,
+      "syntheticPoses": true
+    }
+  },
+  "physicalHumanExerciseValidated": false,
+  "physicalPhoneValidated": false,
+  "supabaseDeployed": false,
+  "logs": [
+    "camera-sources.log",
+    "mediapipe-blank.log",
+    "phone-companion-retry.log",
+    "phone-companion.log",
+    "phone-diagnostic.log",
+    "platform-sql.log",
+    "shared-parity.log",
+    "tower-camera-ui.log",
+    "tower-sql.log"
+  ]
+}

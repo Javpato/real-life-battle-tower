@@ -1,0 +1,302 @@
+[
+  {
+    "id": "hero-female",
+    "name": "The Pathfinder",
+    "design": "EXACT reference woman: huge brown braid, coral cream cropped jacket, teal wraps, navy shorts, plum leggings, warm tan skin. Preserve original eyes and face."
+  },
+  {
+    "id": "hero-male",
+    "name": "The Wayfarer",
+    "design": "Adult male athletic adventurer, tousled auburn short hair, jade sleeveless vest with ivory piping, coral neck scarf, charcoal cuffed trousers, cream trainers, friendly expressive large black-and-white eyes, warm light skin. Distinct male counterpart of reference."
+  },
+  {
+    "id": "normal-leg-1",
+    "name": "Leg Challenger 1",
+    "design": "Original adult lean sprinter, short black curls, running singlet, fitted shorts and leg warmers; jade and ochre palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-leg-2",
+    "name": "Leg Challenger 2",
+    "design": "Original adult muscular woman hurdler, blonde bob, asymmetric tracksuit and knee brace; jade and ochre palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-leg-3",
+    "name": "Leg Challenger 3",
+    "design": "Original adult broad stocky male hiker, russet beard, utility vest, boots and rolled trousers; jade and ochre palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-leg-4",
+    "name": "Leg Challenger 4",
+    "design": "Original adult tall dark-skinned woman dancer, high bun, split training tunic and leggings; jade and ochre palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-leg-5",
+    "name": "Leg Challenger 5",
+    "design": "Original adult older east-asian male mobility coach, silver ponytail, loose knee-length trousers; jade and ochre palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-leg-6",
+    "name": "Leg Challenger 6",
+    "design": "Original adult freckled red-haired woman trail runner, windbreaker tied at waist and striped socks; jade and ochre palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-arm-1",
+    "name": "Arm Challenger 1",
+    "design": "Original adult muscular bald dark-skinned male boxer, sleeveless hoodie and wrapped fists; coral and navy palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-arm-2",
+    "name": "Arm Challenger 2",
+    "design": "Original adult compact woman calisthenics athlete, cropped silver hair, sports vest and wristbands; coral and navy palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-arm-3",
+    "name": "Arm Challenger 3",
+    "design": "Original adult lanky male climber, messy sandy hair, fitted jacket and chalk pouch; coral and navy palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-arm-4",
+    "name": "Arm Challenger 4",
+    "design": "Original adult broad woman powerlifter, black braided crown, singlet and soft training shoes; coral and navy palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-arm-5",
+    "name": "Arm Challenger 5",
+    "design": "Original adult older moustached male rowing coach, rolled sleeves and maroon waistcoat; coral and navy palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-arm-6",
+    "name": "Arm Challenger 6",
+    "design": "Original adult woman martial artist, long blue-black ponytail, cropped zip jacket and wide trousers; coral and navy palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-back-1",
+    "name": "Back Challenger 1",
+    "design": "Original adult tall woman posture specialist, dark blunt bob, fitted tunic and flowing sash; sky blue and ivory palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-back-2",
+    "name": "Back Challenger 2",
+    "design": "Original adult lean male gymnast, chestnut waves, layered sleeveless jacket and fitted trousers; sky blue and ivory palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-back-3",
+    "name": "Back Challenger 3",
+    "design": "Original adult older dark-skinned woman coach, grey curls, teal cardigan and training pants; sky blue and ivory palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-back-4",
+    "name": "Back Challenger 4",
+    "design": "Original adult broad male rescue climber, shaved side haircut, blue harness and rugged outfit; sky blue and ivory palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-back-5",
+    "name": "Back Challenger 5",
+    "design": "Original adult young adult woman acrobat, copper side braid, navy bodysuit with short overskirt; sky blue and ivory palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-back-6",
+    "name": "Back Challenger 6",
+    "design": "Original adult silver-haired male yoga instructor, relaxed linen wrap top and cuffed trousers; sky blue and ivory palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-core-1",
+    "name": "Core Challenger 1",
+    "design": "Original adult woman balance trainer, black pixie cut, purple crop jacket and fitted shorts; violet and gold palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-core-2",
+    "name": "Core Challenger 2",
+    "design": "Original adult dark-skinned male gymnast, gold headband, plum sleeveless top and ankle wraps; violet and gold palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-core-3",
+    "name": "Core Challenger 3",
+    "design": "Original adult stocky woman wrestler, auburn double braids, violet singlet and knee sleeves; violet and gold palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-core-4",
+    "name": "Core Challenger 4",
+    "design": "Original adult lean male pilates coach, silver glasses, long lilac vest and black trousers; violet and gold palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-core-5",
+    "name": "Core Challenger 5",
+    "design": "Original adult tall woman martial artist, white braided hair, gold-trimmed purple split tunic; violet and gold palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-core-6",
+    "name": "Core Challenger 6",
+    "design": "Original adult older male stability master, dark beard, belted indigo jacket and relaxed trousers; violet and gold palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-cardio-1",
+    "name": "Cardio Challenger 1",
+    "design": "Original adult woman aerobics instructor, fluffy pink bob, orange cropped hoodie and teal shorts; tangerine and teal palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-cardio-2",
+    "name": "Cardio Challenger 2",
+    "design": "Original adult lean dark-skinned male runner, tight curls, bright track vest and compression sleeves; tangerine and teal palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-cardio-3",
+    "name": "Cardio Challenger 3",
+    "design": "Original adult stocky male dance coach, orange bandana, open teal shirt and cargo trousers; tangerine and teal palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-cardio-4",
+    "name": "Cardio Challenger 4",
+    "design": "Original adult woman kickboxer, black double buns, orange tank and white gloves; tangerine and teal palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-cardio-5",
+    "name": "Cardio Challenger 5",
+    "design": "Original adult older woman walking coach, short grey curls, long teal windbreaker and cream shoes; tangerine and teal palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-cardio-6",
+    "name": "Cardio Challenger 6",
+    "design": "Original adult male street dancer, swept blue hair, orange jacket tied waist and loose joggers; tangerine and teal palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-mobility-1",
+    "name": "Mobility Challenger 1",
+    "design": "Original adult woman stretch coach, loose chestnut bun, mint wrap cardigan and rose leggings; mint and rose palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-mobility-2",
+    "name": "Mobility Challenger 2",
+    "design": "Original adult older male tai-chi instructor, silver beard, mint traditional training jacket; mint and rose palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-mobility-3",
+    "name": "Mobility Challenger 3",
+    "design": "Original adult dark-skinned woman dancer, shaved hair, flowing rose sash and fitted mint vest; mint and rose palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-mobility-4",
+    "name": "Mobility Challenger 4",
+    "design": "Original adult slender male movement artist, long black ponytail, pale wrap shirt and cropped pants; mint and rose palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-mobility-5",
+    "name": "Mobility Challenger 5",
+    "design": "Original adult broad woman instructor, blonde braid, sage hoodie and comfortable rose trousers; mint and rose palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "normal-mobility-6",
+    "name": "Mobility Challenger 6",
+    "design": "Original adult older red-haired male flexibility coach, round glasses, long mint waistcoat; mint and rose palette, natural dynamic ready stance. Clear distinct silhouette."
+  },
+  {
+    "id": "boss-01",
+    "name": "Terra",
+    "design": "Elite leg tower champion, woman, warm tan skin and long black braid, asymmetric high collar athletic capelet, jade and ochre with gold stitching, lean wiry build, regal dynamic ready pose, distinct elaborate outfit and large expressive eyes."
+  },
+  {
+    "id": "boss-02",
+    "name": "Flint",
+    "design": "Elite arm tower champion, man, light freckled skin and crimson tousled hair, layered sleeveless training robe with sash, coral and navy with gold stitching, tall broad shoulders, regal dynamic ready pose, distinct elaborate outfit and large expressive eyes."
+  },
+  {
+    "id": "boss-03",
+    "name": "Zephyr",
+    "design": "Elite back tower champion, woman, olive skin and silver swept hair, tailored cropped jacket and wide-legged pants, sky blue and ivory with gold stitching, compact athletic build, regal dynamic ready pose, distinct elaborate outfit and large expressive eyes."
+  },
+  {
+    "id": "boss-04",
+    "name": "Axiom",
+    "design": "Elite core tower champion, man, deep brown skin and white short curls, long split coat with rolled sleeves, violet and gold with gold stitching, muscular powerful build, regal dynamic ready pose, distinct elaborate outfit and large expressive eyes."
+  },
+  {
+    "id": "boss-05",
+    "name": "Tempo",
+    "design": "Elite cardio tower champion, woman, warm tan skin and long black braid, asymmetric high collar athletic capelet, tangerine and teal with gold stitching, lean wiry build, regal dynamic ready pose, distinct elaborate outfit and large expressive eyes."
+  },
+  {
+    "id": "boss-06",
+    "name": "Willow",
+    "design": "Elite mobility tower champion, man, light freckled skin and crimson tousled hair, layered sleeveless training robe with sash, mint and rose with gold stitching, tall broad shoulders, regal dynamic ready pose, distinct elaborate outfit and large expressive eyes."
+  },
+  {
+    "id": "boss-07",
+    "name": "Forge",
+    "design": "Elite leg and back tower champion, woman, olive skin and silver swept hair, tailored cropped jacket and wide-legged pants, jade and ochre with gold stitching, compact athletic build, regal dynamic ready pose, distinct elaborate outfit and large expressive eyes."
+  },
+  {
+    "id": "boss-08",
+    "name": "Granite",
+    "design": "Elite arm and core tower champion, man, deep brown skin and white short curls, long split coat with rolled sleeves, coral and navy with gold stitching, muscular powerful build, regal dynamic ready pose, distinct elaborate outfit and large expressive eyes."
+  },
+  {
+    "id": "boss-09",
+    "name": "Bastion",
+    "design": "Elite back and cardio tower champion, woman, warm tan skin and long black braid, asymmetric high collar athletic capelet, sky blue and ivory with gold stitching, lean wiry build, regal dynamic ready pose, distinct elaborate outfit and large expressive eyes."
+  },
+  {
+    "id": "boss-10",
+    "name": "Volt",
+    "design": "Elite core and mobility tower champion, man, light freckled skin and crimson tousled hair, layered sleeveless training robe with sash, violet and gold with gold stitching, tall broad shoulders, regal dynamic ready pose, distinct elaborate outfit and large expressive eyes."
+  },
+  {
+    "id": "boss-11",
+    "name": "Reed",
+    "design": "Elite cardio and leg tower champion, woman, olive skin and silver swept hair, tailored cropped jacket and wide-legged pants, tangerine and teal with gold stitching, compact athletic build, regal dynamic ready pose, distinct elaborate outfit and large expressive eyes."
+  },
+  {
+    "id": "boss-12",
+    "name": "Atlas",
+    "design": "Elite mobility and arm tower champion, man, deep brown skin and white short curls, long split coat with rolled sleeves, mint and rose with gold stitching, muscular powerful build, regal dynamic ready pose, distinct elaborate outfit and large expressive eyes."
+  },
+  {
+    "id": "boss-13",
+    "name": "Anchor",
+    "design": "Elite leg and back tower champion, woman, warm tan skin and long black braid, asymmetric high collar athletic capelet, jade and ochre with gold stitching, lean wiry build, regal dynamic ready pose, distinct elaborate outfit and large expressive eyes."
+  },
+  {
+    "id": "boss-14",
+    "name": "Blaze",
+    "design": "Elite arm and core tower champion, man, light freckled skin and crimson tousled hair, layered sleeveless training robe with sash, coral and navy with gold stitching, tall broad shoulders, regal dynamic ready pose, distinct elaborate outfit and large expressive eyes."
+  },
+  {
+    "id": "boss-15",
+    "name": "Sable",
+    "design": "Elite back and cardio tower champion, woman, olive skin and silver swept hair, tailored cropped jacket and wide-legged pants, sky blue and ivory with gold stitching, compact athletic build, regal dynamic ready pose, distinct elaborate outfit and large expressive eyes."
+  },
+  {
+    "id": "boss-16",
+    "name": "Cairn",
+    "design": "Elite core and mobility tower champion, man, deep brown skin and white short curls, long split coat with rolled sleeves, violet and gold with gold stitching, muscular powerful build, regal dynamic ready pose, distinct elaborate outfit and large expressive eyes."
+  },
+  {
+    "id": "boss-17",
+    "name": "Nimbus",
+    "design": "Elite cardio and leg tower champion, woman, warm tan skin and long black braid, asymmetric high collar athletic capelet, tangerine and teal with gold stitching, lean wiry build, regal dynamic ready pose, distinct elaborate outfit and large expressive eyes."
+  },
+  {
+    "id": "boss-18",
+    "name": "Aster",
+    "design": "Elite mobility and arm tower champion, man, light freckled skin and crimson tousled hair, layered sleeveless training robe with sash, mint and rose with gold stitching, tall broad shoulders, regal dynamic ready pose, distinct elaborate outfit and large expressive eyes."
+  },
+  {
+    "id": "boss-19",
+    "name": "Solstice",
+    "design": "Elite leg and back tower champion, woman, olive skin and silver swept hair, tailored cropped jacket and wide-legged pants, jade and ochre with gold stitching, compact athletic build, regal dynamic ready pose, distinct elaborate outfit and large expressive eyes."
+  },
+  {
+    "id": "boss-20",
+    "name": "Zenith",
+    "design": "Centennial champion, striking mature androgynous adult with silver lion-mane hair, ivory and midnight tailored long coat, six subtle colored cloth ribbons, elegant athletic boots, confident open hand, gold trim, no armor, magnificent commanding silhouette"
+  },
+  {
+    "id": "instructor-1",
+    "name": "Coach Rowan",
+    "design": "Friendly older male instructor, silver spiky hair and small beard, coral headband, ivory rolled-sleeve jacket over navy shirt, dark athletic pants, one open guiding palm, clear warm expressive eyes."
+  },
+  {
+    "id": "instructor-2",
+    "name": "Coach Mira",
+    "design": "Friendly mature dark-skinned woman instructor, silver curly bun, teal long training jacket, coral trousers, round golden spectacles, confident encouraging thumbs-up, bright expressive eyes."
+  }
+]

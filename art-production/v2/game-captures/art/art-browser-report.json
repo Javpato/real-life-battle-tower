@@ -1,0 +1,217 @@
+{
+  "passed": true,
+  "sizes": [
+    [
+      1920,
+      1080
+    ],
+    [
+      1366,
+      768
+    ],
+    [
+      1280,
+      720
+    ],
+    [
+      915,
+      412
+    ],
+    [
+      800,
+      360
+    ]
+  ],
+  "anchors": [
+    {
+      "name": "boss-battle-1920x1080",
+      "values": [
+        {
+          "role": "hero",
+          "x": 0.31199052780181247,
+          "y": 0.814989475388601,
+          "inside": true
+        },
+        {
+          "role": "enemy",
+          "x": 0.7699918029054147,
+          "y": 0.617997085492228,
+          "inside": true
+        }
+      ]
+    },
+    {
+      "name": "boss-battle-1366x768",
+      "values": [
+        {
+          "role": "hero",
+          "x": 0.3119921875,
+          "y": 0.815,
+          "inside": true
+        },
+        {
+          "role": "enemy",
+          "x": 0.77,
+          "y": 0.6179861111111111,
+          "inside": true
+        }
+      ]
+    },
+    {
+      "name": "boss-battle-1280x720",
+      "values": [
+        {
+          "role": "hero",
+          "x": 0.3119935912108034,
+          "y": 0.8149820963541666,
+          "inside": true
+        },
+        {
+          "role": "enemy",
+          "x": 0.7699931334401465,
+          "y": 0.6179606119791666,
+          "inside": true
+        }
+      ]
+    },
+    {
+      "name": "boss-battle-915x412",
+      "values": [
+        {
+          "role": "hero",
+          "x": 0.3119702835617872,
+          "y": 0.8149181547619048,
+          "inside": true
+        },
+        {
+          "role": "enemy",
+          "x": 0.7699591922151303,
+          "y": 0.6179315476190477,
+          "inside": true
+        }
+      ]
+    },
+    {
+      "name": "boss-battle-800x360",
+      "values": [
+        {
+          "role": "hero",
+          "x": 0.311941203212608,
+          "y": 0.8149245689655172,
+          "inside": true
+        },
+        {
+          "role": "enemy",
+          "x": 0.7699651462342779,
+          "y": 0.6179956896551724,
+          "inside": true
+        }
+      ]
+    },
+    {
+      "name": "exercise-before-hit-1920x1080",
+      "values": [
+        {
+          "role": "hero",
+          "x": 0.3119923285198556,
+          "y": 0.8149819494584838,
+          "inside": true
+        },
+        {
+          "role": "enemy",
+          "x": 0.7699966155234657,
+          "y": 0.6179803449659045,
+          "inside": true
+        }
+      ]
+    },
+    {
+      "name": "exercise-before-hit-1366x768",
+      "values": [
+        {
+          "role": "hero",
+          "x": 0.3119831424936387,
+          "y": 0.8149915182357931,
+          "inside": true
+        },
+        {
+          "role": "enemy",
+          "x": 0.7699984096692112,
+          "y": 0.6179672054628346,
+          "inside": true
+        }
+      ]
+    },
+    {
+      "name": "exercise-before-hit-1280x720",
+      "values": [
+        {
+          "role": "hero",
+          "x": 0.31199048913043476,
+          "y": 0.8149909420289855,
+          "inside": true
+        },
+        {
+          "role": "enemy",
+          "x": 0.7699983016304348,
+          "y": 0.6179800724637681,
+          "inside": true
+        }
+      ]
+    },
+    {
+      "name": "exercise-before-hit-915x412",
+      "values": [
+        {
+          "role": "hero",
+          "x": 0.3119751291989664,
+          "y": 0.8149583692219351,
+          "inside": true
+        },
+        {
+          "role": "enemy",
+          "x": 0.7699854651162791,
+          "y": 0.6179299454493253,
+          "inside": true
+        }
+      ]
+    },
+    {
+      "name": "exercise-before-hit-800x360",
+      "values": [
+        {
+          "role": "hero",
+          "x": 0.3119914940828402,
+          "y": 0.8149243918474688,
+          "inside": true
+        },
+        {
+          "role": "enemy",
+          "x": 0.7699704142011834,
+          "y": 0.6179322813938198,
+          "inside": true
+        }
+      ]
+    },
+    {
+      "name": "accepted-hit",
+      "values": [
+        {
+          "role": "hero",
+          "x": 0.3119831424936387,
+          "y": 0.8149915182357931,
+          "inside": true
+        },
+        {
+          "role": "enemy",
+          "x": 0.7699984096692112,
+          "y": 0.6179672054628346,
+          "inside": true
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "failed": [],
+  "physicalExercise": false
+}

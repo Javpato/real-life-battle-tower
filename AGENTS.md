@@ -4,7 +4,7 @@ React/Vite/TypeScript, native pixel canvas presentation, Capacitor Android and S
 
 ## Shared authority
 - src/tower/model.ts defines PlayerSave, Skill, Series, TowerRun, WorkoutActivity and TowerCommand. src/tower/engine.ts is the single canonical progression/combat/workout reducer. Presentation must not calculate rewards, damage or accepted progress.
-- src/tower/catalog.ts owns the30 physical skills and challenges; generation.ts owns deterministic floors. No XP, levels, old journey compatibility or geographical progression.
+- src/tower/catalog.ts owns the90 physical skills and challenges; generation.ts owns deterministic floors. No XP, levels, old journey compatibility or geographical progression.
 - ExerciseCamera/MediaPipe and phone transport emit exercise evidence; never upload camera frames. Only accepted unique events advance. Pausing, stale frames and tracking loss never credit units.
 - Camera/manual/mixed provenance is explicit. Experimental detector profiles are not physical validation. Technique stars require evidence; rests never reduce score.
 - src/tower/useTower.ts persists atomic local slots and canonical cloud acknowledgements. Three normal slots; developer preview is separate and cannot sync. Nutrition keeps its independent journal and consent boundary.
@@ -13,11 +13,11 @@ React/Vite/TypeScript, native pixel canvas presentation, Capacitor Android and S
 
 ## Approved art-method change
 - Complex character illustration must use the available image-generation tool or a specialized art model. Python/Pillow/SVG/Canvas are only for image processing, pixel repairs, sheets and presentation, never the primary anatomy/character illustration method.
-- Do not regenerate characters with scripts/build-tower-art.py. Its output is the previous art direction awaiting replacement.
-- art-review/trainers-v2 is an isolated three-candidate approval proof. Do not integrate or mass-produce the new art until the user approves the direction.
+- The old geometric character generator is retired. Use image_gen illustrations and the native export scripts; preserve eyes and source colors.
+- The user approved the ORIGINAL b-strength-specialist-redraw.png (not retouched eyes). Production of 60 characters and integration is authorized. Preserve original facial expression and eyes; use 128px native combat art.
 
 ## Visual ownership
-- Native source-resolution pixel assets live under public/assets/tower with manifest and reproducible generator. No old RPG graphics. PixelScene maps authoritative accepted progress to visuals; no independent exercise counters.
+- Native128px character assets live under public/assets/tower-v2 with manifest, original image-generation sources and reproducible export scripts. No old RPG graphics. PixelScene maps authoritative accepted progress to visuals; no independent exercise counters.
 - World exploration and associated sprites/core are retired. All new screens and support panels must follow the tower visual system.
 
 ## Verification

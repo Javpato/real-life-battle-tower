@@ -1,0 +1,16 @@
+
+> real-life-rpg@0.1.0 test
+> vitest run --reporter=dot
+
+
+ RUN  v5.1.0 /home/javpato/Desktop/todoProgra/HACKATHONNXT/real-life-rpg
+
+····································································································································································································································································································································stdout | tests/tower-balance.test.ts > allows strongest legal four-skill manual play through bounded high-floor bosses
+{"simulations":420,"minHp":5,"maxResponses":8,"failures":[]}
+
+··
+
+ Test Files  29 passed (29)
+      Tests  326 passed (326)
+   Start at  23:25:07
+   Duration  2.31s (tests 69%, transform 15%, import 14%, worker 3%)

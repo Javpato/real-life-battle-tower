@@ -1,0 +1,10219 @@
+{
+  "version": 7,
+  "expectedCharacters": 60,
+  "characters": [
+    {
+      "id": "hero-female",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "dd1488993115253273b38147cd34a60e13d574d48ad64dc7b55feb4e0773b5ae",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "full-16-frame-sheet-2x-nearest",
+          "full-back-16-frame-sheet-2x-nearest",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1261,
+        1247
+      ],
+      "sharedScale": 0.38095238095238093,
+      "frameCount": 16,
+      "backFrameCount": 16,
+      "uniqueFrames": 32,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 210250,
+      "nativeColors": 56114,
+      "bounds": [
+        [
+          36,
+          15,
+          92,
+          123
+        ],
+        [
+          35,
+          14,
+          93,
+          123
+        ],
+        [
+          31,
+          18,
+          92,
+          123
+        ],
+        [
+          36,
+          14,
+          91,
+          123
+        ],
+        [
+          33,
+          23,
+          94,
+          123
+        ],
+        [
+          29,
+          24,
+          103,
+          123
+        ],
+        [
+          25,
+          24,
+          120,
+          123
+        ],
+        [
+          31,
+          20,
+          97,
+          123
+        ],
+        [
+          14,
+          24,
+          99,
+          123
+        ],
+        [
+          32,
+          26,
+          95,
+          123
+        ],
+        [
+          30,
+          19,
+          96,
+          123
+        ],
+        [
+          28,
+          17,
+          97,
+          123
+        ],
+        [
+          28,
+          11,
+          96,
+          123
+        ],
+        [
+          31,
+          11,
+          94,
+          123
+        ],
+        [
+          24,
+          11,
+          94,
+          123
+        ],
+        [
+          21,
+          11,
+          102,
+          123
+        ],
+        [
+          38,
+          24,
+          91,
+          123
+        ],
+        [
+          37,
+          23,
+          90,
+          123
+        ],
+        [
+          38,
+          22,
+          91,
+          123
+        ],
+        [
+          37,
+          24,
+          90,
+          123
+        ],
+        [
+          37,
+          32,
+          92,
+          123
+        ],
+        [
+          34,
+          30,
+          93,
+          123
+        ],
+        [
+          33,
+          30,
+          111,
+          123
+        ],
+        [
+          35,
+          29,
+          93,
+          123
+        ],
+        [
+          29,
+          32,
+          91,
+          123
+        ],
+        [
+          22,
+          40,
+          96,
+          123
+        ],
+        [
+          34,
+          28,
+          95,
+          123
+        ],
+        [
+          32,
+          27,
+          95,
+          123
+        ],
+        [
+          31,
+          24,
+          94,
+          123
+        ],
+        [
+          30,
+          27,
+          94,
+          123
+        ],
+        [
+          33,
+          30,
+          95,
+          123
+        ],
+        [
+          31,
+          28,
+          95,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        1,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        4,
+        5,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "hero-male",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "9952b931876284dac8fa8f24561c78b398a572ec138c030c35d2efb87497f35b",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "full-16-frame-sheet-2x-nearest",
+          "full-back-16-frame-sheet-2x-nearest",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.38666666666666666,
+      "frameCount": 16,
+      "backFrameCount": 16,
+      "uniqueFrames": 32,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 195883,
+      "nativeColors": 53024,
+      "bounds": [
+        [
+          41,
+          20,
+          86,
+          123
+        ],
+        [
+          40,
+          19,
+          86,
+          123
+        ],
+        [
+          39,
+          22,
+          86,
+          123
+        ],
+        [
+          40,
+          20,
+          89,
+          123
+        ],
+        [
+          28,
+          27,
+          100,
+          123
+        ],
+        [
+          36,
+          27,
+          105,
+          123
+        ],
+        [
+          23,
+          32,
+          122,
+          123
+        ],
+        [
+          32,
+          25,
+          94,
+          123
+        ],
+        [
+          33,
+          22,
+          103,
+          123
+        ],
+        [
+          31,
+          36,
+          98,
+          123
+        ],
+        [
+          32,
+          21,
+          95,
+          123
+        ],
+        [
+          29,
+          20,
+          94,
+          123
+        ],
+        [
+          44,
+          20,
+          100,
+          123
+        ],
+        [
+          38,
+          20,
+          91,
+          123
+        ],
+        [
+          29,
+          24,
+          99,
+          123
+        ],
+        [
+          29,
+          21,
+          100,
+          123
+        ],
+        [
+          42,
+          28,
+          83,
+          123
+        ],
+        [
+          42,
+          26,
+          83,
+          123
+        ],
+        [
+          41,
+          24,
+          83,
+          123
+        ],
+        [
+          42,
+          28,
+          83,
+          123
+        ],
+        [
+          41,
+          39,
+          88,
+          123
+        ],
+        [
+          38,
+          36,
+          91,
+          123
+        ],
+        [
+          37,
+          34,
+          107,
+          123
+        ],
+        [
+          40,
+          35,
+          92,
+          123
+        ],
+        [
+          31,
+          34,
+          91,
+          123
+        ],
+        [
+          27,
+          45,
+          80,
+          123
+        ],
+        [
+          37,
+          33,
+          90,
+          123
+        ],
+        [
+          34,
+          30,
+          91,
+          123
+        ],
+        [
+          32,
+          30,
+          91,
+          123
+        ],
+        [
+          34,
+          32,
+          90,
+          123
+        ],
+        [
+          36,
+          39,
+          91,
+          123
+        ],
+        [
+          30,
+          32,
+          94,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-leg-1",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "ea7684f54237e48334589e36a73f2a3736b15e6c0e37636e1f04b72f69ce16fb",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1247,
+        1261
+      ],
+      "sharedScale": 0.41947565543071164,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 133572,
+      "nativeColors": 37823,
+      "bounds": [
+        [
+          36,
+          12,
+          91,
+          123
+        ],
+        [
+          37,
+          11,
+          92,
+          123
+        ],
+        [
+          37,
+          12,
+          91,
+          123
+        ],
+        [
+          37,
+          12,
+          92,
+          123
+        ],
+        [
+          25,
+          27,
+          103,
+          123
+        ],
+        [
+          25,
+          21,
+          102,
+          123
+        ],
+        [
+          23,
+          21,
+          120,
+          123
+        ],
+        [
+          27,
+          17,
+          101,
+          123
+        ],
+        [
+          28,
+          19,
+          97,
+          123
+        ],
+        [
+          26,
+          29,
+          102,
+          123
+        ],
+        [
+          31,
+          16,
+          97,
+          123
+        ],
+        [
+          29,
+          12,
+          99,
+          123
+        ],
+        [
+          50,
+          13,
+          105,
+          123
+        ],
+        [
+          21,
+          13,
+          110,
+          123
+        ],
+        [
+          29,
+          13,
+          99,
+          123
+        ],
+        [
+          26,
+          13,
+          113,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-leg-2",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "499c8c1dc5b4e901b48c38079c046c66b99580ada36c7d05cdf79b55ec435e57",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1246,
+        1263
+      ],
+      "sharedScale": 0.3473053892215569,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 149693,
+      "nativeColors": 29128,
+      "bounds": [
+        [
+          39,
+          33,
+          88,
+          123
+        ],
+        [
+          39,
+          32,
+          88,
+          123
+        ],
+        [
+          40,
+          34,
+          89,
+          123
+        ],
+        [
+          39,
+          32,
+          89,
+          123
+        ],
+        [
+          39,
+          44,
+          95,
+          123
+        ],
+        [
+          38,
+          40,
+          103,
+          123
+        ],
+        [
+          27,
+          42,
+          122,
+          123
+        ],
+        [
+          35,
+          33,
+          92,
+          123
+        ],
+        [
+          33,
+          36,
+          93,
+          123
+        ],
+        [
+          34,
+          42,
+          94,
+          123
+        ],
+        [
+          36,
+          33,
+          93,
+          123
+        ],
+        [
+          36,
+          30,
+          93,
+          123
+        ],
+        [
+          22,
+          31,
+          98,
+          123
+        ],
+        [
+          35,
+          30,
+          93,
+          123
+        ],
+        [
+          33,
+          31,
+          100,
+          123
+        ],
+        [
+          33,
+          31,
+          94,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-leg-3",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "8706eadd29d67a5b11624df7a3298fa4060abf6ad59deaafbb91d7d0886e1c02",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1244,
+        1264
+      ],
+      "sharedScale": 0.39862542955326463,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 159065,
+      "nativeColors": 44472,
+      "bounds": [
+        [
+          32,
+          21,
+          96,
+          123
+        ],
+        [
+          34,
+          21,
+          98,
+          123
+        ],
+        [
+          33,
+          23,
+          96,
+          123
+        ],
+        [
+          32,
+          20,
+          97,
+          123
+        ],
+        [
+          33,
+          28,
+          97,
+          123
+        ],
+        [
+          30,
+          31,
+          99,
+          123
+        ],
+        [
+          25,
+          33,
+          122,
+          123
+        ],
+        [
+          33,
+          29,
+          100,
+          123
+        ],
+        [
+          25,
+          23,
+          108,
+          123
+        ],
+        [
+          33,
+          37,
+          102,
+          123
+        ],
+        [
+          29,
+          23,
+          96,
+          123
+        ],
+        [
+          31,
+          21,
+          104,
+          123
+        ],
+        [
+          31,
+          25,
+          98,
+          123
+        ],
+        [
+          29,
+          24,
+          106,
+          123
+        ],
+        [
+          27,
+          23,
+          111,
+          123
+        ],
+        [
+          23,
+          22,
+          105,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-leg-4",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "0c0b709724bc8cd97be2d868a3e6b11829d9310450aa35e96421162fa5ceaa70",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.417910447761194,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 153090,
+      "nativeColors": 39456,
+      "bounds": [
+        [
+          36,
+          12,
+          90,
+          123
+        ],
+        [
+          33,
+          12,
+          91,
+          123
+        ],
+        [
+          33,
+          11,
+          90,
+          123
+        ],
+        [
+          36,
+          12,
+          91,
+          123
+        ],
+        [
+          30,
+          14,
+          98,
+          123
+        ],
+        [
+          30,
+          15,
+          97,
+          123
+        ],
+        [
+          26,
+          16,
+          118,
+          123
+        ],
+        [
+          29,
+          14,
+          98,
+          123
+        ],
+        [
+          26,
+          18,
+          100,
+          123
+        ],
+        [
+          30,
+          22,
+          98,
+          123
+        ],
+        [
+          31,
+          17,
+          96,
+          123
+        ],
+        [
+          33,
+          14,
+          96,
+          123
+        ],
+        [
+          33,
+          11,
+          102,
+          123
+        ],
+        [
+          15,
+          13,
+          112,
+          123
+        ],
+        [
+          24,
+          11,
+          105,
+          123
+        ],
+        [
+          29,
+          11,
+          104,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        2,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-leg-5",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "f961eae153d7948cfff406cf17c76f9b1e0b16eee0af5a7707d21cdc31440bbd",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.39590443686006827,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 169058,
+      "nativeColors": 42321,
+      "bounds": [
+        [
+          38,
+          18,
+          87,
+          123
+        ],
+        [
+          36,
+          17,
+          88,
+          123
+        ],
+        [
+          36,
+          18,
+          87,
+          123
+        ],
+        [
+          31,
+          18,
+          89,
+          123
+        ],
+        [
+          29,
+          23,
+          98,
+          123
+        ],
+        [
+          31,
+          22,
+          95,
+          123
+        ],
+        [
+          23,
+          26,
+          122,
+          123
+        ],
+        [
+          33,
+          18,
+          94,
+          123
+        ],
+        [
+          18,
+          22,
+          103,
+          123
+        ],
+        [
+          33,
+          27,
+          96,
+          123
+        ],
+        [
+          33,
+          18,
+          95,
+          123
+        ],
+        [
+          33,
+          15,
+          95,
+          123
+        ],
+        [
+          36,
+          18,
+          95,
+          123
+        ],
+        [
+          17,
+          17,
+          110,
+          123
+        ],
+        [
+          25,
+          18,
+          103,
+          123
+        ],
+        [
+          24,
+          20,
+          104,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-leg-6",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "8cb1d9d148fadb81b88c8f55896e559524eae2950f3b35d44afb454e95497edd",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1263,
+        1246
+      ],
+      "sharedScale": 0.4163568773234201,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 172111,
+      "nativeColors": 43547,
+      "bounds": [
+        [
+          36,
+          12,
+          91,
+          123
+        ],
+        [
+          35,
+          11,
+          91,
+          123
+        ],
+        [
+          37,
+          12,
+          90,
+          123
+        ],
+        [
+          34,
+          12,
+          89,
+          123
+        ],
+        [
+          29,
+          21,
+          103,
+          123
+        ],
+        [
+          34,
+          21,
+          107,
+          123
+        ],
+        [
+          17,
+          22,
+          117,
+          123
+        ],
+        [
+          30,
+          18,
+          98,
+          123
+        ],
+        [
+          13,
+          17,
+          92,
+          123
+        ],
+        [
+          32,
+          30,
+          96,
+          123
+        ],
+        [
+          32,
+          13,
+          95,
+          123
+        ],
+        [
+          31,
+          20,
+          95,
+          123
+        ],
+        [
+          29,
+          11,
+          110,
+          123
+        ],
+        [
+          26,
+          15,
+          93,
+          123
+        ],
+        [
+          20,
+          15,
+          99,
+          123
+        ],
+        [
+          25,
+          15,
+          98,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        2,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-arm-1",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "e7c6359a7729de6ddc4d51cd2849d5d0ab5ffd461b2f79c1c81c4e06a716d24e",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1246,
+        1262
+      ],
+      "sharedScale": 0.36477987421383645,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 141925,
+      "nativeColors": 31631,
+      "bounds": [
+        [
+          36,
+          30,
+          87,
+          123
+        ],
+        [
+          38,
+          30,
+          89,
+          123
+        ],
+        [
+          37,
+          32,
+          90,
+          123
+        ],
+        [
+          38,
+          31,
+          90,
+          123
+        ],
+        [
+          34,
+          37,
+          93,
+          123
+        ],
+        [
+          32,
+          35,
+          106,
+          123
+        ],
+        [
+          29,
+          34,
+          122,
+          123
+        ],
+        [
+          34,
+          31,
+          93,
+          123
+        ],
+        [
+          32,
+          35,
+          101,
+          123
+        ],
+        [
+          33,
+          42,
+          101,
+          123
+        ],
+        [
+          33,
+          30,
+          94,
+          123
+        ],
+        [
+          35,
+          26,
+          95,
+          123
+        ],
+        [
+          35,
+          30,
+          94,
+          123
+        ],
+        [
+          34,
+          34,
+          106,
+          123
+        ],
+        [
+          32,
+          31,
+          108,
+          123
+        ],
+        [
+          26,
+          29,
+          99,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-arm-2",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "dbb0dc9789381d5251314083e4a92ef1b79d48085e8b504ebd5a0236c9a3c751",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1247,
+        1261
+      ],
+      "sharedScale": 0.3741935483870968,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 159140,
+      "nativeColors": 34614,
+      "bounds": [
+        [
+          39,
+          23,
+          89,
+          123
+        ],
+        [
+          39,
+          20,
+          92,
+          123
+        ],
+        [
+          39,
+          22,
+          89,
+          123
+        ],
+        [
+          38,
+          22,
+          90,
+          123
+        ],
+        [
+          32,
+          32,
+          96,
+          123
+        ],
+        [
+          31,
+          33,
+          104,
+          123
+        ],
+        [
+          24,
+          32,
+          122,
+          123
+        ],
+        [
+          35,
+          29,
+          93,
+          123
+        ],
+        [
+          31,
+          28,
+          99,
+          123
+        ],
+        [
+          38,
+          37,
+          98,
+          123
+        ],
+        [
+          33,
+          22,
+          95,
+          123
+        ],
+        [
+          33,
+          24,
+          95,
+          123
+        ],
+        [
+          28,
+          21,
+          97,
+          123
+        ],
+        [
+          38,
+          21,
+          95,
+          123
+        ],
+        [
+          29,
+          22,
+          107,
+          123
+        ],
+        [
+          27,
+          29,
+          102,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-arm-3",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "c506ef57c821165ebdf7a1e49e270cce263c8357f6b98b9ebac258dd2c28516a",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.3945578231292517,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 165920,
+      "nativeColors": 38956,
+      "bounds": [
+        [
+          38,
+          18,
+          88,
+          123
+        ],
+        [
+          37,
+          15,
+          91,
+          123
+        ],
+        [
+          35,
+          15,
+          89,
+          123
+        ],
+        [
+          36,
+          17,
+          90,
+          123
+        ],
+        [
+          34,
+          23,
+          99,
+          123
+        ],
+        [
+          27,
+          24,
+          104,
+          123
+        ],
+        [
+          20,
+          24,
+          122,
+          123
+        ],
+        [
+          27,
+          22,
+          100,
+          123
+        ],
+        [
+          25,
+          18,
+          100,
+          123
+        ],
+        [
+          29,
+          31,
+          99,
+          123
+        ],
+        [
+          29,
+          15,
+          99,
+          123
+        ],
+        [
+          30,
+          14,
+          99,
+          123
+        ],
+        [
+          32,
+          18,
+          96,
+          123
+        ],
+        [
+          57,
+          14,
+          114,
+          123
+        ],
+        [
+          17,
+          13,
+          106,
+          123
+        ],
+        [
+          23,
+          16,
+          116,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-arm-4",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "748bc4e936238ac57b20c01be3c677c58e6c0930f369a206669803e2410fc86a",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1261,
+        1247
+      ],
+      "sharedScale": 0.36477987421383645,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 130507,
+      "nativeColors": 30575,
+      "bounds": [
+        [
+          37,
+          31,
+          91,
+          123
+        ],
+        [
+          36,
+          31,
+          91,
+          123
+        ],
+        [
+          38,
+          32,
+          87,
+          123
+        ],
+        [
+          40,
+          31,
+          90,
+          123
+        ],
+        [
+          35,
+          41,
+          93,
+          123
+        ],
+        [
+          37,
+          36,
+          104,
+          123
+        ],
+        [
+          26,
+          39,
+          122,
+          123
+        ],
+        [
+          35,
+          33,
+          93,
+          123
+        ],
+        [
+          30,
+          35,
+          100,
+          123
+        ],
+        [
+          33,
+          46,
+          96,
+          123
+        ],
+        [
+          36,
+          31,
+          93,
+          123
+        ],
+        [
+          37,
+          27,
+          94,
+          123
+        ],
+        [
+          36,
+          31,
+          91,
+          123
+        ],
+        [
+          45,
+          29,
+          103,
+          123
+        ],
+        [
+          24,
+          30,
+          102,
+          123
+        ],
+        [
+          27,
+          32,
+          97,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-arm-5",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "334e2cd6d53a088e26c2760dc4cde00c7fd89ea72c313c1957395fe324eb39ba",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.39322033898305087,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 153035,
+      "nativeColors": 37698,
+      "bounds": [
+        [
+          36,
+          23,
+          92,
+          123
+        ],
+        [
+          35,
+          22,
+          92,
+          123
+        ],
+        [
+          35,
+          24,
+          91,
+          123
+        ],
+        [
+          35,
+          26,
+          90,
+          123
+        ],
+        [
+          30,
+          27,
+          101,
+          123
+        ],
+        [
+          37,
+          28,
+          112,
+          123
+        ],
+        [
+          28,
+          32,
+          122,
+          123
+        ],
+        [
+          33,
+          24,
+          96,
+          123
+        ],
+        [
+          23,
+          26,
+          97,
+          123
+        ],
+        [
+          32,
+          35,
+          96,
+          123
+        ],
+        [
+          31,
+          24,
+          95,
+          123
+        ],
+        [
+          33,
+          18,
+          95,
+          123
+        ],
+        [
+          35,
+          24,
+          94,
+          123
+        ],
+        [
+          13,
+          22,
+          114,
+          123
+        ],
+        [
+          29,
+          24,
+          112,
+          123
+        ],
+        [
+          28,
+          21,
+          100,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-arm-6",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "79bd258fc276ec2ae5b58523013348527ba0267000211082e8c2784d405da0af",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.41025641025641024,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 138549,
+      "nativeColors": 35686,
+      "bounds": [
+        [
+          31,
+          12,
+          90,
+          123
+        ],
+        [
+          29,
+          12,
+          90,
+          123
+        ],
+        [
+          29,
+          12,
+          90,
+          123
+        ],
+        [
+          27,
+          12,
+          89,
+          123
+        ],
+        [
+          25,
+          16,
+          96,
+          123
+        ],
+        [
+          27,
+          17,
+          99,
+          123
+        ],
+        [
+          23,
+          18,
+          122,
+          123
+        ],
+        [
+          28,
+          15,
+          96,
+          123
+        ],
+        [
+          16,
+          18,
+          98,
+          123
+        ],
+        [
+          33,
+          22,
+          98,
+          123
+        ],
+        [
+          26,
+          11,
+          95,
+          123
+        ],
+        [
+          24,
+          14,
+          95,
+          123
+        ],
+        [
+          21,
+          13,
+          91,
+          123
+        ],
+        [
+          21,
+          13,
+          109,
+          123
+        ],
+        [
+          24,
+          13,
+          103,
+          123
+        ],
+        [
+          21,
+          13,
+          107,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-back-1",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "411139059e5514cc6173191d3c60ac87b8779d802b8f82650964d4b558eca21d",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1246,
+        1263
+      ],
+      "sharedScale": 0.40559440559440557,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 128420,
+      "nativeColors": 33251,
+      "bounds": [
+        [
+          40,
+          23,
+          92,
+          123
+        ],
+        [
+          38,
+          24,
+          92,
+          123
+        ],
+        [
+          36,
+          24,
+          94,
+          123
+        ],
+        [
+          38,
+          24,
+          93,
+          123
+        ],
+        [
+          37,
+          26,
+          97,
+          123
+        ],
+        [
+          31,
+          29,
+          107,
+          123
+        ],
+        [
+          26,
+          35,
+          122,
+          123
+        ],
+        [
+          31,
+          26,
+          92,
+          123
+        ],
+        [
+          21,
+          29,
+          94,
+          123
+        ],
+        [
+          31,
+          42,
+          96,
+          123
+        ],
+        [
+          28,
+          22,
+          93,
+          123
+        ],
+        [
+          32,
+          29,
+          97,
+          123
+        ],
+        [
+          36,
+          22,
+          109,
+          123
+        ],
+        [
+          38,
+          19,
+          110,
+          123
+        ],
+        [
+          22,
+          23,
+          103,
+          123
+        ],
+        [
+          29,
+          24,
+          104,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-back-2",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "fd5a7e3536692895a0b24be0d98f16df9ca1121e80c9f115693ff18fd918b0db",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.4043321299638989,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 155953,
+      "nativeColors": 39153,
+      "bounds": [
+        [
+          39,
+          12,
+          88,
+          123
+        ],
+        [
+          40,
+          11,
+          89,
+          123
+        ],
+        [
+          40,
+          13,
+          89,
+          123
+        ],
+        [
+          40,
+          13,
+          89,
+          123
+        ],
+        [
+          36,
+          27,
+          94,
+          123
+        ],
+        [
+          30,
+          26,
+          98,
+          123
+        ],
+        [
+          26,
+          28,
+          121,
+          123
+        ],
+        [
+          32,
+          23,
+          96,
+          123
+        ],
+        [
+          24,
+          19,
+          98,
+          123
+        ],
+        [
+          33,
+          32,
+          97,
+          123
+        ],
+        [
+          29,
+          20,
+          98,
+          123
+        ],
+        [
+          33,
+          13,
+          95,
+          123
+        ],
+        [
+          32,
+          17,
+          95,
+          123
+        ],
+        [
+          15,
+          16,
+          109,
+          123
+        ],
+        [
+          29,
+          18,
+          97,
+          123
+        ],
+        [
+          29,
+          18,
+          97,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-back-3",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "3663bd63245f9d53f3f10ebb8c2b2e27cc8a8d9ace3328f57a7b8325cf84c8de",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1247,
+        1261
+      ],
+      "sharedScale": 0.38666666666666666,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 163060,
+      "nativeColors": 39652,
+      "bounds": [
+        [
+          38,
+          21,
+          88,
+          123
+        ],
+        [
+          36,
+          21,
+          88,
+          123
+        ],
+        [
+          36,
+          21,
+          88,
+          123
+        ],
+        [
+          35,
+          21,
+          87,
+          123
+        ],
+        [
+          31,
+          24,
+          97,
+          123
+        ],
+        [
+          36,
+          26,
+          106,
+          123
+        ],
+        [
+          25,
+          27,
+          122,
+          123
+        ],
+        [
+          33,
+          24,
+          94,
+          123
+        ],
+        [
+          21,
+          27,
+          99,
+          123
+        ],
+        [
+          29,
+          32,
+          100,
+          123
+        ],
+        [
+          30,
+          21,
+          94,
+          123
+        ],
+        [
+          32,
+          22,
+          94,
+          123
+        ],
+        [
+          41,
+          21,
+          101,
+          123
+        ],
+        [
+          16,
+          20,
+          106,
+          123
+        ],
+        [
+          16,
+          19,
+          99,
+          123
+        ],
+        [
+          31,
+          19,
+          98,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-back-4",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "8390d563d86071e1a45e8b26141249ad1b5f4ee4a7d419d2cc35b80e9a7e1e04",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.3729903536977492,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 158813,
+      "nativeColors": 35900,
+      "bounds": [
+        [
+          41,
+          28,
+          91,
+          123
+        ],
+        [
+          41,
+          25,
+          89,
+          123
+        ],
+        [
+          41,
+          28,
+          89,
+          123
+        ],
+        [
+          41,
+          25,
+          91,
+          123
+        ],
+        [
+          29,
+          35,
+          99,
+          123
+        ],
+        [
+          34,
+          37,
+          97,
+          123
+        ],
+        [
+          25,
+          35,
+          122,
+          123
+        ],
+        [
+          30,
+          31,
+          98,
+          123
+        ],
+        [
+          24,
+          32,
+          100,
+          123
+        ],
+        [
+          31,
+          47,
+          96,
+          123
+        ],
+        [
+          32,
+          28,
+          96,
+          123
+        ],
+        [
+          32,
+          22,
+          95,
+          123
+        ],
+        [
+          51,
+          29,
+          104,
+          123
+        ],
+        [
+          16,
+          27,
+          107,
+          123
+        ],
+        [
+          28,
+          30,
+          104,
+          123
+        ],
+        [
+          30,
+          26,
+          99,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-back-5",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "c1880c6cac58d2affebb0ef0bf0521bef4004142288ea0b1305fd0f5e6b5e3c4",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.3625,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 144184,
+      "nativeColors": 31752,
+      "bounds": [
+        [
+          41,
+          29,
+          86,
+          123
+        ],
+        [
+          41,
+          29,
+          86,
+          123
+        ],
+        [
+          39,
+          30,
+          86,
+          123
+        ],
+        [
+          33,
+          29,
+          91,
+          123
+        ],
+        [
+          27,
+          40,
+          94,
+          123
+        ],
+        [
+          38,
+          39,
+          106,
+          123
+        ],
+        [
+          29,
+          39,
+          122,
+          123
+        ],
+        [
+          34,
+          33,
+          93,
+          123
+        ],
+        [
+          28,
+          32,
+          93,
+          123
+        ],
+        [
+          34,
+          41,
+          93,
+          123
+        ],
+        [
+          38,
+          26,
+          90,
+          123
+        ],
+        [
+          36,
+          32,
+          91,
+          123
+        ],
+        [
+          35,
+          28,
+          99,
+          123
+        ],
+        [
+          20,
+          29,
+          101,
+          123
+        ],
+        [
+          31,
+          30,
+          100,
+          123
+        ],
+        [
+          25,
+          35,
+          98,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-back-6",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "c230927f67a7860ed4cada3561ed1b1f7c62e0b983c9d3b8f56b2173c5834930",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.3879598662207358,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 148778,
+      "nativeColors": 37924,
+      "bounds": [
+        [
+          38,
+          18,
+          90,
+          123
+        ],
+        [
+          39,
+          18,
+          90,
+          123
+        ],
+        [
+          38,
+          18,
+          90,
+          123
+        ],
+        [
+          38,
+          17,
+          89,
+          123
+        ],
+        [
+          30,
+          23,
+          97,
+          123
+        ],
+        [
+          28,
+          27,
+          109,
+          123
+        ],
+        [
+          21,
+          27,
+          122,
+          123
+        ],
+        [
+          28,
+          23,
+          100,
+          123
+        ],
+        [
+          29,
+          23,
+          100,
+          123
+        ],
+        [
+          32,
+          32,
+          96,
+          123
+        ],
+        [
+          32,
+          22,
+          96,
+          123
+        ],
+        [
+          33,
+          19,
+          96,
+          123
+        ],
+        [
+          20,
+          23,
+          110,
+          123
+        ],
+        [
+          40,
+          17,
+          92,
+          123
+        ],
+        [
+          20,
+          23,
+          107,
+          123
+        ],
+        [
+          30,
+          22,
+          97,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-core-1",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "76ba733b35a476d0b91b306df7294e1e5c7d7d6f4db1e5249707ac27e6444f0e",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1261,
+        1247
+      ],
+      "sharedScale": 0.3670886075949367,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 117641,
+      "nativeColors": 25803,
+      "bounds": [
+        [
+          41,
+          32,
+          87,
+          123
+        ],
+        [
+          41,
+          29,
+          87,
+          123
+        ],
+        [
+          42,
+          30,
+          90,
+          123
+        ],
+        [
+          42,
+          32,
+          87,
+          123
+        ],
+        [
+          39,
+          39,
+          93,
+          123
+        ],
+        [
+          34,
+          41,
+          104,
+          123
+        ],
+        [
+          32,
+          42,
+          122,
+          123
+        ],
+        [
+          38,
+          37,
+          90,
+          123
+        ],
+        [
+          38,
+          36,
+          90,
+          123
+        ],
+        [
+          29,
+          40,
+          94,
+          123
+        ],
+        [
+          38,
+          30,
+          89,
+          123
+        ],
+        [
+          37,
+          34,
+          91,
+          123
+        ],
+        [
+          38,
+          25,
+          94,
+          123
+        ],
+        [
+          40,
+          29,
+          88,
+          123
+        ],
+        [
+          28,
+          30,
+          99,
+          123
+        ],
+        [
+          29,
+          30,
+          93,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-core-2",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "37bec1bbd4aab86165c6a78698d91822ab63063ad8ca1c05868d29f2b59299fb",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.40418118466898956,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 125009,
+      "nativeColors": 36220,
+      "bounds": [
+        [
+          40,
+          17,
+          90,
+          123
+        ],
+        [
+          36,
+          17,
+          94,
+          123
+        ],
+        [
+          39,
+          17,
+          93,
+          123
+        ],
+        [
+          41,
+          17,
+          92,
+          123
+        ],
+        [
+          39,
+          27,
+          94,
+          123
+        ],
+        [
+          32,
+          26,
+          107,
+          123
+        ],
+        [
+          23,
+          24,
+          122,
+          123
+        ],
+        [
+          35,
+          22,
+          91,
+          123
+        ],
+        [
+          26,
+          24,
+          100,
+          123
+        ],
+        [
+          32,
+          39,
+          95,
+          123
+        ],
+        [
+          34,
+          20,
+          95,
+          123
+        ],
+        [
+          34,
+          17,
+          93,
+          123
+        ],
+        [
+          12,
+          22,
+          107,
+          123
+        ],
+        [
+          36,
+          20,
+          92,
+          123
+        ],
+        [
+          21,
+          22,
+          103,
+          123
+        ],
+        [
+          26,
+          22,
+          100,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-core-3",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "e6a0941279650423e24f6ffdda7db41c3dcd1b3e39796b6bf0f0ca0303007489",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.36363636363636365,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 153268,
+      "nativeColors": 34866,
+      "bounds": [
+        [
+          38,
+          30,
+          87,
+          123
+        ],
+        [
+          35,
+          30,
+          94,
+          123
+        ],
+        [
+          37,
+          33,
+          88,
+          123
+        ],
+        [
+          37,
+          30,
+          90,
+          123
+        ],
+        [
+          34,
+          36,
+          96,
+          123
+        ],
+        [
+          30,
+          35,
+          101,
+          123
+        ],
+        [
+          29,
+          36,
+          122,
+          123
+        ],
+        [
+          34,
+          32,
+          94,
+          123
+        ],
+        [
+          19,
+          35,
+          95,
+          123
+        ],
+        [
+          34,
+          43,
+          94,
+          123
+        ],
+        [
+          34,
+          29,
+          90,
+          123
+        ],
+        [
+          37,
+          23,
+          92,
+          123
+        ],
+        [
+          26,
+          27,
+          83,
+          123
+        ],
+        [
+          23,
+          27,
+          98,
+          123
+        ],
+        [
+          29,
+          30,
+          99,
+          123
+        ],
+        [
+          25,
+          30,
+          108,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-core-4",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "be8aa3b9236481ff71cb98dda84ab04f9d077c39a6729ec1f0cf5eb1d457185d",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.38926174496644295,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 163309,
+      "nativeColors": 38189,
+      "bounds": [
+        [
+          40,
+          22,
+          87,
+          123
+        ],
+        [
+          40,
+          20,
+          86,
+          123
+        ],
+        [
+          39,
+          23,
+          86,
+          123
+        ],
+        [
+          39,
+          22,
+          92,
+          123
+        ],
+        [
+          33,
+          32,
+          109,
+          123
+        ],
+        [
+          31,
+          28,
+          101,
+          123
+        ],
+        [
+          27,
+          29,
+          122,
+          123
+        ],
+        [
+          29,
+          26,
+          97,
+          123
+        ],
+        [
+          23,
+          24,
+          97,
+          123
+        ],
+        [
+          30,
+          37,
+          97,
+          123
+        ],
+        [
+          36,
+          19,
+          92,
+          123
+        ],
+        [
+          36,
+          20,
+          92,
+          123
+        ],
+        [
+          22,
+          21,
+          101,
+          123
+        ],
+        [
+          34,
+          20,
+          94,
+          123
+        ],
+        [
+          28,
+          21,
+          99,
+          123
+        ],
+        [
+          32,
+          21,
+          105,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-core-5",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "b1b482d20ac5ed86c6fbfb3a441bef0c12ea5981925c64c5de15d765aa480d0c",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.41025641025641024,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 195236,
+      "nativeColors": 48009,
+      "bounds": [
+        [
+          30,
+          11,
+          91,
+          123
+        ],
+        [
+          27,
+          11,
+          91,
+          123
+        ],
+        [
+          31,
+          13,
+          91,
+          123
+        ],
+        [
+          32,
+          11,
+          91,
+          123
+        ],
+        [
+          22,
+          19,
+          98,
+          123
+        ],
+        [
+          21,
+          21,
+          102,
+          123
+        ],
+        [
+          21,
+          23,
+          121,
+          123
+        ],
+        [
+          29,
+          17,
+          98,
+          123
+        ],
+        [
+          16,
+          19,
+          101,
+          123
+        ],
+        [
+          29,
+          29,
+          99,
+          123
+        ],
+        [
+          24,
+          12,
+          98,
+          123
+        ],
+        [
+          25,
+          17,
+          98,
+          123
+        ],
+        [
+          27,
+          16,
+          93,
+          123
+        ],
+        [
+          14,
+          16,
+          111,
+          123
+        ],
+        [
+          18,
+          16,
+          103,
+          123
+        ],
+        [
+          21,
+          16,
+          98,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-core-6",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "e8ff7a525c54d7b19e4447425a4d56e0fd231390aeb4cc32b3023a2cb329ba2b",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.4070175438596491,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 152210,
+      "nativeColors": 39851,
+      "bounds": [
+        [
+          37,
+          12,
+          92,
+          123
+        ],
+        [
+          38,
+          12,
+          96,
+          123
+        ],
+        [
+          37,
+          14,
+          92,
+          123
+        ],
+        [
+          37,
+          12,
+          93,
+          123
+        ],
+        [
+          30,
+          20,
+          99,
+          123
+        ],
+        [
+          29,
+          21,
+          103,
+          123
+        ],
+        [
+          24,
+          22,
+          122,
+          123
+        ],
+        [
+          27,
+          15,
+          100,
+          123
+        ],
+        [
+          29,
+          20,
+          104,
+          123
+        ],
+        [
+          28,
+          31,
+          99,
+          123
+        ],
+        [
+          32,
+          13,
+          100,
+          123
+        ],
+        [
+          32,
+          11,
+          100,
+          123
+        ],
+        [
+          30,
+          17,
+          96,
+          123
+        ],
+        [
+          19,
+          15,
+          97,
+          123
+        ],
+        [
+          18,
+          13,
+          107,
+          123
+        ],
+        [
+          25,
+          12,
+          104,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-cardio-1",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "dc266368a9082734c43f5cb6376ec5195c1eb29d28254b42e1b32abe65536a47",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1247,
+        1261
+      ],
+      "sharedScale": 0.41025641025641024,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 196203,
+      "nativeColors": 43931,
+      "bounds": [
+        [
+          37,
+          16,
+          91,
+          123
+        ],
+        [
+          37,
+          16,
+          91,
+          123
+        ],
+        [
+          35,
+          16,
+          91,
+          123
+        ],
+        [
+          36,
+          16,
+          92,
+          123
+        ],
+        [
+          35,
+          19,
+          93,
+          123
+        ],
+        [
+          30,
+          22,
+          104,
+          123
+        ],
+        [
+          26,
+          20,
+          121,
+          123
+        ],
+        [
+          29,
+          18,
+          94,
+          123
+        ],
+        [
+          23,
+          21,
+          92,
+          123
+        ],
+        [
+          34,
+          32,
+          104,
+          123
+        ],
+        [
+          32,
+          11,
+          95,
+          123
+        ],
+        [
+          32,
+          19,
+          95,
+          123
+        ],
+        [
+          34,
+          18,
+          103,
+          123
+        ],
+        [
+          38,
+          15,
+          91,
+          123
+        ],
+        [
+          30,
+          18,
+          98,
+          123
+        ],
+        [
+          16,
+          16,
+          108,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-cardio-2",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "ecbc570fa2cddc05ba8ce996c8253abed8a75924f84cfdd268dd8da06a19f40b",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1246,
+        1263
+      ],
+      "sharedScale": 0.3473053892215569,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 153850,
+      "nativeColors": 28766,
+      "bounds": [
+        [
+          39,
+          30,
+          85,
+          123
+        ],
+        [
+          36,
+          31,
+          84,
+          123
+        ],
+        [
+          40,
+          32,
+          85,
+          123
+        ],
+        [
+          40,
+          32,
+          85,
+          123
+        ],
+        [
+          38,
+          38,
+          94,
+          123
+        ],
+        [
+          40,
+          41,
+          106,
+          123
+        ],
+        [
+          30,
+          43,
+          122,
+          123
+        ],
+        [
+          39,
+          34,
+          88,
+          123
+        ],
+        [
+          27,
+          38,
+          90,
+          123
+        ],
+        [
+          37,
+          50,
+          92,
+          123
+        ],
+        [
+          37,
+          33,
+          91,
+          123
+        ],
+        [
+          37,
+          30,
+          92,
+          123
+        ],
+        [
+          40,
+          33,
+          89,
+          123
+        ],
+        [
+          40,
+          31,
+          101,
+          123
+        ],
+        [
+          35,
+          32,
+          98,
+          123
+        ],
+        [
+          31,
+          33,
+          98,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-cardio-3",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "c42454c198f7047cd1a58ff3ecd9c75e45b929169f86aa09450447f4deb6d684",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1261,
+        1247
+      ],
+      "sharedScale": 0.39057239057239057,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 172274,
+      "nativeColors": 45597,
+      "bounds": [
+        [
+          36,
+          21,
+          93,
+          123
+        ],
+        [
+          36,
+          21,
+          93,
+          123
+        ],
+        [
+          34,
+          23,
+          92,
+          123
+        ],
+        [
+          36,
+          21,
+          94,
+          123
+        ],
+        [
+          24,
+          32,
+          96,
+          123
+        ],
+        [
+          26,
+          31,
+          106,
+          123
+        ],
+        [
+          22,
+          33,
+          122,
+          123
+        ],
+        [
+          29,
+          32,
+          98,
+          123
+        ],
+        [
+          24,
+          29,
+          102,
+          123
+        ],
+        [
+          31,
+          36,
+          96,
+          123
+        ],
+        [
+          30,
+          26,
+          98,
+          123
+        ],
+        [
+          30,
+          22,
+          98,
+          123
+        ],
+        [
+          26,
+          25,
+          106,
+          123
+        ],
+        [
+          16,
+          24,
+          112,
+          123
+        ],
+        [
+          23,
+          25,
+          100,
+          123
+        ],
+        [
+          30,
+          25,
+          99,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-cardio-4",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "0032c57fff75717e54962e62550885f658bc6ce7ed236447558dcaba925632c4",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.4157706093189964,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 127100,
+      "nativeColors": 34550,
+      "bounds": [
+        [
+          37,
+          14,
+          91,
+          123
+        ],
+        [
+          37,
+          14,
+          91,
+          123
+        ],
+        [
+          34,
+          17,
+          91,
+          123
+        ],
+        [
+          33,
+          13,
+          90,
+          123
+        ],
+        [
+          30,
+          18,
+          98,
+          123
+        ],
+        [
+          33,
+          17,
+          100,
+          123
+        ],
+        [
+          27,
+          17,
+          122,
+          123
+        ],
+        [
+          32,
+          14,
+          97,
+          123
+        ],
+        [
+          22,
+          17,
+          94,
+          123
+        ],
+        [
+          31,
+          30,
+          97,
+          123
+        ],
+        [
+          33,
+          16,
+          94,
+          123
+        ],
+        [
+          33,
+          15,
+          95,
+          123
+        ],
+        [
+          33,
+          15,
+          96,
+          123
+        ],
+        [
+          39,
+          16,
+          101,
+          123
+        ],
+        [
+          30,
+          18,
+          101,
+          123
+        ],
+        [
+          32,
+          16,
+          97,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        3,
+        0,
+        2,
+        0,
+        2,
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-cardio-5",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "848a7fdd82ae4bdfe2845f791580b88795d59359f2846efae13953b34b515d7a",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1247,
+        1261
+      ],
+      "sharedScale": 0.4027777777777778,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 174395,
+      "nativeColors": 44479,
+      "bounds": [
+        [
+          35,
+          13,
+          89,
+          123
+        ],
+        [
+          35,
+          13,
+          88,
+          123
+        ],
+        [
+          35,
+          14,
+          89,
+          123
+        ],
+        [
+          35,
+          15,
+          88,
+          123
+        ],
+        [
+          29,
+          19,
+          97,
+          123
+        ],
+        [
+          27,
+          22,
+          101,
+          123
+        ],
+        [
+          23,
+          24,
+          122,
+          123
+        ],
+        [
+          28,
+          21,
+          95,
+          123
+        ],
+        [
+          24,
+          20,
+          92,
+          123
+        ],
+        [
+          29,
+          32,
+          98,
+          123
+        ],
+        [
+          28,
+          17,
+          93,
+          123
+        ],
+        [
+          26,
+          18,
+          90,
+          123
+        ],
+        [
+          30,
+          17,
+          98,
+          123
+        ],
+        [
+          16,
+          17,
+          107,
+          123
+        ],
+        [
+          25,
+          18,
+          104,
+          123
+        ],
+        [
+          24,
+          16,
+          96,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-cardio-6",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "32a779f308aa10f1bb4c5c15649f349230ba654b9cd0408a2fc1c6287091498d",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1247,
+        1261
+      ],
+      "sharedScale": 0.3659305993690852,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 204657,
+      "nativeColors": 40337,
+      "bounds": [
+        [
+          39,
+          23,
+          89,
+          123
+        ],
+        [
+          39,
+          22,
+          89,
+          123
+        ],
+        [
+          39,
+          25,
+          88,
+          123
+        ],
+        [
+          40,
+          22,
+          88,
+          123
+        ],
+        [
+          32,
+          33,
+          96,
+          123
+        ],
+        [
+          25,
+          32,
+          108,
+          123
+        ],
+        [
+          20,
+          34,
+          122,
+          123
+        ],
+        [
+          32,
+          27,
+          96,
+          123
+        ],
+        [
+          28,
+          29,
+          96,
+          123
+        ],
+        [
+          29,
+          44,
+          100,
+          123
+        ],
+        [
+          33,
+          20,
+          95,
+          123
+        ],
+        [
+          32,
+          22,
+          96,
+          123
+        ],
+        [
+          32,
+          24,
+          98,
+          123
+        ],
+        [
+          27,
+          22,
+          116,
+          123
+        ],
+        [
+          26,
+          23,
+          98,
+          123
+        ],
+        [
+          26,
+          28,
+          102,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-mobility-1",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "7cea662bcb56554c6d5073251a69b85bd0729d69ab829806ede4d719f6bc0137",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1245,
+        1263
+      ],
+      "sharedScale": 0.3972602739726027,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 170498,
+      "nativeColors": 40106,
+      "bounds": [
+        [
+          39,
+          14,
+          89,
+          123
+        ],
+        [
+          38,
+          13,
+          88,
+          123
+        ],
+        [
+          35,
+          13,
+          93,
+          123
+        ],
+        [
+          39,
+          13,
+          89,
+          123
+        ],
+        [
+          31,
+          20,
+          97,
+          123
+        ],
+        [
+          27,
+          22,
+          102,
+          123
+        ],
+        [
+          23,
+          24,
+          122,
+          123
+        ],
+        [
+          33,
+          15,
+          96,
+          123
+        ],
+        [
+          26,
+          22,
+          100,
+          123
+        ],
+        [
+          31,
+          34,
+          96,
+          123
+        ],
+        [
+          34,
+          15,
+          94,
+          123
+        ],
+        [
+          36,
+          17,
+          92,
+          123
+        ],
+        [
+          19,
+          17,
+          104,
+          123
+        ],
+        [
+          38,
+          13,
+          92,
+          123
+        ],
+        [
+          26,
+          17,
+          98,
+          123
+        ],
+        [
+          29,
+          17,
+          96,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        2,
+        1,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        2
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-mobility-2",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "a3f052df7890d50abac234e7d4c3330b9827fbb984faf6aaf3f162a21f9770aa",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1247,
+        1261
+      ],
+      "sharedScale": 0.4128113879003559,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 183080,
+      "nativeColors": 49930,
+      "bounds": [
+        [
+          36,
+          13,
+          98,
+          123
+        ],
+        [
+          35,
+          11,
+          98,
+          123
+        ],
+        [
+          35,
+          14,
+          97,
+          123
+        ],
+        [
+          33,
+          13,
+          97,
+          123
+        ],
+        [
+          28,
+          16,
+          93,
+          123
+        ],
+        [
+          28,
+          16,
+          116,
+          123
+        ],
+        [
+          21,
+          19,
+          122,
+          123
+        ],
+        [
+          29,
+          14,
+          96,
+          123
+        ],
+        [
+          15,
+          19,
+          95,
+          123
+        ],
+        [
+          31,
+          34,
+          99,
+          123
+        ],
+        [
+          28,
+          16,
+          100,
+          123
+        ],
+        [
+          29,
+          16,
+          99,
+          123
+        ],
+        [
+          14,
+          16,
+          106,
+          123
+        ],
+        [
+          35,
+          14,
+          101,
+          123
+        ],
+        [
+          22,
+          16,
+          105,
+          123
+        ],
+        [
+          14,
+          16,
+          112,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-mobility-3",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "31249d01f9a55899b2d0f730dd7886b0138ff0debfd920efd7162db8f00cb41f",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.398576512455516,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 169215,
+      "nativeColors": 40753,
+      "bounds": [
+        [
+          36,
+          21,
+          89,
+          123
+        ],
+        [
+          27,
+          19,
+          95,
+          123
+        ],
+        [
+          25,
+          21,
+          94,
+          123
+        ],
+        [
+          31,
+          21,
+          88,
+          123
+        ],
+        [
+          37,
+          34,
+          111,
+          123
+        ],
+        [
+          18,
+          29,
+          103,
+          123
+        ],
+        [
+          20,
+          27,
+          120,
+          123
+        ],
+        [
+          22,
+          23,
+          90,
+          123
+        ],
+        [
+          24,
+          27,
+          96,
+          123
+        ],
+        [
+          27,
+          43,
+          100,
+          123
+        ],
+        [
+          24,
+          24,
+          98,
+          123
+        ],
+        [
+          23,
+          16,
+          96,
+          123
+        ],
+        [
+          20,
+          17,
+          103,
+          123
+        ],
+        [
+          24,
+          11,
+          108,
+          123
+        ],
+        [
+          15,
+          23,
+          104,
+          123
+        ],
+        [
+          15,
+          21,
+          103,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-mobility-4",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "f2e0881c1cee68bb85f7dd827301c844ea44418e337c4a3a34608a2fb60c4186",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.4172661870503597,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 167058,
+      "nativeColors": 41117,
+      "bounds": [
+        [
+          36,
+          18,
+          91,
+          123
+        ],
+        [
+          35,
+          17,
+          90,
+          123
+        ],
+        [
+          37,
+          19,
+          91,
+          123
+        ],
+        [
+          34,
+          19,
+          91,
+          123
+        ],
+        [
+          25,
+          20,
+          102,
+          123
+        ],
+        [
+          34,
+          25,
+          108,
+          123
+        ],
+        [
+          29,
+          24,
+          122,
+          123
+        ],
+        [
+          28,
+          20,
+          93,
+          123
+        ],
+        [
+          19,
+          22,
+          100,
+          123
+        ],
+        [
+          29,
+          32,
+          99,
+          123
+        ],
+        [
+          29,
+          18,
+          93,
+          123
+        ],
+        [
+          26,
+          15,
+          94,
+          123
+        ],
+        [
+          26,
+          21,
+          93,
+          123
+        ],
+        [
+          14,
+          20,
+          108,
+          123
+        ],
+        [
+          24,
+          21,
+          97,
+          123
+        ],
+        [
+          24,
+          21,
+          110,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        2,
+        1,
+        2,
+        0,
+        0,
+        0,
+        2,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        0,
+        1
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-mobility-5",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "33a1ed120b2bb7090d61c47d59b53711afdb837715ab75a8f46a7275d95ca2f6",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1244,
+        1264
+      ],
+      "sharedScale": 0.3431952662721893,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 189569,
+      "nativeColors": 36938,
+      "bounds": [
+        [
+          35,
+          31,
+          90,
+          123
+        ],
+        [
+          37,
+          31,
+          93,
+          123
+        ],
+        [
+          38,
+          32,
+          90,
+          123
+        ],
+        [
+          34,
+          31,
+          94,
+          123
+        ],
+        [
+          30,
+          40,
+          102,
+          123
+        ],
+        [
+          46,
+          38,
+          104,
+          123
+        ],
+        [
+          27,
+          38,
+          122,
+          123
+        ],
+        [
+          34,
+          34,
+          94,
+          123
+        ],
+        [
+          28,
+          35,
+          94,
+          123
+        ],
+        [
+          35,
+          40,
+          93,
+          123
+        ],
+        [
+          35,
+          31,
+          93,
+          123
+        ],
+        [
+          34,
+          32,
+          93,
+          123
+        ],
+        [
+          32,
+          29,
+          94,
+          123
+        ],
+        [
+          34,
+          31,
+          96,
+          123
+        ],
+        [
+          28,
+          33,
+          101,
+          123
+        ],
+        [
+          24,
+          31,
+          98,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "normal-mobility-6",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "851b6a9cdafa079c3a1c6eb98e8835ae91fcb32a832261d86dbe0ab5aebc67a2",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.380327868852459,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 197510,
+      "nativeColors": 44446,
+      "bounds": [
+        [
+          37,
+          24,
+          88,
+          123
+        ],
+        [
+          38,
+          23,
+          89,
+          123
+        ],
+        [
+          36,
+          27,
+          87,
+          123
+        ],
+        [
+          37,
+          24,
+          87,
+          123
+        ],
+        [
+          33,
+          31,
+          99,
+          123
+        ],
+        [
+          27,
+          31,
+          105,
+          123
+        ],
+        [
+          23,
+          36,
+          122,
+          123
+        ],
+        [
+          38,
+          26,
+          91,
+          123
+        ],
+        [
+          24,
+          28,
+          93,
+          123
+        ],
+        [
+          35,
+          36,
+          91,
+          123
+        ],
+        [
+          31,
+          23,
+          91,
+          123
+        ],
+        [
+          32,
+          21,
+          90,
+          123
+        ],
+        [
+          19,
+          28,
+          106,
+          123
+        ],
+        [
+          29,
+          21,
+          97,
+          123
+        ],
+        [
+          28,
+          23,
+          103,
+          123
+        ],
+        [
+          21,
+          24,
+          99,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        3,
+        0,
+        1,
+        2,
+        0,
+        1,
+        0,
+        0,
+        3,
+        1,
+        0,
+        0,
+        0,
+        2,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "boss-01",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "871cd8f1f17b67ec6678f61f3d366529ea05e98e112e001ccc5c32c6ef60cd72",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.39590443686006827,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 147133,
+      "nativeColors": 35555,
+      "bounds": [
+        [
+          35,
+          18,
+          87,
+          123
+        ],
+        [
+          33,
+          18,
+          87,
+          123
+        ],
+        [
+          34,
+          18,
+          85,
+          123
+        ],
+        [
+          30,
+          19,
+          87,
+          123
+        ],
+        [
+          27,
+          28,
+          97,
+          123
+        ],
+        [
+          28,
+          27,
+          102,
+          123
+        ],
+        [
+          29,
+          29,
+          122,
+          123
+        ],
+        [
+          30,
+          25,
+          96,
+          123
+        ],
+        [
+          18,
+          27,
+          95,
+          123
+        ],
+        [
+          31,
+          30,
+          100,
+          123
+        ],
+        [
+          30,
+          23,
+          92,
+          123
+        ],
+        [
+          32,
+          22,
+          93,
+          123
+        ],
+        [
+          31,
+          20,
+          102,
+          123
+        ],
+        [
+          29,
+          21,
+          93,
+          123
+        ],
+        [
+          30,
+          22,
+          109,
+          123
+        ],
+        [
+          14,
+          22,
+          96,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "boss-02",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "8052d25b2445fc705bb3aaf5b9e35852a748311b9b1e2788492054518bc9fe77",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.4,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 208820,
+      "nativeColors": 50538,
+      "bounds": [
+        [
+          37,
+          14,
+          89,
+          123
+        ],
+        [
+          39,
+          14,
+          89,
+          123
+        ],
+        [
+          37,
+          17,
+          88,
+          123
+        ],
+        [
+          38,
+          15,
+          95,
+          123
+        ],
+        [
+          24,
+          25,
+          104,
+          123
+        ],
+        [
+          25,
+          24,
+          106,
+          123
+        ],
+        [
+          18,
+          26,
+          122,
+          123
+        ],
+        [
+          23,
+          23,
+          105,
+          123
+        ],
+        [
+          28,
+          22,
+          105,
+          123
+        ],
+        [
+          33,
+          39,
+          97,
+          123
+        ],
+        [
+          31,
+          15,
+          99,
+          123
+        ],
+        [
+          32,
+          11,
+          95,
+          123
+        ],
+        [
+          29,
+          15,
+          88,
+          123
+        ],
+        [
+          9,
+          15,
+          114,
+          123
+        ],
+        [
+          22,
+          20,
+          99,
+          123
+        ],
+        [
+          22,
+          15,
+          101,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "boss-03",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "1f5f06782b17fffff0ba2403f20233efdc1d5340e8ec8dbd404ccb366f74d9bd",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.42748091603053434,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 193619,
+      "nativeColors": 52871,
+      "bounds": [
+        [
+          34,
+          11,
+          90,
+          123
+        ],
+        [
+          29,
+          11,
+          92,
+          123
+        ],
+        [
+          31,
+          11,
+          96,
+          123
+        ],
+        [
+          31,
+          11,
+          90,
+          123
+        ],
+        [
+          21,
+          17,
+          101,
+          123
+        ],
+        [
+          22,
+          19,
+          105,
+          123
+        ],
+        [
+          21,
+          17,
+          120,
+          123
+        ],
+        [
+          28,
+          13,
+          99,
+          123
+        ],
+        [
+          20,
+          17,
+          105,
+          123
+        ],
+        [
+          29,
+          23,
+          100,
+          123
+        ],
+        [
+          30,
+          11,
+          96,
+          123
+        ],
+        [
+          26,
+          12,
+          98,
+          123
+        ],
+        [
+          17,
+          12,
+          86,
+          123
+        ],
+        [
+          12,
+          12,
+          114,
+          123
+        ],
+        [
+          27,
+          12,
+          99,
+          123
+        ],
+        [
+          9,
+          11,
+          99,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "boss-04",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "c4e72fc93b0b64eda5ccdd551b618d8c3582861acdec1a4976e9627918f085fa",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "full-16-frame-sheet-2x-nearest",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.33429394812680113,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 182294,
+      "nativeColors": 36741,
+      "bounds": [
+        [
+          40,
+          28,
+          87,
+          123
+        ],
+        [
+          35,
+          28,
+          86,
+          123
+        ],
+        [
+          39,
+          29,
+          85,
+          123
+        ],
+        [
+          35,
+          27,
+          86,
+          123
+        ],
+        [
+          31,
+          42,
+          94,
+          123
+        ],
+        [
+          32,
+          41,
+          105,
+          123
+        ],
+        [
+          29,
+          40,
+          122,
+          123
+        ],
+        [
+          28,
+          35,
+          95,
+          123
+        ],
+        [
+          30,
+          31,
+          100,
+          123
+        ],
+        [
+          35,
+          40,
+          99,
+          123
+        ],
+        [
+          32,
+          30,
+          93,
+          123
+        ],
+        [
+          32,
+          28,
+          94,
+          123
+        ],
+        [
+          32,
+          32,
+          96,
+          123
+        ],
+        [
+          20,
+          31,
+          106,
+          123
+        ],
+        [
+          23,
+          31,
+          101,
+          123
+        ],
+        [
+          22,
+          30,
+          103,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "boss-05",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "d6305f9779727ed31ba7e146ea5b7bc30ad3a65eaf6343d7322bf64ec5d2d0eb",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "full-16-frame-sheet-2x-nearest",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Distinct redesigned identity: Short silver hair, goggles, strong arms, rust mechanic coat. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+      },
+      "sourceSize": [
+        1234,
+        1275
+      ],
+      "sharedScale": 0.3670886075949367,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 169578,
+      "nativeColors": 40591,
+      "bounds": [
+        [
+          38,
+          23,
+          90,
+          123
+        ],
+        [
+          38,
+          23,
+          91,
+          123
+        ],
+        [
+          38,
+          24,
+          90,
+          123
+        ],
+        [
+          37,
+          22,
+          91,
+          123
+        ],
+        [
+          25,
+          33,
+          95,
+          123
+        ],
+        [
+          31,
+          38,
+          97,
+          123
+        ],
+        [
+          21,
+          40,
+          122,
+          123
+        ],
+        [
+          35,
+          30,
+          93,
+          123
+        ],
+        [
+          27,
+          30,
+          94,
+          123
+        ],
+        [
+          29,
+          47,
+          93,
+          123
+        ],
+        [
+          32,
+          27,
+          93,
+          123
+        ],
+        [
+          35,
+          21,
+          93,
+          123
+        ],
+        [
+          32,
+          23,
+          94,
+          123
+        ],
+        [
+          28,
+          24,
+          94,
+          123
+        ],
+        [
+          25,
+          23,
+          95,
+          123
+        ],
+        [
+          20,
+          23,
+          106,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": [
+        {
+          "frame": 6,
+          "issue": "source-near-cell-boundary",
+          "margin": 2,
+          "review": "Full 16-frame native export and key attack pose inspected: closed punching fist and dark outline are complete. Source alpha gutter check confirms two transparent columns after the fist. This is narrow padding, not clipping; adaptive source rectangle is retained in the manifest."
+        }
+      ]
+    },
+    {
+      "id": "boss-06",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "74ad5a9fda7f32e73214d00302de06d5aeacac0ab4cb02c02810a3e1d46bbb3d",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "full-16-frame-sheet-2x-nearest",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Distinct redesigned identity: Stocky build, large black moustache, swept grey temples, green martial tunic. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.3682539682539683,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 231956,
+      "nativeColors": 49727,
+      "bounds": [
+        [
+          34,
+          29,
+          95,
+          123
+        ],
+        [
+          34,
+          27,
+          95,
+          123
+        ],
+        [
+          32,
+          32,
+          95,
+          123
+        ],
+        [
+          32,
+          30,
+          108,
+          123
+        ],
+        [
+          29,
+          32,
+          106,
+          123
+        ],
+        [
+          31,
+          31,
+          109,
+          123
+        ],
+        [
+          22,
+          37,
+          122,
+          123
+        ],
+        [
+          33,
+          30,
+          95,
+          123
+        ],
+        [
+          24,
+          31,
+          98,
+          123
+        ],
+        [
+          31,
+          41,
+          101,
+          123
+        ],
+        [
+          34,
+          30,
+          100,
+          123
+        ],
+        [
+          34,
+          24,
+          97,
+          123
+        ],
+        [
+          15,
+          29,
+          109,
+          123
+        ],
+        [
+          29,
+          28,
+          99,
+          123
+        ],
+        [
+          22,
+          33,
+          108,
+          123
+        ],
+        [
+          24,
+          26,
+          106,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "boss-07",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "fe042a6f38faed99081c8d121289f696253d5de0d54c8644026b33463e6b7b98",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "full-16-frame-sheet-2x-nearest",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Distinct redesigned identity: Tall silhouette, dark skin, asymmetric magenta mohawk and long split coat. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.37662337662337664,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 181729,
+      "nativeColors": 40172,
+      "bounds": [
+        [
+          39,
+          22,
+          85,
+          123
+        ],
+        [
+          40,
+          19,
+          91,
+          123
+        ],
+        [
+          39,
+          21,
+          88,
+          123
+        ],
+        [
+          36,
+          19,
+          89,
+          123
+        ],
+        [
+          32,
+          31,
+          93,
+          123
+        ],
+        [
+          34,
+          33,
+          106,
+          123
+        ],
+        [
+          23,
+          31,
+          122,
+          123
+        ],
+        [
+          28,
+          27,
+          91,
+          123
+        ],
+        [
+          35,
+          27,
+          100,
+          123
+        ],
+        [
+          29,
+          40,
+          91,
+          123
+        ],
+        [
+          33,
+          22,
+          99,
+          123
+        ],
+        [
+          33,
+          23,
+          94,
+          123
+        ],
+        [
+          25,
+          23,
+          102,
+          123
+        ],
+        [
+          33,
+          21,
+          93,
+          123
+        ],
+        [
+          19,
+          22,
+          96,
+          123
+        ],
+        [
+          17,
+          21,
+          108,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "boss-08",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "1cdf345dea23662b0d0fbf15b31c85d22c7be1a2bbc3a6374ef4e8a7441ff501",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "full-16-frame-sheet-2x-nearest",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Distinct redesigned identity: Short stout build, bald scalp, spectacles, large gold gloves and red waistcoat. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+      },
+      "sourceSize": [
+        1263,
+        1246
+      ],
+      "sharedScale": 0.28501228501228504,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 192564,
+      "nativeColors": 30072,
+      "bounds": [
+        [
+          38,
+          51,
+          89,
+          123
+        ],
+        [
+          40,
+          49,
+          91,
+          123
+        ],
+        [
+          39,
+          51,
+          88,
+          123
+        ],
+        [
+          37,
+          49,
+          88,
+          123
+        ],
+        [
+          33,
+          61,
+          96,
+          123
+        ],
+        [
+          58,
+          62,
+          122,
+          123
+        ],
+        [
+          30,
+          62,
+          117,
+          123
+        ],
+        [
+          37,
+          56,
+          93,
+          123
+        ],
+        [
+          32,
+          53,
+          97,
+          123
+        ],
+        [
+          40,
+          59,
+          90,
+          123
+        ],
+        [
+          33,
+          50,
+          96,
+          123
+        ],
+        [
+          36,
+          45,
+          95,
+          123
+        ],
+        [
+          35,
+          51,
+          95,
+          123
+        ],
+        [
+          26,
+          49,
+          104,
+          123
+        ],
+        [
+          29,
+          50,
+          94,
+          123
+        ],
+        [
+          39,
+          50,
+          90,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": [
+        {
+          "frame": 6,
+          "issue": "source-near-cell-boundary",
+          "margin": 2,
+          "review": "Full 16-frame native export and key attack pose inspected: closed punching fist and dark outline are complete. Source alpha gutter check confirms two transparent columns after the fist. This is narrow padding, not clipping; adaptive source rectangle is retained in the manifest."
+        }
+      ]
+    },
+    {
+      "id": "boss-09",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "0b156abe4e48c996f80077a4c733fadf5ca40d082ac53ef298b26d6f813c2a94",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "full-16-frame-sheet-2x-nearest",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Distinct redesigned identity: Auburn bob, asymmetric purple shoulder fabric, short combat skirt and tall boots. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.4157706093189964,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 160755,
+      "nativeColors": 42795,
+      "bounds": [
+        [
+          41,
+          20,
+          87,
+          123
+        ],
+        [
+          39,
+          17,
+          89,
+          123
+        ],
+        [
+          42,
+          20,
+          88,
+          123
+        ],
+        [
+          38,
+          17,
+          87,
+          123
+        ],
+        [
+          32,
+          18,
+          96,
+          123
+        ],
+        [
+          37,
+          22,
+          104,
+          123
+        ],
+        [
+          25,
+          24,
+          122,
+          123
+        ],
+        [
+          33,
+          18,
+          90,
+          123
+        ],
+        [
+          18,
+          21,
+          93,
+          123
+        ],
+        [
+          37,
+          36,
+          97,
+          123
+        ],
+        [
+          34,
+          19,
+          95,
+          123
+        ],
+        [
+          35,
+          13,
+          92,
+          123
+        ],
+        [
+          33,
+          18,
+          88,
+          123
+        ],
+        [
+          36,
+          17,
+          90,
+          123
+        ],
+        [
+          30,
+          18,
+          103,
+          123
+        ],
+        [
+          23,
+          20,
+          97,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "boss-10",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "3abd819bfc56152e4d0ca4dacd7aacbb1b4bf41e3c8d0c4404ecf0bcbf7e2fd3",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "full-16-frame-sheet-2x-nearest",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Distinct redesigned identity: High topknot with trailing ribbons, saffron robe and loose green trousers. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.3790849673202614,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 184272,
+      "nativeColors": 41308,
+      "bounds": [
+        [
+          38,
+          21,
+          86,
+          123
+        ],
+        [
+          38,
+          21,
+          85,
+          123
+        ],
+        [
+          37,
+          23,
+          84,
+          123
+        ],
+        [
+          34,
+          21,
+          84,
+          123
+        ],
+        [
+          24,
+          27,
+          97,
+          123
+        ],
+        [
+          29,
+          29,
+          100,
+          123
+        ],
+        [
+          24,
+          31,
+          122,
+          123
+        ],
+        [
+          28,
+          26,
+          95,
+          123
+        ],
+        [
+          29,
+          28,
+          102,
+          123
+        ],
+        [
+          28,
+          38,
+          96,
+          123
+        ],
+        [
+          37,
+          21,
+          90,
+          123
+        ],
+        [
+          36,
+          19,
+          96,
+          123
+        ],
+        [
+          33,
+          24,
+          93,
+          123
+        ],
+        [
+          18,
+          22,
+          107,
+          123
+        ],
+        [
+          29,
+          20,
+          104,
+          123
+        ],
+        [
+          21,
+          20,
+          98,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "boss-11",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "d217b633ac100f8fa114e88ecdcc5c781645cf692896ae19b678e1532a37b1d9",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "full-16-frame-sheet-2x-nearest",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Distinct redesigned identity: Elder with white bun, teal long coat, coral trousers and open palm poses. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+      },
+      "sourceSize": [
+        1246,
+        1263
+      ],
+      "sharedScale": 0.3558282208588957,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 220981,
+      "nativeColors": 44211,
+      "bounds": [
+        [
+          32,
+          27,
+          96,
+          123
+        ],
+        [
+          33,
+          27,
+          94,
+          123
+        ],
+        [
+          33,
+          27,
+          96,
+          123
+        ],
+        [
+          31,
+          28,
+          96,
+          123
+        ],
+        [
+          25,
+          34,
+          103,
+          123
+        ],
+        [
+          31,
+          35,
+          122,
+          123
+        ],
+        [
+          23,
+          36,
+          122,
+          123
+        ],
+        [
+          30,
+          33,
+          98,
+          123
+        ],
+        [
+          27,
+          31,
+          96,
+          123
+        ],
+        [
+          36,
+          42,
+          94,
+          123
+        ],
+        [
+          36,
+          29,
+          99,
+          123
+        ],
+        [
+          34,
+          27,
+          92,
+          123
+        ],
+        [
+          25,
+          27,
+          100,
+          123
+        ],
+        [
+          34,
+          27,
+          89,
+          123
+        ],
+        [
+          25,
+          27,
+          99,
+          123
+        ],
+        [
+          20,
+          27,
+          107,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "boss-12",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "71538f03c8362c74c02860a1ef96d1af89a209c54711752f960cecb20c6b5739",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "full-16-frame-sheet-2x-nearest",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Distinct redesigned identity: Broad muscular build, dark beard, close curls, blue vest and purple trousers. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.33819241982507287,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 170116,
+      "nativeColors": 38056,
+      "bounds": [
+        [
+          37,
+          34,
+          91,
+          123
+        ],
+        [
+          35,
+          34,
+          92,
+          123
+        ],
+        [
+          35,
+          35,
+          94,
+          123
+        ],
+        [
+          34,
+          35,
+          94,
+          123
+        ],
+        [
+          32,
+          36,
+          98,
+          123
+        ],
+        [
+          32,
+          43,
+          101,
+          123
+        ],
+        [
+          26,
+          44,
+          122,
+          123
+        ],
+        [
+          34,
+          34,
+          100,
+          123
+        ],
+        [
+          27,
+          36,
+          106,
+          123
+        ],
+        [
+          34,
+          42,
+          96,
+          123
+        ],
+        [
+          35,
+          28,
+          96,
+          123
+        ],
+        [
+          26,
+          35,
+          100,
+          123
+        ],
+        [
+          17,
+          34,
+          112,
+          123
+        ],
+        [
+          29,
+          33,
+          98,
+          123
+        ],
+        [
+          21,
+          34,
+          98,
+          123
+        ],
+        [
+          20,
+          33,
+          105,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "boss-13",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "195033f0025a28bfdab0dc673fa70d2b1ec950fd1d147eae6c3de0dd11a1df06",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "full-16-frame-sheet-2x-nearest",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Distinct redesigned identity: Short navy hair, coral sleeveless outfit, asymmetric purple sleeve and leg wraps. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.3625,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 167986,
+      "nativeColors": 33975,
+      "bounds": [
+        [
+          45,
+          30,
+          90,
+          123
+        ],
+        [
+          46,
+          28,
+          90,
+          123
+        ],
+        [
+          46,
+          31,
+          90,
+          123
+        ],
+        [
+          44,
+          29,
+          91,
+          123
+        ],
+        [
+          32,
+          36,
+          87,
+          123
+        ],
+        [
+          36,
+          38,
+          106,
+          123
+        ],
+        [
+          32,
+          39,
+          122,
+          123
+        ],
+        [
+          38,
+          32,
+          88,
+          123
+        ],
+        [
+          30,
+          31,
+          92,
+          123
+        ],
+        [
+          35,
+          41,
+          94,
+          123
+        ],
+        [
+          38,
+          30,
+          93,
+          123
+        ],
+        [
+          36,
+          25,
+          89,
+          123
+        ],
+        [
+          35,
+          32,
+          88,
+          123
+        ],
+        [
+          28,
+          32,
+          94,
+          123
+        ],
+        [
+          27,
+          31,
+          91,
+          123
+        ],
+        [
+          21,
+          29,
+          103,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "boss-14",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "93a740f528d380aec7cffbaa6f9271313a73fb517d98288fa8dcd308ef70fbd1",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "full-16-frame-sheet-2x-nearest",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Distinct redesigned identity: Short bald fighter, large ginger beard, orange coat and heavy boots. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+      },
+      "sourceSize": [
+        1247,
+        1261
+      ],
+      "sharedScale": 0.31607629427792916,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 197793,
+      "nativeColors": 36616,
+      "bounds": [
+        [
+          38,
+          37,
+          91,
+          123
+        ],
+        [
+          33,
+          37,
+          94,
+          123
+        ],
+        [
+          35,
+          37,
+          92,
+          123
+        ],
+        [
+          36,
+          37,
+          95,
+          123
+        ],
+        [
+          30,
+          47,
+          94,
+          123
+        ],
+        [
+          35,
+          47,
+          112,
+          123
+        ],
+        [
+          31,
+          47,
+          122,
+          123
+        ],
+        [
+          34,
+          44,
+          104,
+          123
+        ],
+        [
+          29,
+          45,
+          98,
+          123
+        ],
+        [
+          31,
+          52,
+          96,
+          123
+        ],
+        [
+          29,
+          35,
+          100,
+          123
+        ],
+        [
+          30,
+          41,
+          97,
+          123
+        ],
+        [
+          32,
+          39,
+          96,
+          123
+        ],
+        [
+          21,
+          39,
+          110,
+          123
+        ],
+        [
+          27,
+          40,
+          100,
+          123
+        ],
+        [
+          22,
+          39,
+          99,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": [
+        {
+          "frame": 6,
+          "issue": "source-near-cell-boundary",
+          "margin": 2,
+          "review": "Full 16-frame native export and key attack pose inspected: closed punching fist and dark outline are complete. Source alpha gutter check confirms two transparent columns after the fist. This is narrow padding, not clipping; adaptive source rectangle is retained in the manifest."
+        }
+      ]
+    },
+    {
+      "id": "boss-15",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "40d2bdeb545f9b1cbc9b32a5c91ec57e5d805c1afed01387192ca925b464a966",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "full-16-frame-sheet-2x-nearest",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Distinct redesigned identity: Blue bob, light cape, flowing cream trousers and balanced victory pose. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+      },
+      "sourceSize": [
+        1261,
+        1247
+      ],
+      "sharedScale": 0.4163568773234201,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 212241,
+      "nativeColors": 50384,
+      "bounds": [
+        [
+          36,
+          16,
+          88,
+          123
+        ],
+        [
+          37,
+          14,
+          89,
+          123
+        ],
+        [
+          37,
+          17,
+          89,
+          123
+        ],
+        [
+          33,
+          15,
+          94,
+          123
+        ],
+        [
+          21,
+          24,
+          98,
+          123
+        ],
+        [
+          36,
+          28,
+          108,
+          123
+        ],
+        [
+          20,
+          25,
+          115,
+          123
+        ],
+        [
+          29,
+          22,
+          94,
+          123
+        ],
+        [
+          28,
+          25,
+          100,
+          123
+        ],
+        [
+          30,
+          38,
+          93,
+          123
+        ],
+        [
+          31,
+          23,
+          99,
+          123
+        ],
+        [
+          27,
+          16,
+          96,
+          123
+        ],
+        [
+          20,
+          14,
+          111,
+          123
+        ],
+        [
+          35,
+          11,
+          110,
+          123
+        ],
+        [
+          23,
+          19,
+          99,
+          123
+        ],
+        [
+          19,
+          15,
+          111,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "boss-16",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "4e132ee6d03e4af596eabcf32a8c8116bc9748dbea2e3dda7958b567eb2c311d",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "full-16-frame-sheet-2x-nearest",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Distinct redesigned identity: Thin elder, bald scalp, long white goatee and cream layered robes. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+      },
+      "sourceSize": [
+        1263,
+        1246
+      ],
+      "sharedScale": 0.36024844720496896,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 128362,
+      "nativeColors": 30986,
+      "bounds": [
+        [
+          43,
+          30,
+          86,
+          123
+        ],
+        [
+          38,
+          28,
+          86,
+          123
+        ],
+        [
+          36,
+          30,
+          91,
+          123
+        ],
+        [
+          42,
+          30,
+          83,
+          123
+        ],
+        [
+          27,
+          41,
+          96,
+          123
+        ],
+        [
+          30,
+          45,
+          100,
+          123
+        ],
+        [
+          29,
+          47,
+          122,
+          123
+        ],
+        [
+          31,
+          41,
+          97,
+          123
+        ],
+        [
+          29,
+          38,
+          95,
+          123
+        ],
+        [
+          34,
+          50,
+          92,
+          123
+        ],
+        [
+          36,
+          35,
+          90,
+          123
+        ],
+        [
+          35,
+          26,
+          90,
+          123
+        ],
+        [
+          25,
+          31,
+          102,
+          123
+        ],
+        [
+          24,
+          31,
+          86,
+          123
+        ],
+        [
+          29,
+          35,
+          98,
+          123
+        ],
+        [
+          23,
+          33,
+          102,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "boss-17",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "365a83ba66ac8f04eed2e9460a0cd703fa808a043fbc3ec1f2dcb9d41ca5df54",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "full-16-frame-sheet-2x-nearest",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Distinct redesigned identity: Muscular woman with double hair buns, orange wide trousers and strong shoulders. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.38666666666666666,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 202097,
+      "nativeColors": 49482,
+      "bounds": [
+        [
+          33,
+          24,
+          93,
+          123
+        ],
+        [
+          33,
+          22,
+          93,
+          123
+        ],
+        [
+          34,
+          25,
+          93,
+          123
+        ],
+        [
+          33,
+          25,
+          93,
+          123
+        ],
+        [
+          30,
+          29,
+          100,
+          123
+        ],
+        [
+          27,
+          26,
+          102,
+          123
+        ],
+        [
+          21,
+          31,
+          122,
+          123
+        ],
+        [
+          28,
+          27,
+          101,
+          123
+        ],
+        [
+          25,
+          25,
+          103,
+          123
+        ],
+        [
+          28,
+          38,
+          101,
+          123
+        ],
+        [
+          27,
+          23,
+          97,
+          123
+        ],
+        [
+          25,
+          25,
+          102,
+          123
+        ],
+        [
+          25,
+          25,
+          97,
+          123
+        ],
+        [
+          30,
+          23,
+          95,
+          123
+        ],
+        [
+          22,
+          26,
+          104,
+          123
+        ],
+        [
+          18,
+          23,
+          107,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "boss-18",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "1b369c4b39b053297f1113b1404f6dda40fab173f357cbdc035cfa4bbe36880f",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "full-16-frame-sheet-2x-nearest",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Distinct redesigned identity: Large rounded curls, green hood, sleeveless jacket and purple fitted trousers. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+      },
+      "sourceSize": [
+        1246,
+        1263
+      ],
+      "sharedScale": 0.33819241982507287,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 176322,
+      "nativeColors": 34952,
+      "bounds": [
+        [
+          44,
+          29,
+          88,
+          123
+        ],
+        [
+          44,
+          28,
+          89,
+          123
+        ],
+        [
+          44,
+          31,
+          86,
+          123
+        ],
+        [
+          43,
+          29,
+          88,
+          123
+        ],
+        [
+          32,
+          32,
+          95,
+          123
+        ],
+        [
+          32,
+          37,
+          107,
+          123
+        ],
+        [
+          25,
+          39,
+          122,
+          123
+        ],
+        [
+          35,
+          32,
+          93,
+          123
+        ],
+        [
+          31,
+          33,
+          98,
+          123
+        ],
+        [
+          38,
+          46,
+          97,
+          123
+        ],
+        [
+          34,
+          31,
+          93,
+          123
+        ],
+        [
+          38,
+          27,
+          91,
+          123
+        ],
+        [
+          38,
+          33,
+          91,
+          123
+        ],
+        [
+          26,
+          30,
+          102,
+          123
+        ],
+        [
+          27,
+          30,
+          102,
+          123
+        ],
+        [
+          22,
+          29,
+          101,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": [
+        {
+          "frame": 6,
+          "issue": "source-near-cell-boundary",
+          "margin": 2,
+          "review": "Full 16-frame native export and key attack pose inspected: closed punching fist and dark outline are complete. Source alpha gutter check confirms two transparent columns after the fist. This is narrow padding, not clipping; adaptive source rectangle is retained in the manifest."
+        }
+      ]
+    },
+    {
+      "id": "boss-19",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "cfe43d18618ca7ea702011aff3bed0a1b9c64f5b5a48a964c2fb96b813918450",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "full-16-frame-sheet-2x-nearest",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Distinct redesigned identity: Red asymmetric mohawk, shaved patterned side, green vest and mustard trousers. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.3741935483870968,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 184015,
+      "nativeColors": 41601,
+      "bounds": [
+        [
+          42,
+          22,
+          85,
+          123
+        ],
+        [
+          42,
+          22,
+          84,
+          123
+        ],
+        [
+          42,
+          22,
+          85,
+          123
+        ],
+        [
+          38,
+          22,
+          87,
+          123
+        ],
+        [
+          34,
+          26,
+          92,
+          123
+        ],
+        [
+          22,
+          28,
+          101,
+          123
+        ],
+        [
+          27,
+          28,
+          122,
+          123
+        ],
+        [
+          32,
+          27,
+          91,
+          123
+        ],
+        [
+          24,
+          25,
+          99,
+          123
+        ],
+        [
+          35,
+          32,
+          97,
+          123
+        ],
+        [
+          36,
+          22,
+          90,
+          123
+        ],
+        [
+          33,
+          23,
+          92,
+          123
+        ],
+        [
+          34,
+          22,
+          91,
+          123
+        ],
+        [
+          39,
+          22,
+          96,
+          123
+        ],
+        [
+          23,
+          20,
+          104,
+          123
+        ],
+        [
+          30,
+          22,
+          92,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "boss-20",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "943dff6b318bdb2067a641635820e6c2bec243687cec8df2cc47b7dfced27f6a",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "full-16-frame-sheet-2x-nearest",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.3971631205673759,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 218015,
+      "nativeColors": 52818,
+      "bounds": [
+        [
+          33,
+          12,
+          94,
+          123
+        ],
+        [
+          32,
+          11,
+          95,
+          123
+        ],
+        [
+          34,
+          13,
+          94,
+          123
+        ],
+        [
+          34,
+          14,
+          94,
+          123
+        ],
+        [
+          21,
+          21,
+          104,
+          123
+        ],
+        [
+          18,
+          23,
+          105,
+          123
+        ],
+        [
+          21,
+          24,
+          120,
+          123
+        ],
+        [
+          23,
+          20,
+          104,
+          123
+        ],
+        [
+          8,
+          24,
+          98,
+          123
+        ],
+        [
+          26,
+          30,
+          97,
+          123
+        ],
+        [
+          27,
+          20,
+          102,
+          123
+        ],
+        [
+          23,
+          17,
+          102,
+          123
+        ],
+        [
+          18,
+          18,
+          106,
+          123
+        ],
+        [
+          23,
+          17,
+          104,
+          123
+        ],
+        [
+          14,
+          17,
+          107,
+          123
+        ],
+        [
+          12,
+          16,
+          112,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "instructor-1",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "ca8f5aca2488f189b7538687b1bee423cf0a53c268baa030c383556f37fc2661",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.4057971014492754,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 155309,
+      "nativeColors": 39669,
+      "bounds": [
+        [
+          38,
+          13,
+          87,
+          123
+        ],
+        [
+          38,
+          11,
+          89,
+          123
+        ],
+        [
+          36,
+          15,
+          85,
+          123
+        ],
+        [
+          28,
+          13,
+          106,
+          123
+        ],
+        [
+          30,
+          17,
+          96,
+          123
+        ],
+        [
+          30,
+          20,
+          101,
+          123
+        ],
+        [
+          24,
+          19,
+          118,
+          123
+        ],
+        [
+          33,
+          17,
+          95,
+          123
+        ],
+        [
+          21,
+          18,
+          101,
+          123
+        ],
+        [
+          31,
+          30,
+          98,
+          123
+        ],
+        [
+          33,
+          11,
+          96,
+          123
+        ],
+        [
+          31,
+          11,
+          95,
+          123
+        ],
+        [
+          12,
+          13,
+          111,
+          123
+        ],
+        [
+          30,
+          13,
+          96,
+          123
+        ],
+        [
+          23,
+          13,
+          99,
+          123
+        ],
+        [
+          22,
+          14,
+          100,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    },
+    {
+      "id": "instructor-2",
+      "status": "exported-visual-reviewed",
+      "visualReview": {
+        "sourceSha256": "adf61a34245dbe338906ec57d6df54f50deaccab895efeaf224320caae592922",
+        "views": [
+          "front-native",
+          "front-enlarged-4x-nearest",
+          "key-action-poses-native",
+          "portrait-2x-nearest"
+        ],
+        "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sharedScale": 0.3778501628664495,
+      "frameCount": 16,
+      "backFrameCount": 0,
+      "uniqueFrames": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "rgbValuesPreserved": true,
+      "sourceColors": 190896,
+      "nativeColors": 41731,
+      "bounds": [
+        [
+          42,
+          22,
+          87,
+          123
+        ],
+        [
+          38,
+          23,
+          87,
+          123
+        ],
+        [
+          39,
+          23,
+          85,
+          123
+        ],
+        [
+          39,
+          23,
+          86,
+          123
+        ],
+        [
+          30,
+          24,
+          94,
+          123
+        ],
+        [
+          35,
+          28,
+          105,
+          123
+        ],
+        [
+          27,
+          32,
+          122,
+          123
+        ],
+        [
+          34,
+          24,
+          89,
+          123
+        ],
+        [
+          28,
+          24,
+          93,
+          123
+        ],
+        [
+          35,
+          32,
+          95,
+          123
+        ],
+        [
+          32,
+          24,
+          91,
+          123
+        ],
+        [
+          37,
+          23,
+          93,
+          123
+        ],
+        [
+          35,
+          24,
+          94,
+          123
+        ],
+        [
+          23,
+          23,
+          104,
+          123
+        ],
+        [
+          29,
+          23,
+          109,
+          123
+        ],
+        [
+          31,
+          22,
+          96,
+          123
+        ]
+      ],
+      "feetY": [
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122
+      ],
+      "discardedDetachedPixels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "issues": [],
+      "reviewedBoundaries": []
+    }
+  ],
+  "pending": [],
+  "exportedCharacters": 60,
+  "uniqueFronts": 60,
+  "exportComplete": true,
+  "issuesCount": 0,
+  "reviewedCharacters": 60,
+  "animationFrames": 992,
+  "runtimeCharacterPngs": 432
+}

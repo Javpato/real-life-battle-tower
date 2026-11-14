@@ -96,3 +96,14 @@ html[data-journal-theme=dark] .tower-support .journal-rpg .text-button{color:#f2
 html[data-journal-theme=dark] .tower-support .journal-rpg :is(.muted,.tiny,.energy-details>div>span,.calorie-ring span,.card-foot){color:#dfd1c7}
 html[data-journal-theme=dark] .tower-support .journal-rpg :is(input,select,textarea){background:#302f46!important;color:#fff1d6!important;border-color:#81778c!important}
 .tower-support .journal-rpg .journal-nav>button.selected:hover{background:var(--bt-cream);color:var(--bt-ink)}
+/* Short landscape screens keep the pre-exercise arena prominent. Camera layouts
+   keep their own dock and never inherit this four-move arrangement. */
+@media(max-height:550px) and (min-width:700px) and (orientation:landscape){
+ .bt .bt-battle:not(.bt-battle-series *) .bt-battle-dock:has(.bt-moves){display:block;min-height:0;padding:4px 10px}
+ .bt .bt-battle:not(.bt-battle-series *) .bt-battle-dock:has(.bt-moves)>div:first-child{display:none}
+ .bt .bt-battle:not(.bt-battle-series *) .bt-moves{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+ .bt .bt-battle:not(.bt-battle-series *) .bt-moves>button{display:block;min-height:60px;padding:4px 6px;font-size:11px;line-height:1.2}
+ .bt .bt-battle:not(.bt-battle-series *) .bt-moves>button small{margin-top:4px;font-size:8px;line-height:1.2}
+ .bt .bt-battle:not(.bt-battle-series *) .bt-moves+ .bt-row{margin-top:6px!important;gap:8px;justify-content:flex-end}
+ .bt .bt-battle:not(.bt-battle-series *) .bt-moves+ .bt-row>button{min-height:44px;padding:6px 14px}
+}

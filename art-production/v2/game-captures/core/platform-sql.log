@@ -1,0 +1,2 @@
+PASS: RLS, pairing, idempotency, wallet, fencing, safe transfer, shared diary, conflicts, null version, export owner, erase generation, steps deduplication revocation, service-only adventure commits, CAS, receipts and fenced wallet deltas.
+PASS: three independent cloud saves, idempotent creation, fourth-save rejection and cross-owner isolation.

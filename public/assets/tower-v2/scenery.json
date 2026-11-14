@@ -1,0 +1,55 @@
+{
+  "version": 2,
+  "source": "art-production/v2/sources",
+  "method": "image_gen illustration; native nearest-neighbor export; no palette recoloring",
+  "size": [
+    480,
+    270
+  ],
+  "battleFeet": {
+    "hero": [
+      0.312,
+      0.815
+    ],
+    "enemy": [
+      0.77,
+      0.618
+    ]
+  },
+  "zones": [
+    "arena-0.png",
+    "arena-1.png",
+    "arena-2.png",
+    "arena-3.png",
+    "arena-4.png",
+    "arena-5.png"
+  ],
+  "title": "title.png",
+  "hub": "hub.png",
+  "icons": {
+    "leg": "icon-leg.png",
+    "arm": "icon-arm.png",
+    "back": "icon-back.png",
+    "core": "icon-core.png",
+    "cardio": "icon-cardio.png",
+    "mobility": "icon-mobility.png",
+    "coin": "icon-coin.png",
+    "potion": "icon-potion.png",
+    "shield": "icon-shield.png",
+    "star": "icon-star.png",
+    "tower": "icon-tower.png",
+    "bag": "icon-bag.png",
+    "settings": "icon-settings.png",
+    "play": "icon-play.png",
+    "pause": "icon-pause.png",
+    "trophy": "icon-trophy.png",
+    "training": "icon-training.png",
+    "skill": "icon-skill.png",
+    "record": "icon-record.png",
+    "flash": "icon-flash.png",
+    "lock": "icon-lock.png",
+    "crystal": "icon-crystal.png",
+    "stairs": "icon-stairs.png",
+    "gloves": "icon-gloves.png"
+  }
+}

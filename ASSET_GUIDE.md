@@ -1,28 +1,37 @@
-# Battle Tower artwork and replacement guide
+# Illustrated Battle Tower assets
 
-## Battle Tower native art replacement (v1)
+The user approved `art-production/v2/approved-reference.png`, including its original eyes and face. Do not copy the later96px retouched eyes. Complex characters are illustrated with the built-in image-generation tool; code only processes, repairs alpha, crops, registers and exports. The old geometric character generator and its runtime assets are retired.
 
-The active Tower renderer uses only `public/assets/tower/`. These are new assets, not edits, reductions, or recolorings of the previous asset library. `scripts/build-tower-art.py` reproducibly draws every PNG from integer-coordinate geometry with Pillow; it reads no input images. The supplied references informed dark selective outlines, warm highlights, readable silhouettes and elevated village perspective, without copying any proprietary sprite or map.
+## Inventory
 
-The palette is blue ink, warm ivory, coral, jade, and antique yellow. Light comes from above-left. All source pixels are opaque or fully transparent. Native character frames are 128×128 with a constant foot anchor (64,117); four-frame idle sheets are 512×128. Both protagonists have separately drawn front and back views. Ten silhouettes include two protagonists, three trainers, three discipline leaders, Rowan and the Warden. Each also has a separately authored 48×48 idle sheet. NPC names are visual identities only; logical enemy IDs stay in the game catalog. Sixteen 32px icons, a 480×270 tower hub/title landscape, and six original arena compositions complete the PNG collection. The Tower-specific manifest records paths, dimensions and platform anchors.
+60characters:2protagonists,36normaladversaries,19regularbosses,1centennialboss,2instructors. Each has16different illustrated poses:4idle,4attack,2impact,4victory,2transformation. Both protagonists have16additional back-view poses. Total992distinct pose frames and432 character PNG exports, plus8scene backgrounds and24icons.
 
-`PixelScene` supplies title, hub, battle and thirty individual workout scenes. Combat anchors are the platforms' exact logical coordinates; the inner sprite breathes without moving the anchor. Workout scenes receive accepted `progress` and `target`; they neither score nor grant progress. Every skill has its own scene objects and action: growth, platforms, elevator, stepping stones, stairs, gates, shield, labyrinth, forge, balancing tower, moving monolith, generators, construction, sanctuary, masonry destruction, press, prism beam, trap, colossus, twin crystals, bridge balance, lantern path, first flight, cloud flight, awakening, wings, equilibrium, navigation, clock and temple. Scene animation runs only when accepted progress changes; pose feedback is owned by the exercise UI. Pausing never decreases progress.
+## Sources and reproduction
 
-To replace artwork: retain the fixed frame size and foot anchor, update the Tower manifest and renderer URLs, then inspect at 1× and an integer enlargement. Do not crop individual animation frames to their alpha bounds. Run the generator only when deliberately rebuilding the entire original Tower art set. No network generation dependency is required.
+Originals and complete prompts live in `art-production/v2/sources/`; rejected iterations remain separately identified. `roster.json` assigns logical IDs and names. The original approved female portrait/front preserves her face without palette or eye repainting. The final cast is inspectable at `art-production/v2/gallery.html`; contact sheets include native,2×/4× and key action comparisons.
 
-### Exercise coach replacement
+Run:
 
-All nine active `ExerciseDemo` illustrations now use new native 280×140 PNG coach poses from the Tower generator. The previous green SVG stick figures have been removed from the component. New fully clothed figures, floor/mat, chair/wall and direction arrow use the Tower pixel palette. The original teaching joint positions and all guide text are preserved; these drawings never determine recognition. `ExercisePoseArt` shows numbered start/movement labels and a readable alt description. Diamond retains the side-view push-up body geometry; its guide explicitly states that hand/finger placement is not camera verified.
+```sh
+python3 scripts/export-tower-art-v2.py
+python3 scripts/export-tower-scenery-v2.py
+```
 
-### Experimental recognition profiles
+Python3/Pillow and DejaVu fonts are required. The original model generations are not deterministic; export from retained PNGs is reproducible. Pixel Art Studio remains installed for grid/export/inspection workflows; PixelLab is not connected or used.
 
-`guide-mini-squat.png` separately draws a shallow squat, and `guide-knee-pushup.png` shows bent knees supported at the floor with the lower legs raised in both starting and lowered positions. They are selected only for matching `recognitionProfile` values. `getExerciseGuide(exerciseId, recognitionProfile)` supplies the same setup, movement and short starting cue to the camera and demonstration. These experimental profiles estimate visible movement; they cannot verify physical floor/knee contact or load-bearing support. The text makes no clinical prescription. `guideOverride` supports exact skill instructions, and `hideIllustration` allows unsupported manual skills to avoid displaying a misleading family illustration.
+## Native contracts
 
+- Runtime root:`public/assets/tower-v2/`. Central `manifest.json` describes characters, clips, sources and review status; `scenery.json` describes backgrounds/icons and arena anchors.
+- Characters128×128 RGBA, one shared scale per character across poses/front/back, foot pivot[64,122], nearest-neighbor sampling. Alpha is normalized from generated transparency; source colors are preserved. No palette reduction or global face edits.
+- `front.png` and `portrait.png` are still images. `idle.png`,`attack.png`,`impact.png`,`victory.png`,`transform.png` are horizontal128px-cell atlases. Heroes also have `back.png` and corresponding`back-*`clips. Frame timing is in the manifest.
+- New poses are illustrated, not synthesized by translating a still. The renderer keeps the foot transform fixed while advancing frames. Reduced-motion displays a still.
+- Scene planes480×270; normalized feet hero[.312,.815], enemy[.77,.618]. Six arenas share this composition. Icons32×32, frames remain sharp with integer nearest sampling.
+- Every source-boundary exception requires explicit visual inspection tied to its SHA256. Alpha cleanup of white-background mistakes is masked outside outlines and recorded; never erase enclosed white hair or clothing.
 
-### Final active art inventory and animation
+## Replacing a character
 
-The Tower art directory contains 69 native PNGs (approximately 168 KiB): twelve 512×128 front/back animation sheets, twelve 128×128 still exports, ten 192×48 compact idle sheets, sixteen 32×32 icons, eleven 280×140 exercise guide images, two 480×270 hub/title landscapes and six 480×270 arenas. All have binary alpha. Thirty additional minigames are rendered by integer pixel operations in `PixelScene`; these are code-native scenes, not PNG files.
+Keep its logical ID. Generate a4×4 sheet matching the approved face/pixel construction and clip order. Leave margins around every pose. Replace the source PNG and record its prompt, then rerun export. Inspect all16frames on light/dark backgrounds and actual battle-size rendering. Do not mark production ready from dimensions alone. Update the manifest and capture browser evidence before retiring the old source.
 
-`PixelCharacter` actively plays the native four-frame front/back sheets inside a fixed 128×128 SVG clip at 1.6 seconds per loop. Character frames retain foot (64,117); attack/reaction transforms act on the outer artwork while frame playback occurs inside it. Reduced-motion preference displays frame zero and disables movement effects. Title, selection, hub, result and battle character presentations share these original sheets. No separate high-resolution title illustrations are claimed. The ten compact 48×48 exploration/idle sheets and twelve still exports are unused reusable source outputs; the current Tower has no exploration renderer. The floor roster uses Moss/Pip/Fern, Terra/Flint/Zephyr and Rowan; the Warden appears at floor50 and its later odd multiples.
+## Presentation boundaries
 
-The manifest documents the asset contracts and provenance; `PixelScene` currently resolves its conventional filenames directly rather than importing the manifest. The active Tower and exercise components load only `assets/tower` graphics. Final browser inspection confirmed corrected mobile combat platform alignment; workout scene controls must remain outside the scene area so they do not cover bridge decks, garden beds or platforms.
+The generated backgrounds were composed as pixel-style illustrations and normalized to the scene grid; they are not claimed as a manually authored tile atlas. Exercise instructions for90movements are written, movement-specific guides. No unreviewed anatomical illustration is used to imply correct physical technique. Existing detector demonstrations remain available for their supported families. Native art QA does not validate human movement detection.

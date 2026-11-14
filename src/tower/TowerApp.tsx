@@ -569,6 +569,7 @@ export default function TowerApp({
         <div className="bt-arena">
           <PixelScene
             scene="battle"
+            outcome={b.turn}
             hero={save!.avatar}
             enemy={b.enemy.artId}
             zone={Math.floor((current.floor - 1) / 5) % 6}
@@ -1376,7 +1377,16 @@ export default function TowerApp({
     );
     return (
       <>
-        <div className="bt-section-title">
+        <div
+          className="bt-section-title"
+          style={{ display: "flex", alignItems: "center", gap: 16 }}
+        >
+          <div
+            className="bt-instructor"
+            style={{ width: "clamp(48px,7vw,96px)", aspectRatio: "1", flexShrink: 0 }}
+          >
+            <PixelCharacter id="instructor-2" action="idle" />
+          </div>
           <div>
             <span className="eyebrow">EVERY EXERCISE · NO UNLOCK REQUIRED</span>
             <h1>The Training Grounds</h1>

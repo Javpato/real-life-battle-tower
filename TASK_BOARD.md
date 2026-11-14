@@ -1,15 +1,8 @@
-# Nueva revisión artística — aprobación pendiente
+# Battle Tower v2 delivery
 
-La entrega actual contiene únicamente tres propuestas en `art-review/trainers-v2`. La generación primaria es artística mediante imagegen; Pixel Art Studio se utiliza para preparación, inspección y exportación. El método geométrico anterior queda congelado para personajes.
-
-Antes de sustituir el resto de los recursos o ejecutar el siguiente bloque jugable, el usuario debe aprobar la dirección artística de esta prueba. Las decisiones de progresión/Flash/jefes/Training Grounds están conservadas en `art-review/trainers-v2/NEXT_PHASE.md`; todavía no están implementadas.
-
----
-
-# Battle Tower delivery status
-
-- Implemented: canonical fresh saves;30skills; trials; connected prerequisite trees; deterministic tower; fixed-loadout7challenges; specializations; safe-point equipment; exact workout sequences, results and provenance.
-- Implemented:69new pixel PNGs; native character atlas animation; six arenas; tower title/hub;30exercise scenes; unified responsive menus/camera/support panels.
-- Implemented: three IndexedDB slots; isolated local preview; retained phone companion, MediaPipe, voice/calibration, journal, Android steps; new canonical Supabase endpoint/migration and cosmetic purchases.
-- Verified locally:287tests,240strategic boss simulations, embedded PostgreSQL security/idempotence, real UI manual progression, all30minigames, fiveviewports, retained journal, real blank-frame MediaPipe inference and synthetic companion transport. See QA.md and visual evidence.
-- External acceptance pending: real exercise accuracy, physical phone pairing/sensors and hosted Supabase deployment. These are explicitly outside the completed automated/emulator checks.
+- Implemented: six distinct types, mean dual-type attacks, single STAB, four initial learned/equipped attacks, trial opportunities every3floors, boss rewards every5floors,20boss cycle, temporary upgrades and evidence-aware Flash.
+- Implemented:90skills,15perdiscipline; all available in Training Grounds;10fixed-loadout challenges; unrestricted routine composition; six trees and interactive matchup codex.
+- Integrated:60 illustrated characters,16poses each,32additional hero back poses;128px native exports, portraits,6arenas,title/hub,24icons, revised minigame renderer and unified support screens. All60current sources reviewed; zero unresolved art validation issues. See art-production/v2/validation.json.
+- Preserved:camera/phone transport,MediaPipe,coach/calibration,manual input,3slots,cloud command architecture,Android steps and journal. Version1Tower saves backed up/migrated; old active runs retain old rules.
+- Tests and evidence:QA.md and art-production/v2/game-captures. Hosted Supabase deployment and physical exercise/device validation are external follow-ups, not claimed as completed.
+- Deliberate coverage limits:60new exercises guided/manual until validated; no per-exercise reviewed pose illustrations yet. Workout mode remains exercise-driven minigames; the older optional workout-final-boss concept is not implemented.

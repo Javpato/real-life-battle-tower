@@ -1,0 +1,726 @@
+{
+  "method": "Direct inspection of native, 4x nearest and key-pose contact sheets. Hero full front/back 16-frame sheets also inspected.",
+  "limitations": "Contact-sheet review verifies the listed views, readable silhouettes, faces and cropping; it is not an exhaustive frame-by-frame anatomical audit or physical exercise demonstration validation. Sources are generated illustrations, processed into native PNGs without facial painting or palette reduction.",
+  "characters": {
+    "hero-female": {
+      "sourceSha256": "dd1488993115253273b38147cd34a60e13d574d48ad64dc7b55feb4e0773b5ae",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "full-16-frame-sheet-2x-nearest",
+        "full-back-16-frame-sheet-2x-nearest",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "hero-male": {
+      "sourceSha256": "9952b931876284dac8fa8f24561c78b398a572ec138c030c35d2efb87497f35b",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "full-16-frame-sheet-2x-nearest",
+        "full-back-16-frame-sheet-2x-nearest",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-leg-1": {
+      "sourceSha256": "ea7684f54237e48334589e36a73f2a3736b15e6c0e37636e1f04b72f69ce16fb",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-leg-2": {
+      "sourceSha256": "499c8c1dc5b4e901b48c38079c046c66b99580ada36c7d05cdf79b55ec435e57",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-leg-3": {
+      "sourceSha256": "8706eadd29d67a5b11624df7a3298fa4060abf6ad59deaafbb91d7d0886e1c02",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-leg-4": {
+      "sourceSha256": "0c0b709724bc8cd97be2d868a3e6b11829d9310450aa35e96421162fa5ceaa70",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-leg-5": {
+      "sourceSha256": "f961eae153d7948cfff406cf17c76f9b1e0b16eee0af5a7707d21cdc31440bbd",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-leg-6": {
+      "sourceSha256": "8cb1d9d148fadb81b88c8f55896e559524eae2950f3b35d44afb454e95497edd",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-arm-1": {
+      "sourceSha256": "e7c6359a7729de6ddc4d51cd2849d5d0ab5ffd461b2f79c1c81c4e06a716d24e",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-arm-2": {
+      "sourceSha256": "dbb0dc9789381d5251314083e4a92ef1b79d48085e8b504ebd5a0236c9a3c751",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-arm-3": {
+      "sourceSha256": "c506ef57c821165ebdf7a1e49e270cce263c8357f6b98b9ebac258dd2c28516a",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-arm-4": {
+      "sourceSha256": "748bc4e936238ac57b20c01be3c677c58e6c0930f369a206669803e2410fc86a",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-arm-5": {
+      "sourceSha256": "334e2cd6d53a088e26c2760dc4cde00c7fd89ea72c313c1957395fe324eb39ba",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-arm-6": {
+      "sourceSha256": "79bd258fc276ec2ae5b58523013348527ba0267000211082e8c2784d405da0af",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-back-1": {
+      "sourceSha256": "411139059e5514cc6173191d3c60ac87b8779d802b8f82650964d4b558eca21d",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-back-2": {
+      "sourceSha256": "fd5a7e3536692895a0b24be0d98f16df9ca1121e80c9f115693ff18fd918b0db",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-back-3": {
+      "sourceSha256": "3663bd63245f9d53f3f10ebb8c2b2e27cc8a8d9ace3328f57a7b8325cf84c8de",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-back-4": {
+      "sourceSha256": "8390d563d86071e1a45e8b26141249ad1b5f4ee4a7d419d2cc35b80e9a7e1e04",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-back-5": {
+      "sourceSha256": "c1880c6cac58d2affebb0ef0bf0521bef4004142288ea0b1305fd0f5e6b5e3c4",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-back-6": {
+      "sourceSha256": "c230927f67a7860ed4cada3561ed1b1f7c62e0b983c9d3b8f56b2173c5834930",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-core-1": {
+      "sourceSha256": "76ba733b35a476d0b91b306df7294e1e5c7d7d6f4db1e5249707ac27e6444f0e",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-core-2": {
+      "sourceSha256": "37bec1bbd4aab86165c6a78698d91822ab63063ad8ca1c05868d29f2b59299fb",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-core-3": {
+      "sourceSha256": "e6a0941279650423e24f6ffdda7db41c3dcd1b3e39796b6bf0f0ca0303007489",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-core-4": {
+      "sourceSha256": "be8aa3b9236481ff71cb98dda84ab04f9d077c39a6729ec1f0cf5eb1d457185d",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-core-5": {
+      "sourceSha256": "b1b482d20ac5ed86c6fbfb3a441bef0c12ea5981925c64c5de15d765aa480d0c",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-core-6": {
+      "sourceSha256": "e8ff7a525c54d7b19e4447425a4d56e0fd231390aeb4cc32b3023a2cb329ba2b",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-cardio-1": {
+      "sourceSha256": "dc266368a9082734c43f5cb6376ec5195c1eb29d28254b42e1b32abe65536a47",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-cardio-2": {
+      "sourceSha256": "ecbc570fa2cddc05ba8ce996c8253abed8a75924f84cfdd268dd8da06a19f40b",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-cardio-3": {
+      "sourceSha256": "c42454c198f7047cd1a58ff3ecd9c75e45b929169f86aa09450447f4deb6d684",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-cardio-4": {
+      "sourceSha256": "0032c57fff75717e54962e62550885f658bc6ce7ed236447558dcaba925632c4",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-cardio-5": {
+      "sourceSha256": "848a7fdd82ae4bdfe2845f791580b88795d59359f2846efae13953b34b515d7a",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-cardio-6": {
+      "sourceSha256": "32a779f308aa10f1bb4c5c15649f349230ba654b9cd0408a2fc1c6287091498d",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-mobility-1": {
+      "sourceSha256": "7cea662bcb56554c6d5073251a69b85bd0729d69ab829806ede4d719f6bc0137",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-mobility-2": {
+      "sourceSha256": "a3f052df7890d50abac234e7d4c3330b9827fbb984faf6aaf3f162a21f9770aa",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-mobility-3": {
+      "sourceSha256": "31249d01f9a55899b2d0f730dd7886b0138ff0debfd920efd7162db8f00cb41f",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-mobility-4": {
+      "sourceSha256": "f2e0881c1cee68bb85f7dd827301c844ea44418e337c4a3a34608a2fb60c4186",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-mobility-5": {
+      "sourceSha256": "33a1ed120b2bb7090d61c47d59b53711afdb837715ab75a8f46a7275d95ca2f6",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "normal-mobility-6": {
+      "sourceSha256": "851b6a9cdafa079c3a1c6eb98e8835ae91fcb32a832261d86dbe0ab5aebc67a2",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "boss-01": {
+      "sourceSha256": "871cd8f1f17b67ec6678f61f3d366529ea05e98e112e001ccc5c32c6ef60cd72",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "boss-02": {
+      "sourceSha256": "8052d25b2445fc705bb3aaf5b9e35852a748311b9b1e2788492054518bc9fe77",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "boss-03": {
+      "sourceSha256": "1f5f06782b17fffff0ba2403f20233efdc1d5340e8ec8dbd404ccb366f74d9bd",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "boss-04": {
+      "sourceSha256": "c4e72fc93b0b64eda5ccdd551b618d8c3582861acdec1a4976e9627918f085fa",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "full-16-frame-sheet-2x-nearest",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "boss-05": {
+      "sourceSha256": "d6305f9779727ed31ba7e146ea5b7bc30ad3a65eaf6343d7322bf64ec5d2d0eb",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "full-16-frame-sheet-2x-nearest",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Distinct redesigned identity: Short silver hair, goggles, strong arms, rust mechanic coat. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+    },
+    "boss-06": {
+      "sourceSha256": "74ad5a9fda7f32e73214d00302de06d5aeacac0ab4cb02c02810a3e1d46bbb3d",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "full-16-frame-sheet-2x-nearest",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Distinct redesigned identity: Stocky build, large black moustache, swept grey temples, green martial tunic. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+    },
+    "boss-09": {
+      "sourceSha256": "0b156abe4e48c996f80077a4c733fadf5ca40d082ac53ef298b26d6f813c2a94",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "full-16-frame-sheet-2x-nearest",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Distinct redesigned identity: Auburn bob, asymmetric purple shoulder fabric, short combat skirt and tall boots. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+    },
+    "boss-10": {
+      "sourceSha256": "3abd819bfc56152e4d0ca4dacd7aacbb1b4bf41e3c8d0c4404ecf0bcbf7e2fd3",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "full-16-frame-sheet-2x-nearest",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Distinct redesigned identity: High topknot with trailing ribbons, saffron robe and loose green trousers. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+    },
+    "boss-14": {
+      "sourceSha256": "93a740f528d380aec7cffbaa6f9271313a73fb517d98288fa8dcd308ef70fbd1",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "full-16-frame-sheet-2x-nearest",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Distinct redesigned identity: Short bald fighter, large ginger beard, orange coat and heavy boots. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+    },
+    "boss-07": {
+      "sourceSha256": "fe042a6f38faed99081c8d121289f696253d5de0d54c8644026b33463e6b7b98",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "full-16-frame-sheet-2x-nearest",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Distinct redesigned identity: Tall silhouette, dark skin, asymmetric magenta mohawk and long split coat. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+    },
+    "boss-08": {
+      "sourceSha256": "1cdf345dea23662b0d0fbf15b31c85d22c7be1a2bbc3a6374ef4e8a7441ff501",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "full-16-frame-sheet-2x-nearest",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Distinct redesigned identity: Short stout build, bald scalp, spectacles, large gold gloves and red waistcoat. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+    },
+    "boss-11": {
+      "sourceSha256": "d217b633ac100f8fa114e88ecdcc5c781645cf692896ae19b678e1532a37b1d9",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "full-16-frame-sheet-2x-nearest",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Distinct redesigned identity: Elder with white bun, teal long coat, coral trousers and open palm poses. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+    },
+    "boss-12": {
+      "sourceSha256": "71538f03c8362c74c02860a1ef96d1af89a209c54711752f960cecb20c6b5739",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "full-16-frame-sheet-2x-nearest",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Distinct redesigned identity: Broad muscular build, dark beard, close curls, blue vest and purple trousers. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+    },
+    "boss-13": {
+      "sourceSha256": "195033f0025a28bfdab0dc673fa70d2b1ec950fd1d147eae6c3de0dd11a1df06",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "full-16-frame-sheet-2x-nearest",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Distinct redesigned identity: Short navy hair, coral sleeveless outfit, asymmetric purple sleeve and leg wraps. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+    },
+    "boss-15": {
+      "sourceSha256": "40d2bdeb545f9b1cbc9b32a5c91ec57e5d805c1afed01387192ca925b464a966",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "full-16-frame-sheet-2x-nearest",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Distinct redesigned identity: Blue bob, light cape, flowing cream trousers and balanced victory pose. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+    },
+    "boss-16": {
+      "sourceSha256": "4e132ee6d03e4af596eabcf32a8c8116bc9748dbea2e3dda7958b567eb2c311d",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "full-16-frame-sheet-2x-nearest",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Distinct redesigned identity: Thin elder, bald scalp, long white goatee and cream layered robes. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+    },
+    "boss-17": {
+      "sourceSha256": "365a83ba66ac8f04eed2e9460a0cd703fa808a043fbc3ec1f2dcb9d41ca5df54",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "full-16-frame-sheet-2x-nearest",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Distinct redesigned identity: Muscular woman with double hair buns, orange wide trousers and strong shoulders. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+    },
+    "boss-18": {
+      "sourceSha256": "1b369c4b39b053297f1113b1404f6dda40fab173f357cbdc035cfa4bbe36880f",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "full-16-frame-sheet-2x-nearest",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Distinct redesigned identity: Large rounded curls, green hood, sleeveless jacket and purple fitted trousers. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+    },
+    "boss-19": {
+      "sourceSha256": "cfe43d18618ca7ea702011aff3bed0a1b9c64f5b5a48a964c2fb96b813918450",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "full-16-frame-sheet-2x-nearest",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Distinct redesigned identity: Red asymmetric mohawk, shaved patterned side, green vest and mustard trousers. Full sheet, native key poses and portrait inspected; no observed opaque clipping, matte background or damaged eyes."
+    },
+    "boss-20": {
+      "sourceSha256": "943dff6b318bdb2067a641635820e6c2bec243687cec8df2cc47b7dfced27f6a",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "full-16-frame-sheet-2x-nearest",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "instructor-1": {
+      "sourceSha256": "ca8f5aca2488f189b7538687b1bee423cf0a53c268baa030c383556f37fc2661",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    },
+    "instructor-2": {
+      "sourceSha256": "adf61a34245dbe338906ec57d6df54f50deaccab895efeaf224320caae592922",
+      "views": [
+        "front-native",
+        "front-enlarged-4x-nearest",
+        "key-action-poses-native",
+        "portrait-2x-nearest"
+      ],
+      "finding": "Readable face and silhouette; no observed opaque clipping or matte fringe in inspected views."
+    }
+  },
+  "boundaryReviews": [
+    {
+      "id": "boss-10",
+      "frame": 6,
+      "sourceSha256": "8e919a9306c8e5539354b7d5338c11a143f01801dddbdf2de98122b8cd7b39c6",
+      "accepted": true,
+      "reason": "Full source and native frame inspected: closed fist and its black outline are complete; one transparent column remains before the cell boundary. Padding warning, not clipping."
+    },
+    {
+      "id": "boss-08",
+      "frame": 5,
+      "sourceSha256": "efa84a512732f94e2f83847eea64a0622bd6826da506f10491d8b486d1c10bea",
+      "accepted": true,
+      "reason": "Repaired full source and all 16 native frames inspected: hair, sleeves, fists, coat tails and shoes have complete dark contours. The adaptive split retains 1\u20132 transparent pixels in narrow gutters; this is padding, not clipping."
+    },
+    {
+      "id": "boss-08",
+      "frame": 6,
+      "sourceSha256": "efa84a512732f94e2f83847eea64a0622bd6826da506f10491d8b486d1c10bea",
+      "accepted": true,
+      "reason": "Repaired full source and all 16 native frames inspected: hair, sleeves, fists, coat tails and shoes have complete dark contours. The adaptive split retains 1\u20132 transparent pixels in narrow gutters; this is padding, not clipping."
+    },
+    {
+      "id": "boss-08",
+      "frame": 11,
+      "sourceSha256": "efa84a512732f94e2f83847eea64a0622bd6826da506f10491d8b486d1c10bea",
+      "accepted": true,
+      "reason": "Repaired full source and all 16 native frames inspected: hair, sleeves, fists, coat tails and shoes have complete dark contours. The adaptive split retains 1\u20132 transparent pixels in narrow gutters; this is padding, not clipping."
+    },
+    {
+      "id": "boss-08",
+      "frame": 13,
+      "sourceSha256": "efa84a512732f94e2f83847eea64a0622bd6826da506f10491d8b486d1c10bea",
+      "accepted": true,
+      "reason": "Repaired full source and all 16 native frames inspected: hair, sleeves, fists, coat tails and shoes have complete dark contours. The adaptive split retains 1\u20132 transparent pixels in narrow gutters; this is padding, not clipping."
+    },
+    {
+      "id": "boss-08",
+      "frame": 15,
+      "sourceSha256": "efa84a512732f94e2f83847eea64a0622bd6826da506f10491d8b486d1c10bea",
+      "accepted": true,
+      "reason": "Repaired full source and all 16 native frames inspected: hair, sleeves, fists, coat tails and shoes have complete dark contours. The adaptive split retains 1\u20132 transparent pixels in narrow gutters; this is padding, not clipping."
+    },
+    {
+      "id": "boss-12",
+      "frame": 11,
+      "sourceSha256": "b631c4ff4bff440d1a1acf55fdf74f699c8114dae96078b988af4c3c7e0f00d3",
+      "accepted": true,
+      "reason": "Raised victory fist crosses the nominal quarter-grid line. Adaptive gutter crop includes the whole fist and dark outline; inspected full source and all 16 exported frames, with one transparent row remaining above the fist. Frame 7 no longer contains the stray fist cap."
+    },
+    {
+      "id": "boss-05",
+      "frame": 6,
+      "sourceSha256": "d6305f9779727ed31ba7e146ea5b7bc30ad3a65eaf6343d7322bf64ec5d2d0eb",
+      "accepted": true,
+      "reason": "Full 16-frame native export and key attack pose inspected: closed punching fist and dark outline are complete. Source alpha gutter check confirms two transparent columns after the fist. This is narrow padding, not clipping; adaptive source rectangle is retained in the manifest."
+    },
+    {
+      "id": "boss-08",
+      "frame": 6,
+      "sourceSha256": "1cdf345dea23662b0d0fbf15b31c85d22c7be1a2bbc3a6374ef4e8a7441ff501",
+      "accepted": true,
+      "reason": "Full 16-frame native export and key attack pose inspected: closed punching fist and dark outline are complete. Source alpha gutter check confirms two transparent columns after the fist. This is narrow padding, not clipping; adaptive source rectangle is retained in the manifest."
+    },
+    {
+      "id": "boss-14",
+      "frame": 6,
+      "sourceSha256": "93a740f528d380aec7cffbaa6f9271313a73fb517d98288fa8dcd308ef70fbd1",
+      "accepted": true,
+      "reason": "Full 16-frame native export and key attack pose inspected: closed punching fist and dark outline are complete. Source alpha gutter check confirms two transparent columns after the fist. This is narrow padding, not clipping; adaptive source rectangle is retained in the manifest."
+    },
+    {
+      "id": "boss-18",
+      "frame": 6,
+      "sourceSha256": "1b369c4b39b053297f1113b1404f6dda40fab173f357cbdc035cfa4bbe36880f",
+      "accepted": true,
+      "reason": "Full 16-frame native export and key attack pose inspected: closed punching fist and dark outline are complete. Source alpha gutter check confirms two transparent columns after the fist. This is narrow padding, not clipping; adaptive source rectangle is retained in the manifest."
+    }
+  ],
+  "supersededBossSources": {
+    "reason": "Rejected repeated boss identities; replaced with individually described bodies, ages, hair and costumes. No rejected source is active in the runtime manifest.",
+    "sourceSha256": {
+      "boss-05": "f5ffa3e2504e7600d505d2a384b029096229dfff12b9f841253ea9c585756641",
+      "boss-06": "c47e77e8378b810ec0ffe4ad3a7fcef230a4e6c5ca6371e9ebe1deb42e92b6b6",
+      "boss-07": "c1a5ac016e3c0dc7157025611c19a993a82e7fb4c73c4bb580e1b826ce1071ce",
+      "boss-08": "efa84a512732f94e2f83847eea64a0622bd6826da506f10491d8b486d1c10bea",
+      "boss-09": "da0408a3cd4bafaa2e7a69bd49de1d71cbe47e057aa5b35ee862b6590aaa975e",
+      "boss-10": "8e919a9306c8e5539354b7d5338c11a143f01801dddbdf2de98122b8cd7b39c6",
+      "boss-11": "20eff4e8b4bb897dbc25553aed33e2222886766c144833002df80d6b0a527353",
+      "boss-12": "b631c4ff4bff440d1a1acf55fdf74f699c8114dae96078b988af4c3c7e0f00d3",
+      "boss-13": "cebbbe1b69f73abe2fc3c5a55aef23d5d0febd8746f98953bf67ecddfc8a8253",
+      "boss-14": "c9597948f86d466c2201dcb6351f37901ab8819a8777ada8c8773a49ced0b5e7",
+      "boss-15": "8bf0eb1fabda2ef9f6f56233e088293ce4b00c6847b16aace7298789fce583af",
+      "boss-16": "81f6920aa3330f9447a50efec364a0d53b6a2c9279de283d8dcded2c8d00f83c",
+      "boss-17": "f870498e19de30bcbb80f53138e4a84db2be8fdc5b38c46c4bc17866731dd518",
+      "boss-18": "158f9ada160aa73e15eac9db7d5a81234d7738c0093592752a06f74fcef84522",
+      "boss-19": "873e479de07d84f13ceaeb88ecad4a39fd89900e1e28a78c83a2bec536a3a231"
+    }
+  }
+}

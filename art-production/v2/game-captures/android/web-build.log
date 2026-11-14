@@ -1,0 +1,16 @@
+
+> real-life-rpg@0.1.0 build
+> tsc -b && vite build && node scripts/build-offline.mjs
+
+vite v7.3.8 building client environment for production...
+transforming...
+✓ 1958 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                        0.73 kB │ gzip:   0.42 kB
+dist/assets/pose.worker-SRizSUkj.js  126.07 kB
+dist/assets/index-DLoofvvF.css       148.89 kB │ gzip:  29.74 kB
+dist/assets/esm-iPjrJSYw.js          415.98 kB │ gzip: 108.68 kB
+dist/assets/index-DvAl0wWN.js        807.34 kB │ gzip: 241.83 kB
+✓ built in 3.34s
+Offline shell 88950f4d77f5fa3b: 471 required assets; 3 optional pose assets.

@@ -1,0 +1,17 @@
+{
+  "characters": 60,
+  "uniqueAnimationFrames": 992,
+  "characterPngs": 432,
+  "backgrounds": 8,
+  "icons": 24,
+  "reviewedCharacters": 60,
+  "unresolvedIssues": 0,
+  "approvedFemaleRgbPreserved": true,
+  "allSourceHashesCurrent": true,
+  "allFeetY": 122,
+  "allAlphaValues": [
+    0,
+    255
+  ],
+  "currentBoundaryReviews": 4
+}

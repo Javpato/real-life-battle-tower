@@ -3,7 +3,7 @@ import type { Element, PlayerSave, Skill } from "./model";
 import { INITIAL_SKILLS, SKILLS, SKILL_BY_ID } from "./catalog";
 import { canLearnSkill, trialRequirement, FLASH_SKILLS } from "./engine";
 import { skillTypes } from "./typeChart";
-import { PixelIcon } from "./PixelScene";
+import { PixelIcon, PixelCharacter } from "./PixelScene";
 import ExerciseDemo from "../exercises/ExerciseDemo";
 import { skillGuide } from "./skillGuides";
 import { DISCIPLINES, SkillTypes, TypeCodex } from "./TypeCodex";
@@ -105,7 +105,13 @@ export default function SkillAcademy({
   return (
     <section className="skill-academy" aria-label="Skill Academy">
       <header className="academy-heading">
-        <div>
+        <div
+          className="bt-instructor"
+          style={{ width: "clamp(48px,7vw,96px)", aspectRatio: "1", flexShrink: 0 }}
+        >
+          <PixelCharacter id="instructor-1" action="idle" />
+        </div>
+        <div style={{ flex: 1 }}>
           <span className="eyebrow">THE SKILL ACADEMY</span>
           <h1>Choose your next strength.</h1>
           <p>Six disciplines. Every technique has a path.</p>
