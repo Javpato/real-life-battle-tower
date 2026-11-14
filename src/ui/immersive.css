@@ -2218,3 +2218,10 @@
     font-size: 9px;
   }
 }
+
+/* Keep atlas icons square inside the shared nutrition/shop row structure. */
+.immersive-game .food-row > .inventory-item-art {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+}
