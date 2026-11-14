@@ -30,7 +30,7 @@ self.onmessage = async (event: MessageEvent) => {
           message.bitmap.height <= 0
         )
           throw new Error("The camera frame is not ready yet.");
-        const inferenceStarted=performance.now();
+        const inferenceStarted = performance.now();
         const result = detector.detectForVideo(
           message.bitmap,
           message.timestamp,
@@ -38,7 +38,7 @@ self.onmessage = async (event: MessageEvent) => {
         self.postMessage({
           type: "pose",
           requestId: message.requestId,
-          inferenceMs: performance.now()-inferenceStarted,
+          inferenceMs: performance.now() - inferenceStarted,
           landmarks: result.landmarks[0] ?? [],
           timestamp: message.timestamp,
           width: message.bitmap.width,

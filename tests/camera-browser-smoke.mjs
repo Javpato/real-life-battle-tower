@@ -152,11 +152,7 @@ try {
   await controls();
   await page.getByRole("button", { name: "Camera mode", exact: true }).click();
   await state("off");
-  assert(
-    await page
-      .getByText(/Enable the camera, then follow the starting position/)
-      .isVisible(),
-  );
+  await page.getByText(/Enable the camera, then follow the starting position/).waitFor();
   assert.equal(await page.getByTestId("units").textContent(), "0");
   await page.getByRole("button", { name: "Manual mode", exact: true }).click();
   await state("off");
@@ -168,10 +164,9 @@ try {
   assert.equal(
     await page.getByTestId("units").textContent(),
     "0",
-    "manual camera preview does not credit units",
+    "camera-mode recovery without a detected body does not credit units",
   );
-  assert(await page.getByText(/Manual mode · preview only/).isVisible());
-  await page.getByRole("button", { name: "Camera mode", exact: true }).click();
+  assert(await page.getByRole("button", {name:"Manual mode",exact:true}).isVisible(), "Enable camera exits manual mode");
   // Facing selection restarts ownership safely. Desktop fake hardware may still report a single camera.
   await openCameraSettings(camera);
   await page
@@ -270,7 +265,7 @@ try {
         "3 repeated stops/re-enables with real fake-hardware MediaStreams",
         "worker/model initialization on each restart",
         "pause/turn/session stream preservation",
-        "manual preview without credit",
+        "manual-to-camera recovery without fabricated credit",
         "off-state mode change updates guidance without credit",
         "front/back restart",
         "late permission stream cleanup",

@@ -17,8 +17,8 @@ import ExerciseHUD from "./ExerciseHUD";
 import type { ExerciseVisualState } from "./exerciseUi";
 import "./exercises.css";
 import { RecalibrationGate } from "./preparation";
-import {PoseFilter} from "./poseFilter";
-import {FeedbackDwell} from "./feedbackDwell";
+import { PoseFilter } from "./poseFilter";
+import { FeedbackDwell } from "./feedbackDwell";
 import { STARTING_CUES } from "./exercisePresentation";
 import {
   armExerciseAudio,
@@ -34,9 +34,9 @@ type Props = Omit<ExerciseCameraProps, "onUnit"> & {
   mode?: "camera" | "manual";
   paused?: boolean;
   sessionComplete?: boolean;
-  onRequestCameraMode?:()=>void;
-  source?:"webcam"|"phone";
-  externalPoseFrame?:PoseFrame|null;
+  onRequestCameraMode?: () => void;
+  source?: "webcam" | "phone";
+  externalPoseFrame?: PoseFrame | null;
 };
 type Stage =
   | "off"
@@ -95,33 +95,77 @@ export default function ExerciseCamera(props: Props) {
   const latest = useRef(props);
   latest.current = props;
   const lifecycle = useRef<CameraLifecycle | null>(null);
-  const [fullModelUrl,setFullModelUrl]=useState<string|null>(null),[model,setModel]=useState<'lite'|'full'>('lite'),[modelBusy,setModelBusy]=useState(false),[modelNotice,setModelNotice]=useState('');
-  const fullUrlRef=useRef<string|null>(null),downloadRef=useRef<AbortController|null>(null),metricsAt=useRef(0);
-  const [metrics,setMetrics]=useState<CameraMetrics|null>(null);
-  useEffect(()=>()=>{downloadRef.current?.abort();if(fullUrlRef.current)URL.revokeObjectURL(fullUrlRef.current);},[]);
-  const chooseModel=async(next:'lite'|'full')=>{
-    if(latest.current.source==='phone')return;
-    let url=fullUrlRef.current;
-    if(next==='full'&&!url){
-      setModelBusy(true);setModelNotice('Downloading optional Full model. Camera images are never uploaded.');
-      const controller=new AbortController();downloadRef.current=controller;
-      try{
-        const remote='https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task';
-        const cache=typeof caches!=='undefined'?await caches.open('everstride-optional-pose-model-v1'):null;
-        let response=await cache?.match(remote);
-        if(!response){response=await fetch(remote,{signal:controller.signal});if(!response.ok)throw new Error('Model download failed');await cache?.put(remote,response.clone());}
-        const blob=await response.blob();if(controller.signal.aborted)return;
-        url=URL.createObjectURL(blob);fullUrlRef.current=url;setFullModelUrl(url);
-      }catch{if(!controller.signal.aborted)setModelNotice('Full model could not download. Lite remains available; retry when connected.');return;}
-      finally{if(!controller.signal.aborted)setModelBusy(false);}
+  const [fullModelUrl, setFullModelUrl] = useState<string | null>(null),
+    [model, setModel] = useState<"lite" | "full">("lite"),
+    [modelBusy, setModelBusy] = useState(false),
+    [modelNotice, setModelNotice] = useState("");
+  const fullUrlRef = useRef<string | null>(null),
+    downloadRef = useRef<AbortController | null>(null),
+    metricsAt = useRef(0);
+  const [metrics, setMetrics] = useState<CameraMetrics | null>(null);
+  useEffect(
+    () => () => {
+      downloadRef.current?.abort();
+      if (fullUrlRef.current) URL.revokeObjectURL(fullUrlRef.current);
+    },
+    [],
+  );
+  const chooseModel = async (next: "lite" | "full") => {
+    if (latest.current.source === "phone") return;
+    let url = fullUrlRef.current;
+    if (next === "full" && !url) {
+      setModelBusy(true);
+      setModelNotice(
+        "Downloading optional Full model. Camera images are never uploaded.",
+      );
+      const controller = new AbortController();
+      downloadRef.current = controller;
+      try {
+        const remote =
+          "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task";
+        const cache =
+          typeof caches !== "undefined"
+            ? await caches.open("everstride-optional-pose-model-v1")
+            : null;
+        let response = await cache?.match(remote);
+        if (!response) {
+          response = await fetch(remote, { signal: controller.signal });
+          if (!response.ok) throw new Error("Model download failed");
+          await cache?.put(remote, response.clone());
+        }
+        const blob = await response.blob();
+        if (controller.signal.aborted) return;
+        url = URL.createObjectURL(blob);
+        fullUrlRef.current = url;
+        setFullModelUrl(url);
+      } catch {
+        if (!controller.signal.aborted)
+          setModelNotice(
+            "Full model could not download. Lite remains available; retry when connected.",
+          );
+        return;
+      } finally {
+        if (!controller.signal.aborted) setModelBusy(false);
+      }
     }
-    lifecycle.current?.stop();detector.current.pause();calibrated.current.clear();poseFilter.current.reset();
-    setModel(next);setMetrics(null);setModelNotice(`${next==='full'?'Full':'Lite'} selected. Enable camera for fresh calibration. Compare on your device; performance is not guaranteed.`);
+    lifecycle.current?.stop();
+    detector.current.pause();
+    calibrated.current.clear();
+    poseFilter.current.reset();
+    setModel(next);
+    setMetrics(null);
+    setModelNotice(
+      `${next === "full" ? "Full" : "Lite"} selected. Enable camera for fresh calibration. Compare on your device; performance is not guaranteed.`,
+    );
   };
-  const poseFilter=useRef(new PoseFilter()),phoneTimestamp=useRef(-Infinity),phoneArrival=useRef(-Infinity);
-  const [partialSquat,setPartialSquat]=useState(false);
+  const poseFilter = useRef(new PoseFilter()),
+    phoneTimestamp = useRef(-Infinity),
+    phoneArrival = useRef(-Infinity);
+  const [partialSquat, setPartialSquat] = useState(false);
   const detector = useRef(
-    new ExerciseDetector(props.exerciseId, props.sessionId, props.lastSide,{allowPartialSquat:partialSquat}),
+    new ExerciseDetector(props.exerciseId, props.sessionId, props.lastSide, {
+      allowPartialSquat: partialSquat,
+    }),
   );
   const detectorSession = useRef(sessionKey(props));
   const recalibration = useRef(new RecalibrationGate());
@@ -211,7 +255,7 @@ export default function ExerciseCamera(props: Props) {
     }
   };
   const receivePose = (rawFrame: PoseFrame) => {
-    const frame=poseFilter.current.process(rawFrame);
+    const frame = poseFilter.current.process(rawFrame);
     draw(frame);
     const p = latest.current;
     // Render may have changed props before React effects run. Never credit a frame into the next session.
@@ -330,7 +374,7 @@ export default function ExerciseCamera(props: Props) {
               current.exerciseId,
               current.sessionId,
               current.lastSide,
-              {allowPartialSquat:partialSquat},
+              { allowPartialSquat: partialSquat },
             );
             lifecycle.current.invalidateFrames();
             setNextSide(detector.current.expectedSide);
@@ -384,7 +428,7 @@ export default function ExerciseCamera(props: Props) {
         calibrated.current.has(calibrationGroup(p.exerciseId)) ||
         frame.timestamp - stableSince.current >= 700
       ) {
-        if(!detector.current.recalibrate(frame)) return;
+        if (!detector.current.recalibrate(frame)) return;
         calibrated.current.add(calibrationGroup(p.exerciseId));
         setPhase("ready");
         setStatus("ready");
@@ -446,7 +490,7 @@ export default function ExerciseCamera(props: Props) {
   receiveRef.current = receivePose;
   const cameraStateRef = useRef<(snapshot: CameraSnapshot) => void>(() => {});
   cameraStateRef.current = (snapshot) => {
-    if(latest.current.source === "phone") return;
+    if (latest.current.source === "phone") return;
     setCamera(snapshot);
     if (snapshot.status === "requesting") {
       calibrated.current.clear();
@@ -521,12 +565,21 @@ export default function ExerciseCamera(props: Props) {
       },
       init: {
         type: "init",
-        modelUrl: model === "full" && fullModelUrl ? fullModelUrl : new URL("models/pose_landmarker_lite.task", base).href,
+        modelUrl:
+          model === "full" && fullModelUrl
+            ? fullModelUrl
+            : new URL("models/pose_landmarker_lite.task", base).href,
         wasmUrl: new URL("models/wasm", base).href,
       },
       onState: (snapshot) => cameraStateRef.current(snapshot),
       onPose: (frame) => receiveRef.current(frame),
-      onMetrics: value=>{const now=performance.now();if(now-metricsAt.current>500){metricsAt.current=now;setMetrics(value);}},
+      onMetrics: (value) => {
+        const now = performance.now();
+        if (now - metricsAt.current > 500) {
+          metricsAt.current = now;
+          setMetrics(value);
+        }
+      },
     });
     lifecycle.current = controller;
     const change = async () => {
@@ -572,7 +625,7 @@ export default function ExerciseCamera(props: Props) {
       controller.dispose();
       if (lifecycle.current === controller) lifecycle.current = null;
     };
-  }, [model,fullModelUrl]);
+  }, [model, fullModelUrl]);
   useEffect(() => {
     pendingUnit.current = null;
     detectorSession.current = sessionKey(props);
@@ -580,7 +633,7 @@ export default function ExerciseCamera(props: Props) {
       props.exerciseId,
       props.sessionId,
       props.lastSide,
-      {allowPartialSquat:partialSquat},
+      { allowPartialSquat: partialSquat },
     );
     lifecycle.current?.invalidateFrames();
     poseFilter.current.reset();
@@ -593,7 +646,10 @@ export default function ExerciseCamera(props: Props) {
       !dismissedGuide.current.has(sessionKey(props)) &&
         needsGuide(props.exerciseId),
     );
-    if (lifecycle.current?.currentStatus === "ready" || props.source === "phone") {
+    if (
+      lifecycle.current?.currentStatus === "ready" ||
+      props.source === "phone"
+    ) {
       setPhase("framing");
       setStatus("insufficient");
       setMessage(EXERCISE_GUIDES[props.exerciseId].setup);
@@ -615,7 +671,9 @@ export default function ExerciseCamera(props: Props) {
     ) {
       setPhase("framing");
       setStatus("insufficient");
-      setMessage("Return to the starting position for fresh calibration. Your progress is kept.");
+      setMessage(
+        "Return to the starting position for fresh calibration. Your progress is kept.",
+      );
     }
   }, [props.active, props.paused, props.mode]);
   useEffect(() => {
@@ -645,30 +703,95 @@ export default function ExerciseCamera(props: Props) {
     const timer = setInterval(tick, 100);
     return () => clearInterval(timer);
   }, [stage]);
-  useEffect(()=>{
-    detector.current.pause();poseFilter.current.reset();resetTiming();calibrated.current.clear();phoneTimestamp.current=-Infinity;phoneArrival.current=-Infinity;
-    if(props.source==='phone'){
-      lifecycle.current?.stop();setCamera({status:'ready',stream:null,message:'Phone pose source selected. Waiting for a fresh frame.'});setPhase('framing');setStatus('no-body');setMessage('Connect your phone camera and move into its view.');
-    }else{setCamera(initialCamera);setPhase('off');setStatus('off');setMessage(initialCamera.message);}
-  },[props.source]);
-  useEffect(()=>{
-    if(props.source!=='phone')return;
-    const frame=props.externalPoseFrame,now=performance.now();
-    if(!frame||!Number.isFinite(frame.timestamp)||frame.timestamp>now+50||now-frame.timestamp>500||frame.timestamp<=phoneTimestamp.current||frame.landmarks.length!==33||!Number.isFinite(frame.width)||!Number.isFinite(frame.height)||frame.width<=0||frame.height<=0){
-      if(!frame||!Number.isFinite(frame?.timestamp)||now-(frame?.timestamp??0)>500){detector.current.pause();poseFilter.current.reset();calibrated.current.clear();stableSince.current=null;countdownAt.current=null;setPhase('framing');setStatus('no-body');setMessage('Phone tracking paused. Reconnect or move back into view.');}
+  useEffect(() => {
+    detector.current.pause();
+    poseFilter.current.reset();
+    resetTiming();
+    calibrated.current.clear();
+    phoneTimestamp.current = -Infinity;
+    phoneArrival.current = -Infinity;
+    if (props.source === "phone") {
+      lifecycle.current?.stop();
+      setCamera({
+        status: "ready",
+        stream: null,
+        message: "Phone pose source selected. Waiting for a fresh frame.",
+      });
+      setPhase("framing");
+      setStatus("no-body");
+      setMessage("Connect your phone camera and move into its view.");
+    } else {
+      setCamera(initialCamera);
+      setPhase("off");
+      setStatus("off");
+      setMessage(initialCamera.message);
+    }
+  }, [props.source]);
+  useEffect(() => {
+    if (props.source !== "phone") return;
+    const frame = props.externalPoseFrame,
+      now = performance.now();
+    if (
+      !frame ||
+      !Number.isFinite(frame.timestamp) ||
+      frame.timestamp > now + 50 ||
+      now - frame.timestamp > 500 ||
+      frame.timestamp <= phoneTimestamp.current ||
+      frame.landmarks.length !== 33 ||
+      !Number.isFinite(frame.width) ||
+      !Number.isFinite(frame.height) ||
+      frame.width <= 0 ||
+      frame.height <= 0
+    ) {
+      if (
+        !frame ||
+        !Number.isFinite(frame?.timestamp) ||
+        now - (frame?.timestamp ?? 0) > 500
+      ) {
+        detector.current.pause();
+        poseFilter.current.reset();
+        calibrated.current.clear();
+        stableSince.current = null;
+        countdownAt.current = null;
+        setPhase("framing");
+        setStatus("no-body");
+        setMessage("Phone tracking paused. Reconnect or move back into view.");
+      }
       return;
     }
-    phoneTimestamp.current=frame.timestamp;phoneArrival.current=now;
-    receiveRef.current({timestamp:frame.timestamp,width:frame.width,height:frame.height,landmarks:frame.landmarks,receivedAt:now,inferenceMs:frame.inferenceMs});
-  },[props.source,props.externalPoseFrame]);
-  useEffect(()=>{
-    if(props.source!=='phone')return;
-    const timer=setInterval(()=>{if(performance.now()-phoneArrival.current>500){detector.current.pause();poseFilter.current.reset();calibrated.current.clear();stableSince.current=null;countdownAt.current=null;setPhase('framing');setStatus('no-body');setMessage('Waiting for fresh phone tracking. Your completed units are kept.');}},200);
-    return()=>clearInterval(timer);
-  },[props.source]);
+    phoneTimestamp.current = frame.timestamp;
+    phoneArrival.current = now;
+    receiveRef.current({
+      timestamp: frame.timestamp,
+      width: frame.width,
+      height: frame.height,
+      landmarks: frame.landmarks,
+      receivedAt: now,
+      inferenceMs: frame.inferenceMs,
+    });
+  }, [props.source, props.externalPoseFrame]);
+  useEffect(() => {
+    if (props.source !== "phone") return;
+    const timer = setInterval(() => {
+      if (performance.now() - phoneArrival.current > 500) {
+        detector.current.pause();
+        poseFilter.current.reset();
+        calibrated.current.clear();
+        stableSince.current = null;
+        countdownAt.current = null;
+        setPhase("framing");
+        setStatus("no-body");
+        setMessage(
+          "Waiting for fresh phone tracking. Your completed units are kept.",
+        );
+      }
+    }, 200);
+    return () => clearInterval(timer);
+  }, [props.source]);
   const startCamera = async (next = selectionRef.current) => {
     if (!video.current || latest.current.source === "phone") return;
-    if(latest.current.mode === "manual") latest.current.onRequestCameraMode?.();
+    if (latest.current.mode === "manual")
+      latest.current.onRequestCameraMode?.();
     try {
       localStorage.setItem(
         "everstride-guide-" + latest.current.exerciseId,
@@ -702,7 +825,10 @@ export default function ExerciseCamera(props: Props) {
     resetTiming();
     calibrated.current.clear();
     poseFilter.current.reset();
-    if (!value && (lifecycle.current?.currentStatus === "ready" || props.source === "phone"))
+    if (
+      !value &&
+      (lifecycle.current?.currentStatus === "ready" || props.source === "phone")
+    )
       setPhase("framing");
     setMessage(
       value
@@ -740,9 +866,17 @@ export default function ExerciseCamera(props: Props) {
             ? "Paused. Your completed units are kept."
             : "Preview only between turns. Choose an exercise to begin."
         : message;
-  const dwell=useRef(new FeedbackDwell());
-  const [stableMessage,setStableMessage]=useState(hudMessage);
-  useEffect(()=>{const update=()=>setStableMessage(dwell.current.update(hudMessage,hudStatus,performance.now()));update();const timer=setInterval(update,100);return()=>clearInterval(timer);},[hudMessage,hudStatus]);
+  const dwell = useRef(new FeedbackDwell());
+  const [stableMessage, setStableMessage] = useState(hudMessage);
+  useEffect(() => {
+    const update = () =>
+      setStableMessage(
+        dwell.current.update(hudMessage, hudStatus, performance.now()),
+      );
+    update();
+    const timer = setInterval(update, 100);
+    return () => clearInterval(timer);
+  }, [hudMessage, hudStatus]);
   const mirrored =
     (camera.facingMode ?? selection.facingMode) !== "environment";
   const guide = EXERCISE_GUIDES[props.exerciseId];
@@ -875,10 +1009,77 @@ export default function ExerciseCamera(props: Props) {
           </div>
         )}
       </div>
-      {props.source==='phone'&&<p className="exercise-note">Phone tracking · video stays on your phone unless you explicitly share its preview.</p>}
-      {props.exerciseId==='squat'&&!partialSquat&&(status==='partial'||status==='insufficient')&&<button type="button" onClick={()=>{setPartialSquat(true);calibrated.current.clear();}}>Feet out of frame? Count visible hip movement (estimated)</button>}
-      {partialSquat&&props.exerciseId==='squat'&&<p className="exercise-note">Cropped squat estimate · feet and knee depth are not verified. Stand tall for a fresh reference. <button type="button" onClick={()=>setPartialSquat(false)}>Use full-leg tracking</button></p>}
-      {props.source!=='phone'&&<details className="exercise-model-options"><summary>Recognition model · {model==='full'?'Full':'Lite'}</summary><p>Lite is included. Full is an optional download, processed on this device. Compare measured latency; neither model guarantees correct repetitions.</p><div><button type="button" disabled={modelBusy||model==='lite'} onClick={()=>void chooseModel('lite')}>Use Lite</button><button type="button" disabled={modelBusy||model==='full'} onClick={()=>void chooseModel('full')}>{modelBusy?'Downloading…':fullModelUrl?'Use Full':'Download and use Full'}</button></div>{modelNotice&&<p role="status">{modelNotice}</p>}{metrics&&<p>Last capture-to-result: {Math.round(metrics.captureLatencyMs)} ms{metrics.inferenceMs!==undefined?` · inference: ${Math.round(metrics.inferenceMs)} ms`:''} · stale frames discarded: {metrics.droppedStale}. No inference queue.</p>}</details>}
+      {props.source === "phone" && (
+        <p className="exercise-note">
+          Phone tracking · video stays on your phone unless you explicitly share
+          its preview.
+        </p>
+      )}
+      {props.exerciseId === "squat" &&
+        !partialSquat &&
+        (status === "partial" || status === "insufficient") && (
+          <button
+            type="button"
+            onClick={() => {
+              setPartialSquat(true);
+              calibrated.current.clear();
+            }}
+          >
+            Feet out of frame? Count visible hip movement (estimated)
+          </button>
+        )}
+      {partialSquat && props.exerciseId === "squat" && (
+        <p className="exercise-note">
+          Cropped squat estimate · feet and knee depth are not verified. Stand
+          tall for a fresh reference.{" "}
+          <button type="button" onClick={() => setPartialSquat(false)}>
+            Use full-leg tracking
+          </button>
+        </p>
+      )}
+      {props.source !== "phone" && (
+        <details className="exercise-model-options">
+          <summary>
+            Recognition model · {model === "full" ? "Full" : "Lite"}
+          </summary>
+          <p>
+            Lite is included. Full is an optional download, processed on this
+            device. Compare measured latency; neither model guarantees correct
+            repetitions.
+          </p>
+          <div>
+            <button
+              type="button"
+              disabled={modelBusy || model === "lite"}
+              onClick={() => void chooseModel("lite")}
+            >
+              Use Lite
+            </button>
+            <button
+              type="button"
+              disabled={modelBusy || model === "full"}
+              onClick={() => void chooseModel("full")}
+            >
+              {modelBusy
+                ? "Downloading…"
+                : fullModelUrl
+                  ? "Use Full"
+                  : "Download and use Full"}
+            </button>
+          </div>
+          {modelNotice && <p role="status">{modelNotice}</p>}
+          {metrics && (
+            <p>
+              Last capture-to-result: {Math.round(metrics.captureLatencyMs)} ms
+              {metrics.inferenceMs !== undefined
+                ? ` · inference: ${Math.round(metrics.inferenceMs)} ms`
+                : ""}{" "}
+              · stale frames discarded: {metrics.droppedStale}. No inference
+              queue.
+            </p>
+          )}
+        </details>
+      )}
       <ExerciseHUD
         exerciseId={props.exerciseId}
         progress={props.progress}
@@ -902,12 +1103,21 @@ export default function ExerciseCamera(props: Props) {
       />
       <div className="exercise-camera-controls" aria-label="Camera controls">
         <div className="exercise-actions">
-          {props.mode==='manual'&&props.onRequestCameraMode&&<button type="button" className="exercise-primary" data-guide="camera-use-mode" onClick={props.onRequestCameraMode}>Use camera for this turn</button>}
+          {props.mode === "manual" && props.onRequestCameraMode && (
+            <button
+              type="button"
+              className="exercise-primary"
+              data-guide="camera-use-mode"
+              onClick={props.onRequestCameraMode}
+            >
+              Use camera for this turn
+            </button>
+          )}
           <button
             type="button"
             className="exercise-primary"
             data-guide="camera-setup"
-            disabled={props.source==='phone'}
+            disabled={props.source === "phone"}
             onClick={() => void startCamera()}
           >
             {camera.status === "error"
@@ -989,7 +1199,7 @@ export default function ExerciseCamera(props: Props) {
                 Camera facing
                 <select
                   aria-label="Camera facing"
-                  disabled={props.source==='phone'}
+                  disabled={props.source === "phone"}
                   value={selection.facingMode}
                   onChange={(e) =>
                     changeSelection({
@@ -1006,7 +1216,7 @@ export default function ExerciseCamera(props: Props) {
                 Camera device
                 <select
                   aria-label="Camera device"
-                  disabled={props.source==='phone'}
+                  disabled={props.source === "phone"}
                   value={selection.deviceId ?? ""}
                   onChange={(e) =>
                     changeSelection({

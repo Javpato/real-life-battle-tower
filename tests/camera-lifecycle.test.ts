@@ -59,7 +59,8 @@ function setup() {
     play: vi.fn().mockResolvedValue(undefined),
     pause: vi.fn(),
   } as unknown as HTMLVideoElement;
-  const onPose = vi.fn(), onMetrics=vi.fn();
+  const onPose = vi.fn(),
+    onMetrics = vi.fn();
   const camera = new CameraLifecycle({
     dependencies: {
       getUserMedia,
@@ -364,20 +365,36 @@ describe("camera lifecycle ownership and races", () => {
   });
 });
 
-describe('camera freshness and measured latency',()=>{
- it('allows only one in-flight inference and drops a slow result as lost evidence',async()=>{
-  const f=setup();await f.start();await f.tick();
-  for(let i=0;i<6;i++)await f.tick();
-  expect(f.captureFrame).toHaveBeenCalledTimes(1);
-  f.workers[0].send(f.pose);
-  expect(f.onPose).toHaveBeenLastCalledWith(expect.objectContaining({landmarks:[],captureLatencyMs:600}));
-  expect(f.onMetrics).toHaveBeenLastCalledWith(expect.objectContaining({accepted:0,droppedStale:1}));
-  await f.tick();expect(f.captureFrame).toHaveBeenCalledTimes(2);
- });
- it('does not let a late response consume the current request',async()=>{
-  const f=setup();await f.start();await f.tick();
-  f.workers[0].send({...f.pose,requestId:999});expect(f.onPose).not.toHaveBeenCalled();
-  f.workers[0].send({...f.pose,requestId:1,inferenceMs:21});
-  expect(f.onMetrics).toHaveBeenLastCalledWith(expect.objectContaining({accepted:1,inferenceMs:21,captureLatencyMs:0}));
- });
+describe("camera freshness and measured latency", () => {
+  it("allows only one in-flight inference and drops a slow result as lost evidence", async () => {
+    const f = setup();
+    await f.start();
+    await f.tick();
+    for (let i = 0; i < 6; i++) await f.tick();
+    expect(f.captureFrame).toHaveBeenCalledTimes(1);
+    f.workers[0].send(f.pose);
+    expect(f.onPose).toHaveBeenLastCalledWith(
+      expect.objectContaining({ landmarks: [], captureLatencyMs: 600 }),
+    );
+    expect(f.onMetrics).toHaveBeenLastCalledWith(
+      expect.objectContaining({ accepted: 0, droppedStale: 1 }),
+    );
+    await f.tick();
+    expect(f.captureFrame).toHaveBeenCalledTimes(2);
+  });
+  it("does not let a late response consume the current request", async () => {
+    const f = setup();
+    await f.start();
+    await f.tick();
+    f.workers[0].send({ ...f.pose, requestId: 999 });
+    expect(f.onPose).not.toHaveBeenCalled();
+    f.workers[0].send({ ...f.pose, requestId: 1, inferenceMs: 21 });
+    expect(f.onMetrics).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        accepted: 1,
+        inferenceMs: 21,
+        captureLatencyMs: 0,
+      }),
+    );
+  });
 });

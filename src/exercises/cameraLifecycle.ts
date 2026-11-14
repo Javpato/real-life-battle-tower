@@ -32,7 +32,12 @@ export type CameraDependencies = {
   clearTimer: (timer: ReturnType<typeof setTimeout>) => void;
   now: () => number;
 };
-export type CameraMetrics = { accepted: number; droppedStale: number; captureLatencyMs: number; inferenceMs?: number };
+export type CameraMetrics = {
+  accepted: number;
+  droppedStale: number;
+  captureLatencyMs: number;
+  inferenceMs?: number;
+};
 export type CameraLifecycleOptions = {
   dependencies: CameraDependencies;
   init: { type: "init"; modelUrl: string; wasmUrl: string };
@@ -76,9 +81,18 @@ export class CameraLifecycle {
   private frameHandle: number | undefined;
   private startupTimer: ReturnType<typeof setTimeout> | undefined;
   private frameTimer: ReturnType<typeof setTimeout> | undefined;
-  private inflight: { workerGeneration: number; epoch: number; capturedAt: number; requestId: number } | null = null;
-  private requestId=0;
-  private metrics: CameraMetrics={accepted:0,droppedStale:0,captureLatencyMs:0};
+  private inflight: {
+    workerGeneration: number;
+    epoch: number;
+    capturedAt: number;
+    requestId: number;
+  } | null = null;
+  private requestId = 0;
+  private metrics: CameraMetrics = {
+    accepted: 0,
+    droppedStale: 0,
+    captureLatencyMs: 0,
+  };
   private lastVideoTime = -1;
   private lastCapture = -Infinity;
   private recoveries = 0;
@@ -291,7 +305,11 @@ export class CameraLifecycle {
         }
         if (message?.type === "pose" && this.inflight) {
           const pending = this.inflight;
-          if(message.requestId !== undefined && message.requestId !== pending.requestId) return;
+          if (
+            message.requestId !== undefined &&
+            message.requestId !== pending.requestId
+          )
+            return;
           this.inflight = null;
           this.clearTimer("frameTimer");
           if (
@@ -306,18 +324,36 @@ export class CameraLifecycle {
             !Number.isFinite(message.height)
           )
             return;
-          const receivedAt=this.options.dependencies.now(),captureLatencyMs=Math.max(0,receivedAt-pending.capturedAt);
-          this.metrics={...this.metrics,captureLatencyMs,inferenceMs:Number.isFinite(message.inferenceMs)?message.inferenceMs:undefined};
-          if(captureLatencyMs>(this.options.maxFrameAgeMs??500)){
+          const receivedAt = this.options.dependencies.now(),
+            captureLatencyMs = Math.max(0, receivedAt - pending.capturedAt);
+          this.metrics = {
+            ...this.metrics,
+            captureLatencyMs,
+            inferenceMs: Number.isFinite(message.inferenceMs)
+              ? message.inferenceMs
+              : undefined,
+          };
+          if (captureLatencyMs > (this.options.maxFrameAgeMs ?? 500)) {
             this.metrics.droppedStale++;
-            this.options.onMetrics?.({...this.metrics});
+            this.options.onMetrics?.({ ...this.metrics });
             // Deliver loss, never stale body coordinates. This cancels held/cycle evidence.
-            this.options.onPose({timestamp:receivedAt,width:message.width,height:message.height,landmarks:[],receivedAt,captureLatencyMs});
+            this.options.onPose({
+              timestamp: receivedAt,
+              width: message.width,
+              height: message.height,
+              landmarks: [],
+              receivedAt,
+              captureLatencyMs,
+            });
             return;
           }
           this.metrics.accepted++;
-          this.options.onMetrics?.({...this.metrics});
-          this.options.onPose({...message,receivedAt,captureLatencyMs} as PoseFrame);
+          this.options.onMetrics?.({ ...this.metrics });
+          this.options.onPose({
+            ...message,
+            receivedAt,
+            captureLatencyMs,
+          } as PoseFrame);
         }
       };
       this.startupTimer = this.options.dependencies.setTimer(
@@ -356,7 +392,12 @@ export class CameraLifecycle {
         return;
       this.lastVideoTime = video.currentTime;
       this.lastCapture = now;
-      const pending = { workerGeneration, epoch: this.evaluationEpoch, capturedAt: now, requestId: ++this.requestId };
+      const pending = {
+        workerGeneration,
+        epoch: this.evaluationEpoch,
+        capturedAt: now,
+        requestId: ++this.requestId,
+      };
       this.inflight = pending;
       this.frameTimer = this.options.dependencies.setTimer(() => {
         if (!current() || this.inflight !== pending) return;
@@ -383,7 +424,15 @@ export class CameraLifecycle {
           }
           return;
         }
-        worker.postMessage({ type: "frame", bitmap, timestamp: now, requestId: pending.requestId }, [bitmap]);
+        worker.postMessage(
+          {
+            type: "frame",
+            bitmap,
+            timestamp: now,
+            requestId: pending.requestId,
+          },
+          [bitmap],
+        );
       } catch (error) {
         bitmap?.close();
         if (current())

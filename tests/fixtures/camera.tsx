@@ -2,7 +2,7 @@
 import { StrictMode, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import ExerciseCamera from "../../src/exercises/ExerciseCamera";
-import type {PoseFrame} from "../../src/exercises/detectors";
+import type { PoseFrame } from "../../src/exercises/detectors";
 import type { ExerciseId } from "../../src/core/contracts";
 function CameraFixture() {
   const [active, setActive] = useState(true),
@@ -11,8 +11,14 @@ function CameraFixture() {
     [session, setSession] = useState(1),
     [progress, setProgress] = useState(0),
     [exercise, setExercise] = useState<ExerciseId>("squat");
-  const [source,setSource]=useState<"webcam"|"phone">("webcam"),[phoneFrame,setPhoneFrame]=useState<PoseFrame|null>(null);
-  useEffect(()=>{const receive=(event:Event)=>setPhoneFrame((event as CustomEvent<PoseFrame|null>).detail);window.addEventListener("test-phone-frame",receive);return()=>window.removeEventListener("test-phone-frame",receive);},[]);
+  const [source, setSource] = useState<"webcam" | "phone">("webcam"),
+    [phoneFrame, setPhoneFrame] = useState<PoseFrame | null>(null);
+  useEffect(() => {
+    const receive = (event: Event) =>
+      setPhoneFrame((event as CustomEvent<PoseFrame | null>).detail);
+    window.addEventListener("test-phone-frame", receive);
+    return () => window.removeEventListener("test-phone-frame", receive);
+  }, []);
   const receiptMode = new URLSearchParams(location.search).has("receipts");
   const pendingReceipt = useRef<((accepted: boolean) => void) | null>(null);
   const [requests, setRequests] = useState(0);
@@ -27,7 +33,13 @@ function CameraFixture() {
     <main style={{ maxWidth: 980, margin: "auto" }}>
       <h1>Camera lifecycle test fixture</h1>
       <nav aria-label="Test controls">
-        <button onClick={()=>setSource(v=>v==="webcam"?"phone":"webcam")}>{source==="webcam"?"Phone source":"Webcam source"}</button>
+        <button
+          onClick={() =>
+            setSource((v) => (v === "webcam" ? "phone" : "webcam"))
+          }
+        >
+          {source === "webcam" ? "Phone source" : "Webcam source"}
+        </button>
         <button onClick={() => setActive((v) => !v)}>
           {active ? "End turn" : "Begin turn"}
         </button>
@@ -64,7 +76,10 @@ function CameraFixture() {
       <ExerciseCamera
         source={source}
         externalPoseFrame={phoneFrame}
-        onRequestCameraMode={()=>{setManual(false);setPaused(false);}}
+        onRequestCameraMode={() => {
+          setManual(false);
+          setPaused(false);
+        }}
         exerciseId={exercise}
         sessionId={`test-session-${session}`}
         target={receiptMode ? 2 : 8}
