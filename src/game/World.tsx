@@ -76,7 +76,8 @@ export default function World(props:WorldProps){
     const sy=Number.isFinite(start.y)?Phaser.Math.Clamp(start.y,46,MAP_H-30):initialPosition.y;
     const usable=this.canMove(sx,sy)?{x:sx,y:sy}:initialPosition;
     this.player=this.add.sprite(usable.x,usable.y,'traveler',0).setOrigin(.5,1).setDepth(usable.y);this.player.setScale(36/this.player.height);
-    this.cameras.main.setZoom(2).setBounds(0,0,MAP_W,MAP_H).startFollow(this.player,true,.12,.12).setRoundPixels(true);
+    this.cameras.main.setBounds(0,0,MAP_W,MAP_H).startFollow(this.player,true,.12,.12).setRoundPixels(true);
+    const resizeView=()=>{const width=this.scale.width,height=this.scale.height;const immersive=Boolean(host.current?.closest('.immersive-game'));const zoom=immersive?Math.max(width<600?width/320:2,width/MAP_W,height/MAP_H):2;this.cameras.main.setZoom(zoom);};resizeView();this.scale.on('resize',resizeView);this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>this.scale.off('resize',resizeView));
     this.keys=this.input.keyboard!.addKeys('W,A,S,D,UP,DOWN,LEFT,RIGHT,E,ENTER,SHIFT',false) as Record<string,Phaser.Input.Keyboard.Key>;
     // Persist a press until the next scene update: a key released between frames still counts.
     const queueInteraction=(event:KeyboardEvent)=>{const target=event.target;const editing=target instanceof HTMLElement&&(target.isContentEditable||['INPUT','TEXTAREA','SELECT','BUTTON'].includes(target.tagName));if(!latest.current.paused&&!editing&&!event.repeat&&!event.isComposing)this.pendingInteract=true;};
@@ -113,24 +114,26 @@ export default function World(props:WorldProps){
     this.gate.setText(latest.current.badges.length>=3?'THE SUMMIT · OPEN':'THE SUMMIT · 3 BADGES');
    }
   }
-  const game=new Phaser.Game({type:Phaser.AUTO,parent:host.current,width:960,height:540,pixelArt:true,roundPixels:true,backgroundColor:'#79a66c',antialias:false,scene:Village,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},audio:{noAudio:true},input:{activePointers:3}});
+  const immersive=Boolean(host.current.closest('.immersive-game'));
+  const game=new Phaser.Game({type:Phaser.AUTO,parent:host.current,width:immersive?host.current.clientWidth:960,height:immersive?host.current.clientHeight:540,pixelArt:true,roundPixels:true,backgroundColor:'#79a66c',antialias:false,scene:Village,scale:{mode:immersive?Phaser.Scale.RESIZE:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},audio:{noAudio:true},input:{activePointers:3}});
+  const observer=immersive?new ResizeObserver(entries=>{const box=entries[0]?.contentRect;if(box&&box.width>0&&box.height>0)game.scale.resize(Math.round(box.width),Math.round(box.height));}):null;observer?.observe(host.current);
   const clear=()=>{controls.current={up:false,down:false,left:false,right:false,interact:false};};
   window.addEventListener('blur',clear);
-  return()=>{alive=false;window.removeEventListener('blur',clear);game.destroy(true);};
+  return()=>{alive=false;observer?.disconnect();window.removeEventListener('blur',clear);game.destroy(true);};
  },[]);
  useEffect(()=>{if(props.paused)controls.current={up:false,down:false,left:false,right:false,interact:false};},[props.paused]);
  const hold=(direction:'up'|'down'|'left'|'right')=>({onPointerDown:(e:React.PointerEvent<HTMLButtonElement>)=>{e.preventDefault();e.currentTarget.setPointerCapture(e.pointerId);controls.current[direction]=true;},onPointerUp:()=>{controls.current[direction]=false;},onPointerCancel:()=>{controls.current[direction]=false;},onLostPointerCapture:()=>{controls.current[direction]=false;}});
  const buttonStyle:React.CSSProperties={width:35,height:35,border:'1px solid #f5e7be55',borderRadius:8,color:'#fff3cf',background:'#344e47dd',fontSize:16,touchAction:'none',cursor:'pointer',boxShadow:'0 2px 0 #203b35'};
  return <div aria-label="Everstride village game world" style={{width:'100%',height:'100%',minHeight:320,position:'relative',overflow:'hidden',background:'#345647',isolation:'isolate'}}>
   <div ref={host} style={{width:'100%',height:'100%',minHeight:320,imageRendering:'pixelated'}}/>
-  <div style={{position:'absolute',left:16,top:14,pointerEvents:'none',color:'#fff1cd',textShadow:'0 2px #324c40',fontFamily:'monospace',fontSize:11,letterSpacing:2}}><span style={{fontSize:9,opacity:.8}}>GREENHAVEN VALLEY</span><br/><strong style={{fontSize:15,letterSpacing:1}}>Willowmere</strong></div>
+  <div className="world-region-label" style={{position:'absolute',left:16,top:14,pointerEvents:'none',color:'#fff1cd',textShadow:'0 2px #324c40',fontFamily:'monospace',fontSize:11,letterSpacing:2}}><span style={{fontSize:9,opacity:.8}}>GREENHAVEN VALLEY</span><br/><strong style={{fontSize:15,letterSpacing:1}}>Willowmere</strong></div>
   {!ready&&<div style={{position:'absolute',inset:0,display:'grid',placeItems:'center',color:'#f6e7c1'}}>{loadError?'Artwork could not load. Please reload when connected.':'Opening the village…'}</div>}
   {!props.paused&&<>
-   <div style={{position:'absolute',bottom:16,left:16,display:'grid',gridTemplateColumns:'repeat(3,35px)',gap:3,opacity:.87}}>
+   <div className="world-touch-pad" style={{position:'absolute',bottom:16,left:16,display:'grid',gridTemplateColumns:'repeat(3,35px)',gap:3,opacity:.87}}>
     <span/><button aria-label="Move up" style={buttonStyle} {...hold('up')}>↑</button><span/>
     <button aria-label="Move left" style={buttonStyle} {...hold('left')}>←</button><button aria-label="Move down" style={buttonStyle} {...hold('down')}>↓</button><button aria-label="Move right" style={buttonStyle} {...hold('right')}>→</button>
    </div>
-   <button disabled={!nearby} onClick={()=>{controls.current.interact=true;}} style={{position:'absolute',right:16,bottom:18,padding:'12px 17px',border:'1px solid #f3ddb566',borderRadius:10,background:nearby?'#f0d69b':'#344e47dd',color:nearby?'#354c40':'#f2e4c0',fontFamily:'inherit',fontSize:11,cursor:nearby?'pointer':'default',maxWidth:'55%',boxShadow:'0 3px 0 #273e34'}}>{nearby?`E · ${nearby}`:'WASD / arrows · Shift to run'}</button>
+   <button className="world-interact" disabled={!nearby} onClick={()=>{controls.current.interact=true;}} style={{position:'absolute',right:16,bottom:18,padding:'12px 17px',border:'1px solid #f3ddb566',borderRadius:10,background:nearby?'#f0d69b':'#344e47dd',color:nearby?'#354c40':'#f2e4c0',fontFamily:'inherit',fontSize:11,cursor:nearby?'pointer':'default',maxWidth:'55%',boxShadow:'0 3px 0 #273e34'}}>{nearby?`E · ${nearby}`:'WASD / arrows · Shift to run'}</button>
   </>}
  </div>;
 }
