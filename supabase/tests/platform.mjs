@@ -129,4 +129,12 @@ for(const enemyId of ['trainer-1','leader-leg','leader-arm','leader-back','rival
 assert.equal(journey.player.badges.length,3);assert.equal(journey.player.ending,true);
 console.log('PASS: full database-backed manual adventure from initial save through all three leaders and three-phase rival, using the shared core and server-only commit.');
 console.log('PASS: RLS, pairing, idempotency, wallet, fencing, safe transfer, shared diary, conflicts, null version, export owner, erase generation, steps deduplication revocation, service-only adventure commits, CAS, receipts and fenced wallet deltas.');
+const slotOwner=crypto.randomUUID();await db.exec('reset role');await db.query('insert into auth.users values ($1)',[slotOwner]);await actor(slotOwner);
+const slotTokens=[crypto.randomUUID(),crypto.randomUUID(),crypto.randomUUID()];
+const slotIds=[];
+for(const token of slotTokens){const created=await rpc('select public.create_game_save_slot($1,$2) result',['Eve',token]);slotIds.push(created.saveId);assert.equal((await rpc('select public.create_game_save_slot($1,$2) result',['Eve',token])).saveId,created.saveId);}
+assert.equal(new Set(slotIds).size,3);
+await rejects('select public.create_game_save_slot($1,$2)',['Eve',crypto.randomUUID()],/SAVE_LIMIT_REACHED/);
+await actor(alice);for(const id of slotIds)await rejects('select public.read_adventure_context($1)',[id],/NOT_AUTHORIZED/);
+console.log('PASS: three independent cloud saves, idempotent creation, fourth-save rejection and cross-owner isolation.');
 await db.close();

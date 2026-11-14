@@ -1,5 +1,6 @@
 import {createClient} from 'npm:@supabase/supabase-js@2.119.0';
 import {applyAdventureCommand,initialAdventure,type AdventureCommand,type AdventureSnapshot} from '../_shared/commands.ts';
+import {validateLocalImport} from '../_shared/importSave.ts';
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info','Access-Control-Allow-Methods':'POST,OPTIONS'};
 function response(body:unknown,status=200){return new Response(JSON.stringify(body),{status,headers:{...cors,'Content-Type':'application/json'}});}
 function namedDefaultKey(variable:string){try{const value=JSON.parse(Deno.env.get(variable)??'{}').default;return typeof value==='string'&&value?value:undefined;}catch{return undefined;}}
@@ -19,7 +20,7 @@ Deno.serve(async request=>{
   const {data:auth,error:authError}=await caller.auth.getUser(authorization.slice(7));
   if(authError||!auth.user)return response({error:'INVALID_SESSION'},401);
   const text=await request.text();if(text.length>32768)return response({error:'REQUEST_TOO_LARGE'},413);
-  const body=JSON.parse(text) as {saveId:string;operationId:string;leaseEpoch:number;expectedRevision?:number;command:AdventureCommand};
+  const body=JSON.parse(text) as {saveId:string;operationId:string;leaseEpoch:number;expectedRevision?:number;command:AdventureCommand|{kind:'importLocal';snapshot:unknown}};
   if(!uuid.test(body.saveId)||!uuid.test(body.operationId)||!Number.isSafeInteger(body.leaseEpoch)||body.leaseEpoch<1||!body.command||typeof body.command.kind!=='string')return response({error:'INVALID_REQUEST'},400);
   const requestData={kind:'adventure',command:body.command};
   const receipt=await caller.rpc('get_adventure_receipt',{save_id:body.saveId,operation_id:body.operationId,command:requestData});
@@ -43,7 +44,14 @@ Deno.serve(async request=>{
    if(current.data.snapshot||Object.keys(current.data.items).length)state.player.items={...state.player.items,...current.data.items};
    state.player.upgrades=current.data.upgrades;
    let next:AdventureSnapshot;
-   try { next=applyAdventureCommand(state,body.command); }
+   try {
+    if(body.command.kind==='importLocal'){
+     const owner=await caller.from('game_saves').select('owner_id').eq('id',body.saveId).single();
+     if(owner.error||owner.data?.owner_id!==auth.user.id)throw Error('OWNER_REQUIRED');
+     if(current.data.snapshot!==null||current.data.revision!==0)throw Error('CLOUD_SAVE_NOT_EMPTY');
+     next=validateLocalImport(body.command.snapshot);
+    }else next=applyAdventureCommand(state,body.command);
+   }
    catch(error){
     // Another identical request may have committed between our receipt check and state read.
     const raced=await caller.rpc('get_adventure_receipt',{save_id:body.saveId,operation_id:body.operationId,command:requestData});

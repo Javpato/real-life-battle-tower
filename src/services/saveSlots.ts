@@ -1,7 +1,7 @@
 import {initialAdventure,normalizeAdventure,type AdventureSnapshot} from '../core/commands';
 import {readSave,writeSave,withSaveTransaction} from './storage';
 export type SaveSlotNumber=1|2|3;
-export type SaveSlot={slotNumber:SaveSlotNumber;saveId:string|null;cloudSaveId?:string;updatedAt:string|null;snapshot?:AdventureSnapshot};
+export type SaveSlot={slotNumber:SaveSlotNumber;saveId:string|null;cloudSaveId?:string;syncStatus?:'linked'|'syncing'|'offline'|'error';syncError?:string;updatedAt:string|null;snapshot?:AdventureSnapshot};
 const registry='save-slots:v1';
 export const adventureKey=(saveId:string)=>`adventure:${saveId}`;
 export const nutritionKey=(saveId:string)=>`nutrition:${saveId}`;
@@ -43,3 +43,5 @@ export async function bindCloudSlot(localSaveId:string,cloudSaveId:string){await
 export async function persistSlotSnapshot(saveId:string,snapshot:AdventureSnapshot){await withSaveTransaction(async store=>{const slots=await store.get(registry) as SaveSlot[]|undefined;const slot=slots?.find(s=>s.saveId===saveId);if(!slot)throw Error('Save slot no longer exists.');slot.updatedAt=new Date().toISOString();await store.put(snapshot,adventureKey(saveId));await store.put(slots,registry);});}
 export const readSlotNutrition=<T>(id:string)=>readSave<T>(nutritionKey(id));
 export const writeSlotNutrition=(id:string,value:unknown)=>writeSave(nutritionKey(id),value);
+
+export async function setSlotCloudStatus(saveId:string,syncStatus:NonNullable<SaveSlot['syncStatus']>,syncError=''){await withSaveTransaction(async store=>{const slots=await store.get(registry) as SaveSlot[]|undefined;const slot=slots?.find(s=>s.saveId===saveId);if(!slot)return;slot.syncStatus=syncStatus;slot.syncError=syncError;if(syncStatus==='linked')slot.updatedAt=new Date().toISOString();await store.put(slots,registry);});}

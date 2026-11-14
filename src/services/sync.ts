@@ -56,7 +56,9 @@ export class GameSync {
   exportNutrition(saveId:string) {return this.rpc<Record<string,unknown>>('export_nutrition_data',{save_id:saveId});}
   deleteNutrition(saveId:string) {return this.rpc<{deleted:true;generation:number}>('delete_all_nutrition_data',{save_id:saveId});}
   readAdventure(saveId:string) {return this.rpc<{revision:number;coins:number;snapshot:AdventureSnapshot|null;items:Record<string,number>;upgrades:Record<string,number>}>('read_adventure_context',{save_id:saveId});}
-  async executeAdventure(saveId:string,leaseEpoch:number,command:AdventureCommand,operationId:string=crypto.randomUUID(),expectedRevision?:number):Promise<SyncResult<{snapshot:AdventureSnapshot;revision:number}>> {
+  executeAdventure(saveId:string,leaseEpoch:number,command:AdventureCommand,operationId:string=crypto.randomUUID(),expectedRevision?:number){return this.executeRequest(saveId,leaseEpoch,command,operationId,expectedRevision);}
+  importLocalAdventure(saveId:string,leaseEpoch:number,snapshot:AdventureSnapshot,operationId:string){return this.executeRequest(saveId,leaseEpoch,{kind:'importLocal',snapshot},operationId,0);}
+  private async executeRequest(saveId:string,leaseEpoch:number,command:AdventureCommand|{kind:'importLocal';snapshot:AdventureSnapshot},operationId:string=crypto.randomUUID(),expectedRevision?:number):Promise<SyncResult<{snapshot:AdventureSnapshot;revision:number}>> {
     if(!this.client)return this.missing();
     try {
       const {data,error}=await this.client.functions.invoke('adventure-command',{body:{saveId,leaseEpoch,command,operationId,expectedRevision}});
