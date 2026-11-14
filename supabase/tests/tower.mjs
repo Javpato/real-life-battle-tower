@@ -16,4 +16,11 @@ const commit=()=>rpc('select public.commit_tower_command($1,$2,$3,1,0,$4,$5) res
 assert.equal((await commit()).revision,1);assert.equal((await commit()).revision,1);
 await assert.rejects(()=>rpc('select public.commit_tower_command($1,$2,$3,1,1,$4,$5) result',[s,crypto.randomUUID(),alice,cmd,{...state,debug:true}]),/INVALID_TOWER_STATE/);
 await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false)",[bob]);await db.exec('set role authenticated');await assert.rejects(()=>rpc('select public.read_tower_context($1) result',[s]),/NOT_AUTHORIZED/);
+await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false)",[alice]);await db.exec('set role authenticated');
+const buyId=crypto.randomUUID();
+const buy=()=>rpc('select public.tower_cosmetic_command($1,$2,$3) result',[s,'sky-banner',buyId]);
+assert.equal((await buy()).coins,0);assert.equal((await buy()).coins,0);
+assert.equal((await rpc('select public.tower_cosmetic_command($1,$2,$3) result',[s,'sky-banner',crypto.randomUUID()])).coins,0);
+await assert.rejects(()=>rpc('select public.tower_cosmetic_command($1,$2,$3) result',[s,'ember-banner',crypto.randomUUID()]),/INSUFFICIENT_COSMETIC_COINS/);
+await assert.rejects(()=>rpc('select public.tower_cosmetic_command($1,$2,$3) result',[s,'unlock-skills',crypto.randomUUID()]),/UNKNOWN_COSMETIC/);
 console.log('Tower SQL: membership, service-only writes, idempotence, revision and debug isolation passed');await db.close();

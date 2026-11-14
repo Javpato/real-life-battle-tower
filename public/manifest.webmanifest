@@ -1,16 +1,21 @@
 {
   "id": "./",
-  "name": "Everstride — Your Everyday Adventure",
-  "short_name": "Everstride",
-  "description": "An original village adventure and a personal field journal, powered by your everyday movement.",
+  "name": "Real-Life Battle Tower",
+  "short_name": "Battle Tower",
+  "description": "Your body is your weapon. Infinite battles and physical minigames.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#edf0e6",
-  "theme_color": "#426a4d",
+  "background_color": "#15253e",
+  "theme_color": "#223047",
   "lang": "en",
   "icons": [
-    {"src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
   ]
 }

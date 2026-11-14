@@ -69,3 +69,22 @@ declare c public.adventure_control; begin
  return jsonb_build_object('holderId',c.holder_id,'epoch',c.epoch,'expiresAt',c.expires_at,'safePoint',c.safe_point,'requestedBy',c.requested_by,'requestExpiresAt',c.request_expires_at);
 end; $$;
 
+
+-- Walking currency buys presentation only; never physical skills, stats or floor credit.
+create function public.tower_cosmetic_command(save_id uuid,item text,operation_id uuid) returns jsonb language plpgsql security definer set search_path='' as $$
+declare balance integer; previous everstride_private.operations; req jsonb:=jsonb_build_object('kind','towerCosmetic','item',item); result jsonb; begin
+ perform everstride_private.require_member(save_id);
+ if item not in ('sky-banner','ember-banner','jade-banner') then raise exception 'UNKNOWN_COSMETIC'; end if;
+ select coins into balance from public.game_saves where id=save_id for update;
+ select * into previous from everstride_private.operations o where o.save_id=tower_cosmetic_command.save_id and o.operation_id=tower_cosmetic_command.operation_id;
+ if found then if previous.actor_id<>auth.uid() or previous.request<>req then raise exception 'IDEMPOTENCY_CONFLICT'; end if;return previous.result;end if;
+ if not exists(select 1 from public.game_inventory i where i.save_id=tower_cosmetic_command.save_id and i.item_id=item and quantity>0) then
+ if balance<50 then raise exception 'INSUFFICIENT_COSMETIC_COINS';end if;
+ update public.game_saves set coins=coins-50 where id=save_id returning coins into balance;
+ insert into public.game_inventory values(save_id,item,1) on conflict on constraint game_inventory_pkey do update set quantity=1;
+ end if;
+ result:=jsonb_build_object('item',item,'coins',balance);
+ insert into everstride_private.operations values(save_id,operation_id,auth.uid(),req,result,now());return result;
+end; $$;
+revoke all on function public.tower_cosmetic_command(uuid,text,uuid) from public,anon;
+grant execute on function public.tower_cosmetic_command(uuid,text,uuid) to authenticated;

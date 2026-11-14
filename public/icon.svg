@@ -1,8 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <title>Everstride original leaf and path icon</title>
-  <rect width="512" height="512" rx="112" fill="#426a4d"/>
-  <path d="M256 91 302 156 372 175 320 225 324 302 256 266 188 302 192 225 140 175 210 156Z" fill="#ebd5a5"/>
-  <path d="M256 132v126M204 187l52 39 52-39" fill="none" stroke="#69936b" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M143 398c12-42 102-30 102-64 0-18-35-15-25-39M272 401c15-43 98-36 94-73" fill="none" stroke="#a8c28b" stroke-width="24" stroke-linecap="round"/>
-  <path d="m375 107 7 19 20 7-20 7-7 20-7-20-20-7 20-7Z" fill="#f5e6bd"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges"><path fill="#223047" d="M0 0h64v64H0z"/><path fill="#46516b" d="M6 56h52v4H6z"/><path fill="#fff1cf" d="M16 10h8v8h8v-8h8v8h8v-8h8v46H16z"/><path fill="#83bf75" d="M20 22h32v4H20zm0 12h32v4H20zm0 12h32v4H20z"/><path fill="#223047" d="M28 27h8v12h-8zm0 18h12v11H28z"/><path fill="#ce715a" d="M8 22h10v20H8z"/><path fill="#d9b66f" d="M10 24h6v12h-6z"/></svg>

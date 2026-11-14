@@ -12,7 +12,7 @@ import {
   type CameraSnapshot,
   type CameraMetrics,
 } from "./cameraLifecycle";
-import ExerciseDemo, { EXERCISE_GUIDES } from "./ExerciseDemo";
+import ExerciseDemo, { EXERCISE_GUIDES, getExerciseGuide } from "./ExerciseDemo";
 import ExerciseHUD from "./ExerciseHUD";
 import type { ExerciseVisualState } from "./exerciseUi";
 import "./exercises.css";
@@ -28,6 +28,8 @@ import {
 
 type Props = Omit<ExerciseCameraProps, "onUnit"> & {
   recognitionProfile?: "mini-squat" | "knee-pushup";
+  guideOverride?: typeof EXERCISE_GUIDES["squat"];
+  hideIllustration?: boolean;
   onUnit: (unit: ExerciseUnit) => void | boolean | Promise<boolean>;
   lastSide?: "left" | "right";
   sessionId?: string;
@@ -887,7 +889,7 @@ export default function ExerciseCamera(props: Props) {
   }, [hudMessage, hudStatus]);
   const mirrored =
     (camera.facingMode ?? selection.facingMode) !== "environment";
-  const guide = EXERCISE_GUIDES[props.exerciseId];
+  const guide = props.guideOverride ?? getExerciseGuide(props.exerciseId,props.recognitionProfile);
   const preparationState = props.sessionComplete
     ? "completed"
     : transportInactive
@@ -947,7 +949,7 @@ export default function ExerciseCamera(props: Props) {
               if (enabled && !props.muted) {
                 armExerciseAudio();
                 speakExercise(
-                  `${guide.camera}. ${STARTING_CUES[props.exerciseId]}.`,
+                  `${guide.camera}. ${props.recognitionProfile?getExerciseGuide(props.exerciseId,props.recognitionProfile).setup:STARTING_CUES[props.exerciseId]}.`,
                   true,
                 );
               } else stopExerciseSpeech();
@@ -987,7 +989,7 @@ export default function ExerciseCamera(props: Props) {
               Close exercise guide
             </button>
           </div>
-          <ExerciseDemo exerciseId={props.exerciseId} />
+          <ExerciseDemo exerciseId={props.exerciseId} recognitionProfile={props.recognitionProfile} guideOverride={props.guideOverride} hideIllustration={props.hideIllustration} />
         </section>
       )}
       <div className={`exercise-feed ${camera.stream ? "is-live" : ""}`}>
@@ -1010,7 +1012,7 @@ export default function ExerciseCamera(props: Props) {
         {!camera.stream && props.source !== "phone" && (
           <div className="exercise-placeholder">
             <div className="exercise-prep-art" aria-hidden="true">
-              <ExerciseDemo exerciseId={props.exerciseId} />
+              <ExerciseDemo exerciseId={props.exerciseId} recognitionProfile={props.recognitionProfile} guideOverride={props.guideOverride} hideIllustration={props.hideIllustration} />
             </div>
             <strong>{guide.camera}</strong>
             <small>Enable the camera when you are ready.</small>

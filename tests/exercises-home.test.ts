@@ -4,8 +4,6 @@ import {
   observePose,
   type PoseFrame,
 } from "../src/exercises/detectors";
-import { attacks, available, initialPlayer } from "../src/core/game";
-import { initialAdventure, applyAdventureCommand } from "../src/core/commands";
 import type { ExerciseId, ExerciseUnit } from "../src/core/contracts";
 type Home = "sitstand" | "wallpushup" | "bridge";
 const make = (): PoseFrame => ({
@@ -96,30 +94,6 @@ describe("three connected home exercises", () => {
     },
   );
   it.each<Home>(["sitstand", "wallpushup", "bridge"])(
-    "%s is unlocked, equipable and its measured event causes real canonical damage",
-    (id) => {
-      const player=initialPlayer();if(id==="bridge")player.quests.squat=1;
-      expect(available(player).some((a) => a.id === id)).toBe(true);
-      let s = initialAdventure();s.player=player;
-      s = applyAdventureCommand(s, { kind: "equip", attackIds: [id] });
-      s = applyAdventureCommand(s, {
-        kind: "startBattle",
-        enemyId: "trainer-1",
-        specialization: null,
-      });
-      s = applyAdventureCommand(s, { kind: "beginAttack", attackId: id });
-      const hp = s.battle!.enemyHp;
-      s = applyAdventureCommand(s, {
-        kind: "exerciseUnit",
-        unit: cycle(id)[0],
-        sessionId: s.battle!.sessionId,
-      });
-      expect(s.battle!.progress).toBe(1);
-      expect(s.battle!.enemyHp).toBeLessThan(hp);
-      expect(s.battle!.verified).toBe(1);
-    },
-  );
-  it.each<Home>(["sitstand", "wallpushup", "bridge"])(
     "%s never counts the starting position alone or a small incomplete movement",
     (id) => {
       const d = new ExerciseDetector(id);
@@ -141,26 +115,6 @@ describe("three connected home exercises", () => {
       ).toHaveLength(0);
     },
   );
-  it("uses requested editable basic attack values without changing combat multipliers", () => {
-    expect(attacks.find((a) => a.id === "sitstand")).toMatchObject({
-      name: "Root Rise",
-      type: "leg",
-      units: 6,
-      damage: 24,
-    });
-    expect(attacks.find((a) => a.id === "wallpushup")).toMatchObject({
-      name: "Wall Pulse",
-      type: "arm",
-      units: 8,
-      damage: 28,
-    });
-    expect(attacks.find((a) => a.id === "bridge")).toMatchObject({
-      name: "Meadow Bridge",
-      type: "back",
-      units: 6,
-      damage: 30,
-    });
-  });
   it("does not count wall elbow motion without torso movement", () => {
     expect(
       cycle("wallpushup", 1, (f) => {

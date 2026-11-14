@@ -1,5 +1,4 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import type {AdventureCommand,AdventureSnapshot} from '../core/commands';
 
 export type SyncResult<T> = { ok: true; data: T } | { ok: false; error: string; unavailable?: boolean };
 export type Lease = { holderId: string | null; epoch: number; expiresAt: string; safePoint: boolean; requestedBy?:string|null;requestExpiresAt?:string|null };
@@ -55,19 +54,6 @@ export class GameSync {
   revokeDevice(saveId:string,userId:string) {return this.rpc<{revoked:true}>('revoke_linked_device',{save_id:saveId,target_user_id:userId});}
   exportNutrition(saveId:string) {return this.rpc<Record<string,unknown>>('export_nutrition_data',{save_id:saveId});}
   deleteNutrition(saveId:string) {return this.rpc<{deleted:true;generation:number}>('delete_all_nutrition_data',{save_id:saveId});}
-  readAdventure(saveId:string) {return this.rpc<{revision:number;coins:number;snapshot:AdventureSnapshot|null;items:Record<string,number>;upgrades:Record<string,number>}>('read_adventure_context',{save_id:saveId});}
-  executeAdventure(saveId:string,leaseEpoch:number,command:AdventureCommand,operationId:string=crypto.randomUUID(),expectedRevision?:number){return this.executeRequest(saveId,leaseEpoch,command,operationId,expectedRevision);}
-  importLocalAdventure(saveId:string,leaseEpoch:number,snapshot:AdventureSnapshot,operationId:string){return this.executeRequest(saveId,leaseEpoch,{kind:'importLocal',snapshot},operationId,0);}
-  private async executeRequest(saveId:string,leaseEpoch:number,command:AdventureCommand|{kind:'importLocal';snapshot:AdventureSnapshot},operationId:string=crypto.randomUUID(),expectedRevision?:number):Promise<SyncResult<{snapshot:AdventureSnapshot;revision:number}>> {
-    if(!this.client)return this.missing();
-    try {
-      const {data,error}=await this.client.functions.invoke('adventure-command',{body:{saveId,leaseEpoch,command,operationId,expectedRevision}});
-      if(error){let detail=error.message;try{const body=await error.context?.json();if(body?.error)detail=body.error;}catch{/* Keep transport error. */}return {ok:false,error:detail};}
-      if(data?.error)return {ok:false,error:String(data.error)};
-      if(!data?.snapshot||!Number.isSafeInteger(data.revision))return {ok:false,error:'INVALID_SERVER_RESPONSE'};
-      return {ok:true,data};
-    }catch(error){return this.failure(error);}
-  }
   async listSaves():Promise<SyncResult<Array<{id:string;coins:number;revision:number;nutrition_generation:number}>>> {
     if(!this.client)return this.missing();
     try {const {data,error}=await this.client.from('game_saves').select('id,coins,revision,nutrition_generation');return error?{ok:false,error:error.message}:{ok:true,data:data??[]};} catch(error){return this.failure(error);}

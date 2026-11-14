@@ -28,6 +28,7 @@ const backs:Row[]=[
 const held=new Set(['wall-sit','high-plank','short-superman','superman']);
 export const SKILLS:Skill[]=([['leg',legs],['arm',arms],['back',backs]] as const).flatMap(([type,rows])=>rows.map(([id,name,exercise,units,damage,prerequisite,detector='manual',alternating=false],i)=>({
  id,name,type,exercise,units,damage,prerequisite,detector,detectorStatus:(detector==='manual'?'pending':['mini-squat','knee-pushup'].includes(id)?'experimental':'configured') as Skill['detectorStatus'],alternating,tier:(i<4?1:i<7?2:3) as 1|2|3,
+ qualityMetric:(detector==='manual'?'none':held.has(id)?'observed-amplitude':'movement-control') as Skill['qualityMetric'],
  unit:held.has(id)?'seconds' as const:'reps' as const,trialTarget:held.has(id)?5:alternating?4:3,
  description:`${units} ${held.has(id)?'observable seconds':'controlled repetitions'}${alternating?' · alternate sides':''}`,
  cue:held.has(id)?'Hold steady · keep breathing':alternating?'Return with control · alternate sides':'Move with control · return to the start',

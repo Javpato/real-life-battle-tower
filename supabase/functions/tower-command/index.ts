@@ -1,5 +1,6 @@
 import {createClient} from 'npm:@supabase/supabase-js@2.119.0';
 import {applyCommand,initialSave} from '../_shared/tower/engine.ts';
+import {validateTowerImport} from '../_shared/tower/importSave.ts';
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info','Access-Control-Allow-Methods':'POST,OPTIONS'};
 const respond=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});
 function named(variable:string){try{return JSON.parse(Deno.env.get(variable)??'{}').default;}catch{return undefined;}}
@@ -19,7 +20,9 @@ Deno.serve(async request=>{
  const current=await caller.rpc('read_tower_context',{save_id:body.saveId});if(current.error)throw current.error;
  if(current.data.revision!==body.expectedRevision)return respond({error:'VERSION_CONFLICT'},409);
  let next;
- if(body.command.kind==='initialize'){
+ if(body.command.kind==='importLocal'){
+ if(current.data.snapshot)throw Error('CLOUD_SAVE_NOT_EMPTY');const owner=await caller.from('game_saves').select('owner_id').eq('id',body.saveId).single();if(owner.error||owner.data?.owner_id!==auth.data.user.id)throw Error('OWNER_REQUIRED');next=validateTowerImport(body.command.snapshot);
+ }else if(body.command.kind==='initialize'){
  if(current.data.snapshot)throw Error('ALREADY_INITIALIZED');
  if(typeof body.command.name!=='string'||!body.command.name.trim()||body.command.name.length>20||!['male','female'].includes(body.command.avatar))throw Error('INVALID_PROFILE');
  next=initialSave(body.command.name,body.command.avatar,false);
