@@ -1,5 +1,13 @@
 # Battle Tower v2 — verification
 
+## Temporary demo tunnel recovery — 2026-11-15
+
+- The previous `implementing-satisfy-warm-raise.trycloudflare.com` address returned Cloudflare HTTP 530 while the local MediaPipe module returned HTTP 200. Its tunnel process was no longer running. This failure was hosting-related; no frontend or Supabase change was needed.
+- Current temporary address: https://consistent-shame-positioning-incorporated.trycloudflare.com . Open this address on PC and generate a new phone pairing invitation. The previous address and QR in older evidence are historical. Browser-local storage belongs to each origin; this recovery does not migrate or erase old saves.
+- Production preview and tunnel now run as transient user services, `battle-tower-demo-web.service` and `battle-tower-demo-tunnel.service`, with restart-on-failure. They require the computer to remain awake, connected and the user session running. A restarted Quick Tunnel may receive a different URL; this is temporary hosting.
+- Public GET checks passed for the JS module (322,082 bytes, `text/javascript`), WASM (11,153,641 bytes, `application/wasm`) and pose model (5,777,746 bytes). The hosted phone test passed again: real Supabase camera-pair backend, desktop approval, synthetic camera plus actual MediaPipe startup, real WebRTC, opt-in video and disconnect cleanup, zero page errors. This does not validate a physical iPhone.
+- Runtime verification report and screenshot: `/tmp/bt-demo-recovery-qa/`. Inspect services with `systemctl --user status battle-tower-demo-web battle-tower-demo-tunnel`; retrieve the current address from `journalctl --user -u battle-tower-demo-tunnel`. Stop both services after the demo with `systemctl --user stop battle-tower-demo-tunnel battle-tower-demo-web`.
+
 ## iPhone camera startup and hosted pairing — 2026-11-15
 
 - User screenshots showed an inactive preview, disabled Start/Stop buttons, and “Still waiting”. Phone capture previously depended on the WebRTC channel being connected; Safari can need capture permission before exposing local candidates. The phone can now explicitly start local capture after claiming the invitation, before the channel connects. SDP/ICE answering waits for the live stream; desktop code confirmation remains independently required.
