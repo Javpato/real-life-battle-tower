@@ -38,7 +38,7 @@ export class GameSync {
       return {ok:true,data:data as T};
     } catch(error){return this.failure(error);}
   }
-  createSave(deviceName='Device') {return this.rpc<{saveId:string}>('create_game_save',{device_name:deviceName});}
+  createSave(deviceName='Device',creationId?:string) {return creationId?this.rpc<{saveId:string}>('create_game_save_slot',{device_name:deviceName,creation_id:creationId}):this.rpc<{saveId:string}>('create_game_save',{device_name:deviceName});}
   createPairCode(deviceName='Device') {return this.rpc<{code:string;expiresAt:string;sharesNutrition:true}>('create_pair_code',{device_name:deviceName});}
   /** Calling this explicitly authorizes adventure AND nutrition access. Show that fact before calling. */
   approvePairCode(saveId:string,code:string) {return this.rpc<{linked:true;deviceName:string;sharesNutrition:true}>('approve_pair_code',{save_id:saveId,code});}

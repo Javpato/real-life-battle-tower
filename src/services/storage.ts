@@ -13,3 +13,7 @@ export async function writeSave(key: string, value: unknown) {
 export async function clearSave(key: string) {
   return (await db).delete("state", key);
 }
+export async function withSaveTransaction<T>(action:(store:import('idb').IDBPObjectStore<unknown,['state'],'state','readwrite'>)=>Promise<T>):Promise<T>{
+ const tx=(await db).transaction('state','readwrite');
+ try{const result=await action(tx.objectStore('state'));await tx.done;return result;}catch(error){try{tx.abort();}catch{}await tx.done.catch(()=>{});throw error;}
+}

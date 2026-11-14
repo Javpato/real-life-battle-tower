@@ -11,7 +11,7 @@ create function auth.uid() returns uuid language sql stable as $$select nullif(c
 grant usage on schema auth to authenticated;
 create function extensions.digest(text,text) returns bytea language sql as $$select decode(md5($1),'hex')$$;
 create function extensions.gen_random_bytes(integer) returns bytea language sql as $$select decode(replace(gen_random_uuid()::text,'-',''),'hex')$$;`);
-for(const file of ['202611140001_platform.sql','202611140002_privacy.sql','202611140003_adventure.sql','202611140004_control_requests.sql']){
+for(const file of ['202611140001_platform.sql','202611140002_privacy.sql','202611140003_adventure.sql','202611140004_control_requests.sql','202611140005_save_slots.sql']){
  const sql=(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')).replace('create extension if not exists pgcrypto with schema extensions;','');
  await db.exec(sql);
 }

@@ -1,5 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
-import {applyAdventureCommand,initialAdventure,type AdventureCommand,type AdventureSnapshot} from '../core/commands';
+import {applyAdventureCommand,initialAdventure,normalizeAdventure,type AdventureCommand,type AdventureSnapshot} from '../core/commands';
+import {adventureKey,persistSlotSnapshot,bindCloudSlot} from './saveSlots';
 import {gameSync,type Lease,type SyncResult} from './sync';
 
 type Remote={snapshot:AdventureSnapshot;revision:number};
@@ -13,10 +14,11 @@ const pendingKey=(id:string,userId?:string)=>`adventure-cloud-pending:${id}:${us
 export class AdventureController {
  state:AdventureView={snapshot:initialAdventure(),ready:false,fresh:false,mode:'local',revision:0,busy:false,readOnly:false,error:'',pending:0,requesting:false};
  private queue:Pending[]=[];private running=false;private waiters=new Map<string,(ok:boolean)=>void>();private listeners=new Set<()=>void>();private local=initialAdventure();
- constructor(private api:AdventureApi=gameSync,private store:Store=storage){}
+ constructor(private api:AdventureApi=gameSync,private store:Store=storage,private localSaveId?:string){}
+ private get storageKey(){return this.localSaveId?adventureKey(this.localSaveId):'adventure';}
  subscribe=(listener:()=>void)=>{this.listeners.add(listener);return()=>{this.listeners.delete(listener);};};
  private update(patch:Partial<AdventureView>){this.state={...this.state,...patch};this.listeners.forEach(fn=>fn());}
- async load(){try{const saved=await this.store.read<AdventureSnapshot>('adventure');this.local=saved?{...saved,quest:saved.quest??null,battle:saved.battle?{...saved.battle,paused:true}:null}:initialAdventure();this.update({snapshot:this.local,ready:true,fresh:!saved});}catch(e){this.update({ready:true,error:`Local storage unavailable: ${String(e)}`});}}
+ async load(){try{const saved=await this.store.read<AdventureSnapshot>(this.storageKey);this.local=saved?{...normalizeAdventure(saved),quest:saved.quest??null,battle:saved.battle?{...saved.battle,paused:true}:null}:initialAdventure();this.update({snapshot:this.local,ready:true,fresh:!saved});}catch(e){this.update({ready:true,error:`Local storage unavailable: ${String(e)}`});}}
  async send(command:AdventureCommand):Promise<boolean>{
   if(!this.state.ready||this.state.readOnly||this.state.error)return false;
   const id=crypto.randomUUID();const completion=new Promise<boolean>(resolve=>this.waiters.set(id,resolve));this.queue.push({id,command});this.update({pending:this.queue.length,busy:true});void this.drain();return completion;
@@ -26,7 +28,7 @@ export class AdventureController {
   try{while(this.queue.length&&!this.state.readOnly&&!this.state.error){
    const pending=this.queue[0];
    if(this.state.mode==='local'){
-    const next=applyAdventureCommand(this.state.snapshot,pending.command);await this.store.write('adventure',next);this.local=next;this.update({snapshot:next,fresh:false});
+    const next=applyAdventureCommand(this.state.snapshot,pending.command);if(this.localSaveId&&this.store===storage)await persistSlotSnapshot(this.localSaveId,next);else await this.store.write(this.storageKey,next);this.local=next;this.update({snapshot:next,fresh:false});
    }else{
     const {saveId,lease}=this.state;if(!saveId||!lease)throw Error('NO_CLOUD_CONTROL');
     pending.expectedRevision??=this.state.revision;await this.store.write(pendingKey(saveId,this.state.userId),this.queue);
@@ -42,7 +44,8 @@ export class AdventureController {
      if(!current.data.snapshot||current.data.revision<this.state.revision)throw Error('STALE_CANONICAL_SNAPSHOT');
      const snapshot=structuredClone(current.data.snapshot);snapshot.player={...snapshot.player,coins:current.data.coins,items:{...snapshot.player.items,...current.data.items},upgrades:current.data.upgrades};
      this.update({snapshot,revision:current.data.revision});
-    }else this.update({snapshot:response.data.snapshot,revision:response.data.revision});
+    }else this.update({snapshot:normalizeAdventure(response.data.snapshot),revision:response.data.revision});
+    await this.store.write(`adventure-cloud-cache:${saveId}`,this.state.snapshot);
     if(this.state.snapshot.battle?.turn!=='exercise'&&!this.state.snapshot.quest){
      const safe=await this.api.control(saveId,'safe',lease.epoch);if(safe.ok)this.update({lease:safe.data});
     }
@@ -61,7 +64,9 @@ export class AdventureController {
    const auth=await this.api.authenticate();if(!auth.ok)throw Error(auth.error);
    const read=await this.api.readAdventure(saveId);if(!read.ok)throw Error(read.error);
    const acquired=await this.api.control(saveId,'acquire');
-   const snapshot=read.data.snapshot??initialAdventure();snapshot.player={...snapshot.player,coins:read.data.coins,items:{...snapshot.player.items,...read.data.items},upgrades:read.data.upgrades};
+   const snapshot=normalizeAdventure(read.data.snapshot??initialAdventure());snapshot.player={...snapshot.player,coins:read.data.coins,items:{...snapshot.player.items,...read.data.items},upgrades:read.data.upgrades};
+   if(this.localSaveId&&this.store===storage)await bindCloudSlot(this.localSaveId,saveId);
+   await this.store.write(`adventure-cloud-cache:${saveId}`,snapshot);
    this.queue=await this.store.read<Pending[]>(pendingKey(saveId,auth.data.userId))??[];
    this.update({mode:'cloud',saveId,userId:auth.data.userId,snapshot,revision:read.data.revision,lease:acquired.ok?acquired.data:undefined,readOnly:!acquired.ok,fresh:false,pending:this.queue.length,requesting:false});
    if(acquired.ok){
@@ -85,8 +90,8 @@ export class AdventureController {
  async retry(){if(this.state.readOnly)throw Error('Acquire control before retrying.');if(this.state.mode==='cloud'&&this.state.error.includes('VERSION_CONFLICT')){await this.refresh();if(this.state.readOnly)return;if(this.queue[0])this.queue[0].expectedRevision=this.state.revision;}this.update({error:''});await this.drain();}
  async discardPending(){if(this.running)throw Error('An action is still running.');if(this.state.saveId){await this.store.write(`${pendingKey(this.state.saveId,this.state.userId)}:discarded:${Date.now()}`,this.queue);await this.store.write(pendingKey(this.state.saveId,this.state.userId),[]);}this.queue=[];this.update({pending:0,error:''});await this.refresh();}
 }
-export function useAdventure(){
- const ref=useRef<AdventureController|null>(null);if(!ref.current)ref.current=new AdventureController();const controller=ref.current;
+export function useAdventure(localSaveId?:string){
+ const ref=useRef<AdventureController|null>(null);if(!ref.current)ref.current=new AdventureController(gameSync,storage,localSaveId);const controller=ref.current;
  const [view,setView]=useState(controller.state);
  useEffect(()=>{const unsubscribe=controller.subscribe(()=>setView(controller.state));void controller.load();const timer=setInterval(()=>void controller.heartbeat(),20000);return()=>{unsubscribe();clearInterval(timer);};},[controller]);
  return {...view,controller,send:(command:AdventureCommand)=>controller.send(command),locked:(view.mode==='cloud'&&view.busy)||view.readOnly||Boolean(view.error)};

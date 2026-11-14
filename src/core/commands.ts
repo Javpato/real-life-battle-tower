@@ -1,8 +1,11 @@
 import {initialPlayer,available,attackFor,enemyFor,startBattle,beginAttack,acceptUnit,cancelSeries,enemyTurn,win,lose,reward,questTarget,type Player,type Battle} from './game';
 import type {Element,ExerciseId,ExerciseUnit} from './contracts';
+import {initialSpawn,resolveWorldPosition,resolvePortal,type WorldPosition} from './worldMaps';
+export type Journey={avatar:'male'|'female';introComplete:boolean;tutorialStage:number;location:WorldPosition;playSeconds:number};
 export type QuestSession={id:string;exercise:ExerciseId;target:number;progress:number;seen:string[];side?:'left'|'right'};
-export type AdventureSnapshot={player:Player;battle:Battle|null;quest:QuestSession|null};
+export type AdventureSnapshot={player:Player;battle:Battle|null;quest:QuestSession|null;journey?:Journey};
 export type AdventureCommand=
+ |{kind:'configureCharacter';name:string;avatar:'male'|'female'}|{kind:'startTutorialBattle'}|{kind:'completeIntro'}|{kind:'setTutorial';stage:number}|{kind:'location';mapId:string;x:number;y:number;facing:WorldPosition['facing']}|{kind:'portal';portalId:string}|{kind:'playTime';seconds:number}
  |{kind:'initialize'}|{kind:'move';x:number;y:number}|{kind:'rename';name:string}|{kind:'setDifficulty';difficulty:Player['difficulty']}
  |{kind:'equip';attackIds:string[]}|{kind:'heal'}|{kind:'purchaseItem';item:'potion'|'shield'|'boost'}|{kind:'upgradeAttack';attackId:string}
  |{kind:'startBattle';enemyId:string;specialization:Element|null}|{kind:'beginAttack';attackId:string}
@@ -15,24 +18,36 @@ const enemyIds=new Set(['trainer-1','trainer-2','trainer-3','leader-leg','leader
 const questExercises=new Set<ExerciseId>(['squat','pushup','birddog','lunge']);
 const prices={potion:15,shield:12,boost:20};
 export const initialAdventure=():AdventureSnapshot=>({player:initialPlayer(),battle:null,quest:null});
+export function normalizeAdventure(snapshot:AdventureSnapshot,legacy=true):AdventureSnapshot {
+ const s=structuredClone(snapshot);s.quest??=null;
+ s.journey??={avatar:'male',introComplete:legacy,tutorialStage:legacy?6:0,location:legacy?resolveWorldPosition({mapId:'starter_town',...s.player.position}):initialSpawn(),playSeconds:0};
+ s.journey.location=resolveWorldPosition(s.journey.location);return s;
+}
 function requireRule(condition:unknown,message:string):asserts condition {if(!condition)throw new Error(message);}
 function validUnit(u:ExerciseUnit){return u&&typeof u.id==='string'&&u.id.length>0&&u.id.length<=200&&Number.isFinite(u.quality)&&u.quality>0&&u.quality<=1&&Number.isFinite(u.confidence)&&u.confidence>=0&&u.confidence<=1&&typeof u.verified==='boolean'&&(!u.verified||u.confidence>=.5)&&Number.isFinite(u.timestamp)&&u.timestamp>=0&&(u.side===undefined||u.side==='left'||u.side==='right');}
 /** Same reducer runs in browser tests and the trusted Edge Function. It never accepts a replacement player. */
 export function applyAdventureCommand(snapshot:AdventureSnapshot,command:AdventureCommand):AdventureSnapshot {
  requireRule(command&&typeof command.kind==='string','INVALID_COMMAND');
- const s=structuredClone(snapshot);let p=s.player,b=s.battle;const idle=()=>requireRule(!s.battle&&!s.quest,'FINISH_CURRENT_ACTIVITY');
+ const s=normalizeAdventure(snapshot);let p=s.player,b=s.battle;const idle=()=>requireRule(!s.battle&&!s.quest,'FINISH_CURRENT_ACTIVITY');
  const playerTurn=()=>{requireRule(b&&b.turn==='player'&&!b.paused,'NOT_PLAYER_TURN');return b;};
  switch(command.kind){
  case 'initialize': return s;
+ case 'configureCharacter':idle();requireRule(['male','female'].includes(command.avatar)&&command.name.trim().length>0&&command.name.length<=20,'INVALID_CHARACTER');requireRule(!s.journey!.introComplete,'CHARACTER_ALREADY_CREATED');p.name=command.name.trim();s.journey!.avatar=command.avatar;break;
+ case 'startTutorialBattle':idle();requireRule(s.journey!.tutorialStage<4&&!p.defeated.includes('tutorial-moss'),'TUTORIAL_COMPLETED');{const enemy={...enemyFor('trainer-1',p),id:'tutorial-moss',hp:30,thresholds:[0],attack:1,xp:20,coins:10};s.battle=startBattle(enemy,p,null);s.battle.turn='player';}break;
+ case 'completeIntro':s.journey!.introComplete=true;break;
+ case 'setTutorial':requireRule(Number.isInteger(command.stage)&&command.stage>=0&&command.stage<=6,'INVALID_TUTORIAL');s.journey!.tutorialStage=Math.max(s.journey!.tutorialStage,command.stage);break;
+ case 'location':idle();s.journey!.location=resolveWorldPosition(command);p.position={x:s.journey!.location.x,y:s.journey!.location.y};break;
+ case 'portal':idle();s.journey!.location=resolvePortal(s.journey!.location,command.portalId,p.badges);p.position={x:s.journey!.location.x,y:s.journey!.location.y};break;
+ case 'playTime':requireRule(Number.isInteger(command.seconds)&&command.seconds>=0&&command.seconds<=60,'INVALID_PLAY_TIME');s.journey!.playSeconds+=command.seconds;break;
  case 'rename': idle();requireRule(typeof command.name==='string'&&command.name.trim().length>0&&command.name.length<=20,'INVALID_NAME');p.name=command.name.trim();break;
- case 'move':idle();requireRule(Number.isFinite(command.x)&&Number.isFinite(command.y)&&command.x>=0&&command.y>=0&&command.x<=4096&&command.y<=4096,'INVALID_POSITION');p.position={x:command.x,y:command.y};break;
+ case 'move':idle();requireRule(Number.isFinite(command.x)&&Number.isFinite(command.y)&&command.x>=0&&command.y>=0&&command.x<=4096&&command.y<=4096,'INVALID_POSITION');p.position={x:command.x,y:command.y};s.journey!.location=resolveWorldPosition({...s.journey!.location,...p.position});break;
  case 'setDifficulty':idle();requireRule(['easy','medium','hard'].includes(command.difficulty),'INVALID_DIFFICULTY');p.difficulty=command.difficulty;break;
  case 'equip':idle();requireRule(Array.isArray(command.attackIds)&&command.attackIds.length>=1&&command.attackIds.length<=4&&new Set(command.attackIds).size===command.attackIds.length&&command.attackIds.every(id=>available(p).some(a=>a.id===id)),'INVALID_LOADOUT');p.equipped=command.attackIds;break;
  case 'heal':idle();p.hp=p.maxHp;break;
  case 'purchaseItem':idle();{const price=prices[command.item];requireRule(Object.hasOwn(prices,command.item)&&p.coins>=price,'INSUFFICIENT_COINS_OR_UNKNOWN_ITEM');p.coins-=price;p.items[command.item]=(p.items[command.item]??0)+1;}break;
  case 'upgradeAttack':idle();{requireRule(available(p).some(a=>a.id===command.attackId),'ATTACK_LOCKED');const level=p.upgrades[command.attackId]??0,cost=25*(level+1);requireRule(level<4&&p.coins>=cost,'UPGRADE_UNAVAILABLE');p.coins-=cost;p.upgrades[command.attackId]=level+1;}break;
  case 'startBattle':idle();requireRule(enemyIds.has(command.enemyId),'UNKNOWN_ENEMY');requireRule(command.enemyId!=='rival'||p.badges.length===3,'RIVAL_LOCKED');requireRule(command.specialization===null||p.badges.includes(command.specialization),'TYPE_LOCKED');s.battle=startBattle(enemyFor(command.enemyId,p),p,command.specialization);break;
- case 'beginAttack':{const active=playerTurn();requireRule(p.equipped.includes(command.attackId)&&available(p).some(a=>a.id===command.attackId),'ATTACK_NOT_EQUIPPED');s.battle=beginAttack(active,attackFor(command.attackId,p));}break;
+ case 'beginAttack':{const active=playerTurn();requireRule(p.equipped.includes(command.attackId)&&available(p).some(a=>a.id===command.attackId),'ATTACK_NOT_EQUIPPED');requireRule(active.enemy.id!=='tutorial-moss'||command.attackId==='squat','TUTORIAL_SQUAT_REQUIRED');const attack=attackFor(command.attackId,p);s.battle=beginAttack(active,active.enemy.id==='tutorial-moss'?{...attack,units:3,damage:36,description:'Three controlled squats · learn at your own pace'}:attack);}break;
  case 'exerciseUnit':requireRule(b&&command.sessionId===b.sessionId,'STALE_EXERCISE_SESSION');requireRule(validUnit(command.unit),'INVALID_UNIT');s.battle=acceptUnit(b,command.unit,p,command.sessionId);break;
  case 'manualRemaining':requireRule(b&&b.turn==='exercise'&&!b.paused&&b.attack&&command.sessionId===b.sessionId,'STALE_EXERCISE_SESSION');{let next=b;for(let i=next.progress;i<b.attack.units&&next.turn==='exercise';i++){next=acceptUnit(next,{id:crypto.randomUUID(),exerciseId:b.attack.exercise,quality:1,confidence:0,verified:false,timestamp:Date.now(),side:next.side==='left'?'right':'left'},p,command.sessionId);}s.battle=next;}break;
  case 'pause':requireRule(b&&typeof command.paused==='boolean','NO_BATTLE');b.paused=command.paused;break;
@@ -41,7 +56,7 @@ export function applyAdventureCommand(snapshot:AdventureSnapshot,command:Adventu
  case 'continuePhase':requireRule(b?.turn==='transform'&&!b.paused&&b.phase+1<b.enemy.phases.length,'NO_TRANSFORMATION');b.phase++;b.turn='enemy';break;
  case 'defend':b=playerTurn();b.defending=true;b.turn='enemy';b.log='You brace for the next hit.';break;
  case 'useItem':b=playerTurn();requireRule(Object.hasOwn(prices,command.item)&&(p.items[command.item]??0)>0,'ITEM_UNAVAILABLE');p.items[command.item]--;if(command.item==='potion')b.playerHp=Math.min(p.maxHp,b.playerHp+45);if(command.item==='shield')b.defending=true;if(command.item==='boost')b.boost=true;b.turn='enemy';break;
- case 'finishBattle':requireRule(b&&(b.turn==='won'||b.turn==='lost'),'BATTLE_NOT_FINISHED');s.player=b.turn==='won'?win(p,b):lose(p);s.battle=null;break;
+ case 'finishBattle':requireRule(b&&(b.turn==='won'||b.turn==='lost'),'BATTLE_NOT_FINISHED');s.player=b.turn==='won'?win(p,b):lose(p);if(b.enemy.id==='tutorial-moss'&&b.turn==='won')s.journey!.tutorialStage=Math.max(4,s.journey!.tutorialStage);if(b.turn==='lost'){s.journey!.location=resolveWorldPosition({mapId:'starter_town',x:384,y:300});s.player.position={x:s.journey!.location.x,y:s.journey!.location.y};}s.battle=null;break;
  case 'leaveBattle':requireRule(b&&b.enemy.id.startsWith('trainer'),'CANNOT_FLEE');p.hp=b.playerHp;s.battle=null;break;
  case 'stopSafely':if(b){b.paused=true;b.log='Stopped safely. Your progress is kept.';}s.quest=null;break;
  case 'startQuest':idle();requireRule(questExercises.has(command.exercise),'UNKNOWN_QUEST');s.quest={id:crypto.randomUUID(),exercise:command.exercise,target:questTarget(command.exercise,p.quests[command.exercise]??0),progress:0,seen:[]};break;
