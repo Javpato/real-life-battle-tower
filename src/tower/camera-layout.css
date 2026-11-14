@@ -1,0 +1,117 @@
+/* Tower camera layout. Scope keeps manual confirmations and legacy journal views intact. */
+.bt .bt-camera-pane .exercise-hud,
+.bt .bt-camera-pane .exercise-hud :is(strong,small,p,span,i,b),
+.bt .bt-camera-pane .exercise-hud .exercise-counter-target{
+ color:#172f49!important;text-shadow:none!important;-webkit-text-stroke:0!important;
+}
+.bt .bt-camera-pane .exercise-hud{background:#fff3d4!important;border:2px solid #ac9161!important;box-shadow:none!important;border-radius:0!important}
+.bt .bt-camera-pane .exercise-hud .exercise-big-feedback{background:#ead8ad!important;border:0!important;border-left:4px solid #b27839!important;border-radius:0!important;box-shadow:none!important;padding:7px 9px!important}
+.bt .bt-camera-pane .exercise-hud.state-error .exercise-big-feedback{background:#f0cfbf!important;border-left-color:#a14743!important}
+.bt .bt-camera-pane .exercise-hud.state-valid .exercise-big-feedback{background:#d6e7c8!important;border-left-color:#568064!important}
+.bt .bt-camera-pane .exercise-hud .exercise-start-position,
+.bt .bt-camera-pane .exercise-hud .exercise-posture-popover{background:#e7d8b2!important;border-color:#ac9161!important;color:#172f49!important}
+.bt .bt-camera-pane:not(:has(>.bt-panel)){
+ position:relative;display:flex;flex-direction:column;gap:5px;min-height:0;overflow:hidden;padding:8px;
+}
+.bt .bt-camera-pane:not(:has(>.bt-panel))>.bt-row,
+.bt .bt-camera-pane:not(:has(>.bt-panel))>p.muted{display:none}
+.bt .bt-camera-pane:not(:has(>.bt-panel))>.bt-series-controls{flex:none;width:63%;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:0}
+.bt .bt-camera-pane:not(:has(>.bt-panel))>.bt-series-controls button{min-height:44px;font-size:12px;padding:5px}
+.bt .bt-camera-pane:not(:has(>.bt-panel))>.bt-technique{flex:none;min-height:24px;margin:0;padding:2px 7px;background:#f4e6c4}
+.bt .bt-camera-pane:not(:has(>.bt-panel))>.bt-technique summary{min-height:20px;font-size:11px}
+.bt .bt-camera-pane:not(:has(>.bt-panel))>.bt-technique[open]{position:absolute;top:56px;left:8px;right:8px;max-height:calc(100% - 64px);z-index:31;overflow:auto;border:3px solid #9e7e4c;padding:9px;background:#fff3d4}
+.bt .bt-camera-pane:not(:has(>.bt-panel))>.bt-technique[open] summary{position:sticky;top:0;background:#fff3d4;padding:7px 0}
+.bt .bt-camera-pane:not(:has(>.bt-panel))>.exercise-camera{
+ position:static;flex:1;min-height:0;height:auto!important;max-height:none!important;display:grid!important;
+ grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:minmax(0,1fr);grid-auto-rows:44px;gap:6px;
+ overflow:visible!important;padding:7px!important;margin:0;background:#1b3450!important;border:2px solid #b89b69!important;
+}
+.bt .bt-camera-pane:not(:has(>.bt-panel))>.exercise-camera>header{position:absolute;right:8px;top:8px;width:34%;height:44px;min-height:44px;display:flex;align-items:stretch;margin:0;padding:0;border:0;background:transparent;z-index:3}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-camera-title{display:none}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-header-actions{display:grid;grid-template-columns:1fr 1fr;gap:5px;width:100%;margin:0;min-width:0}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-header-actions button{padding:4px;font-size:11px;min-height:44px;width:auto;min-width:0;white-space:normal}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-feed{grid-column:1/6;grid-row:1;min-height:0!important;height:100%!important;width:100%!important;max-height:none!important;aspect-ratio:auto!important;align-self:stretch;position:relative;overflow:hidden;border:1px solid #6b8a9c;border-radius:0!important;background:#0d1d30}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-feed :is(video,canvas){position:absolute;inset:0;width:100%!important;height:100%!important;max-height:none!important;min-height:0!important;object-fit:contain!important;border-radius:0!important}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-placeholder{position:absolute;inset:0;min-height:0;overflow:auto;padding:8px;font-size:11px;background:#142c45;color:#fff3d4}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-placeholder .exercise-prep-art{max-height:70%;min-height:0;overflow:hidden}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-placeholder .exercise-demo{padding:0;margin:0;background:transparent}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-placeholder .exercise-demo p,
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-placeholder .exercise-demo>small,
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-placeholder .exercise-demo>strong{display:none}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-placeholder>strong{font-size:11px;color:#fff3d4!important}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-placeholder>small{font-size:10px;color:#fff3d4!important}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-hud{grid-column:6/9;grid-row:1;min-width:0;min-height:0;max-height:none;height:100%;display:flex!important;flex-direction:column;justify-content:center;gap:8px;padding:10px!important;overflow:auto}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-hud-heading{display:flex;justify-content:flex-end;align-items:center;margin:0!important;min-height:12px;padding:0;flex:none}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-hud-heading>span{display:none}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-hud-heading>small{font-size:10px!important;letter-spacing:0!important}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-counter{display:flex;align-items:baseline;justify-content:center;gap:5px;min-height:0!important;margin:0!important;padding:0!important;flex:none;white-space:nowrap}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-counter>strong{font-size:clamp(46px,5vw,76px)!important;line-height:1!important;letter-spacing:-3px!important;margin:0!important;color:#172f49!important}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-counter-target{font-size:24px!important;line-height:1.1!important;min-width:0;display:block!important}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-counter-target>small{font-size:9px!important;line-height:1.3!important;letter-spacing:0!important;display:block}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-progress-track{height:7px!important;min-height:7px;margin:0;flex:none;border-radius:0}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-next-side{padding:5px!important;margin:0!important;background:#d5e2df!important;min-height:0;flex:none}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-next-side>small{font-size:8px!important;line-height:1.1;display:block;letter-spacing:0!important}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-next-side>strong{font-size:14px!important;line-height:1.15;display:block;margin-top:3px}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-big-feedback{margin:0!important;min-height:0;flex:none;overflow-wrap:anywhere}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-big-feedback>strong{font-size:19px!important;line-height:1.15!important;display:block;letter-spacing:-.04em!important;max-width:100%;white-space:normal!important}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-big-feedback>p{font-size:12px!important;line-height:1.3!important;margin:5px 0 0!important;max-width:100%;overflow-wrap:break-word;font-weight:600!important}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-start-position{margin:0!important;padding:5px 6px!important;flex:none;position:static}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-start-position>summary{min-height:0;padding:0!important;display:block;font-size:10px}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-start-position>summary>span{font-size:8px!important;letter-spacing:.03em!important;display:block}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-start-position>summary>strong{font-size:11px!important;line-height:1.2!important;display:block;padding:0;margin-top:2px}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-start-position>summary>i{display:none}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-start-position[open]>.exercise-posture-popover{position:absolute;left:10px;right:10px;top:70px;bottom:10px;z-index:32;max-height:none;padding:15px;overflow:auto;border:3px solid #9e7e4c}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-camera-controls,
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-camera-controls .exercise-actions{display:contents!important}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-actions>button,
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-camera-settings,
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-model-options{grid-column:span 2;grid-row:auto;min-width:0;height:44px!important;min-height:44px!important;margin:0!important;padding:0!important;position:static!important;align-self:stretch;border-radius:0!important}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-actions>button{font-size:11px;line-height:1.15;padding:4px!important;color:#172f49;background:#fff3d4;border:2px solid #ac9161;box-shadow:none}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-camera-settings>summary,
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-model-options>summary{min-height:44px!important;height:44px;margin:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:5px!important;font-size:10px!important;line-height:1.2;color:#fff3d4!important;background:#284864!important;cursor:pointer;border:1px solid #91a2a2;border-radius:0!important;overflow-wrap:anywhere}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-model-options[open]{position:absolute!important;inset:58px 8px 8px!important;width:auto;height:auto!important;max-height:none!important;z-index:35;padding:14px!important;overflow:auto;background:#1c3551!important;border:3px solid #bb9b66!important;color:#fff3d4!important}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-model-options[open]>summary{position:sticky;top:-14px;margin:-14px -14px 12px;min-height:44px}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-camera-settings[open]>.exercise-settings-popover{position:absolute;inset:58px 8px 8px;z-index:34;max-height:none;overflow:auto;padding:16px;background:#1c3551;border:3px solid #bb9b66;color:#fff3d4;box-shadow:none}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-camera-settings[open]>summary{position:relative;z-index:36;border-color:#f3b85d}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-guide-popover{position:absolute!important;inset:58px 8px 8px!important;max-height:none!important;margin:0;padding:14px!important;overflow:auto;background:#1c3551!important;z-index:33;border:3px solid #bb9b66!important}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-guide-heading{position:sticky;top:-14px;background:#1c3551;padding:8px 0;z-index:2;display:flex;justify-content:space-between;gap:8px}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-guide-heading button{min-height:44px;flex-shrink:0;font-size:11px;padding:5px 10px}
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-camera>.exercise-note,
+.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-camera>button{grid-column:1/-1;grid-row:auto;font-size:10px;line-height:1.3;min-height:0;margin:0;padding:4px;height:auto}
+@media(min-width:1050px){.bt .bt-battle-series:has(.bt-camera-pane:not(:has(>.bt-panel))){grid-template-columns:minmax(0,40%) minmax(0,60%)}.bt .bt-workout:has(.bt-camera-pane:not(:has(>.bt-panel))){grid-template-columns:minmax(0,40%) minmax(0,60%)}}
+@media(max-height:550px) and (orientation:landscape){
+ .bt .bt-battle-series:has(.bt-camera-pane:not(:has(>.bt-panel))),.bt .bt-workout:has(.bt-camera-pane:not(:has(>.bt-panel))){grid-template-columns:minmax(0,28%) minmax(0,72%)}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)){padding:5px;gap:3px}
+ .bt .bt-camera-pane:not(:has(>.bt-panel))>.bt-series-controls{gap:3px;width:63%;height:44px}
+ .bt .bt-camera-pane:not(:has(>.bt-panel))>.bt-series-controls button{font-size:11px;min-height:44px}
+ .bt .bt-camera-pane:not(:has(>.bt-panel))>.bt-technique{min-height:20px;padding:0 5px}
+ .bt .bt-camera-pane:not(:has(>.bt-panel))>.bt-technique summary{font-size:10px;min-height:18px}
+ .bt .bt-camera-pane:not(:has(>.bt-panel))>.exercise-camera{gap:3px;padding:4px!important;grid-auto-rows:44px}
+ .bt .bt-camera-pane:not(:has(>.bt-panel))>.exercise-camera>header{top:5px;right:5px;height:44px}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-header-actions{gap:3px}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-header-actions button{font-size:10px;min-height:44px;padding:3px}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-feed{grid-column:1/6}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-hud{grid-column:6/9;gap:3px;padding:5px!important;justify-content:flex-start}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-hud-heading{min-height:8px}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-hud-heading>small{font-size:8px!important}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-counter>strong{font-size:36px!important;line-height:1!important;letter-spacing:-2px!important}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-counter-target{font-size:18px!important}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-counter-target>small{font-size:8px!important}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-progress-track{height:4px!important;min-height:4px}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-next-side{padding:3px!important}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-next-side>small{font-size:7px!important}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-next-side>strong{font-size:11px!important;margin-top:1px}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-big-feedback{padding:4px 5px!important;border-left-width:3px!important}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-big-feedback>strong{font-size:13px!important;line-height:1.1!important}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-big-feedback>p{font-size:10px!important;line-height:1.15!important;margin-top:2px!important}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-start-position{padding:3px 4px!important}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-start-position>summary>span{font-size:7px!important}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-start-position>summary>strong{font-size:9px!important;margin-top:1px}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-actions>button{font-size:10px;padding:3px!important;min-height:44px!important}
+ .bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-camera-settings>summary,.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-model-options>summary{font-size:9px!important;padding:3px!important}
+ .bt .bt-battle-series:has(.bt-camera-pane:not(:has(>.bt-panel))) .bt-battle-dock{padding:7px;min-height:0}
+ .bt .bt-battle-series:has(.bt-camera-pane:not(:has(>.bt-panel))) .bt-battle-dock h2{font-size:13px}
+ .bt .bt-battle-series:has(.bt-camera-pane:not(:has(>.bt-panel))) .bt-battle-dock button{font-size:10px;min-height:44px;padding:4px 7px}
+ .bt .bt-battle-series:has(.bt-camera-pane:not(:has(>.bt-panel))) .bt-health{width:115px}
+}
+@media(max-width:650px) and (orientation:portrait){.bt .bt-camera-pane:not(:has(>.bt-panel)){min-height:350px;overflow:auto}.bt .bt-camera-pane:not(:has(>.bt-panel))>.exercise-camera{min-height:300px}.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-hud{padding:6px!important;gap:5px}.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-counter>strong{font-size:40px!important}.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-counter-target{font-size:18px!important}.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-big-feedback>strong{font-size:14px!important}.bt .bt-camera-pane:not(:has(>.bt-panel)) .exercise-big-feedback>p{font-size:10px!important}}
