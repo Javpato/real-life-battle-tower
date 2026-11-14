@@ -1,3 +1,9 @@
+import {
+  walkToFirstTrainer,
+  openAttackMenu,
+  openCameraControls,
+  dismissExerciseGuide,
+} from "./browser-controls.mjs";
 /** Real App UI using Chromium's generated camera stream. No physical recognition claim. */
 import { chromium, expect } from "@playwright/test";
 const browser = await chromium.launch({
@@ -42,15 +48,12 @@ try {
   await page.getByRole("button", { name: "Take the first step" }).click();
   await expect(page.locator(".world-frame canvas")).toHaveCount(1);
   await page.waitForTimeout(400);
-  await hold("d", 550);
-  const trainer = page.getByRole("button", { name: /E · .* · first steps/ });
-  for (let i = 0; i < 8 && !(await trainer.isVisible()); i++)
-    await hold("s", 140);
-  await expect(trainer).toBeVisible();
-  await page.keyboard.press("e", { delay: 150 });
+  await walkToFirstTrainer(page);
   await page.getByLabel("Use camera verification").check();
   await page.getByRole("button", { name: "Begin encounter" }).click();
+  await openCameraControls(page);
   const camera = page.locator(".exercise-camera");
+  await dismissExerciseGuide(camera);
   await expect(camera).toBeVisible();
   await page.evaluate(() => {
     window.__cameraRoot = document.querySelector(".exercise-camera");
@@ -62,18 +65,24 @@ try {
           document.querySelector(".exercise-camera") === window.__cameraRoot,
       ),
     ).toBe(true);
+  await openCameraControls(page);
   await camera
     .getByRole("button", { name: "Enable camera", exact: true })
     .click();
   await expect(camera).toHaveAttribute("data-camera-state", "ready", {
     timeout: 30000,
   });
+  await openAttackMenu(page);
   await page.getByRole("button", { name: /Earthbound/ }).click();
   await expect(
-    page.getByRole("button", { name: "Manual mode", exact: true }),
+    page
+      .locator(".exercise-mode-switch button")
+      .filter({ hasText: "Manual mode" }),
   ).toBeDisabled();
   await expect(
-    page.getByRole("button", { name: "Camera mode", exact: true }),
+    page
+      .locator(".exercise-mode-switch button")
+      .filter({ hasText: "Camera mode" }),
   ).toBeDisabled();
   await same();
   const layoutEvidence = [];
@@ -142,6 +151,7 @@ try {
     .click();
   await expect(camera).toHaveAttribute("data-camera-state", "off");
   await same();
+  await openCameraControls(page);
   await camera
     .getByRole("button", { name: "Enable camera", exact: true })
     .click();
@@ -156,6 +166,7 @@ try {
     .click();
   await expect(camera).toHaveAttribute("data-camera-state", "off");
   await same();
+  await openCameraControls(page);
   await camera
     .getByRole("button", { name: "Enable camera", exact: true })
     .click();
@@ -176,11 +187,12 @@ try {
     .poll(
       async () =>
         (await victory.isVisible()) ||
-        (await page.getByRole("button", { name: /Earthbound/ }).isVisible()),
+        (await page.locator(".command-attack").isVisible()),
     )
     .toBe(true);
   await same();
   for (let n = 0; n < 10 && !(await victory.isVisible()); n++) {
+    await openAttackMenu(page);
     await page.getByRole("button", { name: /Earthbound/ }).click();
     await page
       .getByRole("button", {
@@ -192,7 +204,7 @@ try {
       .poll(
         async () =>
           (await victory.isVisible()) ||
-          (await page.getByRole("button", { name: /Earthbound/ }).isVisible()),
+          (await page.locator(".command-attack").isVisible()),
       )
       .toBe(true);
   }
