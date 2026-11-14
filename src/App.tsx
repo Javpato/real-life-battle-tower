@@ -342,7 +342,7 @@ export default function App() {
         }
       }}
     >
-      <header className="game-header">
+      <header className="game-header" inert={Boolean(panel || welcome || quest)}>
         <button className="brand" onClick={() => V(null)}>
           <span className="brand-mark">✦</span>
           <span>
@@ -439,6 +439,7 @@ export default function App() {
           </div>
         )}
       <main
+        inert={Boolean(panel || welcome || quest)}
         className={
           "game-main" + (b?.turn === "exercise" ? " exercise-session" : "")
         }
@@ -995,7 +996,7 @@ export default function App() {
         </div>
       )}
       {(saveError || adventure.mode === "cloud") && (
-        <section className="notice" style={{ margin: 20 }} role="status">
+        <section className="notice adventure-cloud-status" style={{ margin: 20 }} role="status">
           <strong>
             {adventure.mode === "cloud"
               ? `Cloud adventure ${adventure.saveId?.slice(0, 8)} · revision ${adventure.revision}`
