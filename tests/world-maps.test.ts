@@ -50,3 +50,16 @@ describe('ordered exterior streets',()=>{
   }
  });
 });
+
+it('has no isolated walkable pockets after the geography update',()=>{
+ for(const map of Object.values(WORLD_MAPS)){
+  // Eight-pixel navigation samples cover the playable floor, including saved positions off roads.
+  // Residents are excluded because their temporary occupied feet are not permanent geometry.
+  const points=new Map<string,{x:number;y:number}>();
+  for(let y=52;y<=map.height-20;y+=8)for(let x=20;x<=map.width-20;x+=8)if(isWalkable(map.id,x,y,false))points.set(`${x},${y}`,{x,y});
+  const start=[...points.values()].sort((a,b)=>Math.hypot(a.x-map.spawns.safe.x,a.y-map.spawns.safe.y)-Math.hypot(b.x-map.spawns.safe.x,b.y-map.spawns.safe.y))[0];
+  const queue=[start],seen=new Set([`${start.x},${start.y}`]);
+  for(let i=0;i<queue.length;i++)for(const [dx,dy]of[[8,0],[-8,0],[0,8],[0,-8]]){const key=`${queue[i].x+dx},${queue[i].y+dy}`;if(points.has(key)&&!seen.has(key)){seen.add(key);queue.push(points.get(key)!);}}
+  expect(seen.size,map.id+' reachable saved-position samples').toBe(points.size);
+ }
+});
