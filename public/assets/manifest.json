@@ -1,38 +1,475 @@
 {
- "name":"Everstride original bitmap asset registry", "version":2,
- "world":{"logicalViewport":[480,270],"mapSize":[768,576],"pixelArt":true,"groundRenderScale":2,"renderResolution":[960,540],"cameraZoom":2},
- "sheets":{
-  "heroBack":{"path":"assets/sprites/hero-back-v2.png","width":1024,"height":1536,"columns":1,"rows":1},
-  "traveler":{"path":"assets/sprites/traveler-walk-v2.png","width":1247,"height":1261,"columns":4,"rows":4},
-  "battleCast":{"path":"assets/sprites/battle-cast-v2.png","width":1774,"height":887,"columns":4,"rows":2},
-  "villagers":{"path":"assets/sprites/villagers-v2.png","width":1774,"height":887,"columns":4,"rows":2},
-  "buildings":{"path":"assets/world/buildings-v2.png","width":1774,"height":887,"columns":4,"rows":2},
-  "scenery":{"path":"assets/world/scenery-v2.png","width":1774,"height":887,"columns":4,"rows":2},
-  "terrain":{"path":"assets/world/terrain-v2.png","width":1254,"height":1254,"columns":2,"rows":2},
-  "items":{"path":"assets/items/items-v2.png","width":1774,"height":887,"columns":4,"rows":2}
- },
- "battlefield":{"path":"assets/world/battlefield-v2.png","width":1536,"height":1024,"heroFoot":[0.28,0.77],"enemyFoot":[0.79,0.43]},
- "characters":{
-  "hero":{"sheet":"battleCast","frame":0,"name":"The traveler"},
-  "trainer-1":{"sheet":"battleCast","frame":1,"name":"Moss"},
-  "trainer-2":{"sheet":"battleCast","frame":2,"name":"Pip"},
-  "trainer-3":{"sheet":"battleCast","frame":3,"name":"Fern"},
-  "leader-leg":{"sheet":"battleCast","frame":4,"name":"Terra"},
-  "leader-arm":{"sheet":"battleCast","frame":5,"name":"Flint"},
-  "leader-back":{"sheet":"battleCast","frame":6,"name":"Zephyr"},
-  "rival":{"sheet":"battleCast","frame":7,"name":"Rowan"},
-  "healer":{"sheet":"villagers","frame":0,"name":"The healer"},
-  "shop":{"sheet":"villagers","frame":1,"name":"Jun"},
-  "alchemy":{"sheet":"villagers","frame":2,"name":"Mira"},
-  "quest-squat":{"sheet":"villagers","frame":3,"name":"Ollie"},
-  "quest-pushup":{"sheet":"villagers","frame":4,"name":"Ada"},
-  "quest-birddog":{"sheet":"villagers","frame":5,"name":"Noor"},
-  "quest-lunge":{"sheet":"villagers","frame":6,"name":"Finn"}
- },
- "items":{"potion":0,"shield":1,"boost":2,"coins":3,"leg":4,"arm":5,"back":6,"ingredient":7},
- "animation":{"directions":["down","left","right","up"],"framesPerDirection":4,"walkFrameMs":145,"runFrameMs":95},
- "provenance":{"kind":"original AI-generated bitmap artwork","tool":"OpenAI built-in image generation","date":"2026-11-14","details":"ASSET_GUIDE.md; no proprietary game assets imported"},
- "exerciseGuides":{"component":"src/exercises/ExerciseDemo.tsx","format":"inline SVG"},
- "poseModel":{"path":"/models/pose_landmarker_lite.task","source":"Google MediaPipe Pose Landmarker Lite","runtime":"@mediapipe/tasks-vision 0.10.35"},
- "audio":{"effects":"Web Audio synthesized triangle tones","music":"src/audio/music.ts"}
+  "name": "Everstride original bitmap asset registry",
+  "version": 3,
+  "world": {
+    "logicalViewport": [
+      480,
+      270
+    ],
+    "mapSize": [
+      768,
+      576
+    ],
+    "pixelArt": true,
+    "groundRenderScale": 2,
+    "renderResolution": [
+      960,
+      540
+    ],
+    "cameraZoom": 2
+  },
+  "sheets": {
+    "heroBack": {
+      "path": "assets/sprites/hero-back-v2.png",
+      "width": 1024,
+      "height": 1536,
+      "columns": 1,
+      "rows": 1
+    },
+    "traveler": {
+      "path": "assets/sprites/traveler-walk-v2.png",
+      "width": 1247,
+      "height": 1261,
+      "columns": 4,
+      "rows": 4
+    },
+    "battleCast": {
+      "path": "assets/sprites/battle-cast-v2.png",
+      "width": 1774,
+      "height": 887,
+      "columns": 4,
+      "rows": 2
+    },
+    "villagers": {
+      "path": "assets/sprites/villagers-v2.png",
+      "width": 1774,
+      "height": 887,
+      "columns": 4,
+      "rows": 2
+    },
+    "buildings": {
+      "path": "assets/world/buildings-v2.png",
+      "width": 1774,
+      "height": 887,
+      "columns": 4,
+      "rows": 2
+    },
+    "scenery": {
+      "path": "assets/world/scenery-v2.png",
+      "width": 1774,
+      "height": 887,
+      "columns": 4,
+      "rows": 2
+    },
+    "terrain": {
+      "path": "assets/world/terrain-v2.png",
+      "width": 1254,
+      "height": 1254,
+      "columns": 2,
+      "rows": 2
+    },
+    "items": {
+      "path": "assets/items/items-v2.png",
+      "width": 1774,
+      "height": 887,
+      "columns": 4,
+      "rows": 2
+    },
+    "overworld": {
+      "path": "assets/sprites/overworld-v3.png",
+      "width": 768,
+      "height": 768,
+      "columns": 16,
+      "rows": 16
+    },
+    "indicators": {
+      "path": "assets/sprites/indicators-v3.png",
+      "width": 112,
+      "height": 16,
+      "columns": 7,
+      "rows": 1
+    },
+    "female": {
+      "path": "assets/sprites/hero-female-v3.png",
+      "width": 1536,
+      "height": 1024,
+      "columns": 2,
+      "rows": 1
+    }
+  },
+  "battlefield": {
+    "path": "assets/world/battlefield-v2.png",
+    "width": 1536,
+    "height": 1024,
+    "heroFoot": [
+      0.28,
+      0.77
+    ],
+    "enemyFoot": [
+      0.79,
+      0.43
+    ]
+  },
+  "characters": {
+    "hero": {
+      "sheet": "battleCast",
+      "frame": 0,
+      "name": "The traveler"
+    },
+    "trainer-1": {
+      "sheet": "battleCast",
+      "frame": 1,
+      "name": "Moss"
+    },
+    "trainer-2": {
+      "sheet": "battleCast",
+      "frame": 2,
+      "name": "Pip"
+    },
+    "trainer-3": {
+      "sheet": "battleCast",
+      "frame": 3,
+      "name": "Fern"
+    },
+    "leader-leg": {
+      "sheet": "battleCast",
+      "frame": 4,
+      "name": "Terra"
+    },
+    "leader-arm": {
+      "sheet": "battleCast",
+      "frame": 5,
+      "name": "Flint"
+    },
+    "leader-back": {
+      "sheet": "battleCast",
+      "frame": 6,
+      "name": "Zephyr"
+    },
+    "rival": {
+      "sheet": "battleCast",
+      "frame": 7,
+      "name": "Rowan"
+    },
+    "healer": {
+      "sheet": "villagers",
+      "frame": 0,
+      "name": "The healer"
+    },
+    "shop": {
+      "sheet": "villagers",
+      "frame": 1,
+      "name": "Jun"
+    },
+    "alchemy": {
+      "sheet": "villagers",
+      "frame": 2,
+      "name": "Mira"
+    },
+    "quest-squat": {
+      "sheet": "villagers",
+      "frame": 3,
+      "name": "Ollie"
+    },
+    "quest-pushup": {
+      "sheet": "villagers",
+      "frame": 4,
+      "name": "Ada"
+    },
+    "quest-birddog": {
+      "sheet": "villagers",
+      "frame": 5,
+      "name": "Noor"
+    },
+    "quest-lunge": {
+      "sheet": "villagers",
+      "frame": 6,
+      "name": "Finn"
+    },
+    "hero-female": {
+      "sheet": "female",
+      "frame": 0,
+      "name": "The traveler"
+    }
+  },
+  "items": {
+    "potion": 0,
+    "shield": 1,
+    "boost": 2,
+    "coins": 3,
+    "leg": 4,
+    "arm": 5,
+    "back": 6,
+    "ingredient": 7
+  },
+  "animation": {
+    "directions": [
+      "down",
+      "left",
+      "right",
+      "up"
+    ],
+    "framesPerDirection": 4,
+    "walkFrameMs": 145,
+    "runFrameMs": 95
+  },
+  "provenance": {
+    "kind": "original AI-generated bitmap artwork",
+    "tool": "OpenAI built-in image generation",
+    "date": "2026-11-14",
+    "details": "ASSET_GUIDE.md; no proprietary game assets imported"
+  },
+  "exerciseGuides": {
+    "component": "src/exercises/ExerciseDemo.tsx",
+    "format": "inline SVG"
+  },
+  "poseModel": {
+    "path": "/models/pose_landmarker_lite.task",
+    "source": "Google MediaPipe Pose Landmarker Lite",
+    "runtime": "@mediapipe/tasks-vision 0.10.35"
+  },
+  "audio": {
+    "effects": "Web Audio synthesized triangle tones",
+    "music": "src/audio/music.ts"
+  },
+  "overworldCharacters": {
+    "hero": {
+      "sheet": "overworld",
+      "row": 0
+    },
+    "hero-female": {
+      "sheet": "overworld",
+      "row": 1
+    },
+    "trainer-1": {
+      "sheet": "overworld",
+      "row": 2
+    },
+    "trainer-2": {
+      "sheet": "overworld",
+      "row": 3
+    },
+    "trainer-3": {
+      "sheet": "overworld",
+      "row": 4
+    },
+    "leader-leg": {
+      "sheet": "overworld",
+      "row": 5
+    },
+    "leader-arm": {
+      "sheet": "overworld",
+      "row": 6
+    },
+    "leader-back": {
+      "sheet": "overworld",
+      "row": 7
+    },
+    "rival": {
+      "sheet": "overworld",
+      "row": 8
+    },
+    "healer": {
+      "sheet": "overworld",
+      "row": 9
+    },
+    "shop": {
+      "sheet": "overworld",
+      "row": 10
+    },
+    "alchemy": {
+      "sheet": "overworld",
+      "row": 11
+    },
+    "quest-squat": {
+      "sheet": "overworld",
+      "row": 12
+    },
+    "quest-pushup": {
+      "sheet": "overworld",
+      "row": 13
+    },
+    "quest-birddog": {
+      "sheet": "overworld",
+      "row": 14
+    },
+    "quest-lunge": {
+      "sheet": "overworld",
+      "row": 15
+    }
+  },
+  "visualBounds": {
+    "battleCast": [
+      {
+        "x": 113,
+        "y": 8,
+        "width": 243,
+        "height": 427
+      },
+      {
+        "x": 526,
+        "y": 8,
+        "width": 256,
+        "height": 426
+      },
+      {
+        "x": 990,
+        "y": 9,
+        "width": 271,
+        "height": 426
+      },
+      {
+        "x": 1445,
+        "y": 8,
+        "width": 200,
+        "height": 427
+      },
+      {
+        "x": 85,
+        "y": 446,
+        "width": 287,
+        "height": 435
+      },
+      {
+        "x": 539,
+        "y": 447,
+        "width": 248,
+        "height": 434
+      },
+      {
+        "x": 950,
+        "y": 446,
+        "width": 324,
+        "height": 435
+      },
+      {
+        "x": 1409,
+        "y": 449,
+        "width": 299,
+        "height": 432
+      }
+    ],
+    "villagers": [
+      {
+        "x": 124,
+        "y": 9,
+        "width": 212,
+        "height": 419
+      },
+      {
+        "x": 538,
+        "y": 9,
+        "width": 252,
+        "height": 417
+      },
+      {
+        "x": 991,
+        "y": 9,
+        "width": 225,
+        "height": 419
+      },
+      {
+        "x": 1452,
+        "y": 9,
+        "width": 196,
+        "height": 420
+      },
+      {
+        "x": 136,
+        "y": 454,
+        "width": 186,
+        "height": 424
+      },
+      {
+        "x": 557,
+        "y": 449,
+        "width": 216,
+        "height": 429
+      },
+      {
+        "x": 1015,
+        "y": 449,
+        "width": 221,
+        "height": 429
+      },
+      {
+        "x": 1423,
+        "y": 459,
+        "width": 257,
+        "height": 419
+      }
+    ],
+    "heroBack": [
+      {
+        "x": 184,
+        "y": 53,
+        "width": 633,
+        "height": 1387
+      }
+    ],
+    "female": [
+      {
+        "x": 176,
+        "y": 16,
+        "width": 457,
+        "height": 970
+      },
+      {
+        "x": 861,
+        "y": 11,
+        "width": 447,
+        "height": 972
+      }
+    ],
+    "items": [
+      {
+        "x": 79,
+        "y": 31,
+        "width": 284,
+        "height": 378
+      },
+      {
+        "x": 517,
+        "y": 26,
+        "width": 296,
+        "height": 378
+      },
+      {
+        "x": 998,
+        "y": 19,
+        "width": 221,
+        "height": 392
+      },
+      {
+        "x": 1351,
+        "y": 26,
+        "width": 399,
+        "height": 378
+      },
+      {
+        "x": 93,
+        "y": 462,
+        "width": 252,
+        "height": 417
+      },
+      {
+        "x": 511,
+        "y": 462,
+        "width": 310,
+        "height": 417
+      },
+      {
+        "x": 967,
+        "y": 462,
+        "width": 281,
+        "height": 412
+      },
+      {
+        "x": 1375,
+        "y": 470,
+        "width": 368,
+        "height": 399
+      }
+    ]
+  }
 }

@@ -2225,3 +2225,37 @@
   width: 44px;
   height: 44px;
 }
+
+/* One coordinate space for arena artwork and visual feet at every viewport. */
+.immersive-game .battle-stage {
+  container-type:size;
+  background-size:contain!important;
+  background-position:center!important;
+  background-repeat:no-repeat;
+  background-color:#253e3d;
+}
+.immersive-game .battle-stage .combat-sprite {
+  display:block!important;
+  position:absolute;
+  right:auto!important;bottom:auto!important;
+  transform:translate(-50%,-100%)!important;
+  animation:none!important;
+  transform-origin:50% 100%;
+  pointer-events:none;
+}
+.immersive-game .battle-stage .combat-sprite.hero {
+  left:calc(50% - min(22cqw,33cqh))!important;
+  top:calc(50% + min(18cqw,27cqh))!important;
+  width:min(27cqw,40.5cqh)!important;
+  height:min(30cqw,45cqh)!important;
+}
+.immersive-game .battle-stage .combat-sprite.enemy {
+  left:calc(50% + min(29cqw,43.5cqh))!important;
+  top:calc(50% - min(4.6667cqw,7cqh))!important;
+  width:min(23cqw,34.5cqh)!important;
+  height:min(25cqw,37.5cqh)!important;
+}
+.immersive-game .battle-hit .combat-sprite.enemy .sprite-art{animation:earned-impact 260ms ease-out;}
+.immersive-game .battle-transform .combat-sprite.enemy .sprite-art{animation:phase-glow 1s ease-in-out infinite;}
+.immersive-game .battle-victory .combat-sprite.hero .sprite-art{filter:drop-shadow(0 0 8px #f2d78b);}
+@media(prefers-reduced-motion:reduce){.immersive-game .combat-sprite .sprite-art{animation:none!important;}}

@@ -37,3 +37,38 @@ export function createWorldArt(terrain:HTMLImageElement){
  trees.forEach(t=>obstacles.push({x:t.x-5,y:t.y-7,w:11,h:10}));
  return {canvas:c,obstacles,trees};
 }
+
+import type {WorldMap} from '../core/worldMaps';
+/** Native pixel terrain: deterministic decoration never changes collision geometry. */
+export function paintMap(map:WorldMap){
+ const c=document.createElement('canvas');c.width=map.width;c.height=map.height;const g=c.getContext('2d')!;g.imageSmoothingEnabled=false;
+ const box=(x:number,y:number,w:number,h:number,color:string)=>{g.fillStyle=color;g.fillRect(Math.round(x),Math.round(y),w,h);};
+ if(map.kind==='interior'){
+  box(0,0,c.width,c.height,'#382a35');box(16,16,352,256,'#d2b784');box(16,47,352,225,'#957052');
+  for(let y=48;y<272;y+=16)for(let x=16;x<368;x+=32){box(x,y,31,15,(x+y)%3?'#aa805a':'#b78d62');box(x+3,y+3,22,1,'#c29c70');}
+  box(20,18,344,27,'#f0d9a5');box(20,42,344,6,'#5d473b');
+  // Warm window, bed, desk, chair, bookshelf and rug. Each retains a matching collision.
+  box(164,18,54,26,'#624b47');box(168,20,46,20,'#77bfc2');box(171,22,18,17,'#afd7cf');box(190,20,3,22,'#ead09a');
+  box(36,54,72,58,'#493e45');box(40,58,64,48,'#f4e3b8');box(43,77,58,28,map.id.includes('gym')?'#b76853':'#587d7b');box(44,61,23,12,'#fff0cc');
+  box(266,54,70,32,'#513b35');box(269,57,64,26,'#b98b5c');for(let i=0;i<7;i++)box(272+i*8,60,5,20,['#839970','#bd795b','#e5ca8d'][i%3]);
+  box(46,154,60,36,'#5c4437');box(44,151,64,25,'#c19867');box(53,155,23,13,'#ece0b1');box(62,154,1,15,'#947d5d');
+  box(150,162,85,53,map.id.includes('gym')?'#ad604e':'#657e78');box(154,166,77,45,map.id.includes('gym')?'#c78b68':'#8ba59a');box(160,172,65,33,map.id.includes('gym')?'#995648':'#607d74');
+  box(168,267,48,21,'#e6c58b');box(174,272,36,3,'#705744');
+  if(map.id==='starter_house'){box(304,112,32,24,'#ead7a5');for(let y=114;y<136;y+=5)box(305,y,30,2,'#85644c');}
+  for(const x of [122,246]){box(x,27,6,8,'#ffdf8a');box(x-2,34,10,3,'#99704f');}
+ }else{
+  const grass=map.kind==='summit'?'#73918c':map.kind==='route'?'#4f805d':'#83a86f';box(0,0,c.width,c.height,grass);
+  for(let y=12;y<c.height;y+=24)for(let x=12;x<c.width;x+=24){const n=(x*31+y*17)%13;box(x+n,y+n,2,3,map.kind==='route'?'#709967':'#a5b77d');if(n%4===0)box(x+n+3,y+n+2,2,2,'#e5ca91');}
+  const path=(x:number,y:number,w:number,h:number)=>{box(x-3,y-3,w+6,h+6,'#697c58');box(x,y,w,h,map.kind==='summit'?'#b0b3a1':'#c3b285');for(let yy=y+5;yy<y+h;yy+=14)for(let xx=x+4;xx<x+w;xx+=20)box(xx,yy,7,2,'#d7c69a');};
+  if(map.kind==='town'){path(620,48,40,900);for(const y of [270,490,750,920])path(160,y,760,32);for(const x of [180,460,860])path(x,240,36,680);path(590,460,112,112);}
+  if(map.kind==='summit'){path(458,35,44,660);path(150,350,640,36);path(180,310,30,52);path(742,310,30,52);path(370,390,220,105);}
+  if(map.kind==='route'){path(365,35,40,1080);path(285,280,180,34);path(285,280,34,460);path(285,706,120,34);path(395,910,160,34);}
+  for(const o of map.obstacles){if(map.buildings.some(b=>Math.abs(b.x+5-o.x)<4))continue;box(o.x,o.y,o.w,o.h,'#47777a');box(o.x+6,o.y+6,o.w-12,o.h-12,'#659a99');for(let y=o.y+16;y<o.y+o.h;y+=25)box(o.x+12,y,30,2,'#a3c8b1');}
+  // Boundary forest has a clear break at every route entrance.
+  const tree=(x:number,y:number)=>{box(x-3,y,6,14,'#66513b');box(x-14,y-16,28,18,'#315a49');box(x-10,y-28,20,20,'#456f50');box(x-5,y-35,10,16,'#648558');box(x-8,y-20,5,3,'#7b995e');};
+  for(let x=24;x<c.width-20;x+=30){if(!map.portals.some(p=>Math.abs(p.x+p.w/2-x)<55&&p.y<70))tree(x,45);if(!map.portals.some(p=>Math.abs(p.x+p.w/2-x)<55&&p.y>c.height-70))tree(x,c.height-9);}
+  for(let y=90;y<c.height-20;y+=32){tree(13,y);tree(c.width-13,y);}
+  if(map.kind==='route')for(let y=140;y<1000;y+=130){tree(95,y);tree(650,y+45);tree(125,y+20);tree(675,y+60);}
+ }
+ return c;
+}
