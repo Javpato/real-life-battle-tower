@@ -12,6 +12,7 @@ export function frameRect(sheet:SheetId,index:number){
 export function characterArt(id:string,variant:'front'|'back'='front'):{sheet:SheetId;frame:number;name:string}{
  if(id==='hero-female'&&variant==='back')return {sheet:'female',frame:1,name:'The traveler'};
  if(id==='hero'&&variant==='back')return {sheet:'heroBack',frame:0,name:'The traveler'};
+ if(id==='tutorial-moss')id='trainer-1';
  const entry=manifest.characters[id as CharacterId]??manifest.characters.hero;
  return {...entry,sheet:entry.sheet as SheetId};
 }
