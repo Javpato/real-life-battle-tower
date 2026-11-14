@@ -25,6 +25,9 @@ import {
   Minimize2,
 } from "lucide-react";
 import World from "./game/World";
+import Introduction from "./opening/Introduction";
+import { WORLD_MAPS } from "./core/worldMaps";
+import { readSlotNutrition, writeSlotNutrition } from "./services/saveSlots";
 import BattleCommandMenu from "./ui/BattleCommandMenu";
 import BattleSprite, { ItemSprite } from "./game/BattleSprite";
 import { battlefieldUrl } from "./game/assets";
@@ -81,13 +84,16 @@ function sound(kind = "click") {
     setTimeout(() => a.close(), 350);
   } catch {}
 }
-export default function App() {
-  const adventure = useAdventure();
+export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{localSaveId?:string;onReturnToTitle?:()=>void;initialPanel?:string|null}) {
+  const adventure = useAdventure(localSaveId);
+  const journey=adventure.snapshot.journey;
+  const heroId=journey?.avatar === "female" ? "hero-female" : "hero";
+  const [replayIntro,setReplayIntro]=useState(false);
   const { player: p, battle: b, quest } = adventure.snapshot;
   const ready = adventure.ready;
   const [n, N] = useState<NutritionState>(defaultNutrition),
     [nutritionReady, NR] = useState(false),
-    [panel, V] = useState<string | null>(null),
+    [panel, V] = useState<string | null>(initialPanel),
     [encounter, E] = useState<Enemy | null>(null),
     [chosen, CH] = useState<Element | null>(null),
     [camera, C] = useState(true),
@@ -154,7 +160,7 @@ export default function App() {
     return ok;
   };
   useEffect(() => {
-    if (adventure.fresh) W(true);
+    if (adventure.fresh && !localSaveId) W(true);
   }, [adventure.fresh]);
   useEffect(() => {
     if (!adventure.error && !adventure.busy) PR(false);
@@ -177,7 +183,7 @@ export default function App() {
   }, [muted, b?.enemy.id, b?.turn === "won"]);
   useEffect(() => () => stopMusic(), []);
   useEffect(() => {
-    void readSave<NutritionState>("nutrition")
+    void (localSaveId ? readSlotNutrition<NutritionState>(localSaveId) : readSave<NutritionState>("nutrition"))
       .then((saved) => {
         if (saved) N(saved);
         NR(true);
@@ -189,7 +195,7 @@ export default function App() {
   }, []);
   useEffect(() => {
     if (nutritionReady)
-      void writeSave("nutrition", n).catch(() =>
+      void (localSaveId ? writeSlotNutrition(localSaveId,n) : writeSave("nutrition", n)).catch(() =>
         SE("Could not save the local journal."),
       );
   }, [n, nutritionReady]);
@@ -225,6 +231,7 @@ export default function App() {
   }
   function interact(id: string) {
     if (b || panel || quest || adventure.locked) return;
+    if(id === "trainer-1" && (journey?.tutorialStage??6)<4){void dispatch({kind:"setTutorial",stage:2}); V("tutorial");return;}
     if (id.startsWith("trainer") || id.startsWith("leader") || id === "rival") {
       if (id === "rival" && p.badges.length < 3) {
         notify(
@@ -297,6 +304,11 @@ export default function App() {
       {typeLabel(type)}
     </span>
   );
+  useEffect(()=>{if(!ready)return;const timer=setInterval(()=>{if(!document.hidden&&!adventure.locked)void adventure.send({kind:'playTime',seconds:15})},15000);return()=>clearInterval(timer)},[ready,adventure.locked,adventure.controller]);
+  useEffect(()=>{if(journey?.location.mapId==='starter_town'&&journey.tutorialStage===0)void adventure.send({kind:'setTutorial',stage:1})},[journey?.location.mapId,journey?.tutorialStage]);
+  const previousPanel=useRef<string|null>(null),returnFocus=useRef<HTMLElement|null>(null);
+  useEffect(()=>{if(panel&&!previousPanel.current)returnFocus.current=document.activeElement as HTMLElement;if(!panel&&previousPanel.current){requestAnimationFrame(()=>returnFocus.current?.focus())}previousPanel.current=panel},[panel]);
+  if(ready && journey && (!journey.introComplete || replayIntro))return <Introduction name={p.name} avatar={journey.avatar} onDone={()=>{setReplayIntro(false);if(!journey.introComplete)void dispatch({kind:'completeIntro'})}}/>;
   if (!ready)
     return (
       <div className="loading">
@@ -443,7 +455,7 @@ export default function App() {
         {!b && (
           <>
             <section className="game-hud-player" aria-label="Your adventurer">
-              <BattleSprite id="hero" className="hud-portrait" />
+              <BattleSprite id={heroId} className="hud-portrait" />
               <div>
                 <strong>
                   {p.name} <small>Lv. {p.level}</small>
@@ -470,7 +482,7 @@ export default function App() {
               onClick={() => V("menu")}
               aria-label="Adventure progress"
             >
-              <span>WILLOWMERE VALLEY</span>
+              <span>{WORLD_MAPS[journey?.location.mapId??"starter_town"]?.name??"Willowmere"}</span>
               <strong>
                 {p.ending
                   ? "The summit is yours"
@@ -532,14 +544,16 @@ export default function App() {
               {!b ? (
                 <div className="world-frame">
                   <World
-                    key={adventure.mode + ":" + (adventure.saveId ?? "local")}
+                    key={adventure.mode + ":" + (adventure.saveId ?? "local") + ":" + journey?.location.mapId}
                     paused={!!panel || !!quest || welcome || adventure.locked}
                     badges={p.badges}
-                    position={p.position}
-                    onMove={(position) => {
-                      if (!adventure.locked)
-                        void dispatch({ kind: "move", ...position });
-                    }}
+                    position={journey?.location ?? p.position}
+                    mapId={journey?.location.mapId}
+                    avatar={journey?.avatar}
+                    facing={journey?.location.facing}
+                    onTransition={(portalId)=>void dispatch({kind:'portal',portalId})}
+                    onPosition={(position)=>{if(!adventure.locked)void dispatch({kind:'location',mapId:journey?.location.mapId??'starter_town',x:position.x,y:position.y,facing:position.facing??'down'})}}
+                    onMove={(position)=>{if(!adventure.locked)void dispatch({kind:'location',mapId:journey?.location.mapId??'starter_town',x:position.x,y:position.y,facing:position.facing??'down'})}}
                     onInteract={interact}
                   />
                   <div className="world-caption">
@@ -587,13 +601,13 @@ export default function App() {
                       </span>
                     )}
                     <BattleSprite
-                      id={b.enemy.id}
+                      id={b.enemy.id === "tutorial-moss" ? "trainer-1" : b.enemy.id}
                       className={
                         "combat-sprite enemy " + b.enemy.phases[b.phase][0]
                       }
                     />
                     <BattleSprite
-                      id="hero"
+                      id={heroId}
                       variant="back"
                       className="combat-sprite hero"
                     />
@@ -814,7 +828,7 @@ export default function App() {
               <>
                 <section className="card player-card">
                   <div className="player-heading">
-                    <BattleSprite id="hero" className="profile-portrait" />
+                    <BattleSprite id={heroId} className="profile-portrait" />
                     <div>
                       <small>YOUR ADVENTURER</small>
                       <h2>{p.name}</h2>
@@ -1048,6 +1062,7 @@ export default function App() {
           </div>
         </section>
       )}
+      {!b && !panel && !quest && journey && journey.tutorialStage<6 && <aside className="tutorial-ribbon"><strong>{journey.tutorialStage===0?(journey.location.mapId==='starter_house_bedroom'?'WASD / ARROWS TO MOVE · FIND THE DOOR':'WALK TO THE FRONT DOOR'):journey.tutorialStage===1?'MEET MOSS OUTSIDE · PRESS E TO TALK':journey.tutorialStage<4?'TALK TO MOSS FOR YOUR FIRST BATTLE':journey.tutorialStage===4?'WELL DONE! YOU EARNED XP AND COINS':'THREE GYMS. THREE BADGES. YOUR OWN PATH.'}</strong>{journey.tutorialStage===4&&<p>Use coins at Jun’s shop to buy supplies and improve skills.</p>}{journey.tutorialStage===5&&<p>Visit Terra, Flint and Zephyr. Explore Fernway Trail, then meet Rowan at Summit Hollow.</p>}{journey.tutorialStage>=4&&<button onClick={()=>void dispatch({kind:'setTutorial',stage:journey.tutorialStage+1})}>Continue</button>}<button onClick={()=>void dispatch({kind:'setTutorial',stage:6})}>Skip tutorial</button></aside>}
       {welcome && (
         <div className="modal-backdrop">
           <section className="modal welcome-modal">
@@ -1123,6 +1138,7 @@ export default function App() {
               disabled={adventure.locked && panel !== "devices"}
               style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
             >
+              {panel === 'tutorial' && <><BattleSprite id="trainer-1" className="profile-portrait"/><h3>Moss · Your first steps</h3><p>Let's try a short practice battle. Choose Attack, then Squat. The guide will help you position your camera. Three complete movements are enough. You can also choose manual mode.</p><p>Every valid repetition deals damage immediately. Pause whenever you need a break.</p><button className="primary" onClick={async()=>{if(await dispatch({kind:'startTutorialBattle'}))V(null)}}>Practice with Moss</button></>}
               {panel === "preview" && encounter && (
                 <>
                   <p>
@@ -1357,6 +1373,7 @@ export default function App() {
               )}
               {panel === "devices" && (
                 <DevicePanel
+                  localSaveId={localSaveId}
                   onOpenCloud={async (saveId) => {
                     await adventure.controller.openCloud(saveId);
                     V(null);
@@ -1416,7 +1433,7 @@ export default function App() {
                     aria-label="Character and progress"
                   >
                     <BattleSprite
-                      id="hero"
+                      id={heroId}
                       className="menu-character-portrait"
                     />
                     <div>
@@ -1436,6 +1453,7 @@ export default function App() {
                       </p>
                     </div>
                   </section>
+                  <div className="button-row"><button onClick={()=>{V(null);setReplayIntro(true)}}>Replay introduction</button><button disabled={adventure.busy||adventure.pending>0} onClick={async()=>{if(b&&!b.paused)await dispatch({kind:'pause',paused:true});onReturnToTitle?.()}}>Save & return to title</button></div>
                   <div className="menu-badges">
                     {(["leg", "arm", "back"] as Element[]).map((type) => (
                       <span
