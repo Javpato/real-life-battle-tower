@@ -514,8 +514,9 @@ export default function App() {
           }
         >
           <section className="world-card">
-            <fieldset
-              disabled={adventure.locked}
+            <div
+              className="world-scene"
+              inert={adventure.locked}
               style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
             >
               <div className="world-toolbar">
@@ -727,7 +728,7 @@ export default function App() {
                   Open your journal <ChevronRight size={15} />
                 </button>
               </div>
-            </fieldset>
+            </div>
           </section>
           <aside className="adventure-sidebar">
             {b ? (
