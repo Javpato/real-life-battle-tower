@@ -13,9 +13,11 @@ export type ExerciseVisualState =
   | "off"
   | "loading"
   | "error"
-  | "countdown";
+  | "countdown"
+  | "recalibrating";
 export type ExerciseHudProps = {
   exerciseId: ExerciseId;
+  sessionId?: string;
   progress: number;
   target: number;
   status: ExerciseVisualState;
@@ -26,6 +28,7 @@ export type ExerciseHudProps = {
   countdown?: number;
   paused: boolean;
   muted?: boolean;
+  voiceEnabled?: boolean;
   active: boolean;
   complete?: boolean;
 };

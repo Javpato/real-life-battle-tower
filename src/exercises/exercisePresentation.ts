@@ -14,7 +14,18 @@ export const STARTING_CUES: Record<ExerciseId, string> = {
 
 import type { ExerciseHudProps } from "./exerciseUi";
 /** One actionable headline, based only on current observation metadata. */
-export function exerciseHeadline(p: Pick<ExerciseHudProps, "exerciseId" | "status" | "message" | "nextSide" | "paused" | "complete" | "missingJoints">): string {
+export function exerciseHeadline(
+  p: Pick<
+    ExerciseHudProps,
+    | "exerciseId"
+    | "status"
+    | "message"
+    | "nextSide"
+    | "paused"
+    | "complete"
+    | "missingJoints"
+  >,
+): string {
   if (p.status === "error") return "CAMERA NEEDS ATTENTION";
   if (p.paused || p.status === "paused") return "REST — NO TIME LIMIT";
   if (p.complete) return "SERIES COMPLETE";
@@ -23,22 +34,62 @@ export function exerciseHeadline(p: Pick<ExerciseHudProps, "exerciseId" | "statu
   if (p.status === "no-body") return "MOVE INTO CAMERA VIEW";
   if (p.status === "partial" || p.status === "insufficient") {
     // Recognizer names are anatomical. Never infer a hidden side from the mirrored image.
-    const joint = p.missingJoints?.find(j => /^(left|right) (shoulder|elbow|wrist|hip|knee|ankle)$/.test(j));
+    const joint = p.missingJoints?.find((j) =>
+      /^(left|right) (shoulder|elbow|wrist|hip|knee|ankle)$/.test(j),
+    );
     if (joint) return `SHOW YOUR ${joint.toUpperCase()}`;
-    const observedInstruction = p.message.match(/(?:^|\. )((?:Show|Keep) [^.]+)\./)?.[1];
-    if (observedInstruction && observedInstruction.length <= 64) return observedInstruction.toUpperCase();
-    if (/^(Settle into the illustrated starting position|Begin seated|Start with hips down|Keep hands against the wall|Stand tall with both feet visible|Extend one arm and the opposite leg)/i.test(p.message))
+    const observedInstruction = p.message.match(
+      /(?:^|\. )((?:Show|Keep) [^.]+)\./,
+    )?.[1];
+    if (observedInstruction && observedInstruction.length <= 64)
+      return observedInstruction.toUpperCase();
+    if (
+      /^(Settle into the illustrated starting position|Begin seated|Start with hips down|Keep hands against the wall|Stand tall with both feet visible|Extend one arm and the opposite leg)/i.test(
+        p.message,
+      )
+    )
       return STARTING_CUES[p.exerciseId].toUpperCase();
-    if (/^Side unclear\./i.test(p.message)) return "SHOW YOUR FRONT KNEE + BOTH FEET";
+    if (/^Side unclear\./i.test(p.message))
+      return "SHOW YOUR FRONT KNEE + BOTH FEET";
     return "KEEP REQUIRED JOINTS IN VIEW";
   }
+  if (p.status === "recalibrating") return "PREPARE TO RECALIBRATE";
   if (p.status === "countdown") return "GET READY";
   if (p.status === "ready") return STARTING_CUES[p.exerciseId].toUpperCase();
-  if (p.status === "return") return "RETURN TO START";
+  if (p.status === "return") return RETURN_CUES[p.exerciseId];
+  if (p.status === "moving") return MOVEMENT_CUES[p.exerciseId];
   if (p.status === "hold") return "HOLD STEADY";
   if (p.nextSide && (p.status === "valid" || p.status === "incomplete"))
-    return p.exerciseId === "birddog" ? `${p.nextSide.toUpperCase()} ARM + OPPOSITE LEG NEXT` : `${p.nextSide.toUpperCase()} LEG NEXT`;
-  if (p.status === "incomplete") return /slow down/i.test(p.message) ? "SLOW DOWN · COMPLETE THE MOVEMENT" : "TRY THE FULL MOVEMENT";
+    return p.exerciseId === "birddog"
+      ? `${p.nextSide.toUpperCase()} ARM + OPPOSITE LEG NEXT`
+      : `${p.nextSide.toUpperCase()} LEG NEXT`;
+  if (p.status === "incomplete")
+    return /slow down/i.test(p.message)
+      ? "SLOW DOWN · COMPLETE THE MOVEMENT"
+      : "TRY THE FULL MOVEMENT";
   if (p.status === "valid") return "NICE WORK!";
   return "KEEP GOING";
 }
+
+export const MOVEMENT_CUES: Record<ExerciseId, string> = {
+  squat: "LOWER YOUR HIPS WITH CONTROL",
+  lunge: "BEND YOUR FRONT KNEE",
+  pushup: "LOWER YOUR TORSO",
+  diamond: "LOWER YOUR TORSO",
+  superman: "LIFT ARMS AND LEGS GENTLY",
+  birddog: "EXTEND ARM + OPPOSITE LEG",
+  sitstand: "STAND UP FROM YOUR CHAIR",
+  wallpushup: "BRING YOUR CHEST TOWARD THE WALL",
+  bridge: "RAISE YOUR HIPS",
+};
+export const RETURN_CUES: Record<ExerciseId, string> = {
+  squat: "NOW STAND TALL",
+  lunge: "RETURN BEFORE CHANGING LEGS",
+  pushup: "PRESS UP · EXTEND YOUR ARMS",
+  diamond: "PRESS UP · EXTEND YOUR ARMS",
+  superman: "LOWER GENTLY TO REST",
+  birddog: "RETURN TO HANDS AND KNEES",
+  sitstand: "SIT DOWN WITH CONTROL",
+  wallpushup: "PRESS AWAY FROM THE WALL",
+  bridge: "LOWER YOUR HIPS TO THE FLOOR",
+};

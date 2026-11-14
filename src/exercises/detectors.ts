@@ -621,6 +621,28 @@ export class ExerciseDetector {
     this.lostAt = undefined;
     this.observedSide = undefined;
   }
+  /** Acquire a fresh starting reference without changing accepted units or alternation. */
+  recalibrate(frame: PoseFrame): boolean {
+    const reference = observePose(this.exerciseId, frame);
+    if (
+      !reference.visible ||
+      !reference.fresh ||
+      !reference.ready ||
+      !Number.isFinite(frame.timestamp)
+    )
+      return false;
+    this.pause();
+    this.holdMs = 0; // Uncredited fractions belong to the old posture.
+    this.start = this.peak = reference.amplitude;
+    this.motionStart = reference.motion;
+    this.movement = this.totalMotion = 0;
+    this.side = undefined;
+    this.filtered = frame.landmarks.map((point) => ({ ...point }));
+    this.lastFrame = frame.timestamp;
+    this.lastObservation = frame.timestamp;
+    this.observedSide = reference.observedSide;
+    return true;
+  }
   update(frame: PoseFrame): DetectorFeedback {
     if (this.lastFrame !== undefined && frame.timestamp <= this.lastFrame)
       return { state: "ready", message: "Waiting for a new camera frame." };

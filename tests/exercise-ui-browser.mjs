@@ -61,7 +61,7 @@ try {
     window.renderHud();
   });
   const hud = page.getByRole("region", { name: "Exercise progress" });
-  await expect(hud.getByText("RIGHT", { exact: true })).toBeVisible();
+  await expect(hud.getByText("RIGHT LEG", { exact: true })).toBeVisible();
   await expect(
     hud.getByText("STARTING POSITION", { exact: false }),
   ).toBeVisible();

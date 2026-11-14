@@ -936,3 +936,40 @@
     transition: none !important;
   }
 }
+
+.exercise-header-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.exercise-header-actions button[aria-pressed="true"] {
+  border-color: #8affbe;
+  color: #caffd6;
+}
+.exercise-hud.state-recalibrating .exercise-big-feedback {
+  color: #ffe39a;
+}
+
+.exercise-next-side.is-pair {
+  display: block;
+}
+.exercise-next-side.is-pair small {
+  display: block;
+  max-width: none;
+  font-size: 9px;
+  margin-bottom: 3px;
+}
+.exercise-next-side.is-pair strong {
+  display: block;
+  font-size: clamp(16px, 5.2cqw, 26px);
+  white-space: normal;
+}
+@media (max-height: 600px) and (orientation: landscape) {
+  .immersive-game .exercise-next-side.is-pair small {
+    display: none;
+  }
+  .immersive-game .exercise-next-side.is-pair strong {
+    font-size: 18px;
+  }
+}

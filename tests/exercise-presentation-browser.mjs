@@ -62,7 +62,7 @@ try {
     const camera = page.locator("#presentation-camera"),
       counter = camera.getByTestId("exercise-count");
     await expect(counter).toHaveText("12");
-    await expect(camera.getByText("RIGHT", { exact: true })).toBeVisible();
+    await expect(camera.getByText("RIGHT LEG", { exact: true })).toBeVisible();
     const measurements = await page.evaluate(() => {
       const root = document.getElementById("presentation-camera"),
         camera = root.querySelector(".exercise-camera"),
@@ -144,6 +144,18 @@ try {
       .locator(".exercise-posture-popover")
       .getByText(/Stand upright with feet/),
   ).toBeVisible();
+  await page.getByText("STARTING POSITION", { exact: true }).click();
+  const guide = page.getByRole("button", { name: "Show guide", exact: true });
+  await guide.click();
+  await page
+    .getByRole("button", { name: "Close exercise guide", exact: true })
+    .click();
+  await expect(page.locator(".exercise-guide-popover")).toHaveCount(0);
+  await page.waitForTimeout(350);
+  await expect(page.locator(".exercise-guide-popover")).toHaveCount(0);
+  const voice = page.getByRole("button", { name: "Voice coach", exact: true });
+  await voice.click();
+  await expect(voice).toHaveAttribute("aria-pressed", "true");
   expect(errors).toEqual([]);
   console.log(
     JSON.stringify({

@@ -24,14 +24,8 @@ export default function ExerciseHUD(props: ExerciseHudProps) {
     active,
     complete,
   } = props;
-  const [voice, VOICE] = useState(() => {
-      try {
-        return localStorage.getItem("everstride-exercise-voice") === "on";
-      } catch {
-        return false;
-      }
-    }),
-    [pulse, PULSE] = useState(false);
+  const voice = props.voiceEnabled ?? false;
+  const [pulse, PULSE] = useState(false);
   const current = useRef(props);
   current.current = props;
   const last = useRef(progress),
@@ -39,7 +33,7 @@ export default function ExerciseHUD(props: ExerciseHudProps) {
   useEffect(() => {
     planner.current = new ExerciseCuePlanner(progress);
     last.current = progress;
-  }, [exerciseId]);
+  }, [exerciseId, props.sessionId]);
   useEffect(() => {
     if (progress > last.current) {
       PULSE(true);
@@ -71,7 +65,10 @@ export default function ExerciseHUD(props: ExerciseHudProps) {
       for (const cue of cues) {
         playExerciseCue(cue.kind);
       }
-      if (voice && cues.length) speakExercise(cues.at(-1)!.speech);
+      if (voice && cues.length) {
+        const cue = cues.at(-1)!;
+        speakExercise(cue.speech, cue.kind === "complete");
+      }
     };
     tick();
     const timer = setInterval(tick, 250);
@@ -130,16 +127,28 @@ export default function ExerciseHUD(props: ExerciseHudProps) {
         />
       </div>
       {alternating && (
-        <div className="exercise-next-side" aria-live="polite">
+        <div
+          className={`exercise-next-side${exerciseId === "birddog" ? " is-pair" : ""}`}
+          aria-live="polite"
+        >
           <small>
             NEXT {exerciseId === "birddog" ? "ARM + OPPOSITE LEG" : "LEG"}
           </small>
-          <strong>{nextSide ? nextSide.toUpperCase() : "EITHER SIDE"}</strong>
+          <strong>
+            {nextSide
+              ? exerciseId === "birddog"
+                ? `${nextSide.toUpperCase()} ARM + ${nextSide === "left" ? "RIGHT" : "LEFT"} LEG`
+                : `${nextSide.toUpperCase()} LEG`
+              : "EITHER SIDE"}
+          </strong>
         </div>
       )}
       <div className="exercise-big-feedback" aria-live="polite">
         <strong>
-          {status === "countdown" && countdown !== undefined && !paused
+          {(status === "countdown" || status === "recalibrating") &&
+          countdown !== undefined &&
+          countdown > 0 &&
+          !paused
             ? `${title} · ${countdown}`
             : title}
         </strong>
@@ -166,29 +175,6 @@ export default function ExerciseHUD(props: ExerciseHudProps) {
                 ? "Movement quality —"
                 : `Last movement · ${quality}% quality`}
             </span>
-            <label>
-              <input
-                type="checkbox"
-                checked={voice}
-                onChange={(e) => {
-                  const enabled = e.target.checked;
-                  VOICE(enabled);
-                  try {
-                    localStorage.setItem(
-                      "everstride-exercise-voice",
-                      enabled ? "on" : "off",
-                    );
-                  } catch {}
-                  if (enabled && !muted) {
-                    armExerciseAudio();
-                    speakExercise(
-                      "Voice coach on. Follow the starting position.",
-                    );
-                  }
-                }}
-              />{" "}
-              Voice coach
-            </label>
           </footer>
         </div>
       </details>

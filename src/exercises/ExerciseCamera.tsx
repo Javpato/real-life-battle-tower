@@ -16,6 +16,13 @@ import ExerciseDemo, { EXERCISE_GUIDES } from "./ExerciseDemo";
 import ExerciseHUD from "./ExerciseHUD";
 import type { ExerciseVisualState } from "./exerciseUi";
 import "./exercises.css";
+import { RecalibrationGate } from "./preparation";
+import { STARTING_CUES } from "./exercisePresentation";
+import {
+  armExerciseAudio,
+  speakExercise,
+  stopExerciseSpeech,
+} from "../audio/exerciseFeedback";
 
 type Props = Omit<ExerciseCameraProps, "onUnit"> & {
   onUnit: (unit: ExerciseUnit) => void | boolean | Promise<boolean>;
@@ -27,7 +34,14 @@ type Props = Omit<ExerciseCameraProps, "onUnit"> & {
   sessionComplete?: boolean;
 };
 type Stage =
-  "off" | "loading" | "framing" | "ready" | "countdown" | "running" | "error";
+  | "off"
+  | "loading"
+  | "framing"
+  | "ready"
+  | "countdown"
+  | "running"
+  | "recalibrating"
+  | "error";
 type RichObservation = Observation & {
   status?: ExerciseVisualState;
   message?: string;
@@ -80,6 +94,12 @@ export default function ExerciseCamera(props: Props) {
     new ExerciseDetector(props.exerciseId, props.sessionId, props.lastSide),
   );
   const detectorSession = useRef(sessionKey(props));
+  const recalibration = useRef(new RecalibrationGate());
+  const dismissedGuide = useRef(new Set<string>());
+  const dismissGuide = () => {
+    dismissedGuide.current.add(sessionKey(latest.current));
+    setDemo(false);
+  };
   const stageRef = useRef<Stage>("off"),
     pausedRef = useRef(false);
   const pendingUnit = useRef<{ session: string } | null>(null);
@@ -90,6 +110,13 @@ export default function ExerciseCamera(props: Props) {
     lastObservation = useRef<number | null>(null);
   const manualCountdown = useRef(false),
     autoRef = useRef(true);
+  const [voice, setVoice] = useState(() => {
+    try {
+      return localStorage.getItem("everstride-exercise-voice") === "on";
+    } catch {
+      return false;
+    }
+  });
   const [camera, setCamera] = useState(initialCamera),
     [stage, setStage] = useState<Stage>("off");
   const [status, setStatus] = useState<ExerciseVisualState>("off"),
@@ -115,6 +142,7 @@ export default function ExerciseCamera(props: Props) {
     setStage(value);
   };
   const resetTiming = () => {
+    recalibration.current.cancel();
     stableSince.current = null;
     countdownAt.current = null;
     lastObservation.current = null;
@@ -176,6 +204,36 @@ export default function ExerciseCamera(props: Props) {
       p.sessionComplete
     )
       return;
+    if (stageRef.current === "recalibrating") {
+      const remaining = recalibration.current.remaining(performance.now());
+      setCountdown(remaining);
+      setStatus("recalibrating");
+      setMessage(
+        remaining
+          ? `Move back into position. Recalibration in ${remaining}.`
+          : !o.visible || !fresh
+            ? (o.message ?? guide.camera)
+            : !o.ready
+              ? guide.setup
+              : "Starting position visible. Hold steady for one second.",
+      );
+      if (
+        recalibration.current.observe(
+          o.ready && o.visible,
+          fresh,
+          frame.timestamp,
+          performance.now(),
+        ) &&
+        detector.current.recalibrate(frame)
+      ) {
+        calibrated.current.add(calibrationGroup(p.exerciseId));
+        beginCountdown();
+        setMessage(
+          "Calibration complete. Get ready to continue; your progress is kept.",
+        );
+      }
+      return;
+    }
     const previous = lastObservation.current;
     lastObservation.current = frame.timestamp;
     if (
@@ -374,7 +432,7 @@ export default function ExerciseCamera(props: Props) {
     } else if (snapshot.status === "ready") {
       resetTiming();
       setPhase("framing");
-      setStatus("ready");
+      setStatus("insufficient");
       void refreshDevices();
     } else if (snapshot.status === "off" || snapshot.status === "error") {
       detector.current.pause();
@@ -494,10 +552,13 @@ export default function ExerciseCamera(props: Props) {
     setQuality(null);
     setNextSide(detector.current.expectedSide);
     setRejections(0);
-    setDemo(needsGuide(props.exerciseId));
+    setDemo(
+      !dismissedGuide.current.has(sessionKey(props)) &&
+        needsGuide(props.exerciseId),
+    );
     if (lifecycle.current?.currentStatus === "ready") {
       setPhase("framing");
-      setStatus("ready");
+      setStatus("insufficient");
       setMessage(EXERCISE_GUIDES[props.exerciseId].setup);
     }
   }, [props.exerciseId, props.sessionId]);
@@ -514,7 +575,7 @@ export default function ExerciseCamera(props: Props) {
       lifecycle.current?.currentStatus === "ready"
     ) {
       setPhase("framing");
-      setStatus("ready");
+      setStatus("insufficient");
       setMessage("Return to the starting position. Your calibration is kept.");
     }
   }, [props.active, props.paused, props.mode]);
@@ -527,6 +588,24 @@ export default function ExerciseCamera(props: Props) {
         "Manual mode selected. Camera stopped. Enable it again for a preview if you wish.",
       );
   }, [props.mode]);
+  useEffect(() => {
+    if (stage !== "recalibrating") return;
+    let lastRemaining = 5;
+    const tick = () => {
+      if (!recalibration.current.active) return;
+      const remaining = recalibration.current.remaining(performance.now());
+      setCountdown(remaining);
+      if (remaining)
+        setMessage(`Move back into position. Recalibration in ${remaining}.`);
+      else if (lastRemaining)
+        setMessage(
+          "Looking for your starting position. Hold steady for one second; Start now is available if you need it.",
+        );
+      lastRemaining = remaining;
+    };
+    const timer = setInterval(tick, 100);
+    return () => clearInterval(timer);
+  }, [stage]);
   const startCamera = async (next = selectionRef.current) => {
     if (!video.current) return;
     try {
@@ -601,6 +680,31 @@ export default function ExerciseCamera(props: Props) {
   const mirrored =
     (camera.facingMode ?? selection.facingMode) !== "environment";
   const guide = EXERCISE_GUIDES[props.exerciseId];
+  const preparationState = props.sessionComplete
+    ? "completed"
+    : transportInactive
+      ? camera.status === "off"
+        ? "off"
+        : camera.status === "error"
+          ? "error"
+          : "starting"
+      : inactive
+        ? "paused"
+        : stage === "recalibrating"
+          ? "recalibrating"
+          : stage === "running"
+            ? "active"
+            : stage === "countdown"
+              ? "countdown"
+              : status === "no-body"
+                ? "searching"
+                : status === "partial"
+                  ? "partial"
+                  : status === "ready"
+                    ? "recognized"
+                    : missingJoints.length
+                      ? "framing"
+                      : "waiting-posture";
   const [showSkeleton, setShowSkeleton] = useState(true);
   return (
     <section
@@ -608,19 +712,48 @@ export default function ExerciseCamera(props: Props) {
       aria-label="Exercise camera"
       data-camera-state={camera.status}
       data-exercise-stage={stage}
+      data-preparation-state={preparationState}
     >
       <header>
         <div className="exercise-camera-title">
           <span className="exercise-tag">LOCAL BODY TRACKING</span>
           <strong>{guide.title.split(" · ")[1] ?? guide.title}</strong>
         </div>
-        <button
-          type="button"
-          aria-expanded={demo}
-          onClick={() => setDemo((v) => !v)}
-        >
-          {demo ? "Hide guide" : "Show guide"}
-        </button>
+        <div className="exercise-header-actions">
+          <button
+            type="button"
+            aria-pressed={voice}
+            aria-label="Voice coach"
+            onClick={() => {
+              const enabled = !voice;
+              setVoice(enabled);
+              try {
+                localStorage.setItem(
+                  "everstride-exercise-voice",
+                  enabled ? "on" : "off",
+                );
+              } catch {
+                /* Optional preference. */
+              }
+              if (enabled && !props.muted) {
+                armExerciseAudio();
+                speakExercise(
+                  `${guide.camera}. ${STARTING_CUES[props.exerciseId]}.`,
+                  true,
+                );
+              } else stopExerciseSpeech();
+            }}
+          >
+            Voice {voice ? "on" : "off"}
+          </button>
+          <button
+            type="button"
+            aria-expanded={demo}
+            onClick={() => (demo ? dismissGuide() : setDemo(true))}
+          >
+            {demo ? "Hide guide" : "Show guide"}
+          </button>
+        </div>
       </header>
       {demo && (
         <section
@@ -631,7 +764,7 @@ export default function ExerciseCamera(props: Props) {
           onKeyDown={(event) => {
             if (event.key === "Escape") {
               event.stopPropagation();
-              setDemo(false);
+              dismissGuide();
             }
           }}
         >
@@ -640,7 +773,7 @@ export default function ExerciseCamera(props: Props) {
               Your next move · {props.target}{" "}
               {props.exerciseId === "superman" ? "seconds" : "repetitions"}
             </strong>
-            <button type="button" onClick={() => setDemo(false)}>
+            <button type="button" onClick={dismissGuide}>
               Close exercise guide
             </button>
           </div>
@@ -683,11 +816,17 @@ export default function ExerciseCamera(props: Props) {
         missingJoints={missingJoints}
         nextSide={nextSide}
         quality={quality}
-        countdown={hudStatus === "countdown" ? countdown : undefined}
+        countdown={
+          hudStatus === "countdown" || hudStatus === "recalibrating"
+            ? countdown
+            : undefined
+        }
         paused={Boolean(!transportInactive && (paused || props.paused))}
         muted={props.muted}
+        voiceEnabled={voice}
         active={props.active && props.mode !== "manual" && !paused}
         complete={props.sessionComplete}
+        sessionId={props.sessionId}
       />
       <div className="exercise-camera-controls" aria-label="Camera controls">
         <div className="exercise-actions">
@@ -720,12 +859,22 @@ export default function ExerciseCamera(props: Props) {
               calibrated.current.delete(calibrationGroup(props.exerciseId));
               resetTiming();
               setRejections(0);
-              if (lifecycle.current?.currentStatus === "ready")
-                setPhase("framing");
+              setDemo(false);
+              recalibration.current.start(performance.now());
+              setCountdown(5);
+              setPhase("recalibrating");
+              setStatus("recalibrating");
               setMessage(
-                "Recalibrate from the starting position. Completed units are kept.",
+                "Prepare to recalibrate. Move back into position. You have five seconds.",
               );
             }}
+            disabled={
+              camera.status !== "ready" ||
+              inactive ||
+              Boolean(pendingUnit.current) ||
+              props.sessionComplete ||
+              props.progress >= props.target
+            }
           >
             Recalibrate
           </button>

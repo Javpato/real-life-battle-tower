@@ -8,9 +8,10 @@ export type CueSnapshot = {
   active: boolean;
   complete?: boolean;
   seconds: boolean;
+  countdown?: number;
 };
 export type ExerciseCue = {
-  kind: "rep" | "ready" | "lost" | "complete";
+  kind: "rep" | "ready" | "lost" | "complete" | "guidance";
   speech: string;
 };
 /** Presentation-only cue policy. It never awards units or affects combat. */
@@ -20,6 +21,12 @@ export class ExerciseCuePlanner {
   private lossSince?: number;
   private lossAnnounced = false;
   private readyAnnounced = false;
+  private lastGuidance = -Infinity;
+  private lastInstruction = "";
+  private candidateInstruction = "";
+  private candidateSince = 0;
+  private lastCountdown?: number;
+  private previousStatus?: ExerciseVisualState;
   constructor(progress = 0) {
     this.progress = progress;
   }
@@ -48,9 +55,32 @@ export class ExerciseCuePlanner {
       this.readyAnnounced = true;
       cues.push({
         kind: "ready",
-        speech: "Starting position recognized. Get ready.",
+        speech: s.message || "Starting position recognized. Get ready.",
       });
     }
+    if (
+      s.active &&
+      s.status === "countdown" &&
+      s.countdown !== undefined &&
+      s.countdown !== this.lastCountdown
+    ) {
+      cues.push({
+        kind: "guidance",
+        speech: s.countdown > 0 ? String(s.countdown) : "Begin.",
+      });
+      this.lastCountdown = s.countdown;
+    } else if (s.status !== "countdown") this.lastCountdown = undefined;
+    if (
+      s.active &&
+      s.status === "recalibrating" &&
+      this.previousStatus !== "recalibrating"
+    )
+      cues.push({
+        kind: "guidance",
+        speech:
+          "Prepare to recalibrate. Move back into position. You have five seconds.",
+      });
+    this.previousStatus = s.status;
     const lost =
       s.active &&
       ["no-body", "partial", "insufficient", "error"].includes(s.status);
@@ -66,6 +96,41 @@ export class ExerciseCuePlanner {
     } else {
       this.lossSince = undefined;
       this.lossAnnounced = false;
+    }
+    // A changed correction is useful even during a long loss episode. Require a
+    // stable instruction and a quiet interval so landmark jitter cannot nag.
+    const instruction = s.message.trim();
+    if (instruction !== this.candidateInstruction) {
+      this.candidateInstruction = instruction;
+      this.candidateSince = now;
+    }
+    const guidanceState = [
+      "off",
+      "loading",
+      "countdown",
+      "recalibrating",
+      "moving",
+      "return",
+      "hold",
+      "partial",
+      "insufficient",
+      "no-body",
+    ].includes(s.status);
+    if (
+      s.active &&
+      (!lost || this.lossAnnounced) &&
+      guidanceState &&
+      instruction &&
+      instruction !== this.lastInstruction &&
+      now - this.candidateSince >= 800 &&
+      now - this.lastGuidance >= 6000 &&
+      !cues.length
+    ) {
+      cues.push({ kind: "guidance", speech: instruction });
+    }
+    if (cues.length) {
+      this.lastGuidance = now;
+      this.lastInstruction = instruction;
     }
     return cues;
   }
@@ -112,8 +177,9 @@ export function playExerciseCue(kind: ExerciseCue["kind"]) {
     /* Audio failure never blocks movement. */
   }
 }
-export function speakExercise(text: string) {
+export function speakExercise(text: string, interrupt = false) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+  if (window.speechSynthesis.speaking && !interrupt) return;
   const speech = new SpeechSynthesisUtterance(text);
   speech.lang = "en-US";
   speech.rate = 1.02;
@@ -124,7 +190,7 @@ export function speakExercise(text: string) {
         (v) => v.lang.toLowerCase().startsWith("en") && v.localService,
       ) ?? voices.find((v) => v.lang.toLowerCase().startsWith("en"));
   if (voice) speech.voice = voice;
-  window.speechSynthesis.cancel();
+  if (interrupt) window.speechSynthesis.cancel();
   window.speechSynthesis.speak(speech);
 }
 export function stopExerciseSpeech() {

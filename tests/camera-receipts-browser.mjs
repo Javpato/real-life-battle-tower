@@ -104,6 +104,35 @@ try {
   );
   assert.equal(await page.getByTestId("units").textContent(), "0");
   assert.equal(await page.getByTestId("requests").textContent(), "0");
+  const recalibrate = async () => {
+    const saved = await page.getByTestId("units").textContent();
+    const sent = await page.getByTestId("requests").textContent();
+    await page
+      .getByRole("button", { name: "Recalibrate", exact: true })
+      .click();
+    await page.waitForTimeout(4200);
+    assert.equal(
+      await page
+        .locator(".exercise-camera")
+        .getAttribute("data-exercise-stage"),
+      "recalibrating",
+      "cannot acquire posture before five wall-clock seconds",
+    );
+    assert.equal(await page.getByTestId("units").textContent(), saved);
+    assert.equal(await page.getByTestId("requests").textContent(), sent);
+    await page.waitForFunction(
+      () =>
+        document
+          .querySelector(".exercise-camera")
+          ?.getAttribute("data-exercise-stage") === "running",
+    );
+    assert.equal(
+      await page.getByTestId("units").textContent(),
+      saved,
+      "calibration credits no repetitions",
+    );
+  };
+  await recalibrate();
   await page.evaluate(() => {
     window.__testMotion = "cycle";
   });
@@ -166,6 +195,7 @@ try {
         .querySelector("[data-exercise-stage]")
         ?.getAttribute("data-exercise-stage") === "running",
   );
+  await recalibrate();
   await page.evaluate(() => {
     window.__testMotion = "cycle";
   });
@@ -192,6 +222,7 @@ try {
         "rejections preserve remaining unit budget",
         "pause blocks synthetic reps",
         "target completion stops recognition",
+        "repeated five-second recalibration preserves canonical progress",
       ],
       physicalExerciseValidation: false,
     }),
