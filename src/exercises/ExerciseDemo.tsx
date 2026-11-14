@@ -101,15 +101,50 @@ export const EXERCISE_GUIDES: Record<
   },
 };
 
+export type ExerciseRecognitionProfile = 'mini-squat' | 'knee-pushup';
+type ProfileGuide = (typeof EXERCISE_GUIDES)[ExerciseId] & {startingCue:string};
+const PROFILE_GUIDES:Record<ExerciseRecognitionProfile,ProfileGuide> = {
+  'mini-squat': {
+    title: 'Mini Squat · Shallow squat',
+    setup: 'Stand upright with feet planted and leave your visible hip, knee and ankle in view. Begin with comfortably straight knees. This variation uses a shallow bend rather than a full squat.',
+    movement: 'Make a small, controlled bend at your hips and knees, then return to your upright starting position. Complete the return before the next movement.',
+    camera: 'Side or slight three-quarter view · one hip, knee and ankle visible',
+    note: 'Experimental camera estimate for a shallow movement. It does not assess medical suitability or verify contact with the floor. Pause whenever you need.',
+    startingCue: 'Stand tall · feet planted · prepare a shallow bend',
+  },
+  'knee-pushup': {
+    title: 'Knee Push-up · Supported push-up',
+    setup: 'Begin with both knees supported on the floor, palms under your shoulders and elbows extended. Keep your shoulders, hips and knees roughly in one line. Your knees remain bent; the illustration shows the lower legs raised behind you.',
+    movement: 'Keeping your knees supported, bend your elbows to lower your torso, then press back to the starting position. Move your torso together and complete the return.',
+    camera: 'Low side view · show the near shoulder, elbow, wrist, hip and knee; include the lower leg when possible',
+    note: 'Experimental camera estimate. The camera observes the visible pose but cannot verify knee contact, floor support or pressure. Use manual mode if the pose cannot be observed reliably.',
+    startingCue: 'Knees supported · arms extended · body aligned to knees',
+  },
+};
+/** One source for both camera setup and the profile-specific teaching illustration. */
+export function getExerciseGuide(exerciseId:ExerciseId | HomeExerciseId, recognitionProfile?:ExerciseRecognitionProfile): (typeof EXERCISE_GUIDES)[ExerciseId] & {startingCue?:string} {
+  if(recognitionProfile==='mini-squat' && exerciseId==='squat')return PROFILE_GUIDES['mini-squat'];
+  if(recognitionProfile==='knee-pushup' && exerciseId==='pushup')return PROFILE_GUIDES['knee-pushup'];
+  return EXERCISE_GUIDES[exerciseId];
+}
+
 export default function ExerciseDemo({
   exerciseId,
+  recognitionProfile,
+  guideOverride,
+  hideIllustration = false,
 }: {
   exerciseId: ExerciseId | HomeExerciseId;
+  recognitionProfile?: ExerciseRecognitionProfile;
+  guideOverride?: (typeof EXERCISE_GUIDES)['squat'];
+  hideIllustration?: boolean;
 }) {
-  const guide = EXERCISE_GUIDES[exerciseId];
+  const physicalGuide = getExerciseGuide(exerciseId,recognitionProfile);
+  const guide = guideOverride ?? physicalGuide;
+  const artId = recognitionProfile && physicalGuide === PROFILE_GUIDES[recognitionProfile] ? recognitionProfile : exerciseId;
   return (
     <div className="exercise-demo">
-      <ExercisePoseArt exerciseId={exerciseId} title={guide.title}/>
+      {!hideIllustration && <ExercisePoseArt exerciseId={artId} title={guide.title}/>}
       <strong>{guide.title}</strong>
       <p>
         <b>Starting position:</b> {guide.setup}

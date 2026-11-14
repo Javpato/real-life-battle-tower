@@ -13,3 +13,7 @@ To replace artwork: retain the fixed frame size and foot anchor, update the Towe
 ### Exercise coach replacement
 
 All nine active `ExerciseDemo` illustrations now use new native 280×140 PNG coach poses from the Tower generator. The previous green SVG stick figures have been removed from the component. New fully clothed figures, floor/mat, chair/wall and direction arrow use the Tower pixel palette. The original teaching joint positions and all guide text are preserved; these drawings never determine recognition. `ExercisePoseArt` shows numbered start/movement labels and a readable alt description. Diamond retains the side-view push-up body geometry; its guide explicitly states that hand/finger placement is not camera verified.
+
+### Experimental recognition profiles
+
+`guide-mini-squat.png` separately draws a shallow squat, and `guide-knee-pushup.png` shows bent knees supported at the floor with the lower legs raised in both starting and lowered positions. They are selected only for matching `recognitionProfile` values. `getExerciseGuide(exerciseId, recognitionProfile)` supplies the same setup, movement and short starting cue to the camera and demonstration. These experimental profiles estimate visible movement; they cannot verify physical floor/knee contact or load-bearing support. The text makes no clinical prescription. `guideOverride` supports exact skill instructions, and `hideIllustration` allows unsupported manual skills to avoid displaying a misleading family illustration.

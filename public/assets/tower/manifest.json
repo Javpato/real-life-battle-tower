@@ -339,6 +339,28 @@
         "start",
         "movement"
       ]
+    },
+    "mini-squat": {
+      "path": "guide-mini-squat.png",
+      "size": [
+        280,
+        140
+      ],
+      "poses": [
+        "start",
+        "movement"
+      ]
+    },
+    "knee-pushup": {
+      "path": "guide-knee-pushup.png",
+      "size": [
+        280,
+        140
+      ],
+      "poses": [
+        "start",
+        "movement"
+      ]
     }
   }
 }

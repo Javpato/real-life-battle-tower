@@ -276,6 +276,9 @@ poses={
  'bridge':[((23,99),[(33,104),(72,104)],[[(40,104),(50,104),(61,105)]],[[(72,104),(94,70),(120,104)]]),((174,99),[(184,104),(215,75)],[[(190,104),(200,104),(211,105)]],[[(215,75),(240,63),(266,104)]])],
 }
 poses['diamond']=poses['pushup']
+# Shallow knee bend and supported bent-knee push-up are separately drawn, never aliases.
+poses['mini-squat']=[poses['squat'][0],((205,25),[(205,35),(202,70)],[[(205,44),(220,48),(235,51)]],[[(202,70),(184,86),(180,105)],[(202,70),(223,86),(228,105)]])]
+poses['knee-pushup']=[((29,54),[(41,62),(80,82)],[[(44,63),(44,83),(44,104)]],[[(80,82),(103,104),(123,83)]]),((176,76),[(187,84),(220,95)],[[(192,85),(209,96),(190,104)]],[[(220,95),(245,104),(266,82)]])]
 for name,pair in poses.items():
  im,d=canvas(280,140,'#f5ebd1')
  box(d,(0,0,279,139),'#f5ebd1',INK)
@@ -285,7 +288,7 @@ for name,pair in poses.items():
   box(d,(24,87,72,93),'#ba9164',INK);box(d,(24,60,29,125),'#ba9164',INK);box(d,(66,92,71,125),'#ba9164',INK)
  if name=='wallpushup':
   for x in [111,267]:stone(d,x,29,5,97,'#c4baa2')
- if name in ['bridge','pushup','diamond','birddog','superman']:
+ if name in ['bridge','pushup','diamond','birddog','superman','knee-pushup']:
   box(d,(12,124,128,127),'#85b0ab');box(d,(156,124,268,127),'#85b0ab')
  for pose in pair:coach(d,*pose)
  poly(d,[(133,69),(141,69),(141,65),(148,73),(141,81),(141,77),(133,77)],GOLD,width=1)
