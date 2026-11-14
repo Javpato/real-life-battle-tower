@@ -2,19 +2,29 @@
 
 This section supersedes older feature-coverage statements below. Earlier release records are retained as history.
 
-Implemented: cinematic Cozylight/title opening; selectable male/female protagonists; three real UUID-backed adventures and per-adventure journals; atomic legacy migration with immutable recovery; explicit cloud linkage/import and read-only offline caches; introduction and persistent tutorial; three exterior maps and fourteen reciprocal interiors; directional mini sprites and original PNG indicators; visual-foot battle anchoring; delayed recalibration and useful voice preparation.
+Implemented: cinematic Cozylight/title opening; selectable male/female protagonists; three real UUID-backed adventures and per-adventure journals; atomic legacy migration with immutable recovery; explicit cloud linkage/import and read-only offline caches; introduction and persistent tutorial; three exterior maps and fourteen reciprocal interiors; restored detailed exploration sprites, extra NPC animation and original PNG indicators; visual-foot battle anchoring; delayed recalibration and useful voice preparation.
 
 ## Current automated evidence
 
-- **231 tests across 23 files passed**, TypeScript/Vite production build passed, and generated browser/Edge reducer parity passed.
+- **238 tests across 24 files passed**, TypeScript/Vite production build passed, and generated browser/Edge reducer parity passed.
 - PostgreSQL platform tests passed: full canonical manual campaign, RLS, membership, leases, receipts, wallet, journal conflicts, three distinct cloud saves, retry idempotency, fourth-save rejection and foreign-owner isolation.
 - `tests/opening-browser.mjs`: real UI creation of both protagonists, independent slots, reload, intro persistence, first-click Settings close, four viewport bounds; touch startup/character creation at 844×390.
 - `tests/save-slots-browser.mjs`: real IndexedDB migration and immutable malformed-data recovery, concurrent slot creation, journal isolation, deletion guards for unresolved cloud work, UUID recreation, offline linked cache read-only behavior.
 - `tests/overhaul-camera-browser.mjs`: actual game UI, Settings/inventory/help/map/shop/demo first-click closes; synthetic accepted movement and repeated five-second recalibration preserving progress. Shop/Moss placement and pose signals in this test are explicitly fixtures.
 - Real MediaPipe model/WASM and worker initialization passed in `tests/camera-browser-smoke.mjs` on an isolated development cache: fake camera hardware, permissions/retry, three restart cycles, front/back changes, stale devices and no units from a blank body image. This is not physical movement validation.
-- `tests/overhaul-offline-browser.mjs`: production service worker, actual UI-created female save and keyboard movement, offline title/three slots/continue with matching saved position and progression, completed intro/tutorial, and accessible journal. No adventure state injection.
+- `tests/overhaul-offline-browser.mjs`: production service worker, actual UI-created female save and keyboard movement, offline title/three slots/continue with matching saved position and progression, completed intro and in-progress mandatory tutorial, and accessible journal. No adventure state injection.
 - Existing `tests/ui-smoke.mjs` updated for the opening: food registration, persistence, profile calculation and mobile overflow passed with zero page errors.
 - World geometry tests verify reciprocal destinations, valid spawns, gate behavior and reachable interior exits. Real keyboard/manual tutorial victory and visual battle anchors were verified at 1920×1080, 1366×768 and 844×390.
+
+## User review corrections
+
+- Tutorial is mandatory for new adventures. The skip action is removed; canonical commands reject stage jumps and exploration/encounters beyond the onboarding area until Moss practice and the two explanations are completed. Legacy completed adventures remain compatible. Narrative introduction alone remains skippable/replayable.
+- Replaced the enlarged male title-atlas crop with a dedicated 1024×1536 illustration preserving the existing identity.
+- Fixed the supplied Ana scene-3 screenshot: explicit SVG frame clipping prevents neighboring back-frame bleed in wide/letterboxed sprite containers. All six scenes were captured at2525×1280,1366×768,844×390.
+- Reproduced the supplied quest X/manual-start failure exactly: a trailing movement command after starting a quest produced FINISH_CURRENT_ACTIVITY and poisoned the local command queue. World now suppresses activity-handoff writes; rejected local intents cannot block valid close/cancel commands. Storage and cloud failures still retain pending work.
+- Quest manual instructions and completion action are immediately visible; optional camera preview remains mounted but collapsible. Real browser tests passed stationary/moving-interaction close, manual completion and reward with zero page errors. Compare the before/after screenshots in releases/screenshots.
+- Restored original detailed world resources, added matching female walking artwork, animated the existing NPC artwork, organized streets/plazas/districts and furnished interiors with detailed bitmap art. Trees remain outside route ponds.
+- Switched the 2D world to Phaser Canvas to avoid the observed intermittent WebGL framebuffer failure during resize/map lifecycle. No required WebGL effects existed.
 
 ## Corrected defects found during integration
 
@@ -35,7 +45,7 @@ Interiors: `starter_house_bedroom`, `starter_house`, `mentor_house`, `oak_house`
 
 ## Art and screenshots
 
-Preserved original combat PNGs. Added female front/back illustration, 48×48 exploration frames for all sixteen identities, seven transparent indicator sprites, title landscape and replaceable Cozylight mark. Four directions each have idle/walking frames. Activities use movement and props; large combat actions use anchored presentation animations, not newly drawn individual attack frames. Provenance and prompt details are in ASSET_GUIDE.md.
+Preserved original combat PNGs and restored the previous detailed overworld artwork after user review. Both protagonists have detailed four-direction walking atlases; NPCs retain original portraits with breathing, strolling, training, facing and activity animation. Added female front/back illustration, a standalone high-resolution male title illustration, seven transparent indicator sprites, detailed furniture, title landscape and replaceable Cozylight mark. Large combat actions use anchored presentation animations, not newly drawn individual attack frames. The rejected simplified miniature atlas is no longer used in exploration. Provenance and prompt details are in ASSET_GUIDE.md.
 
 Real browser captures are in ignored `releases/screenshots/`: logo, desktop/landscape title, character selection, empty/local slots, introduction, room, battle anchor layouts, camera/recalibration and offline screens. Generated camera and synthetic motion captures are QA fixtures, not people exercising. No genuine linked-cloud screenshot is claimed.
 

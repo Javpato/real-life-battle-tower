@@ -56,3 +56,5 @@ Hosted Supabase authorization remains unchanged and does not block local gamepla
 - World/art agent: three exteriors, fourteen interiors, directional miniature art, heroine, icons and feet anchors. Worktree `feature/overhaul-world`.
 - Camera agent: preparation, voice, five-second recalibration, one-click guides, actual-App and offline QA. Worktree `feature/overhaul-camera`.
 - Exact test evidence and external blockers are recorded at the top of QA.md. Existing public project identity is preserved.
+
+User review integrated: mandatory onboarding; restored original detailed character/environment art with added animation; improved male title illustration; fixed Ana atlas bleed; reproduced and fixed moving-interaction quest deadlock. Runtime remains in the existing project and deployment identity.

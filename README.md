@@ -6,7 +6,7 @@ Play the current public build: https://everstride-real-life-rpg.transformacion80
 
 ## Cozylight adventure overhaul
 
-The game opens with Cozylight, a two-protagonist title scene, and three independent saved adventures. New adventures choose a character and name, play an original introduction, and begin in a bedroom with a progressive movement/combat tutorial. Existing saves migrate to slot 1 with a retained recovery copy. Local journals belong to their individual adventure.
+The game opens with Cozylight, a two-protagonist title scene, and three independent saved adventures. New adventures choose a character and name, play an original introduction, and begin in a bedroom with a mandatory progressive movement/combat tutorial. Existing saves migrate to slot 1 with a retained recovery copy. Local journals belong to their individual adventure.
 
 Explore Willowmere, Fernway Trail and Summit Hollow, with fourteen connected interiors. Existing villagers, trainers, leaders and Rowan retain their identities. Enter a doorway or use E/the touch interaction button near it. Only Rowan's arena requires the three badges. Settings provides the world map, introduction replay and save/return to the title.
 
