@@ -44,7 +44,7 @@ connect(town,route,640,930,384,40);connect(route,summit,384,1110,480,40);
 route.obstacles.push({x:90,y:440,w:180,h:210},{x:510,y:610,w:160,h:240});
 town.spawns.safe=spawn(640,520);summit.spawns.safe=spawn(480,430);
 // Detailed original foliage and landmarks have matching compact foot collisions.
-function decorate(m:WorldMap,frame:number,x:number,y:number,width:number,solid=false){m.decorations.push({frame,x,y,width});if(solid)m.obstacles.push({x:x-6,y:y-9,w:12,h:10});}
+function decorate(m:WorldMap,frame:number,x:number,y:number,width:number,solid=false){if(m.kind==='route'&&frame<=2&&m.obstacles.some(o=>o.w>50&&x>=o.x-8&&x<=o.x+o.w+8&&y>=o.y&&y<=o.y+o.h+12))return;m.decorations.push({frame,x,y,width});if(solid)m.obstacles.push({x:x-6,y:y-9,w:12,h:10});}
 for(const m of [town,route,summit]){for(let x=34;x<m.width-25;x+=48){if(!m.portals.some(p=>Math.abs(p.x+p.w/2-x)<70&&p.y<75))decorate(m,x%3?0:1,x,45,72);if(!m.portals.some(p=>Math.abs(p.x+p.w/2-x)<70&&p.y>m.height-80))decorate(m,x%3?0:1,x,m.height-7,72);}for(let y=100;y<m.height-50;y+=53){decorate(m,0,17,y,70);decorate(m,1,m.width-17,y,70);}}
 for(const b of town.buildings){decorate(town,3,b.x-18,b.y+b.h-5,34);decorate(town,3,b.x+b.w+17,b.y+b.h-5,34);decorate(town,5,b.x+b.w+34,b.y+b.h+24,32);}
 for(const [x,y]of [[80,325],[85,580],[355,340],[365,570],[365,830],[725,310],[735,610],[1030,340],[1040,560],[1040,830],[740,835],[95,810]])decorate(town,0,x,y,85,true);
