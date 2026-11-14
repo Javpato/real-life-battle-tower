@@ -21,11 +21,15 @@ import {
   Camera,
   Check,
   Star,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 import World from "./game/World";
+import BattleCommandMenu from "./ui/BattleCommandMenu";
 import BattleSprite, { ItemSprite } from "./game/BattleSprite";
 import { battlefieldUrl } from "./game/assets";
 import ExerciseLibrary from "./exercises/ExerciseLibrary";
+import { EXERCISE_GUIDES } from "./exercises/ExerciseDemo";
 import DevicePanel from "./platform/DevicePanel";
 import type { ImportedHealth } from "./platform/health";
 import { startMusic, stopMusic, setVolume } from "./audio/music";
@@ -91,6 +95,41 @@ export default function App() {
     [toast, TO] = useState(""),
     [welcome, W] = useState(false),
     [journalError, SE] = useState("");
+  const [fullscreen, setFullscreen] = useState(
+    Boolean(document.fullscreenElement),
+  );
+  const [cameraExpanded, setCameraExpanded] = useState(false);
+  const [hitDamage, setHitDamage] = useState(0);
+  const previousHp = useRef<{ id: string; hp: number } | null>(null);
+  useEffect(() => {
+    const old = previousHp.current;
+    previousHp.current = b ? { id: b.id, hp: b.enemyHp } : null;
+    if (!b || !old || old.id !== b.id || old.hp <= b.enemyHp) return;
+    setHitDamage(old.hp - b.enemyHp);
+    const timer = setTimeout(() => setHitDamage(0), 650);
+    return () => clearTimeout(timer);
+  }, [b?.id, b?.enemyHp]);
+  useEffect(() => {
+    const update = () => setFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", update);
+    return () => document.removeEventListener("fullscreenchange", update);
+  }, []);
+  useEffect(() => setCameraExpanded(false), [b?.id, b?.turn]);
+  async function toggleFullscreen() {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else if (document.documentElement.requestFullscreen)
+        await document.documentElement.requestFullscreen();
+      else
+        notify(
+          "Your browser does not support fullscreen. The adventure still fills this window.",
+        );
+    } catch {
+      notify(
+        "Fullscreen is unavailable here. You can continue playing in this window.",
+      );
+    }
+  }
   const cloudDiary = adventure.mode === "cloud";
   const nutritionCloud = useNutritionSync(
     cloudDiary ? adventure.saveId! : null,
@@ -171,7 +210,8 @@ export default function App() {
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        if (b) void dispatch({ kind: "pause", paused: !b.paused });
+        if (panel) V(null);
+        else if (b) void dispatch({ kind: "pause", paused: !b.paused });
         else if (quest) void dispatch({ kind: "cancelQuest" });
         else V(panel ? null : "menu");
       }
@@ -199,7 +239,7 @@ export default function App() {
       const exercise = id.slice(6) as ExerciseId;
       void dispatch({ kind: "startQuest", exercise });
     } else if (id === "healer") {
-      void dispatch({ kind: "heal" });
+      V("healer");
     } else V(id);
   }
   async function onUnit(
@@ -293,7 +333,7 @@ export default function App() {
     );
   return (
     <div
-      className="adventure-app"
+      className={`adventure-app immersive-game ${b ? "mode-battle" : "mode-explore"}${b?.turn === "exercise" ? " is-series" : ""} input-${camera ? "camera" : "manual"}${cameraExpanded ? " camera-expanded" : ""}`}
       onPointerDown={() => {
         if (!audioReady.current) {
           audioReady.current = true;
@@ -337,6 +377,26 @@ export default function App() {
                     : "Cloud · in control"
               : "Saved locally"}
           </span>
+          <div className="game-hud-controls">
+            {b && !(b.turn === "exercise" && camera) && (
+              <button
+                className="arena-toggle"
+                aria-expanded={cameraExpanded}
+                onClick={() => setCameraExpanded((value) => !value)}
+              >
+                <Camera size={18} />{" "}
+                {cameraExpanded ? "Close camera controls" : "Camera controls"}
+              </button>
+            )}
+            <button
+              className="icon-button fullscreen-toggle"
+              onClick={() => void toggleFullscreen()}
+              aria-label={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+              title={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            >
+              {fullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+            </button>
+          </div>
           <button
             className="icon-button"
             onClick={() => MU(!muted)}
@@ -346,7 +406,10 @@ export default function App() {
           </button>
           <button
             className="icon-button"
-            onClick={() => V("menu")}
+            onClick={() => {
+              if (b) void dispatch({ kind: "pause", paused: true });
+              V("menu");
+            }}
             aria-label="Settings"
           >
             <Settings size={18} />
@@ -380,6 +443,53 @@ export default function App() {
           "game-main" + (b?.turn === "exercise" ? " exercise-session" : "")
         }
       >
+        {!b && (
+          <>
+            <section className="game-hud-player" aria-label="Your adventurer">
+              <BattleSprite id="hero" className="hud-portrait" />
+              <div>
+                <strong>
+                  {p.name} <small>Lv. {p.level}</small>
+                </strong>
+                <div className="hp-track">
+                  <span style={{ width: `${(p.hp / p.maxHp) * 100}%` }} />
+                </div>
+                <div
+                  className="xp-track"
+                  aria-label={`${p.xp} of ${xpNeeded(p.level)} XP`}
+                >
+                  <span
+                    style={{ width: `${(p.xp / xpNeeded(p.level)) * 100}%` }}
+                  />
+                </div>
+                <small>
+                  <Heart size={12} /> {Math.ceil(p.hp)} / {p.maxHp}{" "}
+                  <Coins size={12} /> {p.coins}
+                </small>
+              </div>
+            </section>
+            <button
+              className="game-hud-objective"
+              onClick={() => V("menu")}
+              aria-label="Adventure progress"
+            >
+              <span>WILLOWMERE VALLEY</span>
+              <strong>
+                {p.ending
+                  ? "The summit is yours"
+                  : p.badges.length === 3
+                    ? "Challenge Rowan at the summit"
+                    : "Find your strength"}
+              </strong>
+              <small>
+                {p.coins} coins · {p.badges.length} / 3 badges ·{" "}
+                {p.badges.length === 3
+                  ? "Final rival unlocked"
+                  : "Visit the three gyms"}
+              </small>
+            </button>
+          </>
+        )}
         <div className="game-title">
           <div>
             <div className="eyebrow">CHAPTER 01 · THE EVERYDAY ADVENTURE</div>
@@ -401,7 +511,9 @@ export default function App() {
         </div>
         <div
           className={
-            "game-layout" + (b ? " is-battle" : "") + (b?.turn === "exercise" ? " is-exercising" : "")
+            "game-layout" +
+            (b ? " is-battle" : "") +
+            (b?.turn === "exercise" ? " is-exercising" : "")
           }
         >
           <section className="world-card">
@@ -443,7 +555,7 @@ export default function App() {
               ) : (
                 <>
                   <div
-                    className="battle-stage"
+                    className={`battle-stage${hitDamage > 0 ? " battle-hit" : ""}${b.turn === "transform" ? " battle-transform" : ""}${b.turn === "won" ? " battle-victory" : ""}`}
                     style={{ backgroundImage: `url("${battlefieldUrl()}")` }}
                   >
                     <div className="enemy-plate">
@@ -468,6 +580,14 @@ export default function App() {
                         {Math.ceil(b.enemyHp)} / {Math.ceil(b.enemy.hp)} HP
                       </small>
                     </div>
+                    {hitDamage > 0 && (
+                      <span
+                        className="damage-burst"
+                        aria-label={`${hitDamage.toFixed(1)} damage`}
+                      >
+                        −{Math.round(hitDamage)}
+                      </span>
+                    )}
                     <BattleSprite
                       id={b.enemy.id}
                       className={
@@ -496,9 +616,32 @@ export default function App() {
                     <div className="battle-log" aria-live="polite">
                       {b.log}
                     </div>
+                    {b.turn === "exercise" && !camera && b.attack && (
+                      <section
+                        className="manual-exercise-guide"
+                        aria-label="Manual exercise"
+                      >
+                        <span>MANUAL · UNVERIFIED</span>
+                        <h2>{b.attack.name}</h2>
+                        <strong>
+                          {b.progress} / {b.attack.units}
+                        </strong>
+                        <p>
+                          <b>Starting position:</b>{" "}
+                          {EXERCISE_GUIDES[b.attack.exercise].setup}
+                        </p>
+                        <small>
+                          Confirm when you have completed the remaining{" "}
+                          {b.attack.exercise === "superman"
+                            ? "seconds"
+                            : "repetitions"}
+                          . Rest whenever you need.
+                        </small>
+                      </section>
+                    )}
                   </div>
                   <div className="battle-actions">
-                    {b.paused ? (
+                    {b.paused && b.turn !== "exercise" ? (
                       <div className="pause-message">
                         <h2>Take your time.</h2>
                         <p>
@@ -548,45 +691,7 @@ export default function App() {
                           Continue when ready
                         </button>
                       </div>
-                    ) : b.turn === "exercise" ? (
-                      <div className="exercise-actions">
-                        <div>
-                          <h2>{b.attack?.name}</h2>
-                          <p>
-                            {b.progress} / {b.attack?.units}{" "}
-                            {b.attack?.exercise === "superman"
-                              ? "seconds"
-                              : "repetitions"}
-                          </p>
-                        </div>
-                        {!camera && (
-                          <button className="primary" onClick={manualSeries}>
-                            <Check size={16} />I completed the remaining units
-                          </button>
-                        )}
-                        <button
-                          className="secondary"
-                          onClick={() =>
-                            void dispatch({ kind: "pause", paused: true })
-                          }
-                        >
-                          <Pause size={16} />
-                          Rest
-                        </button>
-                        <button
-                          onClick={() =>
-                            void dispatch({ kind: "cancelSeries" })
-                          }
-                        >
-                          End series & turn
-                        </button>
-                        <p className="tiny">
-                          {camera
-                            ? "Every accepted movement causes damage."
-                            : "Manual mode is unverified. Group fatigue applies."}
-                        </p>
-                      </div>
-                    ) : b.turn === "enemy" ? (
+                    ) : b.turn === "exercise" ? null : b.turn === "enemy" ? (
                       <div className="pause-message">
                         <p>{b.enemy.name} is responding…</p>
                         <button
@@ -598,84 +703,15 @@ export default function App() {
                         </button>
                       </div>
                     ) : (
-                      <>
-                        <div className="attack-grid">
-                          {p.equipped.map((id) => {
-                            const a = attackFor(id, p);
-                            return (
-                              <button
-                                className={"attack-card " + a.type}
-                                key={id}
-                                onClick={() =>
-                                  void dispatch({
-                                    kind: "beginAttack",
-                                    attackId: a.id,
-                                  })
-                                }
-                              >
-                                <span>
-                                  {iconType(a.type)}
-                                  <small>{Math.round(a.damage)} power</small>
-                                </span>
-                                <strong>{a.name}</strong>
-                                <small>{a.description}</small>
-                              </button>
-                            );
-                          })}
-                        </div>
-                        <div className="button-row">
-                          <button
-                            onClick={() => void dispatch({ kind: "defend" })}
-                          >
-                            <Shield size={16} />
-                            Defend
-                          </button>
-                          <button
-                            disabled={!p.items.potion}
-                            onClick={() => item("potion")}
-                          >
-                            Potion ({p.items.potion})
-                          </button>
-                          <button
-                            disabled={!p.items.shield}
-                            onClick={() => item("shield")}
-                          >
-                            Guard ({p.items.shield})
-                          </button>
-                          <button
-                            disabled={!p.items.boost}
-                            onClick={() => item("boost")}
-                          >
-                            Boost ({p.items.boost})
-                          </button>
-                          <button
-                            onClick={() =>
-                              void dispatch({ kind: "pause", paused: true })
-                            }
-                          >
-                            <Pause size={15} />
-                            Pause
-                          </button>
-                          {b.enemy.id.startsWith("trainer") && (
-                            <button
-                              onClick={() => {
-                                void dispatch({ kind: "leaveBattle" });
-                              }}
-                            >
-                              Leave
-                            </button>
-                          )}
-                          <label className="check compact">
-                            <input
-                              type="checkbox"
-                              checked={camera}
-                              disabled={b.turn !== "player"}
-                              onChange={(e) => C(e.target.checked)}
-                            />
-                            Camera
-                          </label>
-                        </div>
-                      </>
+                      <BattleCommandMenu
+                        key={b.turn + ":" + b.paused}
+                        player={p}
+                        battle={b}
+                        camera={camera}
+                        onCamera={C}
+                        dispatch={dispatch}
+                        onItem={item}
+                      />
                     )}
                   </div>
                 </>
@@ -699,44 +735,46 @@ export default function App() {
           <aside className="adventure-sidebar">
             {b ? (
               <section className="card camera-card">
-                <div className="exercise-battle-strip">
-                  <strong>{b.enemy.name}</strong>
-                  <span>
-                    {Math.ceil(b.enemyHp)} / {Math.ceil(b.enemy.hp)} HP
-                  </span>
-                  <div className="hp-track">
-                    <span
-                      style={{ width: `${(b.enemyHp / b.enemy.hp) * 100}%` }}
-                    />
-                  </div>
-                  <small>
-                    Your HP: {Math.ceil(b.playerHp)} / {p.maxHp}
-                  </small>
-                </div>
-                <div
-                  className="exercise-mode-switch"
-                  aria-label="Exercise input mode"
-                >
-                  <button
-                    aria-pressed={camera}
-                    disabled={b.turn === "exercise"}
-                    onClick={() => C(true)}
-                  >
-                    Camera mode
-                  </button>
-                  <button
-                    aria-pressed={!camera}
-                    disabled={b.turn === "exercise"}
-                    onClick={() => C(false)}
-                  >
-                    Manual mode
-                  </button>
-                  {b.turn === "exercise" && (
+                <div className="camera-card-meta">
+                  <div className="exercise-battle-strip">
+                    <strong>{b.enemy.name}</strong>
+                    <span>
+                      {Math.ceil(b.enemyHp)} / {Math.ceil(b.enemy.hp)} HP
+                    </span>
+                    <div className="hp-track">
+                      <span
+                        style={{ width: `${(b.enemyHp / b.enemy.hp) * 100}%` }}
+                      />
+                    </div>
                     <small>
-                      Input mode stays fixed during the series. Camera preview
-                      can always be restarted.
+                      Your HP: {Math.ceil(b.playerHp)} / {p.maxHp}
                     </small>
-                  )}
+                  </div>
+                  <div
+                    className="exercise-mode-switch"
+                    aria-label="Exercise input mode"
+                  >
+                    <button
+                      aria-pressed={camera}
+                      disabled={b.turn === "exercise"}
+                      onClick={() => C(true)}
+                    >
+                      Camera mode
+                    </button>
+                    <button
+                      aria-pressed={!camera}
+                      disabled={b.turn === "exercise"}
+                      onClick={() => C(false)}
+                    >
+                      Manual mode
+                    </button>
+                    {b.turn === "exercise" && (
+                      <small>
+                        Input mode stays fixed during the series. Camera preview
+                        can always be restarted.
+                      </small>
+                    )}
+                  </div>
                 </div>
                 <Suspense fallback={<p>Preparing camera controls…</p>}>
                   <ExerciseCamera
@@ -773,26 +811,6 @@ export default function App() {
                     onError={notify}
                   />
                 </Suspense>
-                {camera && b.turn === "exercise" && (
-                  <button
-                    className="manual-fallback"
-                    onClick={() => {
-                      C(false);
-                      notify(
-                        "Manual continuation is unverified. Already earned damage is kept. Camera mode is available next turn.",
-                      );
-                    }}
-                  >
-                    Detection trouble? Continue remaining units manually
-                  </button>
-                )}
-                {!camera && b.turn === "exercise" && (
-                  <p className="notice">
-                    Manual confirmation is unverified. You can preview the
-                    camera now and switch back to verified camera mode next
-                    turn.
-                  </p>
-                )}
               </section>
             ) : (
               <>
@@ -900,6 +918,57 @@ export default function App() {
             )}
           </aside>
         </div>
+        {b?.turn === "exercise" && (
+          <section
+            className="series-command-dock"
+            aria-label="Exercise actions"
+          >
+            <div className="series-dock-title">
+              <strong>{b.attack?.name}</strong>
+              <small>
+                {camera ? "Camera verification" : "Manual · unverified"} ·{" "}
+                {b.progress} / {b.attack?.units}
+              </small>
+            </div>
+            <button
+              className="primary"
+              onClick={() =>
+                void dispatch({ kind: "pause", paused: !b.paused })
+              }
+            >
+              <Pause size={18} />
+              {b.paused ? "Resume" : "Rest"}
+            </button>
+            {!camera && (
+              <button
+                className="primary"
+                disabled={b.paused || adventure.locked}
+                onClick={manualSeries}
+              >
+                <Check size={18} />I completed the remaining units
+              </button>
+            )}
+            <button
+              className="secondary"
+              onClick={() => void dispatch({ kind: "cancelSeries" })}
+            >
+              End series & turn
+            </button>
+            {camera && (
+              <button
+                className="manual-fallback"
+                onClick={() => {
+                  C(false);
+                  notify(
+                    "Manual continuation is unverified. Already earned damage is kept. Camera mode is available next turn.",
+                  );
+                }}
+              >
+                Detection trouble? Continue remaining units manually
+              </button>
+            )}
+          </section>
+        )}
         <div className="quick-actions">
           <button onClick={() => V("inventory")}>
             <Backpack size={18} />
@@ -1038,13 +1107,15 @@ export default function App() {
                       ? "Your satchel"
                       : panel === "shop"
                         ? "The little supply shop"
-                        : panel === "alchemy"
-                          ? "The alchemist’s notebook"
-                          : panel === "ending"
-                            ? "You found your stride."
-                            : panel === "devices"
-                              ? "Your connected adventure"
-                              : "Make yourself at home"}
+                        : panel === "healer"
+                          ? "The Rest House"
+                          : panel === "alchemy"
+                            ? "The alchemist’s notebook"
+                            : panel === "ending"
+                              ? "You found your stride."
+                              : panel === "devices"
+                                ? "Your connected adventure"
+                                : "Make yourself at home"}
               </h2>
               <button onClick={() => V(null)} aria-label="Close">
                 ✕
@@ -1342,6 +1413,46 @@ export default function App() {
               )}
               {panel === "menu" && (
                 <>
+                  <section
+                    className="menu-character"
+                    aria-label="Character and progress"
+                  >
+                    <BattleSprite
+                      id="hero"
+                      className="menu-character-portrait"
+                    />
+                    <div>
+                      <h3>
+                        {p.name} · Level {p.level}
+                      </h3>
+                      <p>
+                        {Math.ceil(p.hp)} / {p.maxHp} HP · {p.xp} /{" "}
+                        {xpNeeded(p.level)} XP
+                      </p>
+                      <p>
+                        Attack {p.attack} · Defense {p.defense} · Speed{" "}
+                        {p.speed}
+                      </p>
+                      <p>
+                        {p.coins} coins · {p.badges.length} / 3 badges
+                      </p>
+                    </div>
+                  </section>
+                  <div className="menu-badges">
+                    {(["leg", "arm", "back"] as Element[]).map((type) => (
+                      <span
+                        key={type}
+                        className={
+                          p.badges.includes(type) ? "earned" : "unearned"
+                        }
+                      >
+                        {iconType(type)}{" "}
+                        {p.badges.includes(type)
+                          ? "Badge earned"
+                          : "Gym awaits"}
+                      </span>
+                    ))}
+                  </div>
                   <div className="button-row">
                     <button
                       className="secondary"
@@ -1356,6 +1467,12 @@ export default function App() {
                       Devices
                     </button>
                   </div>
+                  <button
+                    className="secondary"
+                    onClick={() => void toggleFullscreen()}
+                  >
+                    {fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                  </button>
                   <label>
                     Adventure difficulty
                     <select
@@ -1384,6 +1501,35 @@ export default function App() {
                     everyday routines become little adventures.
                   </p>
                 </>
+              )}
+              {panel === "healer" && (
+                <section className="rest-scene">
+                  <Heart size={56} />
+                  <h3>A little rest goes a long way.</h3>
+                  <p>
+                    {Math.ceil(p.hp)} / {p.maxHp} vitality
+                  </p>
+                  <div className="hp-track">
+                    <span style={{ width: `${(p.hp / p.maxHp) * 100}%` }} />
+                  </div>
+                  <p>
+                    Recover all your HP, free of charge. Your adventure will be
+                    here when you are ready.
+                  </p>
+                  <button
+                    className="primary"
+                    disabled={p.hp >= p.maxHp}
+                    onClick={async () => {
+                      if (await dispatch({ kind: "heal" }))
+                        notify("Fully rested. Your vitality is restored.");
+                    }}
+                  >
+                    {p.hp >= p.maxHp ? "Fully rested" : "Rest and recover"}
+                  </button>
+                  <button className="secondary" onClick={() => V(null)}>
+                    Return to the village
+                  </button>
+                </section>
               )}
               {panel === "ending" && (
                 <>
