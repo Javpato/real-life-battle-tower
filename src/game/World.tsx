@@ -147,9 +147,27 @@ export default function World(props:ExtendedProps){
     if(!node)return;
     const camera=this.cameras.main,point={x:(x-camera.worldView.x)*camera.zoom+camera.x,y:(y-camera.worldView.y)*camera.zoom+camera.y};
     const visible=point.x>0&&point.x<this.scale.width&&point.y>40&&point.y<this.scale.height-30;
-    node.style.visibility=visible?'visible':'hidden';
-    node.style.left=`${Math.round(Math.max(100,Math.min(this.scale.width-100,point.x)))}px`;
-    node.style.top=`${Math.round(context?Math.min(this.scale.height-115,Math.max(60,point.y)):point.y)}px`;
+    node.style.visibility=visible&&!latest.current.paused?'visible':'hidden';
+    let left=Math.max(100,Math.min(this.scale.width-100,point.x));
+    let top=context?Math.min(this.scale.height-115,Math.max(60,point.y)):point.y;
+    if(context){
+     // Labels stay in screen pixels and use the clear gap between the fixed HUD panels.
+     const origin=node.offsetParent?.getBoundingClientRect(),half=node.offsetWidth/2,height=node.offsetHeight;
+     if(origin){
+      let min=half+8,max=this.scale.width-half-8,bottom=0;
+      for(const hud of document.querySelectorAll('.game-hud-player,.game-hud-objective')){
+       const r=hud.getBoundingClientRect(),y0=r.top-origin.top,y1=r.bottom-origin.top;
+       if(top>y0&&top-height<y1){
+        bottom=Math.max(bottom,y1);
+        if(r.left-origin.left<this.scale.width/2)min=Math.max(min,r.right-origin.left+half+10);
+        else max=Math.min(max,r.left-origin.left-half-10);
+       }
+      }
+      if(min<=max)left=Math.max(min,Math.min(max,left));else top=Math.max(top,bottom+height+8);
+     }
+    }
+    node.style.left=`${Math.round(left)}px`;
+    node.style.top=`${Math.round(top)}px`;
    }
    update(time:number,delta:number){
     if(!this.player)return;
