@@ -1979,3 +1979,25 @@
 .immersive-game .adventure-cloud-status strong {
   color: #f4d793;
 }
+@media (pointer: coarse) {
+  .immersive-game .world-touch-pad {
+    grid-template-columns: repeat(3, 44px) !important;
+    gap: 4px !important;
+  }
+  .immersive-game .world-touch-pad button {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 20px !important;
+  }
+  .immersive-game .world-interact {
+    min-height: 44px;
+    padding: 10px 13px !important;
+  }
+  .immersive-game .quick-actions button {
+    min-height: 44px;
+  }
+  .immersive-game .fullscreen-toggle {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
