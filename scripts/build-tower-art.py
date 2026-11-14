@@ -91,7 +91,46 @@ def landscape(zone=0,hub=False):
    for dx in range(-rx+18,rx-12,18):box(d,(x+dx,y+8,x+dx+7,y+9),'#d8d0a9')
  return im
 for z in range(6):save(landscape(z),f'arena-{z}')
-save(landscape(0,True),'hub');save(landscape(4,True),'title')
+# Monumental tower continues above the frame; cloud banks articulate its height.
+def monumental(title=False):
+ im=landscape(0,True);d=ImageDraw.Draw(im)
+ # Tall side buttresses and terraces; different visible light planes.
+ for x,y,w in [(154,47,42),(286,29,39)]:
+  stone(d,x,y,w,132,'#a5b6ac');poly(d,[(x+w,y),(x+w+12,y-9),(x+w+12,167),(x+w,y+132)],'#69878c')
+  poly(d,[(x-5,y),(x+w//2,y-21),(x+w+5,y)],'#46677d')
+  for yy in range(y+15,155,28):
+   box(d,(x+13,yy,x+24,yy+16),INK);box(d,(x+16,yy+2,x+21,yy+13),'#8bc7bf')
+  for yy in range(y+28,171,39):stone(d,x-3,yy,w+6,5,'#d1d6ba')
+ # Main shaft leaves the top of the image rather than terminating in a small roof.
+ stone(d,198,-24,89,207,'#c5cbb4');poly(d,[(287,-24),(309,-40),(309,166),(287,183)],'#799497')
+ for yy in range(-10,164,31):
+  stone(d,192,yy,100,7,'#e4ddbd');poly(d,[(292,yy),(313,yy-12),(313,yy-5),(292,yy+7)],'#a4b4a6')
+  for xx in [211,249]:
+   box(d,(xx,yy+12,xx+14,yy+28),INK);box(d,(xx+3,yy+14,xx+10,yy+24),'#6eadae');box(d,(xx+3,yy+14,xx+5,yy+21),'#c0e5cd')
+ for x in [196,282]:
+  stone(d,x,28,8,146,'#d4d5b9')
+  for yy in [40,88,136]:poly(d,[(x-3,yy),(x+11,yy),(x+7,yy+12),(x+1,yy+12)],'#a7b9a8')
+ # Carved central medallion and three training standards.
+ d.ellipse((228,70,258,100),fill=INK);d.ellipse((231,73,255,97),fill=GOLD,outline=LIGHT,width=2)
+ poly(d,[(243,77),(249,86),(243,94),(237,86)],'#5d9298',o='#527582',width=1)
+ for xx,c in [(207,'#d8836d'),(263,'#5b9caf')]:
+  poly(d,[(xx,109),(xx+14,109),(xx+14,146),(xx+7,153),(xx,146)],c);box(d,(xx+5,116,xx+8,137),GOLD)
+ d.ellipse((226,141,260,175),fill=INK);box(d,(226,157,260,183),INK)
+ for x in range(230,258,6):box(d,(x,154,x+3,182),'#8a6552')
+ box(d,(231,158,255,160),GOLD);box(d,(241,161,244,182),GOLD)
+ # Terraces, planted beds, and hand-shaped canopy highlights add depth.
+ for x in [129,322]:
+  stone(d,x,178,30,13,'#8da493')
+  for dx in [4,12,20]:tree(d,x+dx,181,1)
+ for x,y in [(14,246),(453,246),(32,277),(425,277)]:tree(d,x,y,2)
+ # Pixel clouds wind behind the foreground architecture and cross the high shaft.
+ for x,y,w in [(8,56,125),(322,47,153),(62,15,173),(275,0,163)]:
+  box(d,(x,y+8,x+w,y+16),'#c8e5da');box(d,(x+14,y+3,x+w-18,y+13),'#e5eedc');box(d,(x+34,y-2,x+w-44,y+7),'#f7f0d6')
+ if title:
+  for x,y,w in [(111,42,109),(268,82,116)]:
+   box(d,(x,y+7,x+w,y+13),'#cee4d5');box(d,(x+9,y+2,x+w-13,y+9),'#eff0d5');box(d,(x+30,y-3,x+w-31,y+4),'#fff1d5')
+ return im
+save(monumental(),'hub');save(monumental(True),'title')
 
 # Human figures drawn in native 128px cells with fixed foot anchor, separate anatomical poses.
 def character(kind=0,back=False,frame=0):
@@ -110,7 +149,7 @@ def character(kind=0,back=False,frame=0):
  poly(d,[(cx-9,43),(cx+8,42),(cx+10,69),(cx-11,69)],'#e9dcb8' if kind<2 else hi)
  box(d,(cx-18,71,cx+17,77),'#594b49',INK);box(d,(cx-3,71,cx+3,76),GOLD,INK)
  # Arms: poised runner / guard / martial / staff silhouettes.
- if kind in [3,6,9]:
+ if kind in [0,1,3,6,9]:
   poly(d,[(cx-shoulder,43),(cx-shoulder-8,54),(cx-34,44),(cx-37,34),(cx-28,30),(cx-22,43),(cx-15,52)],skin)
   poly(d,[(cx+shoulder,44),(cx+36,59),(cx+32,69),(cx+16,57)],skin)
   box(d,(cx-38,30,cx-28,41),coat,INK);box(d,(cx+25,60,cx+35,70),coat,INK)
