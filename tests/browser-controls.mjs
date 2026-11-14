@@ -10,9 +10,21 @@ export async function openCameraControls(page) {
     .click();
 }
 export async function dismissExerciseGuide(camera) {
+  await camera.waitFor({ state: "visible" });
+  // The first-use guide is set by an effect when the attack changes; let the drawer settle.
+  await camera.page().waitForTimeout(220);
+  const close = camera.getByRole("button", {
+    name: "Close exercise guide",
+    exact: true,
+  });
+  if (await close.isVisible()) {
+    await close.click();
+    return;
+  }
   const hide = camera.getByRole("button", { name: "Hide guide", exact: true });
   if (await hide.isVisible()) await hide.click();
 }
+
 export async function openCameraSettings(camera) {
   const details = camera
     .locator("details")

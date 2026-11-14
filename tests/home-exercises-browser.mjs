@@ -1,3 +1,10 @@
+import {
+  walkToFirstTrainer,
+  openAttackMenu,
+  openCameraControls,
+  closeModal,
+  dismissExerciseGuide,
+} from "./browser-controls.mjs";
 /** Real UI actions in fresh contexts. Manual confirmations are explicitly unverified. */
 import { chromium, expect } from "@playwright/test";
 const browser = await chromium.launch({
@@ -80,7 +87,7 @@ try {
         path: `/tmp/everstride-home-${exercise.id}-guide.png`,
         fullPage: true,
       });
-      await page.getByRole("button", { name: "Close", exact: true }).click();
+      await closeModal(page);
       await page
         .getByRole("button", { name: "Satchel & skills", exact: true })
         .click();
@@ -98,22 +105,24 @@ try {
       await expect
         .poll(async () => (await read()).player.equipped.join(","))
         .toBe("birddog,sitstand,wallpushup,bridge");
-      await page.getByRole("button", { name: "Close", exact: true }).click();
+      await closeModal(page);
       await page.waitForTimeout(400);
-      await hold("d", 550);
-      const trainer = page.getByRole("button", {
-        name: /E · .* · first steps/,
-      });
-      for (let i = 0; i < 8 && !(await trainer.isVisible()); i++)
-        await hold("s", 140);
-      await expect(trainer).toBeVisible();
-      await page.keyboard.press("e", { delay: 150 });
+      await walkToFirstTrainer(page);
       await page.getByLabel("Use camera verification").uncheck();
       await page.getByRole("button", { name: "Begin encounter" }).click();
+      await openAttackMenu(page);
       await page
         .getByRole("button", { name: new RegExp(exercise.name) })
         .click();
+      await openCameraControls(page);
       const camera = page.locator(".exercise-camera");
+      await dismissExerciseGuide(camera);
+      const startingDetails = camera.locator("details.exercise-start-position");
+      if (
+        (await startingDetails.count()) &&
+        !(await startingDetails.evaluate((element) => element.open))
+      )
+        await startingDetails.locator("summary").click();
       await expect(camera).toBeVisible();
       await expect(
         camera

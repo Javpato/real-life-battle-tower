@@ -1,3 +1,4 @@
+import { dismissExerciseGuide } from "./browser-controls.mjs";
 // Run against Vite: node tests/camera-receipts-browser.mjs http://127.0.0.1:5182
 // Synthetic landmarks replace ONLY the browser test's worker. This tests integration, not physical accuracy.
 import assert from "node:assert/strict";
@@ -90,6 +91,7 @@ try {
     (process.argv[2] || "http://127.0.0.1:5182") +
       "/tests/fixtures/camera.html?receipts",
   );
+  await dismissExerciseGuide(page.locator(".exercise-camera"));
   await page
     .getByRole("button", { name: "Enable camera", exact: true })
     .click();
