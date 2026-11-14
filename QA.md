@@ -1,5 +1,25 @@
 # Battle Tower v2 — verification
 
+## iPhone camera startup and hosted pairing — 2026-11-15
+
+- User screenshots showed an inactive preview, disabled Start/Stop buttons, and “Still waiting”. Phone capture previously depended on the WebRTC channel being connected; Safari can need capture permission before exposing local candidates. The phone can now explicitly start local capture after claiming the invitation, before the channel connects. SDP/ICE answering waits for the live stream; desktop code confirmation remains independently required.
+- Camera and connection messages are separate. An inactive/failed camera displays a placeholder and retryable status instead of an unexplained black rectangle. Camera properties explicitly request muted inline playback. Live video still requires opt-in after connection; poses cannot send before the approved channel opens.
+- Hosted testing exposed concurrent signaling compare-and-swap conflicts (`SIGNAL_BUSY_RETRY`). Peer mutations are now serialized with bounded conflict retries and capped SDP republishing. Negotiation flags recover after failures; disconnect/preview races cannot reject an ignored promise. No new relay or media-upload service was added.
+- **346 unit tests in 32 files pass**, production build and shared-source parity pass. Both embedded SQL suites pass. Five-viewport game regression passes. Chromium synthetic-camera tests and WebKit UI/permission tests pass, including denial/retry, no automatic camera request, opt-in preview, camera switching and remote disconnection. Initial WebKit runs were blocked by missing test-runtime dependencies; the correct browser and isolated libraries were supplied in /tmp without system package changes.
+- **Real hosted camera-pair verification now passes** on the public HTTPS address: create/claim, desktop approval, local MediaPipe startup, WebRTC data channel, opt-in video stream and disconnect cleanup, with zero page errors. This supersedes the earlier camera-pair HTTP404 finding; the user deployed that function. No Supabase migration or function was deployed by this fix, and cloud saved-game deployment is not established by a camera-pair test.
+- Evidence: `docs/verification/iphone-camera/`. These are automated browser and synthetic-camera checks, not a physical iPhone or exercise-accuracy validation. User-provided screenshots remain outside the repository.
+- Temporary hosting updated in place at https://implementing-satisfy-warm-raise.trycloudflare.com . Reload the PC page, create a fresh QR, close the old phone tab, connect and explicitly start camera, then confirm the code on PC. No new Supabase deployment is required for this frontend fix.
+- Refreshed APK: 30,843,889 bytes, 477 web files byte-identical to the final build, SHA256 `8329075ee6ebefe2b5cbc74c6b8d4adb5d3e7a95de1ca4d124e451852d7de422`. Signature verified. Offline shell `821dd6e8b9314047`. Supersedes earlier APK hashes in this historical log.
+
+Reproduction:
+
+```sh
+GAME_URL=http://127.0.0.1:5185 node tests/iphone-camera-browser.mjs
+GAME_URL=https://YOUR-TEMPORARY-HOST node tests/phone-live-browser.mjs
+```
+
+The first test requires a compatible Playwright WebKit runtime. The hosted test creates and closes one disposable camera room, never saved-game records.
+
 ## Presentation and temporary mobile hosting — 2026-11-15
 
 - Approved character designs retained. Title sprites now use direct PNG rendering at native pixel multiples. The hub foot anchor is (184,250) in the 480×270 background, using the existing (64,122) sprite pivot. Battle anchors are unchanged.

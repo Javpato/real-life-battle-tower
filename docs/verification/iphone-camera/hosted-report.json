@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "checks": [
+    "public HTTPS",
+    "real camera-pair backend",
+    "desktop approval",
+    "camera-before-ICE",
+    "real WebRTC data channel",
+    "synthetic camera and local MediaPipe",
+    "opt-in direct video",
+    "disconnect cleanup"
+  ],
+  "errors": [],
+  "physicalIPhoneTested": false
+}

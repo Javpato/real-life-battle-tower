@@ -21,3 +21,8 @@
 .companion-control a{color:#843c46}
 .companion-confirm{background:#f5ddca;border:2px solid #ad7d71}
 .companion-preview{background:#161627;border-radius:0}
+/* Camera permission and the peer connection are independent, visible steps. */
+.phone-camera-stage{position:relative}
+.phone-camera-placeholder{position:absolute;inset:0;display:grid;place-content:center;text-align:center;padding:20px;margin:0;color:#fff1d6;background:#161627;pointer-events:none}
+.phone-companion [aria-label="Camera status"]{font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.phone-companion [aria-label="Camera status"][role="alert"]{border-left:4px solid #a9444b;padding:10px;background:#f5ddca;color:#713542}

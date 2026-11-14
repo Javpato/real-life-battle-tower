@@ -228,6 +228,12 @@ export class CameraLifecycle {
         track.addEventListener("ended", ended);
         this.trackListeners.push({ track, ended });
       }
+      // Set DOM properties as well as JSX attributes before attaching a stream.
+      // Safari requires muted inline playback; never ask for microphone access.
+      video.muted = true;
+      video.defaultMuted = true;
+      video.playsInline = true;
+      video.autoplay = true;
       video.srcObject = media;
       this.emit(
         "starting",

@@ -130,6 +130,20 @@ afterEach(() => {
 });
 
 describe("camera lifecycle ownership and races", () => {
+  it("prepares muted inline playback before starting the camera preview", async () => {
+    const f = setup();
+    f.video.play = vi.fn(async () => {
+      expect(f.video.muted).toBe(true);
+      expect(f.video.defaultMuted).toBe(true);
+      expect(f.video.playsInline).toBe(true);
+      expect(f.video.autoplay).toBe(true);
+      expect(f.video.srcObject).toBe(f.media.media);
+    });
+    await f.start();
+    expect(f.video.play).toHaveBeenCalledOnce();
+    expect(f.getUserMedia.mock.calls[0][0].audio).toBe(false);
+    f.camera.dispose();
+  });
   it("stops every track, detaches preview and terminates recognition; can enable repeatedly", async () => {
     const f = setup();
     for (let i = 0; i < 4; i++) {

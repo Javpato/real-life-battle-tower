@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "checks": [
+    "Start enabled before peer connection, no automatic camera permission",
+    "Permission denial remains visible; retry allowed; no ICE answer",
+    "Camera ready after retry; real peer connection; default video privacy",
+    "Explicit preview opt-in and opt-out",
+    "Stop/restart, switch facing, remote disconnect releases camera",
+    "WebKit permission button, clear error and disconnect"
+  ],
+  "errors": [],
+  "physicalIPhoneTested": false
+}

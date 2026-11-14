@@ -13,3 +13,10 @@
 - Verified: 329 unit tests, production build, shared core parity, local tower/platform SQL, full tower UI regression and five-viewport screenshots. APK refreshed and byte/signature checked.
 - Temporary mobile HTTPS is live for the current tunnel process; link, QR and evidence are in QA.md and docs/verification/presentation-mobile.
 - Outstanding external service: configured camera-pair function returns HTTP404. The phone's own camera initializes over HTTPS; PC–phone pairing cannot work until backend deployment. Physical exercise accuracy is not established by synthetic-camera tests.
+
+## iPhone companion fix — 2026-11-15
+
+- Completed: independent local camera start, capture-before-ICE negotiation, clear separate statuses, retry and remote-close cleanup, bounded serialized signaling and safe optional-preview replacement.
+- Verified: 346 unit tests, production build/parity, SQL suites, game regression, Chromium real peers with synthetic camera, WebKit permission UI, and live HTTPS camera-pair/WebRTC/video path against the user's deployed backend. APK refreshed and package parity checked.
+- Published on the existing temporary HTTPS link. Recipients must reload the PC and create a new QR; existing phone invitation tabs cannot be reused after reload.
+- Pending physical validation: user must retry on the real iPhone. Automated WebKit and synthetic video do not prove physical exercise recognition.
