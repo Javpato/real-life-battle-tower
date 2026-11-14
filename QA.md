@@ -196,3 +196,81 @@ A transient Phaser framebuffer error appeared during rapid resize/HMR diagnostic
 Native Android immersive-window code compiled. System bars are recoverable by an edge swipe and Back behavior is not intercepted. Final APK byte/signature verification is separate from actual installation: no real Android device or person was available. Hosted Supabase remains pending the owner's anonymous-auth/CLI authorization; no new live cloud save claim is made.
 
 Final actual-App immersive suite (`tests/immersive-browser.mjs`) passed all five viewports, including portrait after the side-label correction. Fullscreen entry/exit, menus, visible positive-sized battle HP, camera lifecycle and the labelled synthetic recognition-to-damage flow were confirmed. `releases/screenshots/` contains selected real browser captures; generated-camera/synthetic cases carry an explicit QA label.
+
+
+## Overhaul changed-file inventory
+
+- `.gitignore`
+- `ASSET_GUIDE.md`
+- `QA.md`
+- `README.md`
+- `TASK_BOARD.md`
+- `docs/PLATFORM.md`
+- `public/assets/manifest.json`
+- `public/assets/opening/cozylight.svg`
+- `public/assets/opening/hero-title-v4.png`
+- `public/assets/opening/title-landscape.png`
+- `public/assets/sprites/hero-female-v3.png`
+- `public/assets/sprites/heroine-walk-v4.png`
+- `public/assets/sprites/indicators-v3.png`
+- `public/assets/sprites/overworld-v3.png`
+- `public/assets/world/furniture-v4.png`
+- `scripts/build-mini-art.py`
+- `src/App.tsx`
+- `src/audio/exerciseFeedback.ts`
+- `src/audio/music.ts`
+- `src/core/commands.ts`
+- `src/core/contracts.ts`
+- `src/core/game.ts`
+- `src/core/importSave.test.ts`
+- `src/core/importSave.ts`
+- `src/core/worldMaps.ts`
+- `src/exercises/ExerciseCamera.tsx`
+- `src/exercises/ExerciseHUD.tsx`
+- `src/exercises/detectors.ts`
+- `src/exercises/exercisePresentation.ts`
+- `src/exercises/exerciseUi.ts`
+- `src/exercises/exercises.css`
+- `src/exercises/preparation.ts`
+- `src/game/BattleSprite.tsx`
+- `src/game/World.tsx`
+- `src/game/art.ts`
+- `src/game/assets.ts`
+- `src/main.tsx`
+- `src/opening/GameShell.tsx`
+- `src/opening/Introduction.tsx`
+- `src/opening/opening.css`
+- `src/platform/DevicePanel.tsx`
+- `src/services/saveSlots.test.ts`
+- `src/services/saveSlots.ts`
+- `src/services/storage.ts`
+- `src/services/sync.ts`
+- `src/services/useAdventure.ts`
+- `src/ui/BattleCommandMenu.tsx`
+- `src/ui/immersive.css`
+- `supabase/functions/_shared/commands.ts`
+- `supabase/functions/_shared/contracts.ts`
+- `supabase/functions/_shared/game.ts`
+- `supabase/functions/_shared/importSave.ts`
+- `supabase/functions/_shared/worldMaps.ts`
+- `supabase/functions/adventure-command/index.ts`
+- `supabase/migrations/202611140005_save_slots.sql`
+- `supabase/sync-core.mjs`
+- `supabase/tests/platform.mjs`
+- `tests/adventure-smoke.mjs`
+- `tests/camera-receipts-browser.mjs`
+- `tests/cloud-controller.test.ts`
+- `tests/exercise-presentation-browser.mjs`
+- `tests/exercise-recalibration.test.ts`
+- `tests/exercise-ui-browser.mjs`
+- `tests/intro-visual-browser.mjs`
+- `tests/opening-browser.mjs`
+- `tests/overhaul-camera-browser.mjs`
+- `tests/overhaul-offline-browser.mjs`
+- `tests/overhaul-quest-browser.mjs`
+- `tests/overhaul-world-browser.mjs`
+- `tests/save-slots-browser.mjs`
+- `tests/tutorial-required.test.ts`
+- `tests/ui-smoke.mjs`
+- `tests/world-maps.test.ts`
+- `vite.config.ts`
