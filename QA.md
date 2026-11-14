@@ -1,3 +1,19 @@
+# Chair-height correction and clear camera choices — November 14, 2026
+
+The fixed seated-knee threshold could reject a higher chair, forcing the player to descend below their actual seat. Chair sit-to-stand now captures a stable seated hip-height and knee-angle reference, requires standing, and counts returning to that same seat. Tests cover seated angles85–151degrees, different body proportions/image scales, static/noisy/incomplete movements and missing hips. The camera does not detect the physical chair object.
+
+Explicit recalibration, source/model changes and fresh setup now clear the old posture reference before the preparation gate. Ordinary post-repetition pause keeps the reference. Accepted unit IDs, prior progress and alternating side remain intact. This prevents a moved camera or changed seat from being gated against its old position.
+
+The UI explains Fast(Lite) as the included recommended lightweight camera model and Full as a larger optional model that may run more slowly. These options do not change exercise difficulty or required range. The explanation opens above the controls without shrinking the HUD, and has a Done button. Chair instructions explicitly say to return to the same seat without lowering farther.
+
+Validation: **305 tests across31files**, TypeScript and production build pass. Actual App browser regression uses a clearly labelled synthetic135-degree seated pose: starts calibration, stands/returns for one unit, recalibrates after changing camera-relative position, and counts a second unit while preserving the first. Stationary seated frames add no units. Camera source/model download/cache control regression also passes. Screenshots were visually inspected: `releases/screenshots/chair-return-counted.png` and `camera-model-explanation.png`. These are real browser renders with synthetic camera input, not physical-chair validation.
+
+Changed: `src/exercises/detectors.ts`, `ExerciseCamera.tsx`, `ExerciseDemo.tsx`, `exercises.css`, `tests/chair-height.test.ts`, `tests/chair-camera-browser.mjs`, and `tests/camera-sources-browser.mjs`. No game/save/backend rules changed. Runtime9673163, production shell66cf39cf5ceb105e. Matching Android evidence is in `releases/android-build-evidence.json`.
+
+Physical chair/camera validation remains pending; no real-world accuracy claim is made.
+
+---
+
 # Camera recovery, earned skills and ordered world — November 14, 2026
 
 This acceptance record supersedes the older releases below. Implemented in coordinated isolated worktrees; existing detailed characters, battle art, saves and backend contracts preserved.

@@ -1,3 +1,9 @@
+# Current follow-up: actual chair height and camera model explanations
+
+Implemented chair-specific seated reference and explicit reference invalidation on recalibration. Root integrated clearer Lite/Full help and actual-App regression; recognition agent supplied detector and19new regressions; platform agent repackages final Android.305tests and build pass; real human/chair validation remains pending. See latest QA.md section.
+
+---
+
 # Current acceptance: camera recovery, progression and ordered maps
 
 Implemented and integrated with parallel isolated worktrees. Root: App, moves/admin, one-time guides, integration and actual-App tests. Camera agent: filtering/calibration/freshness/model options/research. World agent: connected geography, safe arrivals and full campaign. Companion/platform agent: private phone signaling/WebRTC, SQL/browser tests and matching APK.
