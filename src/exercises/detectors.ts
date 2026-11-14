@@ -103,6 +103,7 @@ export type PoseReference = {
   scale: number;
   hipY: number;
   hipAngle: number;
+  kneeAngle?: number;
 };
 export type RecognitionOptions = {
   allowPartialSquat?: boolean;
@@ -264,18 +265,39 @@ export function observePose(
             (distance(c.hip, c.knee) + distance(c.knee, c.ankle)) * 0.6,
           );
     const upright = !good(c.shoulder) || p[c.shoulder].y < p[c.hip].y;
+    const reference =
+      options.reference?.side === g.side ? options.reference : undefined;
+    // Recognize a seated leg, including higher chairs, without asking for squat depth.
+    // The visible thigh must still differ from a standing vertical leg.
+    const seatedCandidate =
+      upright &&
+      bend > 55 &&
+      bend < 153 &&
+      Math.abs(p[c.hip].x - p[c.knee].x) > scale * 0.22 &&
+      p[c.hip].y < p[c.knee].y + scale * 0.4;
+    const kneeBaseline = reference?.kneeAngle;
+    const rise = reference ? (reference.hipY - p[c.hip].y) / scale : 0;
+    const returnedToSeat =
+      reference && kneeBaseline !== undefined
+        ? Math.abs(rise) <= 0.12 && Math.abs(bend - kneeBaseline) <= 18
+        : seatedCandidate;
+    const standing =
+      upright &&
+      bend >= Math.max(155, (kneeBaseline ?? 90) + 15) &&
+      p[c.hip].y < p[c.knee].y - scale * 0.35 &&
+      (!reference || rise >= 0.08);
     return finish({
       ...base(g.ids, g.side),
-      ready:
-        upright &&
-        bend > 55 &&
-        bend < 130 &&
-        p[c.hip].y < p[c.knee].y + scale * 0.4,
-      extended:
-        upright && bend > 150 && p[c.hip].y < p[c.knee].y - scale * 0.35,
-      amplitude: clamp((bend - 90) / 75),
+      ready: upright && seatedCandidate && Boolean(returnedToSeat),
+      extended: standing,
+      amplitude: clamp(
+        (bend - (kneeBaseline ?? 90)) /
+          Math.max(20, 175 - (kneeBaseline ?? 90)),
+      ),
       motion: p[c.hip].y / scale,
-      message: "Begin seated; stand upright, then sit back down with control.",
+      message: reference
+        ? "Stand upright, then return to your calibrated chair height. You do not need to sit lower."
+        : "Sit naturally on your stable chair and hold still to learn its height. Then stand and return to the same seat.",
     });
   }
   if (exercise === "wallpushup") {
@@ -656,6 +678,13 @@ export class ExerciseDetector {
   private filter = new PoseFilter();
   private reference?: PoseReference;
   private estimatedCycle = false;
+  private seatedCandidate?: {
+    at: number;
+    hipY: number;
+    kneeAngle: number;
+    side: Side;
+    scale: number;
+  };
   private lastFrame?: number;
   private lostAt?: number;
   private observedSide?: Side;
@@ -703,6 +732,7 @@ export class ExerciseDetector {
   /** Pause invalidates an unfinished cycle but preserves completed units, hold fractions and alternation. */
   pause() {
     this.phase = "initial";
+    this.seatedCandidate = undefined;
     this.stableSince = undefined;
     this.lastObservation = undefined;
     this.lastFrame = undefined;
@@ -751,6 +781,7 @@ export class ExerciseDetector {
       scale: Math.max(0.06, scale),
       hipY: p[c.hip].y,
       hipAngle: angle(p[c.shoulder], p[c.hip], p[c.knee]),
+      kneeAngle: angle(p[c.hip], p[c.knee], p[c.ankle]),
     };
     this.lastFrame = frame.timestamp;
     this.lastObservation = frame.timestamp;
@@ -776,6 +807,61 @@ export class ExerciseDetector {
     this.lastFrame = frame.timestamp;
     if (observation.visible && observation.fresh)
       this.observedSide ??= observation.observedSide;
+    // Chair height is learned only after a stable seated interval. A single passing
+    // frame during a descent must not establish an artificially low seat reference.
+    if (this.exerciseId === "sitstand" && !this.reference) {
+      if (
+        !observation.ready ||
+        !observation.fresh ||
+        !observation.visible ||
+        !observation.observedSide
+      ) {
+        this.seatedCandidate = undefined;
+        return this.updateObservation(
+          { ...observation, ready: false, extended: false },
+          frame.timestamp,
+        );
+      }
+      const side = observation.observedSide,
+        c = chain(side),
+        p = processed.landmarks.map((v) => ({
+          ...v,
+          x: (v.x * processed.width) / processed.height,
+        }));
+      const kneeAngle = angle(p[c.hip], p[c.knee], p[c.ankle]);
+      const scale = Math.max(
+        0.06,
+        (Math.hypot(p[c.hip].x - p[c.knee].x, p[c.hip].y - p[c.knee].y) +
+          Math.hypot(p[c.knee].x - p[c.ankle].x, p[c.knee].y - p[c.ankle].y)) *
+          0.6,
+      );
+      const candidate = this.seatedCandidate;
+      if (
+        !candidate ||
+        candidate.side !== side ||
+        Math.abs(candidate.hipY - p[c.hip].y) > candidate.scale * 0.06 ||
+        Math.abs(candidate.kneeAngle - kneeAngle) > 8
+      ) {
+        this.seatedCandidate = {
+          at: frame.timestamp,
+          hipY: p[c.hip].y,
+          kneeAngle,
+          side,
+          scale,
+        };
+      } else if (frame.timestamp - candidate.at >= DETECTOR_CONFIG.stableMs) {
+        this.recalibrate(processed);
+        this.phase = "ready";
+        this.lastObservation = undefined;
+        return this.updateObservation(this.observe(processed), frame.timestamp);
+      }
+      return {
+        state: "ready",
+        status: "insufficient",
+        message:
+          "Sit still on your chair while its starting height is calibrated.",
+      };
+    }
     // Normal startup also captures body proportions once a valid initial pose exists.
     if (
       !this.reference &&
