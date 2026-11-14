@@ -27,6 +27,7 @@ import {
 } from "../audio/exerciseFeedback";
 
 type Props = Omit<ExerciseCameraProps, "onUnit"> & {
+  recognitionProfile?: "mini-squat" | "knee-pushup";
   onUnit: (unit: ExerciseUnit) => void | boolean | Promise<boolean>;
   lastSide?: "left" | "right";
   sessionId?: string;
@@ -165,6 +166,7 @@ export default function ExerciseCamera(props: Props) {
   const detector = useRef(
     new ExerciseDetector(props.exerciseId, props.sessionId, props.lastSide, {
       allowPartialSquat: partialSquat,
+      profile: props.recognitionProfile,
     }),
   );
   const detectorSession = useRef(sessionKey(props));
@@ -374,7 +376,7 @@ export default function ExerciseCamera(props: Props) {
               current.exerciseId,
               current.sessionId,
               current.lastSide,
-              { allowPartialSquat: partialSquat },
+              { allowPartialSquat: partialSquat, profile: current.recognitionProfile },
             );
             lifecycle.current.invalidateFrames();
             setNextSide(detector.current.expectedSide);
@@ -635,7 +637,7 @@ export default function ExerciseCamera(props: Props) {
       props.exerciseId,
       props.sessionId,
       props.lastSide,
-      { allowPartialSquat: partialSquat },
+      { allowPartialSquat: partialSquat, profile: props.recognitionProfile },
     );
     lifecycle.current?.invalidateFrames();
     poseFilter.current.reset();

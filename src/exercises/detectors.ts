@@ -106,6 +106,7 @@ export type PoseReference = {
   kneeAngle?: number;
 };
 export type RecognitionOptions = {
+  profile?: "mini-squat" | "knee-pushup";
   allowPartialSquat?: boolean;
   reference?: PoseReference;
 };
@@ -432,15 +433,15 @@ export function observePose(
       (!good(c.shoulder) || p[c.shoulder].y < p[c.hip].y);
     return finish({
       ...base(g.ids, g.side),
-      ready: upright && bend > 145,
-      extended: upright && bend < 115,
-      amplitude: clamp((165 - bend) / 80),
+      ready: upright && bend > (options.profile === "mini-squat" ? 160 : 145),
+      extended: upright && bend < (options.profile === "mini-squat" ? 145 : 115),
+      amplitude: clamp((165 - bend) / (options.profile === "mini-squat" ? 35 : 80)),
       motion: p[c.hip].y / scale,
     });
   }
   if (exercise === "pushup" || exercise === "diamond") {
     const groups = candidates.flatMap((c) =>
-      [c.ankle, c.knee].map((end) => ({
+      (options.profile === "knee-pushup" ? [c.knee] : [c.ankle, c.knee]).map((end) => ({
         side: c.side,
         ids: [c.shoulder, c.elbow, c.wrist, c.hip, end],
       })),

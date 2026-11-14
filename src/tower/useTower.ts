@@ -1,0 +1,41 @@
+import {useEffect,useRef,useState} from 'react';
+import {readSave,writeSave} from '../services/storage';
+import {gameSync,supabaseClient} from '../services/sync';
+import {initialSave,applyCommand} from './engine';
+import type {PlayerSave,TowerCommand} from './model';
+export type TowerSlot={slot:1|2|3;save:PlayerSave|null;updatedAt:string|null;cloudId?:string;revision?:number};
+const KEY='battle-tower:slots:v1';
+const blank=():TowerSlot[]=>[1,2,3].map(slot=>({slot:slot as 1|2|3,save:null,updatedAt:null}));
+export function useTower(){
+ const [slots,setSlots]=useState<TowerSlot[]>(blank),[active,setActive]=useState<PlayerSave|null>(null),[activeSlot,setActiveSlot]=useState<1|2|3|null>(null),[ready,setReady]=useState(false),[error,setError]=useState(''),[saving,setSaving]=useState(false),[cloudStatus,setCloudStatus]=useState('Local save');
+ const current=useRef<PlayerSave|null>(null),slotRef=useRef<1|2|3|null>(null),all=useRef(slots),queue=useRef(Promise.resolve()),remote=useRef<{id:string;epoch:number;revision:number}|null>(null);
+ const publish=(s:PlayerSave|null)=>{current.current=s;setActive(s);};
+ const persist=async(next:TowerSlot[])=>{await writeSave(KEY,next);all.current=next;setSlots(next);};
+ useEffect(()=>{let disposed=false;void readSave<TowerSlot[]>(KEY).then(s=>{if(disposed)return;if(s&&s.length===3){all.current=s;setSlots(s);}setReady(true);}).catch(e=>{setError(String(e));setReady(true);});return()=>{disposed=true;};},[]);
+ useEffect(()=>{const timer=setInterval(()=>{const r=remote.current;if(r)void gameSync.control(r.id,'renew',r.epoch).then(v=>{if(!v.ok){setError(v.error);setCloudStatus('Control lost — reconnect before continuing');remote.current=null;}});},25000);return()=>clearInterval(timer);},[]);
+ async function saveActive(s:PlayerSave){if(slotRef.current===null)return;const next=all.current.map(v=>v.slot===slotRef.current?{...v,save:s,updatedAt:new Date().toISOString(),...(remote.current?{cloudId:remote.current.id,revision:remote.current.revision}:{})}:v);await persist(next);}
+ function send(command:TowerCommand):Promise<boolean>{
+  let resolve!:(ok:boolean)=>void;const result=new Promise<boolean>(r=>resolve=r);
+  queue.current=queue.current.then(async()=>{if(!current.current){resolve(false);return;}setSaving(true);setError('');try{
+   let next:PlayerSave;
+   const r=remote.current;
+   if(r){if(!supabaseClient)throw Error('Cloud unavailable');const operationId=crypto.randomUUID();const pending={saveId:r.id,operationId,leaseEpoch:r.epoch,expectedRevision:r.revision,command};await writeSave(`battle-tower:pending:${r.id}`,pending);const response=await supabaseClient.functions.invoke('tower-command',{body:pending});if(response.error||response.data?.error)throw Error(response.data?.error??response.error?.message);next=response.data.snapshot;r.revision=response.data.revision;await writeSave(`battle-tower:pending:${r.id}`,null);setCloudStatus('Cloud saved');}
+   else {if(slotRef.current!==null&&all.current.find(v=>v.slot===slotRef.current)?.cloudId)throw Error('Reconnect this cloud slot before changing it. Your cached progress is safe.');next=applyCommand(current.current,command);}
+   await saveActive(next);publish(next);resolve(true);
+  }catch(e){setError(e instanceof Error?e.message:String(e));resolve(false);}finally{setSaving(false);}});return result;
+ }
+ async function create(slot:1|2|3,name:string,avatar:'male'|'female'){if(all.current[slot-1].save)throw Error('Slot already occupied');const s=initialSave(name,avatar);await persist(all.current.map(v=>v.slot===slot?{slot,save:s,updatedAt:new Date().toISOString()}:v));remote.current=null;slotRef.current=slot;setActiveSlot(slot);publish(s);}
+ async function select(slot:1|2|3){await queue.current;const entry=all.current[slot-1];remote.current=null;slotRef.current=slot;setActiveSlot(slot);publish(entry.save);setError('');setCloudStatus(entry.cloudId?'Cloud cache — reconnect to continue':'Local save');}
+ async function remove(slot:1|2|3){await queue.current;await persist(all.current.map(v=>v.slot===slot?{slot,save:null,updatedAt:null}:v));if(slotRef.current===slot)close();}
+ function preview(){remote.current=null;slotRef.current=null;setActiveSlot(null);publish(initialSave('Developer Preview','male',true));setCloudStatus('Local preview — no records synced');setError('');}
+ function close(){const r=remote.current;if(r)void gameSync.control(r.id,'release',r.epoch);remote.current=null;slotRef.current=null;setActiveSlot(null);publish(null);}
+ async function attachCloud(id:string){try{setError('');setCloudStatus('Connecting…');const auth=await gameSync.authenticate();if(!auth.ok)throw Error(auth.error);if(!supabaseClient)throw Error('Supabase unavailable');const lease=await gameSync.control(id,'acquire');if(!lease.ok)throw Error(lease.error);const read=await supabaseClient.rpc('read_tower_context',{save_id:id});if(read.error)throw Error(read.error.message);remote.current={id,epoch:lease.data.epoch,revision:read.data.revision};let next=read.data.snapshot as PlayerSave|null;
+ if(!next){const init=await supabaseClient.functions.invoke('tower-command',{body:{saveId:id,operationId:crypto.randomUUID(),leaseEpoch:lease.data.epoch,expectedRevision:read.data.revision,command:{kind:'initialize',name:current.current?.name??'Adventurer',avatar:current.current?.avatar??'male'}}});if(init.error||init.data?.error)throw Error(init.data?.error??init.error?.message);next=init.data.snapshot;remote.current.revision=init.data.revision;}
+ // Recover a response lost in transit with the original operation id, never mint another reward.
+ const pending=await readSave<Record<string,unknown>>(`battle-tower:pending:${id}`);if(pending){const retry=await supabaseClient.functions.invoke('tower-command',{body:{...pending,leaseEpoch:lease.data.epoch}});if(retry.error||retry.data?.error)throw Error(retry.data?.error??retry.error?.message);if(retry.data.revision>=remote.current.revision){next=retry.data.snapshot;remote.current.revision=retry.data.revision;}await writeSave(`battle-tower:pending:${id}`,null);}
+ if(!next)throw Error('Cloud returned no save');await saveActive(next);publish(next);setCloudStatus('Cloud connected');
+ }catch(e){remote.current=null;setError(String(e));setCloudStatus('Cloud not connected');}}
+ async function connectCloud(){if(current.current?.debug||!slotRef.current){setError('Developer preview is local only');return;}const entry=all.current[slotRef.current-1];if(entry.cloudId){await attachCloud(entry.cloudId);return;}const auth=await gameSync.authenticate();if(!auth.ok){setError(auth.error);return;}const created=await gameSync.createSave('Battle Tower',crypto.randomUUID());if(!created.ok){setError(created.error);return;}await attachCloud(created.data.saveId);}
+ function disconnectCloud(){const r=remote.current;if(r)void gameSync.control(r.id,'release',r.epoch);remote.current=null;setCloudStatus('Cloud disconnected — cached view');}
+ return {slots,active,activeSlot,ready,error,saving,cloudStatus,send,create,select,remove,preview,close,connectCloud,disconnectCloud,attachCloud};
+}

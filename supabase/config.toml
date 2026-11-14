@@ -7,3 +7,6 @@ verify_jwt = true
 [functions.camera-pair]
 # Capability-protected, isolated camera pairing; never authenticates a game save.
 verify_jwt = false
+
+[functions.tower-command]
+verify_jwt = false

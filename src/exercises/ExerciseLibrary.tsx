@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExerciseId } from "../core/contracts";
-import { attacks } from "../core/game";
+import { SKILLS as attacks } from "../tower/catalog";
 import ExerciseDemo, { EXERCISE_GUIDES } from "./ExerciseDemo";
 import "./exercises.css";
 export default function ExerciseLibrary() {
@@ -12,7 +12,7 @@ export default function ExerciseLibrary() {
     <section className="exercise-library">
       <p>
         Choose an exercise to see its starting position, full movement and
-        camera placement. Equip its skill from your satchel before an encounter.
+        camera placement. Equip its skill from the Skill Academy before an encounter.
       </p>
       <div className="exercise-library-tabs">
         {list.map((a) => (

@@ -9,3 +9,10 @@ for(const name of ['contracts','game','worldMaps','commands','importSave']){
  else await writeFile(path,generated);
 }
 console.log(check?'Shared game source parity verified.':'Generated shared Edge game modules.');
+await mkdir(new URL('./functions/_shared/tower/',import.meta.url),{recursive:true});
+for(const name of ['model','catalog','generation','engine']){
+ const input=await readFile(new URL(`../src/tower/${name}.ts`,import.meta.url),'utf8');
+ const generated='// GENERATED. Edit src/tower, then run supabase/sync-core.mjs.\n'+input.replace(/from (['"])(\.\/[\w-]+)\1/g,"from '$2.ts'").replace(/from (['"])\.\.\/core\/contracts\1/g,"from '../contracts.ts'");
+ const path=new URL(`./functions/_shared/tower/${name}.ts`,import.meta.url);
+ if(check){if(await readFile(path,'utf8')!==generated)throw Error(`Tower server parity differs: ${name}`);}else await writeFile(path,generated);
+}
