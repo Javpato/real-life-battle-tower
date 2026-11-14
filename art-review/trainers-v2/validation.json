@@ -1,0 +1,89 @@
+{
+  "status": "candidates awaiting artistic approval",
+  "assets": {
+    "a-trail-athlete": {
+      "size": [
+        96,
+        96
+      ],
+      "visible_rgba_colors": 27,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "visible_bbox": [
+        24,
+        6,
+        69,
+        93
+      ],
+      "nonuniform_blocks": 0,
+      "errors": [],
+      "passed": true,
+      "nearest4xExact": true,
+      "editableGridExact": true,
+      "pivot": [
+        48,
+        92
+      ],
+      "footBaseline": 92,
+      "sha256": "3f679fbf7dd974b0e051c6db29cf1b995cdd7a2d05ced24efca3ab54bee47d69"
+    },
+    "b-strength-specialist": {
+      "size": [
+        96,
+        96
+      ],
+      "visible_rgba_colors": 30,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "visible_bbox": [
+        26,
+        5,
+        70,
+        93
+      ],
+      "nonuniform_blocks": 0,
+      "errors": [],
+      "passed": true,
+      "nearest4xExact": true,
+      "editableGridExact": true,
+      "pivot": [
+        48,
+        92
+      ],
+      "footBaseline": 92,
+      "sha256": "0b80f0e64bddeac47b54e1cfb35b063c3afea489113f06199b77585b01a7b674"
+    },
+    "c-veteran-coach": {
+      "size": [
+        96,
+        96
+      ],
+      "visible_rgba_colors": 29,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "visible_bbox": [
+        27,
+        6,
+        72,
+        93
+      ],
+      "nonuniform_blocks": 0,
+      "errors": [],
+      "passed": true,
+      "nearest4xExact": true,
+      "editableGridExact": true,
+      "pivot": [
+        48,
+        92
+      ],
+      "footBaseline": 92,
+      "sha256": "d4125d4059501a6254619078135c3a3ab95fb919f3bb964bcf3f228014300241"
+    }
+  }
+}

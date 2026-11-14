@@ -1,3 +1,11 @@
+# Nueva revisión artística — aprobación pendiente
+
+La entrega actual contiene únicamente tres propuestas en `art-review/trainers-v2`. La generación primaria es artística mediante imagegen; Pixel Art Studio se utiliza para preparación, inspección y exportación. El método geométrico anterior queda congelado para personajes.
+
+Antes de sustituir el resto de los recursos o ejecutar el siguiente bloque jugable, el usuario debe aprobar la dirección artística de esta prueba. Las decisiones de progresión/Flash/jefes/Training Grounds están conservadas en `art-review/trainers-v2/NEXT_PHASE.md`; todavía no están implementadas.
+
+---
+
 # Battle Tower delivery status
 
 - Implemented: canonical fresh saves;30skills; trials; connected prerequisite trees; deterministic tower; fixed-loadout7challenges; specializations; safe-point equipment; exact workout sequences, results and provenance.

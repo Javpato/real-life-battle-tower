@@ -11,6 +11,11 @@ React/Vite/TypeScript, native pixel canvas presentation, Capacitor Android and S
 - Supabase tower-command runs generated source copies. Run node supabase/sync-core.mjs after tower changes and --check before delivery. Service keys stay server-side. Existing linked-device membership, receipts and revision control apply.
 - Android steps require native readings and server accounting; no fake production steps. Coins never buy physical unlocks or stats.
 
+## Approved art-method change
+- Complex character illustration must use the available image-generation tool or a specialized art model. Python/Pillow/SVG/Canvas are only for image processing, pixel repairs, sheets and presentation, never the primary anatomy/character illustration method.
+- Do not regenerate characters with scripts/build-tower-art.py. Its output is the previous art direction awaiting replacement.
+- art-review/trainers-v2 is an isolated three-candidate approval proof. Do not integrate or mass-produce the new art until the user approves the direction.
+
 ## Visual ownership
 - Native source-resolution pixel assets live under public/assets/tower with manifest and reproducible generator. No old RPG graphics. PixelScene maps authoritative accepted progress to visuals; no independent exercise counters.
 - World exploration and associated sprites/core are retired. All new screens and support panels must follow the tower visual system.

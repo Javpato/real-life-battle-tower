@@ -1,0 +1,3857 @@
+{
+  "a-trail-athlete": {
+    "nativeSize": [
+      96,
+      96
+    ],
+    "status": "first-art-proof candidate; requires user approval",
+    "source": "working/a-trail-athlete-redraw.png",
+    "nativePixelChanges": 16,
+    "visibleSourcePixels": 1945,
+    "registrationTranslation": [
+      2,
+      0
+    ],
+    "footBaselineY": 92,
+    "pivot": [
+      48,
+      92
+    ],
+    "opaqueColors": 27,
+    "binaryAlpha": true,
+    "bbox": [
+      24,
+      6,
+      69,
+      93
+    ],
+    "edits": [
+      {
+        "x": 47,
+        "y": 20,
+        "before": [
+          27,
+          24,
+          33
+        ],
+        "after": [
+          23,
+          21,
+          30
+        ],
+        "reason": "separate eyebrow and two-pixel eye clusters; remove alternating far-eye stripe"
+      },
+      {
+        "x": 48,
+        "y": 20,
+        "before": [
+          29,
+          29,
+          37
+        ],
+        "after": [
+          23,
+          21,
+          30
+        ],
+        "reason": "separate eyebrow and two-pixel eye clusters; remove alternating far-eye stripe"
+      },
+      {
+        "x": 46,
+        "y": 21,
+        "before": [
+          43,
+          30,
+          39
+        ],
+        "after": [
+          252,
+          199,
+          155
+        ],
+        "reason": "separate eyebrow and two-pixel eye clusters; remove alternating far-eye stripe"
+      },
+      {
+        "x": 47,
+        "y": 21,
+        "before": [
+          64,
+          53,
+          60
+        ],
+        "after": [
+          252,
+          199,
+          155
+        ],
+        "reason": "separate eyebrow and two-pixel eye clusters; remove alternating far-eye stripe"
+      },
+      {
+        "x": 48,
+        "y": 21,
+        "before": [
+          87,
+          74,
+          88
+        ],
+        "after": [
+          252,
+          199,
+          155
+        ],
+        "reason": "separate eyebrow and two-pixel eye clusters; remove alternating far-eye stripe"
+      },
+      {
+        "x": 53,
+        "y": 21,
+        "before": [
+          128,
+          100,
+          96
+        ],
+        "after": [
+          23,
+          21,
+          30
+        ],
+        "reason": "separate eyebrow and two-pixel eye clusters; remove alternating far-eye stripe"
+      },
+      {
+        "x": 54,
+        "y": 21,
+        "before": [
+          86,
+          72,
+          87
+        ],
+        "after": [
+          23,
+          21,
+          30
+        ],
+        "reason": "separate eyebrow and two-pixel eye clusters; remove alternating far-eye stripe"
+      },
+      {
+        "x": 53,
+        "y": 22,
+        "before": [
+          18,
+          16,
+          25
+        ],
+        "after": [
+          251,
+          237,
+          220
+        ],
+        "reason": "separate eyebrow and two-pixel eye clusters; remove alternating far-eye stripe"
+      },
+      {
+        "x": 54,
+        "y": 22,
+        "before": [
+          251,
+          237,
+          220
+        ],
+        "after": [
+          23,
+          21,
+          30
+        ],
+        "reason": "separate eyebrow and two-pixel eye clusters; remove alternating far-eye stripe"
+      },
+      {
+        "x": 54,
+        "y": 23,
+        "before": [
+          18,
+          16,
+          25
+        ],
+        "after": [
+          23,
+          21,
+          30
+        ],
+        "reason": "separate eyebrow and two-pixel eye clusters; remove alternating far-eye stripe"
+      },
+      {
+        "x": 52,
+        "y": 23,
+        "before": [
+          27,
+          24,
+          33
+        ],
+        "after": [
+          252,
+          199,
+          155
+        ],
+        "reason": "separate eyebrow and two-pixel eye clusters; remove alternating far-eye stripe"
+      },
+      {
+        "x": 52,
+        "y": 24,
+        "before": [
+          29,
+          29,
+          37
+        ],
+        "after": [
+          252,
+          199,
+          155
+        ],
+        "reason": "separate eyebrow and two-pixel eye clusters; remove alternating far-eye stripe"
+      },
+      {
+        "x": 53,
+        "y": 24,
+        "before": [
+          251,
+          237,
+          220
+        ],
+        "after": [
+          252,
+          199,
+          155
+        ],
+        "reason": "separate eyebrow and two-pixel eye clusters; remove alternating far-eye stripe"
+      },
+      {
+        "x": 49,
+        "y": 26,
+        "before": [
+          84,
+          56,
+          68
+        ],
+        "after": [
+          23,
+          21,
+          30
+        ],
+        "reason": "replace tiny open O mouth with legible asymmetric smile"
+      },
+      {
+        "x": 50,
+        "y": 26,
+        "before": [
+          84,
+          56,
+          68
+        ],
+        "after": [
+          23,
+          21,
+          30
+        ],
+        "reason": "replace tiny open O mouth with legible asymmetric smile"
+      },
+      {
+        "x": 50,
+        "y": 27,
+        "before": [
+          141,
+          57,
+          57
+        ],
+        "after": [
+          252,
+          199,
+          155
+        ],
+        "reason": "replace tiny open O mouth with legible asymmetric smile"
+      }
+    ],
+    "preserved": "Generated anatomy, silhouette, outfit shapes and poses. No resampling of native final art. Only preview is enlarged with nearest-neighbor."
+  },
+  "b-strength-specialist": {
+    "nativeSize": [
+      96,
+      96
+    ],
+    "status": "first-art-proof candidate; requires user approval",
+    "source": "working/b-strength-specialist-redraw.png",
+    "nativePixelChanges": 198,
+    "visibleSourcePixels": 1965,
+    "registrationTranslation": [
+      2,
+      0
+    ],
+    "footBaselineY": 92,
+    "pivot": [
+      48,
+      92
+    ],
+    "opaqueColors": 30,
+    "binaryAlpha": true,
+    "bbox": [
+      26,
+      5,
+      70,
+      93
+    ],
+    "edits": [
+      {
+        "x": 46,
+        "y": 21,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 49,
+        "y": 21,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 50,
+        "y": 21,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 51,
+        "y": 21,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 52,
+        "y": 21,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 53,
+        "y": 21,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 54,
+        "y": 21,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 55,
+        "y": 21,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 48,
+        "y": 22,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 49,
+        "y": 22,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 50,
+        "y": 22,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 51,
+        "y": 22,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 52,
+        "y": 22,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 53,
+        "y": 22,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 54,
+        "y": 22,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 55,
+        "y": 22,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 45,
+        "y": 23,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 49,
+        "y": 23,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 50,
+        "y": 23,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 51,
+        "y": 23,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 52,
+        "y": 23,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 53,
+        "y": 23,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 54,
+        "y": 23,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 55,
+        "y": 23,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 47,
+        "y": 24,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 51,
+        "y": 24,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 52,
+        "y": 24,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 53,
+        "y": 24,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 54,
+        "y": 24,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 43,
+        "y": 25,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 44,
+        "y": 25,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 52,
+        "y": 25,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 53,
+        "y": 25,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 42,
+        "y": 26,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 43,
+        "y": 26,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 51,
+        "y": 26,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 52,
+        "y": 26,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 53,
+        "y": 26,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 43,
+        "y": 27,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 44,
+        "y": 27,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 45,
+        "y": 27,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 47,
+        "y": 27,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 51,
+        "y": 27,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 52,
+        "y": 27,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 53,
+        "y": 27,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 43,
+        "y": 28,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 44,
+        "y": 28,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 45,
+        "y": 28,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 47,
+        "y": 28,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 51,
+        "y": 28,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 52,
+        "y": 28,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 53,
+        "y": 28,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 55,
+        "y": 28,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 46,
+        "y": 29,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 47,
+        "y": 29,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 48,
+        "y": 29,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 49,
+        "y": 29,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 50,
+        "y": 29,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 51,
+        "y": 29,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 52,
+        "y": 29,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 53,
+        "y": 29,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 54,
+        "y": 29,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 47,
+        "y": 30,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 48,
+        "y": 30,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 49,
+        "y": 30,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 50,
+        "y": 30,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 53,
+        "y": 30,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 46,
+        "y": 31,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 49,
+        "y": 31,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 50,
+        "y": 31,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 51,
+        "y": 31,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 52,
+        "y": 31,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked face"
+      },
+      {
+        "x": 46,
+        "y": 32,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked neck"
+      },
+      {
+        "x": 47,
+        "y": 32,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked neck"
+      },
+      {
+        "x": 46,
+        "y": 33,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked neck"
+      },
+      {
+        "x": 47,
+        "y": 33,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked neck"
+      },
+      {
+        "x": 48,
+        "y": 33,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked neck"
+      },
+      {
+        "x": 46,
+        "y": 34,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked neck"
+      },
+      {
+        "x": 47,
+        "y": 34,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked neck"
+      },
+      {
+        "x": 48,
+        "y": 34,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked neck"
+      },
+      {
+        "x": 46,
+        "y": 35,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked neck"
+      },
+      {
+        "x": 47,
+        "y": 35,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked neck"
+      },
+      {
+        "x": 45,
+        "y": 36,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked neck"
+      },
+      {
+        "x": 46,
+        "y": 36,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked neck"
+      },
+      {
+        "x": 47,
+        "y": 36,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked neck"
+      },
+      {
+        "x": 44,
+        "y": 37,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked neck"
+      },
+      {
+        "x": 45,
+        "y": 37,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked neck"
+      },
+      {
+        "x": 46,
+        "y": 37,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked neck"
+      },
+      {
+        "x": 37,
+        "y": 33,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked raised fist"
+      },
+      {
+        "x": 38,
+        "y": 33,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked raised fist"
+      },
+      {
+        "x": 37,
+        "y": 34,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked raised fist"
+      },
+      {
+        "x": 38,
+        "y": 34,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked raised fist"
+      },
+      {
+        "x": 35,
+        "y": 35,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked raised fist"
+      },
+      {
+        "x": 36,
+        "y": 35,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked raised fist"
+      },
+      {
+        "x": 37,
+        "y": 35,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked raised fist"
+      },
+      {
+        "x": 38,
+        "y": 35,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked raised fist"
+      },
+      {
+        "x": 39,
+        "y": 35,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked raised fist"
+      },
+      {
+        "x": 35,
+        "y": 36,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked raised fist"
+      },
+      {
+        "x": 36,
+        "y": 36,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked raised fist"
+      },
+      {
+        "x": 37,
+        "y": 36,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked raised fist"
+      },
+      {
+        "x": 38,
+        "y": 36,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked raised fist"
+      },
+      {
+        "x": 37,
+        "y": 37,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked raised fist"
+      },
+      {
+        "x": 33,
+        "y": 40,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked left forearm"
+      },
+      {
+        "x": 32,
+        "y": 41,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked left forearm"
+      },
+      {
+        "x": 33,
+        "y": 41,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked left forearm"
+      },
+      {
+        "x": 34,
+        "y": 41,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked left forearm"
+      },
+      {
+        "x": 36,
+        "y": 41,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked left forearm"
+      },
+      {
+        "x": 32,
+        "y": 42,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked left forearm"
+      },
+      {
+        "x": 33,
+        "y": 42,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked left forearm"
+      },
+      {
+        "x": 34,
+        "y": 42,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked left forearm"
+      },
+      {
+        "x": 35,
+        "y": 42,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked left forearm"
+      },
+      {
+        "x": 32,
+        "y": 43,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked left forearm"
+      },
+      {
+        "x": 33,
+        "y": 43,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked left forearm"
+      },
+      {
+        "x": 34,
+        "y": 43,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked left forearm"
+      },
+      {
+        "x": 32,
+        "y": 44,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked left forearm"
+      },
+      {
+        "x": 33,
+        "y": 44,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked left forearm"
+      },
+      {
+        "x": 34,
+        "y": 44,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked left forearm"
+      },
+      {
+        "x": 42,
+        "y": 45,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 43,
+        "y": 45,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 44,
+        "y": 45,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 45,
+        "y": 45,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 42,
+        "y": 46,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 43,
+        "y": 46,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 44,
+        "y": 46,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 45,
+        "y": 46,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 42,
+        "y": 47,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 43,
+        "y": 47,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 45,
+        "y": 47,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 46,
+        "y": 47,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 47,
+        "y": 47,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 48,
+        "y": 47,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 40,
+        "y": 48,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 41,
+        "y": 48,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 42,
+        "y": 48,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 43,
+        "y": 48,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 45,
+        "y": 48,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 46,
+        "y": 48,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 47,
+        "y": 48,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 43,
+        "y": 49,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 44,
+        "y": 49,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 45,
+        "y": 49,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 46,
+        "y": 49,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked midriff"
+      },
+      {
+        "x": 58,
+        "y": 46,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 59,
+        "y": 46,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 60,
+        "y": 46,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 57,
+        "y": 47,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 58,
+        "y": 47,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 60,
+        "y": 47,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 61,
+        "y": 47,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 57,
+        "y": 48,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 58,
+        "y": 48,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 59,
+        "y": 48,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 60,
+        "y": 48,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 61,
+        "y": 48,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 57,
+        "y": 49,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 58,
+        "y": 49,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 59,
+        "y": 49,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 60,
+        "y": 49,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 61,
+        "y": 49,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 62,
+        "y": 49,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 58,
+        "y": 50,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 59,
+        "y": 50,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 60,
+        "y": 50,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 61,
+        "y": 50,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 62,
+        "y": 50,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 60,
+        "y": 51,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right forearm"
+      },
+      {
+        "x": 60,
+        "y": 56,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right hand"
+      },
+      {
+        "x": 61,
+        "y": 56,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right hand"
+      },
+      {
+        "x": 60,
+        "y": 57,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right hand"
+      },
+      {
+        "x": 62,
+        "y": 57,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right hand"
+      },
+      {
+        "x": 61,
+        "y": 58,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked right hand"
+      },
+      {
+        "x": 62,
+        "y": 58,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right hand"
+      },
+      {
+        "x": 63,
+        "y": 58,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right hand"
+      },
+      {
+        "x": 64,
+        "y": 58,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right hand"
+      },
+      {
+        "x": 61,
+        "y": 59,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked right hand"
+      },
+      {
+        "x": 62,
+        "y": 59,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked right hand"
+      },
+      {
+        "x": 63,
+        "y": 59,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked right hand"
+      },
+      {
+        "x": 64,
+        "y": 59,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked right hand"
+      },
+      {
+        "x": 30,
+        "y": 79,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked left ankle"
+      },
+      {
+        "x": 30,
+        "y": 80,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked left ankle"
+      },
+      {
+        "x": 30,
+        "y": 81,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked left ankle"
+      },
+      {
+        "x": 31,
+        "y": 81,
+        "before": [
+          247,
+          182,
+          137
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restore medium-brown skin, masked left ankle"
+      },
+      {
+        "x": 32,
+        "y": 83,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked left ankle"
+      },
+      {
+        "x": 61,
+        "y": 79,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked right ankle"
+      },
+      {
+        "x": 59,
+        "y": 80,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked right ankle"
+      },
+      {
+        "x": 60,
+        "y": 80,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked right ankle"
+      },
+      {
+        "x": 61,
+        "y": 80,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked right ankle"
+      },
+      {
+        "x": 59,
+        "y": 81,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked right ankle"
+      },
+      {
+        "x": 60,
+        "y": 81,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked right ankle"
+      },
+      {
+        "x": 61,
+        "y": 81,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked right ankle"
+      },
+      {
+        "x": 59,
+        "y": 82,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked right ankle"
+      },
+      {
+        "x": 60,
+        "y": 82,
+        "before": [
+          194,
+          127,
+          100
+        ],
+        "after": [
+          137,
+          82,
+          64
+        ],
+        "reason": "restore medium-brown skin, masked right ankle"
+      },
+      {
+        "x": 50,
+        "y": 22,
+        "before": [
+          181,
+          119,
+          82
+        ],
+        "after": [
+          213,
+          156,
+          111
+        ],
+        "reason": "restrain oversized eye highlights and retain warm forehead light"
+      },
+      {
+        "x": 51,
+        "y": 22,
+        "before": [
+          181,
+          119,
+          82
+        ],
+        "after": [
+          213,
+          156,
+          111
+        ],
+        "reason": "restrain oversized eye highlights and retain warm forehead light"
+      },
+      {
+        "x": 48,
+        "y": 28,
+        "before": [
+          253,
+          247,
+          229
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restrain oversized eye highlights and retain warm forehead light"
+      },
+      {
+        "x": 49,
+        "y": 28,
+        "before": [
+          19,
+          15,
+          27
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restrain oversized eye highlights and retain warm forehead light"
+      },
+      {
+        "x": 55,
+        "y": 27,
+        "before": [
+          253,
+          247,
+          229
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restrain oversized eye highlights and retain warm forehead light"
+      },
+      {
+        "x": 54,
+        "y": 27,
+        "before": [
+          19,
+          15,
+          27
+        ],
+        "after": [
+          181,
+          119,
+          82
+        ],
+        "reason": "restrain oversized eye highlights and retain warm forehead light"
+      },
+      {
+        "x": 49,
+        "y": 25,
+        "before": [
+          0,
+          0,
+          0
+        ],
+        "after": [
+          31,
+          22,
+          35
+        ],
+        "reason": "restrain oversized eye highlights and retain warm forehead light"
+      },
+      {
+        "x": 49,
+        "y": 27,
+        "before": [
+          0,
+          0,
+          0
+        ],
+        "after": [
+          31,
+          22,
+          35
+        ],
+        "reason": "restrain oversized eye highlights and retain warm forehead light"
+      }
+    ],
+    "preserved": "Generated anatomy, silhouette, outfit shapes and poses. No resampling of native final art. Only preview is enlarged with nearest-neighbor."
+  },
+  "c-veteran-coach": {
+    "nativeSize": [
+      96,
+      96
+    ],
+    "status": "first-art-proof candidate; requires user approval",
+    "source": "working/c-veteran-coach-redraw.png",
+    "nativePixelChanges": 35,
+    "visibleSourcePixels": 2090,
+    "registrationTranslation": [
+      2,
+      1
+    ],
+    "footBaselineY": 92,
+    "pivot": [
+      48,
+      92
+    ],
+    "opaqueColors": 29,
+    "binaryAlpha": true,
+    "bbox": [
+      27,
+      6,
+      72,
+      93
+    ],
+    "edits": [
+      {
+        "x": 49,
+        "y": 20,
+        "before": [
+          0,
+          0,
+          0
+        ],
+        "after": [
+          26,
+          20,
+          34
+        ],
+        "reason": "clean two-pixel eyes and eyebrows without changing face contour"
+      },
+      {
+        "x": 50,
+        "y": 20,
+        "before": [
+          0,
+          0,
+          36
+        ],
+        "after": [
+          243,
+          186,
+          129
+        ],
+        "reason": "clean two-pixel eyes and eyebrows without changing face contour"
+      },
+      {
+        "x": 51,
+        "y": 20,
+        "before": [
+          22,
+          17,
+          29
+        ],
+        "after": [
+          243,
+          186,
+          129
+        ],
+        "reason": "clean two-pixel eyes and eyebrows without changing face contour"
+      },
+      {
+        "x": 49,
+        "y": 21,
+        "before": [
+          29,
+          23,
+          37
+        ],
+        "after": [
+          26,
+          20,
+          34
+        ],
+        "reason": "clean two-pixel eyes and eyebrows without changing face contour"
+      },
+      {
+        "x": 50,
+        "y": 21,
+        "before": [
+          235,
+          212,
+          192
+        ],
+        "after": [
+          243,
+          186,
+          129
+        ],
+        "reason": "clean two-pixel eyes and eyebrows without changing face contour"
+      },
+      {
+        "x": 51,
+        "y": 21,
+        "before": [
+          199,
+          172,
+          140
+        ],
+        "after": [
+          243,
+          186,
+          129
+        ],
+        "reason": "clean two-pixel eyes and eyebrows without changing face contour"
+      },
+      {
+        "x": 48,
+        "y": 22,
+        "before": [
+          250,
+          238,
+          209
+        ],
+        "after": [
+          243,
+          186,
+          129
+        ],
+        "reason": "clean two-pixel eyes and eyebrows without changing face contour"
+      },
+      {
+        "x": 49,
+        "y": 22,
+        "before": [
+          33,
+          27,
+          44
+        ],
+        "after": [
+          243,
+          186,
+          129
+        ],
+        "reason": "clean two-pixel eyes and eyebrows without changing face contour"
+      },
+      {
+        "x": 54,
+        "y": 19,
+        "before": [
+          243,
+          186,
+          129
+        ],
+        "after": [
+          26,
+          20,
+          34
+        ],
+        "reason": "clean two-pixel eyes and eyebrows without changing face contour"
+      },
+      {
+        "x": 55,
+        "y": 19,
+        "before": [
+          22,
+          17,
+          29
+        ],
+        "after": [
+          26,
+          20,
+          34
+        ],
+        "reason": "clean two-pixel eyes and eyebrows without changing face contour"
+      },
+      {
+        "x": 54,
+        "y": 20,
+        "before": [
+          0,
+          0,
+          0
+        ],
+        "after": [
+          245,
+          231,
+          209
+        ],
+        "reason": "clean two-pixel eyes and eyebrows without changing face contour"
+      },
+      {
+        "x": 55,
+        "y": 20,
+        "before": [
+          235,
+          212,
+          192
+        ],
+        "after": [
+          26,
+          20,
+          34
+        ],
+        "reason": "clean two-pixel eyes and eyebrows without changing face contour"
+      },
+      {
+        "x": 54,
+        "y": 21,
+        "before": [
+          26,
+          20,
+          34
+        ],
+        "after": [
+          245,
+          231,
+          209
+        ],
+        "reason": "clean two-pixel eyes and eyebrows without changing face contour"
+      },
+      {
+        "x": 55,
+        "y": 21,
+        "before": [
+          245,
+          231,
+          209
+        ],
+        "after": [
+          26,
+          20,
+          34
+        ],
+        "reason": "clean two-pixel eyes and eyebrows without changing face contour"
+      },
+      {
+        "x": 54,
+        "y": 22,
+        "before": [
+          26,
+          20,
+          34
+        ],
+        "after": [
+          243,
+          186,
+          129
+        ],
+        "reason": "clean two-pixel eyes and eyebrows without changing face contour"
+      },
+      {
+        "x": 55,
+        "y": 22,
+        "before": [
+          250,
+          238,
+          209
+        ],
+        "after": [
+          243,
+          186,
+          129
+        ],
+        "reason": "clean two-pixel eyes and eyebrows without changing face contour"
+      },
+      {
+        "x": 48,
+        "y": 25,
+        "before": [
+          199,
+          172,
+          140
+        ],
+        "after": [
+          177,
+          190,
+          198
+        ],
+        "reason": "cool existing beard clusters only; keep face and jacket warm"
+      },
+      {
+        "x": 49,
+        "y": 25,
+        "before": [
+          160,
+          148,
+          157
+        ],
+        "after": [
+          116,
+          127,
+          144
+        ],
+        "reason": "cool existing beard clusters only; keep face and jacket warm"
+      },
+      {
+        "x": 50,
+        "y": 25,
+        "before": [
+          245,
+          231,
+          209
+        ],
+        "after": [
+          219,
+          228,
+          226
+        ],
+        "reason": "cool existing beard clusters only; keep face and jacket warm"
+      },
+      {
+        "x": 51,
+        "y": 25,
+        "before": [
+          245,
+          231,
+          209
+        ],
+        "after": [
+          219,
+          228,
+          226
+        ],
+        "reason": "cool existing beard clusters only; keep face and jacket warm"
+      },
+      {
+        "x": 52,
+        "y": 25,
+        "before": [
+          245,
+          231,
+          209
+        ],
+        "after": [
+          219,
+          228,
+          226
+        ],
+        "reason": "cool existing beard clusters only; keep face and jacket warm"
+      },
+      {
+        "x": 53,
+        "y": 25,
+        "before": [
+          160,
+          148,
+          157
+        ],
+        "after": [
+          116,
+          127,
+          144
+        ],
+        "reason": "cool existing beard clusters only; keep face and jacket warm"
+      },
+      {
+        "x": 45,
+        "y": 26,
+        "before": [
+          235,
+          212,
+          192
+        ],
+        "after": [
+          177,
+          190,
+          198
+        ],
+        "reason": "cool existing beard clusters only; keep face and jacket warm"
+      },
+      {
+        "x": 45,
+        "y": 27,
+        "before": [
+          160,
+          148,
+          157
+        ],
+        "after": [
+          116,
+          127,
+          144
+        ],
+        "reason": "cool existing beard clusters only; keep face and jacket warm"
+      },
+      {
+        "x": 46,
+        "y": 27,
+        "before": [
+          245,
+          231,
+          209
+        ],
+        "after": [
+          219,
+          228,
+          226
+        ],
+        "reason": "cool existing beard clusters only; keep face and jacket warm"
+      },
+      {
+        "x": 47,
+        "y": 27,
+        "before": [
+          245,
+          231,
+          209
+        ],
+        "after": [
+          219,
+          228,
+          226
+        ],
+        "reason": "cool existing beard clusters only; keep face and jacket warm"
+      },
+      {
+        "x": 53,
+        "y": 27,
+        "before": [
+          160,
+          148,
+          157
+        ],
+        "after": [
+          116,
+          127,
+          144
+        ],
+        "reason": "cool existing beard clusters only; keep face and jacket warm"
+      },
+      {
+        "x": 48,
+        "y": 28,
+        "before": [
+          160,
+          148,
+          157
+        ],
+        "after": [
+          116,
+          127,
+          144
+        ],
+        "reason": "cool existing beard clusters only; keep face and jacket warm"
+      },
+      {
+        "x": 49,
+        "y": 28,
+        "before": [
+          245,
+          231,
+          209
+        ],
+        "after": [
+          219,
+          228,
+          226
+        ],
+        "reason": "cool existing beard clusters only; keep face and jacket warm"
+      },
+      {
+        "x": 50,
+        "y": 28,
+        "before": [
+          245,
+          231,
+          209
+        ],
+        "after": [
+          219,
+          228,
+          226
+        ],
+        "reason": "cool existing beard clusters only; keep face and jacket warm"
+      },
+      {
+        "x": 51,
+        "y": 28,
+        "before": [
+          245,
+          231,
+          209
+        ],
+        "after": [
+          219,
+          228,
+          226
+        ],
+        "reason": "cool existing beard clusters only; keep face and jacket warm"
+      },
+      {
+        "x": 52,
+        "y": 28,
+        "before": [
+          235,
+          212,
+          192
+        ],
+        "after": [
+          177,
+          190,
+          198
+        ],
+        "reason": "cool existing beard clusters only; keep face and jacket warm"
+      },
+      {
+        "x": 50,
+        "y": 26,
+        "before": [
+          152,
+          89,
+          73
+        ],
+        "after": [
+          116,
+          127,
+          144
+        ],
+        "reason": "separate beard smile from skin shadows"
+      },
+      {
+        "x": 51,
+        "y": 26,
+        "before": [
+          152,
+          89,
+          73
+        ],
+        "after": [
+          116,
+          127,
+          144
+        ],
+        "reason": "separate beard smile from skin shadows"
+      },
+      {
+        "x": 52,
+        "y": 26,
+        "before": [
+          152,
+          89,
+          73
+        ],
+        "after": [
+          116,
+          127,
+          144
+        ],
+        "reason": "separate beard smile from skin shadows"
+      }
+    ],
+    "preserved": "Generated anatomy, silhouette, outfit shapes and poses. No resampling of native final art. Only preview is enlarged with nearest-neighbor."
+  }
+}

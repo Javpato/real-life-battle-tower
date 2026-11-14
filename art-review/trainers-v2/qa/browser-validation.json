@@ -1,0 +1,106 @@
+{
+  "passed": true,
+  "viewports": [
+    [
+      1920,
+      1080
+    ],
+    [
+      1366,
+      768
+    ],
+    [
+      1280,
+      720
+    ],
+    [
+      915,
+      412
+    ],
+    [
+      800,
+      360
+    ],
+    [
+      390,
+      844
+    ]
+  ],
+  "images": [
+    {
+      "source": "final/a-trail-athlete.png",
+      "native": [
+        96,
+        96
+      ],
+      "rendered": [
+        96,
+        96
+      ],
+      "rendering": "pixelated"
+    },
+    {
+      "source": "final/a-trail-athlete-4x.png",
+      "native": [
+        384,
+        384
+      ],
+      "rendered": [
+        384,
+        384
+      ],
+      "rendering": "pixelated"
+    },
+    {
+      "source": "final/b-strength-specialist.png",
+      "native": [
+        96,
+        96
+      ],
+      "rendered": [
+        96,
+        96
+      ],
+      "rendering": "pixelated"
+    },
+    {
+      "source": "final/b-strength-specialist-4x.png",
+      "native": [
+        384,
+        384
+      ],
+      "rendered": [
+        384,
+        384
+      ],
+      "rendering": "pixelated"
+    },
+    {
+      "source": "final/c-veteran-coach.png",
+      "native": [
+        96,
+        96
+      ],
+      "rendered": [
+        96,
+        96
+      ],
+      "rendering": "pixelated"
+    },
+    {
+      "source": "final/c-veteran-coach-4x.png",
+      "native": [
+        384,
+        384
+      ],
+      "rendered": [
+        384,
+        384
+      ],
+      "rendering": "pixelated"
+    }
+  ],
+  "backgroundControlsPassed": true,
+  "allLocalLinksExist": true,
+  "errors": []
+}
