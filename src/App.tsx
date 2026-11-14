@@ -1574,97 +1574,57 @@ export default function App({localSaveId,onReturnToTitle,initialPanel=null}:{loc
       )}
       {quest && (
         <div className="modal-backdrop">
-          <section className="modal exercise-quest-modal">
-            <div className="card-title">
+          <section className="modal exercise-quest-modal" role="dialog" aria-modal="true" aria-label="Village exercise challenge">
+            <div className="card-title modal-top">
               <h2>A little village challenge</h2>
               <button
-                onClick={() => void dispatch({ kind: "cancelQuest" })}
+                type="button"
+                onClick={() => {
+                  if (quest.progress > 0 && !window.confirm("Leave this challenge? Its uncollected progress will be lost. Your adventure rewards already collected are kept.")) return;
+                  void dispatch({ kind: "cancelQuest" });
+                }}
                 aria-label="Leave quest"
-              >
-                ✕
-              </button>
+                aria-busy={pauseRequested}
+                style={{minWidth:44,minHeight:44}}
+              >✕</button>
             </div>
-            <p>
-              {quest.exercise} · {quest.progress} / {quest.target} units · quest
-              level {Math.min(5, (p.quests[quest.exercise] ?? 0) + 1)}
-            </p>
-            <Suspense fallback={<p>Preparing camera controls…</p>}>
-              <ExerciseCamera
-                key={quest.id}
-                sessionId={quest.id}
-                lastSide={quest.side}
-                exerciseId={quest.exercise}
-                target={quest.target}
-                progress={quest.progress}
-                mode={camera ? "camera" : "manual"}
-                muted={muted}
-                paused={pauseRequested}
-                sessionComplete={quest.progress >= quest.target}
-                active={
-                  camera &&
-                  quest.progress < quest.target &&
-                  !adventure.readOnly &&
-                  !adventure.error &&
-                  !pauseRequested
-                }
-                onUnit={onUnit}
-                onError={notify}
-              />
-            </Suspense>
-            {quest.progress >= quest.target ? (
-              <>
-                <p>Thank you! Small efforts make a strong village.</p>
-                <button
-                  className="primary"
-                  onClick={() => {
-                    const count = p.quests[quest.exercise] ?? 0;
-                    void dispatch({ kind: "finishQuest" });
-                  }}
-                >
-                  Collect reward
-                </button>
-              </>
-            ) : (
-              <>
-                <label className="check">
-                  <input
-                    type="checkbox"
-                    checked={camera}
-                    disabled={quest.progress > 0}
-                    onChange={(e) => C(e.target.checked)}
-                  />
-                  Use camera
-                </label>
-                {!camera && (
-                  <>
-                    <p className="notice">
-                      Manual confirmation is unverified. Take your time and stop
-                      if you need to.
-                    </p>
-                    <button
-                      className="primary"
-                      disabled={adventure.locked}
-                      onClick={() =>
-                        void dispatch({
-                          kind: "manualQuest",
-                          sessionId: quest.id,
-                        })
-                      }
-                    >
-                      I completed the exercise
-                    </button>
-                  </>
-                )}
-                {camera && quest.progress > 0 && (
-                  <button onClick={() => C(false)}>
-                    Detection trouble? Continue manually
-                  </button>
-                )}
-                <button onClick={() => void dispatch({ kind: "cancelQuest" })}>
-                  Stop safely
-                </button>
-              </>
-            )}
+            <p>{quest.exercise} · {quest.progress} / {quest.target} units · quest level {Math.min(5, (p.quests[quest.exercise] ?? 0) + 1)}</p>
+            {adventure.error && <section className="notice" role="alert"><strong>Your challenge is paused.</strong><p>{adventure.error}</p><button onClick={()=>void adventure.controller.retry().catch(error=>notify(String(error)))}>Retry saving</button></section>}
+            {quest.progress < quest.target && <label className="check"><input type="checkbox" checked={camera} disabled={quest.progress > 0} onChange={event=>C(event.target.checked)}/>Use camera</label>}
+            {!camera && quest.progress < quest.target && <section className="quest-manual-instructions" aria-label="Manual exercise instructions">
+              <h3>Begin when you are ready</h3>
+              <p><strong>{EXERCISE_GUIDES[quest.exercise].setup}</strong></p>
+              <p>{EXERCISE_GUIDES[quest.exercise].movement}</p>
+              <p>Complete {quest.target - quest.progress} remaining {quest.exercise === "superman" ? "seconds" : "repetitions"}, then confirm below. No camera start button is needed. Manual confirmation is unverified.</p>
+              <button className="primary" disabled={adventure.locked || pauseRequested} onClick={()=>void dispatch({kind:"manualQuest",sessionId:quest.id})}>I completed the exercise</button>
+            </section>}
+            <details className="quest-camera-preview" open={camera}>
+              <summary>{camera ? "Exercise camera and guide" : "Optional camera preview and exercise illustration"}</summary>
+              <Suspense fallback={<p>Preparing camera controls…</p>}>
+                <ExerciseCamera
+                  key={quest.id}
+                  sessionId={quest.id}
+                  lastSide={quest.side}
+                  exerciseId={quest.exercise}
+                  target={quest.target}
+                  progress={quest.progress}
+                  mode={camera ? "camera" : "manual"}
+                  muted={muted}
+                  paused={pauseRequested}
+                  sessionComplete={quest.progress >= quest.target}
+                  active={camera && quest.progress < quest.target && !adventure.readOnly && !adventure.error && !pauseRequested}
+                  onUnit={onUnit}
+                  onError={notify}
+                />
+              </Suspense>
+            </details>
+            {quest.progress >= quest.target ? <><p>Thank you! Small efforts make a strong village.</p><button className="primary" disabled={adventure.locked} onClick={()=>void dispatch({kind:"finishQuest"})}>Collect reward</button></> : <>
+              {camera && quest.progress > 0 && <button onClick={()=>C(false)}>Detection trouble? Continue manually</button>}
+              <button onClick={()=>{
+                if (quest.progress > 0 && !window.confirm("Leave this challenge? Its uncollected progress will be lost. Your adventure rewards already collected are kept.")) return;
+                void dispatch({kind:"cancelQuest"});
+              }}>Stop safely</button>
+            </>}
           </section>
         </div>
       )}
