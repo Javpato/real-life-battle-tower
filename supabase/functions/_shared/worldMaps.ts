@@ -6,11 +6,12 @@ export type WorldPosition={mapId:MapId;x:number;y:number;facing:Facing};
 export type Rect={x:number;y:number;w:number;h:number};
 export type Portal=Rect&{id:string;to:string;spawn:string;label:string;badges?:number};
 export type Resident={id:string;name:string;x:number;y:number;activity:'stand'|'read'|'cook'|'train'|'walk'|'rest';icon:'heal'|'shop'|'alchemy'|'gym'|'battle'|'quest'|'story'};
+export type Decoration={frame:number;x:number;y:number;width:number};
 export type Building=Rect&{frame:number;name:string};
-export type WorldMap={id:string;name:string;region:string;kind:'town'|'route'|'summit'|'interior';width:number;height:number;spawns:Record<string,{x:number;y:number;facing:Facing}>;obstacles:Rect[];portals:Portal[];npcs:Resident[];buildings:Building[]};
+export type WorldMap={id:string;name:string;region:string;kind:'town'|'route'|'summit'|'interior';width:number;height:number;spawns:Record<string,{x:number;y:number;facing:Facing}>;obstacles:Rect[];portals:Portal[];npcs:Resident[];buildings:Building[];decorations:Decoration[]};
 const maps:Record<string,WorldMap>={};
 const spawn=(x:number,y:number,facing:Facing='down')=>({x,y,facing});
-function outdoor(id:string,name:string,kind:WorldMap['kind'],width:number,height:number){const m:WorldMap={id,name,region:'GREENHAVEN VALLEY',kind,width,height,spawns:{safe:spawn(width/2,height/2)},obstacles:[],portals:[],npcs:[],buildings:[]};maps[id]=m;return m;}
+function outdoor(id:string,name:string,kind:WorldMap['kind'],width:number,height:number){const m:WorldMap={id,name,region:'GREENHAVEN VALLEY',kind,width,height,spawns:{safe:spawn(width/2,height/2)},obstacles:[],portals:[],npcs:[],buildings:[],decorations:[]};maps[id]=m;return m;}
 const town=outdoor('starter_town','Willowmere','town',1152,960);
 const route=outdoor('training_route','Fernway Trail','route',768,1152);
 const summit=outdoor('rival_town','Summit Hollow','summit',960,768);
@@ -42,6 +43,18 @@ connect(town,route,640,930,384,40);connect(route,summit,384,1110,480,40);
 // Route pools and groves make two traversable alternatives around a central glade.
 route.obstacles.push({x:90,y:440,w:180,h:210},{x:510,y:610,w:160,h:240});
 town.spawns.safe=spawn(640,520);summit.spawns.safe=spawn(480,430);
+// Detailed original foliage and landmarks have matching compact foot collisions.
+function decorate(m:WorldMap,frame:number,x:number,y:number,width:number,solid=false){m.decorations.push({frame,x,y,width});if(solid)m.obstacles.push({x:x-6,y:y-9,w:12,h:10});}
+for(const m of [town,route,summit]){for(let x=34;x<m.width-25;x+=48){if(!m.portals.some(p=>Math.abs(p.x+p.w/2-x)<70&&p.y<75))decorate(m,x%3?0:1,x,45,72);if(!m.portals.some(p=>Math.abs(p.x+p.w/2-x)<70&&p.y>m.height-80))decorate(m,x%3?0:1,x,m.height-7,72);}for(let y=100;y<m.height-50;y+=53){decorate(m,0,17,y,70);decorate(m,1,m.width-17,y,70);}}
+for(const b of town.buildings){decorate(town,3,b.x-18,b.y+b.h-5,34);decorate(town,3,b.x+b.w+17,b.y+b.h-5,34);decorate(town,5,b.x+b.w+34,b.y+b.h+24,32);}
+for(const [x,y]of [[80,325],[85,580],[355,340],[365,570],[365,830],[725,310],[735,610],[1030,340],[1040,560],[1040,830],[740,835],[95,810]])decorate(town,0,x,y,85,true);
+for(const [x,y]of [[580,550],[700,550],[580,650],[700,650]])decorate(town,3,x,y,42);
+decorate(town,4,640,600,70,true);decorate(town,5,565,610,42);decorate(town,5,715,610,42);
+for(let y=150;y<1050;y+=98)for(const x of [75,145,600,685])decorate(route,(y+x)%3===0?1:0,x,y+(x%3)*9,80,true);
+for(const [x,y]of [[240,230],[500,340],[460,540],[275,875],[510,965]])decorate(route,3,x,y,42);
+decorate(route,5,480,315,42);decorate(route,6,530,980,55);
+for(const [x,y]of [[90,430],[265,470],[710,460],[870,440],[280,620],[680,620]])decorate(summit,2,x,y,82,true);
+decorate(summit,4,480,510,75,true);decorate(summit,5,365,500,46);decorate(summit,5,595,500,46);
 export const WORLD_MAPS:Readonly<Record<string,WorldMap>>=maps;
 export const initialSpawn=():WorldPosition=>({mapId:bedroom.id,...bedroom.spawns.new_game});
 export function isWalkable(mapId:string,x:number,y:number,includeNPCs=true){const m=maps[mapId];return Boolean(m&&Number.isFinite(x)&&Number.isFinite(y)&&x>=20&&y>=52&&x<=m.width-20&&y<=m.height-20&&!m.obstacles.some(o=>x+6>o.x&&x-6<o.x+o.w&&y>o.y&&y-6<o.y+o.h)&&(!includeNPCs||!m.npcs.some(n=>Math.abs(n.x-x)<13&&Math.abs(n.y-y)<12)));}
