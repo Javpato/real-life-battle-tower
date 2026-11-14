@@ -1,4 +1,5 @@
 import type {Element,ExerciseId,ExerciseUnit} from './contracts';
+import {WORLD_MAPS} from './worldMaps';
 export type Attack={id:string;name:string;type:Element;exercise:ExerciseId;units:number;damage:number;description:string};
 export const attacks:Attack[]=[
 {id:'squat',name:'Earthbound',type:'leg',exercise:'squat',units:8,damage:32,description:'8 controlled squats'},
@@ -37,5 +38,5 @@ else if(b.progress>=a.units){closeSeries(b);b.turn='enemy';}return b;}
 export function cancelSeries(b:Battle):Battle {if(b.turn!=='exercise')return b;b=structuredClone(b);closeSeries(b);b.turn='enemy';b.paused=false;b.log='Series ended. Your damage is kept.';return b;}
 export function enemyTurn(b:Battle,p:Player):Battle {if(b.turn!=='enemy'||b.paused)return b;b=structuredClone(b);b.seed=(b.seed*16807)%2147483647;const dodge=Math.min(.1,p.speed/300);const t=b.enemy.phases[b.phase][b.phase%b.enemy.phases[b.phase].length];const damage=b.seed/2147483647<dodge?0:b.enemy.attack*effectiveness(t,b.type?[b.type]:[])*stab(t,b.enemy.phases[b.phase])*statMultiplier(b.enemy.attack,p.defense)*(b.defending?.5:1);b.playerHp=Math.max(0,b.playerHp-damage);if(damage>0)b.defending=false;b.turn=b.playerHp<=0?'lost':'player';b.log=damage?`${b.enemy.name} responds · ${damage.toFixed(1)} damage.`:'You sidestepped the attack!';return b;}
 export function win(p:Player,b:Battle):Player {if(b.turn!=='won'||b.enemyHp>0||!b.id||p.claimedBattles?.includes(b.id))return p;p=structuredClone(p);p.claimedBattles=[...(p.claimedBattles??[]),b.id];p.hp=b.playerHp;const first=!p.defeated.includes(b.enemy.id);p=reward(p,first?b.enemy.xp:10,first?b.enemy.coins:8);if(first)p.defeated.push(b.enemy.id);if(b.enemy.badge&&!p.badges.includes(b.enemy.badge))p.badges.push(b.enemy.badge);if(b.enemy.id==='rival')p.ending=true;return p;}
-export function lose(p:Player):Player {return {...p,hp:p.maxHp,coins:p.coins-Math.min(30,Math.floor(p.coins*.1)),position:{x:384,y:300}};}
+export function lose(p:Player):Player {return {...p,hp:p.maxHp,coins:p.coins-Math.min(30,Math.floor(p.coins*.1)),position:{x:WORLD_MAPS.rest_house.spawns.safe.x,y:WORLD_MAPS.rest_house.spawns.safe.y}};}
 export const questTarget=(exercise:ExerciseId,count:number)=>['lunge','birddog'].includes(exercise)?4+Math.min(count,4)*2:3+Math.min(count,4);

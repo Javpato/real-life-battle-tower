@@ -1,6 +1,6 @@
 import {initialPlayer,available,attackFor,enemyFor,startBattle,beginAttack,acceptUnit,cancelSeries,enemyTurn,win,lose,reward,questTarget,type Player,type Battle} from './game';
 import type {Element,ExerciseId,ExerciseUnit} from './contracts';
-import {initialSpawn,resolveWorldPosition,resolvePortal,type WorldPosition} from './worldMaps';
+import {initialSpawn,resolveWorldPosition,resolvePortal,WORLD_MAPS,type WorldPosition} from './worldMaps';
 export type Journey={avatar:'male'|'female';introComplete:boolean;tutorialStage:number;location:WorldPosition;playSeconds:number};
 export type QuestSession={id:string;exercise:ExerciseId;target:number;progress:number;seen:string[];side?:'left'|'right'};
 export type AdventureSnapshot={player:Player;battle:Battle|null;quest:QuestSession|null;journey?:Journey};
@@ -20,7 +20,7 @@ const prices={potion:15,shield:12,boost:20};
 export const initialAdventure=():AdventureSnapshot=>({player:initialPlayer(),battle:null,quest:null});
 export function normalizeAdventure(snapshot:AdventureSnapshot,legacy=true):AdventureSnapshot {
  const s=structuredClone(snapshot);s.quest??=null;
- s.journey??={avatar:'male',introComplete:legacy,tutorialStage:legacy?6:0,location:legacy?resolveWorldPosition({mapId:'starter_town',...s.player.position}):initialSpawn(),playSeconds:0};
+ s.journey??={avatar:'male',introComplete:legacy,tutorialStage:legacy?6:0,location:legacy?resolveWorldPosition({mapId:'starter_town',...WORLD_MAPS.starter_town.spawns.safe}):initialSpawn(),playSeconds:0};
  s.journey.location=resolveWorldPosition(s.journey.location);if(s.journey.location.mapId==='rival_arena'&&s.player.badges.length<3)s.journey.location=resolveWorldPosition({mapId:'rival_town'});return s;
 }
 function requireRule(condition:unknown,message:string):asserts condition {if(!condition)throw new Error(message);}
@@ -55,7 +55,7 @@ export function applyAdventureCommand(snapshot:AdventureSnapshot,command:Adventu
  case 'continuePhase':requireRule(b?.turn==='transform'&&!b.paused&&b.phase+1<b.enemy.phases.length,'NO_TRANSFORMATION');b.phase++;b.turn='enemy';break;
  case 'defend':b=playerTurn();b.defending=true;b.turn='enemy';b.log='You brace for the next hit.';break;
  case 'useItem':b=playerTurn();requireRule(Object.hasOwn(prices,command.item)&&(p.items[command.item]??0)>0,'ITEM_UNAVAILABLE');p.items[command.item]--;if(command.item==='potion')b.playerHp=Math.min(p.maxHp,b.playerHp+45);if(command.item==='shield')b.defending=true;if(command.item==='boost')b.boost=true;b.turn='enemy';break;
- case 'finishBattle':requireRule(b&&(b.turn==='won'||b.turn==='lost'),'BATTLE_NOT_FINISHED');s.player=b.turn==='won'?win(p,b):lose(p);if(b.enemy.id==='tutorial-moss'&&b.turn==='won')s.journey!.tutorialStage=Math.max(4,s.journey!.tutorialStage);if(b.turn==='lost'){s.journey!.location=resolveWorldPosition({mapId:'starter_town',x:384,y:300});s.player.position={x:s.journey!.location.x,y:s.journey!.location.y};}s.battle=null;break;
+ case 'finishBattle':requireRule(b&&(b.turn==='won'||b.turn==='lost'),'BATTLE_NOT_FINISHED');s.player=b.turn==='won'?win(p,b):lose(p);if(b.enemy.id==='tutorial-moss'&&b.turn==='won')s.journey!.tutorialStage=Math.max(4,s.journey!.tutorialStage);if(b.turn==='lost'){s.journey!.location=resolveWorldPosition({mapId:'rest_house',...WORLD_MAPS.rest_house.spawns.safe});s.player.position={x:s.journey!.location.x,y:s.journey!.location.y};}s.battle=null;break;
  case 'leaveBattle':requireRule(b&&b.enemy.id.startsWith('trainer'),'CANNOT_FLEE');p.hp=b.playerHp;s.battle=null;break;
  case 'stopSafely':if(b){b.paused=true;b.log='Stopped safely. Your progress is kept.';}s.quest=null;break;
  case 'startQuest':idle();requireRule(questExercises.has(command.exercise),'UNKNOWN_QUEST');s.quest={id:crypto.randomUUID(),exercise:command.exercise,target:questTarget(command.exercise,p.quests[command.exercise]??0),progress:0,seen:[]};break;
