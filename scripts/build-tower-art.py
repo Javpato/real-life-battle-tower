@@ -237,3 +237,58 @@ for name in icons:
 manifest={'version':1,'name':'Battle Tower native pixel atlas','provenance':{'author':'Codex','source':'scripts/build-tower-art.py','method':'Original integer-coordinate raster drawing; no input images, image rescaling or proprietary artwork'},'pixelRules':{'outline':INK,'light':'upper-left','sampling':'nearest','worldTile':16},'characters':{n:{'front':n+'-front.png','still':n+'-front-still.png','back':n+'-back.png' if i<2 else None,'idle':n+'-idle.png','frame':[128,128],'frames':4,'foot':[64,117],'idleFrame':[48,48]} for i,n in enumerate(chars)},'battle':{'size':[480,270],'heroFoot':[136,228],'enemyFoot':[349,170],'zones':[f'arena-{i}.png' for i in range(6)]},'icons':{n:f'icon-{n}.png' for n in icons}}
 (OUT/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
 print(f'Created {len(list(OUT.glob("*.png")))} original PNGs')
+
+# New pixel coach illustrations preserve the existing teaching pose joint positions.
+# Each source is authored at 280×140: left starting position, right movement.
+# Geometry describes instruction only; it is never used to accept exercise units.
+def coach(d,head,torso,arms,legs):
+ def segment(points,base,highlight):
+  shifted=[(x,y+18) for x,y in points];d.line(shifted,fill=INK,width=9,joint='curve');d.line(shifted,fill=base,width=6,joint='curve')
+  for x,y in shifted[1:-1]:box(d,(x-2,y-2,x+1,y+1),highlight)
+ def hand(p):
+  x,y=p;box(d,(x-3,y+15,x+3,y+21),'#e9b991',INK)
+ for points in legs:segment(points,'#476480','#8ba9b7')
+ for points in arms:segment(points,'#b37b61','#e9b991')
+ segment(torso,'#3f8b99','#a2d7c5')
+ a,b=torso[0],torso[-1]
+ for t in [.25,.4,.55]:
+  x=round(a[0]+(b[0]-a[0])*t);y=round(a[1]+(b[1]-a[1])*t)+18;box(d,(x-1,y-1,x+1,y+1),'#b5ded0')
+ for points in arms:
+  # Colored short sleeves and skin forearm keep the direction easy to read.
+  start,elbow=points[0],points[1];end=(start[0]+(elbow[0]-start[0])*.5,start[1]+(elbow[1]-start[1])*.5)
+  segment([start,end],'#3f8b99','#a2d7c5');hand(points[-1])
+ for points in legs:
+  x,y=points[-1];box(d,(x-4,y+15,x+5,y+20),'#aa7751',INK);box(d,(x-3,y+16,x+3,y+17),GOLD)
+ # Pixel face, hair clusters and highlight; no old SVG/circle graphic retained.
+ x,y=head;y+=18
+ poly(d,[(x-6,y-7),(x+4,y-8),(x+8,y-3),(x+8,y+5),(x+2,y+9),(x-6,y+5),(x-8,y-2)],'#e9b991',width=1)
+ poly(d,[(x-8,y-2),(x-8,y-8),(x-2,y-11),(x+5,y-10),(x+9,y-6),(x+5,y-2),(x+1,y-5),(x-4,y-1)],'#86543f',width=1)
+ box(d,(x-4,y-8,x,y-6),'#c58b59');box(d,(x+4,y,x+5,y+2),INK)
+ box(d,(x+1,y+6,x+4,y+6),'#ae725d')
+poses={
+ 'squat':[((60,18),[(60,28),(60,65)],[[(60,40),(50,50),(40,60)],[(60,40),(70,50),(80,60)]],[[(60,65),(53,85),(45,105)],[(60,65),(67,85),(75,105)]]),((205,35),[(205,45),(195,70)],[[(205,49),(220,52),(235,55)]],[[(195,70),(225,78),(215,105)],[(195,70),(175,82),(180,105)]])],
+ 'lunge':[((60,18),[(60,28),(60,65)],[[(60,40),(50,50),(40,60)],[(60,40),(70,50),(80,60)]],[[(60,65),(53,85),(45,105)],[(60,65),(67,85),(75,105)]]),((205,35),[(205,45),(200,65)],[[(205,48),(190,50),(175,52)]],[[(200,65),(175,77),(175,105)],[(200,65),(225,95),(245,105)]])],
+ 'pushup':[((29,54),[(41,62),(86,78)],[[(44,63),(44,83),(44,104)]],[[(86,78),(106,90),(124,101)]]),((176,76),[(187,84),(225,93)],[[(192,85),(212,96),(190,104)]],[[(225,93),(245,98),(264,103)]])],
+ 'superman':[((28,91),[(38,99),(88,100)],[[(40,99),(26,100),(12,101)]],[[(88,100),(106,101),(124,103)]]),((180,85),[(191,94),(230,95)],[[(194,94),(177,86),(160,78)]],[[(230,95),(249,87),(267,79)]])],
+ 'birddog':[((30,57),[(42,66),(91,66)],[[(45,67),(45,85),(45,104)]],[[(91,66),(91,103),(121,104)]]),((181,59),[(193,69),(230,70)],[[(195,69),(176,69),(157,69)],[(200,71),(200,87),(200,104)]],[[(230,70),(250,70),(267,70)],[(230,71),(230,104),(251,104)]])],
+ 'sitstand':[((47,27),[(47,37),(47,69)],[[(47,46),(57,54),(67,62)]],[[(47,69),(83,71),(84,105)]]),((207,19),[(207,29),(207,67)],[[(207,42),(216,51),(225,60)]],[[(207,67),(199,86),(192,105)],[(207,67),(215,86),(222,105)]])],
+ 'wallpushup':[((60,25),[(62,35),(52,69)],[[(62,40),(86,40),(110,40)]],[[(52,69),(47,87),(42,105)]]),((229,30),[(230,40),(213,72)],[[(232,45),(246,66),(265,42)]],[[(213,72),(203,88),(193,105)]])],
+ 'bridge':[((23,99),[(33,104),(72,104)],[[(40,104),(50,104),(61,105)]],[[(72,104),(94,70),(120,104)]]),((174,99),[(184,104),(215,75)],[[(190,104),(200,104),(211,105)]],[[(215,75),(240,63),(266,104)]])],
+}
+poses['diamond']=poses['pushup']
+for name,pair in poses.items():
+ im,d=canvas(280,140,'#f5ebd1')
+ box(d,(0,0,279,139),'#f5ebd1',INK)
+ for x in range(12,280,12):box(d,(x,127,x+5,128),'#d2c9a7')
+ box(d,(10,126,269,129),'#607f85');box(d,(10,125,269,126),'#acbfaa')
+ if name=='sitstand':
+  box(d,(24,87,72,93),'#ba9164',INK);box(d,(24,60,29,125),'#ba9164',INK);box(d,(66,92,71,125),'#ba9164',INK)
+ if name=='wallpushup':
+  for x in [111,267]:stone(d,x,29,5,97,'#c4baa2')
+ if name in ['bridge','pushup','diamond','birddog','superman']:
+  box(d,(12,124,128,127),'#85b0ab');box(d,(156,124,268,127),'#85b0ab')
+ for pose in pair:coach(d,*pose)
+ poly(d,[(133,69),(141,69),(141,65),(148,73),(141,81),(141,77),(133,77)],GOLD,width=1)
+ save(im,'guide-'+name)
+manifest['exerciseGuides']={k:{'path':'guide-'+k+'.png','size':[280,140],'poses':['start','movement']} for k in poses}
+(OUT/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')

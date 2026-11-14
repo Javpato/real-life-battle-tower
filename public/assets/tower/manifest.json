@@ -239,5 +239,106 @@
     "settings": "icon-settings.png",
     "play": "icon-play.png",
     "pause": "icon-pause.png"
+  },
+  "exerciseGuides": {
+    "squat": {
+      "path": "guide-squat.png",
+      "size": [
+        280,
+        140
+      ],
+      "poses": [
+        "start",
+        "movement"
+      ]
+    },
+    "lunge": {
+      "path": "guide-lunge.png",
+      "size": [
+        280,
+        140
+      ],
+      "poses": [
+        "start",
+        "movement"
+      ]
+    },
+    "pushup": {
+      "path": "guide-pushup.png",
+      "size": [
+        280,
+        140
+      ],
+      "poses": [
+        "start",
+        "movement"
+      ]
+    },
+    "superman": {
+      "path": "guide-superman.png",
+      "size": [
+        280,
+        140
+      ],
+      "poses": [
+        "start",
+        "movement"
+      ]
+    },
+    "birddog": {
+      "path": "guide-birddog.png",
+      "size": [
+        280,
+        140
+      ],
+      "poses": [
+        "start",
+        "movement"
+      ]
+    },
+    "sitstand": {
+      "path": "guide-sitstand.png",
+      "size": [
+        280,
+        140
+      ],
+      "poses": [
+        "start",
+        "movement"
+      ]
+    },
+    "wallpushup": {
+      "path": "guide-wallpushup.png",
+      "size": [
+        280,
+        140
+      ],
+      "poses": [
+        "start",
+        "movement"
+      ]
+    },
+    "bridge": {
+      "path": "guide-bridge.png",
+      "size": [
+        280,
+        140
+      ],
+      "poses": [
+        "start",
+        "movement"
+      ]
+    },
+    "diamond": {
+      "path": "guide-diamond.png",
+      "size": [
+        280,
+        140
+      ],
+      "poses": [
+        "start",
+        "movement"
+      ]
+    }
   }
 }

@@ -1,4 +1,5 @@
 import type { ExerciseId } from "../core/contracts";
+import ExercisePoseArt from "../tower/ExercisePoseArt";
 
 export type HomeExerciseId = "sitstand" | "wallpushup" | "bridge";
 export const EXERCISE_GUIDES: Record<
@@ -106,89 +107,9 @@ export default function ExerciseDemo({
   exerciseId: ExerciseId | HomeExerciseId;
 }) {
   const guide = EXERCISE_GUIDES[exerciseId];
-  const standing = exerciseId === "squat" || exerciseId === "lunge";
-  const hold = exerciseId === "superman";
   return (
     <div className="exercise-demo">
-      <svg
-        viewBox="0 0 280 120"
-        aria-label={`${guide.title} starting and exercise position`}
-        role="img"
-      >
-        <path d="M12 108H268" stroke="#314855" strokeWidth="3" />
-        <g
-          stroke="#7fe6b1"
-          strokeWidth="5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-        >
-          {exerciseId === "sitstand" ? (
-            <>
-              <path d="M28 72H70V108M28 72V108M28 44V72" stroke="#d9b773" />
-              <circle cx="47" cy="27" r="8" />
-              <path d="M47 37V69L83 71L84 105M47 46L67 62" />
-              <circle cx="207" cy="19" r="8" />
-              <path d="M207 29V67L192 105M207 67L222 105M207 42L225 60" />
-            </>
-          ) : exerciseId === "wallpushup" ? (
-            <>
-              <path d="M111 13V108M267 13V108" stroke="#d9b773" />
-              <circle cx="60" cy="25" r="8" />
-              <path d="M62 35L52 69L42 105M62 40L110 40" />
-              <circle cx="229" cy="30" r="8" />
-              <path d="M230 40L213 72L193 105M232 45L246 66L265 42" />
-            </>
-          ) : exerciseId === "bridge" ? (
-            <>
-              <circle cx="23" cy="99" r="7" />
-              <path d="M33 104L72 104L94 70L120 104M40 104L61 105" />
-              <circle cx="174" cy="99" r="7" />
-              <path d="M184 104L215 75L240 63L266 104M190 104L211 105" />
-            </>
-          ) : standing ? (
-            <>
-              <circle cx="60" cy="18" r="8" />
-              <path d="M60 28V65M60 40L40 60M60 40L80 60M60 65L45 105M60 65L75 105" />
-              <circle cx="205" cy="35" r="8" />
-              <path
-                d={
-                  exerciseId === "lunge"
-                    ? "M205 45L200 65L175 77L175 105M200 65L225 95L245 105M205 48L175 52"
-                    : "M205 45L195 70L225 78L215 105M195 70L175 82L180 105M205 49L235 55"
-                }
-              />
-            </>
-          ) : hold ? (
-            <>
-              <circle cx="28" cy="91" r="7" />
-              <path d="M38 99L88 100L124 103M40 99L12 101" />
-              <circle cx="180" cy="85" r="7" />
-              <path d="M191 94L230 95L267 79M194 94L160 78" />
-            </>
-          ) : exerciseId === "birddog" ? (
-            <>
-              <circle cx="30" cy="57" r="8" />
-              <path d="M42 66L91 66M45 67L45 104M91 66L91 103L121 104" />
-              <circle cx="181" cy="59" r="8" />
-              <path d="M193 69L230 70L267 70M195 69L157 69M200 71L200 104M230 71L230 104" />
-            </>
-          ) : (
-            <>
-              <circle cx="29" cy="54" r="8" />
-              <path d="M41 62L86 78L124 101M44 63L44 104" />
-              <circle cx="176" cy="76" r="8" />
-              <path d="M187 84L225 93L264 103M192 85L212 96L190 104" />
-            </>
-          )}
-        </g>
-        <path
-          d="M130 56H146M141 51L146 56L141 61"
-          stroke="#e8c16e"
-          strokeWidth="3"
-          fill="none"
-        />
-      </svg>
+      <ExercisePoseArt exerciseId={exerciseId} title={guide.title}/>
       <strong>{guide.title}</strong>
       <p>
         <b>Starting position:</b> {guide.setup}
