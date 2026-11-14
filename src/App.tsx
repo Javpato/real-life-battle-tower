@@ -350,10 +350,6 @@ export default function App() {
           </span>
         </button>
         <nav>
-          <button className="active">
-            <Map size={17} />
-            Adventure
-          </button>
           <button
             onClick={() => {
               if (b) void dispatch({ kind: "pause", paused: true });
@@ -414,7 +410,7 @@ export default function App() {
           >
             <Settings size={18} />
           </button>
-          <span className="avatar">J</span>
+          <span className="avatar">{p.name.slice(0, 1).toUpperCase()}</span>
         </div>
       </header>
       {adventure.mode === "cloud" &&
