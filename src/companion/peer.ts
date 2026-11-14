@@ -3,24 +3,30 @@ import type {PairView} from './protocol';
 import type {SignalTransport} from './transport';
 import {CompanionFrameGate} from './frames';
 export type PeerEvents={onState?:(state:PairView)=>void;onStatus?:(status:string)=>void;onFrame?:(frame:PoseFrame|null)=>void;onPreview?:(stream:MediaStream|null)=>void;onConnected?:()=>void;onDisconnected?:()=>void};
+export type PeerOptions={waitForCamera?:boolean};
 /** Host-only ICE for same-LAN pairing; no relay, no server media path. */
 export class CompanionPeer{
+ private connectionAllowed:boolean;
  private pc:RTCPeerConnection;private channel?:RTCDataChannel;private timer?:ReturnType<typeof setInterval>;private pulse?:ReturnType<typeof setInterval>;private stopped=false;private polling=false;private negotiating=false;private remoteIce=0;private sequence=0;private lastFrame=-Infinity;private stale=true;private gate=new CompanionFrameGate();private pings=new Map<string,number>();private lastPing=-Infinity;private previewSender?:RTCRtpSender;private remotePreview:MediaStream|null=null;private previewOptin=false;private pendingTrack:MediaStreamTrack|null=null;private started=performance.now();
- constructor(readonly role:'desktop'|'phone',private roomId:string,private capability:string,private transport:SignalTransport,private events:PeerEvents={}){
+ constructor(readonly role:'desktop'|'phone',private roomId:string,private capability:string,private transport:SignalTransport,private events:PeerEvents={},options:PeerOptions={}){
+  this.connectionAllowed=role!=='phone'||!options.waitForCamera;
   this.pc=new RTCPeerConnection({iceServers:[],iceTransportPolicy:'all'});
   this.pc.onicecandidate=e=>{if(e.candidate&&!this.stopped)void this.transport.request(this.roomId,this.capability,'ice',e.candidate.toJSON()).catch(error=>this.events.onStatus?.(String(error)));};
   this.pc.ondatachannel=e=>this.attach(e.channel);
   this.pc.ontrack=e=>{if(role==='desktop'){this.remotePreview=e.streams[0]??new MediaStream([e.track]);if(this.previewOptin)this.events.onPreview?.(this.remotePreview);}};
   this.pc.onconnectionstatechange=()=>{if(!this.stopped&&['failed','disconnected','closed'].includes(this.pc.connectionState)){this.events.onDisconnected?.();this.events.onFrame?.(null);this.events.onPreview?.(null);this.events.onStatus?.('Phone connection lost. Reconnect or use the webcam.');}};
  }
+ /** Safari may withhold local ICE candidates until capture permission exists.
+  * The UI calls this only after an explicit camera start returns a live stream. */
+ allowConnection(){if(this.stopped||this.connectionAllowed)return;this.connectionAllowed=true;this.started=performance.now();void this.poll();}
  get connected(){return this.channel?.readyState==='open';}
  start(){void this.poll();this.timer=setInterval(()=>void this.poll(),900);this.pulse=setInterval(()=>this.tick(),100);}
  async approve(challenge:string){const state=await this.transport.request(this.roomId,this.capability,'approve',{challenge});this.events.onState?.(state);await this.poll();}
  private async poll(){if(this.polling||this.stopped)return;this.polling=true;try{
-  const state=await this.transport.request(this.roomId,this.capability,'poll');if(this.stopped)return;this.events.onState?.(state);if(state.closed){this.close(false);return;}
+  const state=await this.transport.request(this.roomId,this.capability,'poll');if(this.stopped)return;this.events.onState?.(state);if(state.closed){this.close(false);this.events.onStatus?.('Pairing ended. Scan a new code to reconnect.');return;}
   if(state.approved&&!this.negotiating){
    if(this.role==='desktop'&&!this.pc.localDescription){this.negotiating=true;this.attach(this.pc.createDataChannel('pose',{ordered:false,maxPacketLifeTime:200}));this.pc.addTransceiver('video',{direction:'recvonly'});await this.pc.setLocalDescription(await this.pc.createOffer());await this.transport.request(this.roomId,this.capability,'offer',this.pc.localDescription!.toJSON());this.negotiating=false;}
-   if(this.role==='phone'&&state.offer&&!this.pc.remoteDescription){this.negotiating=true;await this.pc.setRemoteDescription(state.offer);const video=this.pc.getTransceivers().find(t=>t.receiver.track.kind==='video');if(video){video.direction='sendonly';this.previewSender=video.sender;await this.previewSender.replaceTrack(this.pendingTrack);}await this.pc.setLocalDescription(await this.pc.createAnswer());await this.transport.request(this.roomId,this.capability,'answer',this.pc.localDescription!.toJSON());this.negotiating=false;}
+   if(this.role==='phone'&&this.connectionAllowed&&state.offer&&!this.pc.remoteDescription){this.negotiating=true;await this.pc.setRemoteDescription(state.offer);const video=this.pc.getTransceivers().find(t=>t.receiver.track.kind==='video');if(video){video.direction='sendonly';this.previewSender=video.sender;await this.previewSender.replaceTrack(this.pendingTrack);}await this.pc.setLocalDescription(await this.pc.createAnswer());await this.transport.request(this.roomId,this.capability,'answer',this.pc.localDescription!.toJSON());this.negotiating=false;}
    if(this.role==='desktop'&&state.answer&&!this.pc.remoteDescription)await this.pc.setRemoteDescription(state.answer);
    if(this.pc.remoteDescription){for(const candidate of state.ice.slice(this.remoteIce)){await this.pc.addIceCandidate(candidate as RTCIceCandidateInit);this.remoteIce++;}}
   }
@@ -35,9 +41,9 @@ export class CompanionPeer{
  };}
  private send(packet:unknown){if(this.channel?.readyState==='open'&&this.channel.bufferedAmount<32768)this.channel.send(JSON.stringify(packet));}
  private ping(){const id=crypto.randomUUID(),now=performance.now();this.lastPing=now;this.pings.clear();this.pings.set(id,now);this.send({type:'ping',id});}
- private tick(){if(this.stopped)return;if(this.connected&&this.role==='desktop'){if(performance.now()-this.lastPing>2000)this.ping();if(!this.stale&&performance.now()-this.lastFrame>500){this.stale=true;this.events.onFrame?.(null);}}if(!this.connected&&performance.now()-this.started>60000)this.events.onStatus?.('Still waiting. Use the same Wi-Fi; guest networks may isolate devices. You can return to the webcam.');}
+ private tick(){if(this.stopped)return;if(this.connected&&this.role==='desktop'){if(performance.now()-this.lastPing>2000)this.ping();if(!this.stale&&performance.now()-this.lastFrame>500){this.stale=true;this.events.onFrame?.(null);}}if(!this.connected&&this.connectionAllowed&&performance.now()-this.started>60000)this.events.onStatus?.('Still waiting. Use the same Wi-Fi; guest networks may isolate devices. You can return to the webcam.');}
  sendPose(frame:PoseFrame,inferenceMs?:number){if(this.role!=='phone')return;this.send({type:'pose',sequence:++this.sequence,sentAt:performance.now(),frame:{timestamp:frame.timestamp,width:frame.width,height:frame.height,landmarks:frame.landmarks},inferenceMs});}
  stopPose(){this.send({type:'stop',sequence:++this.sequence});}
  async setPreview(track:MediaStreamTrack|null){this.pendingTrack=track;this.send({type:'preview',enabled:Boolean(track)});if(this.previewSender)await this.previewSender.replaceTrack(track);}
- close(notify=true){if(this.stopped)return;this.stopped=true;clearInterval(this.timer);clearInterval(this.pulse);this.stopPose();this.channel?.close();this.pc.close();this.events.onFrame?.(null);this.events.onPreview?.(null);if(notify)void this.transport.request(this.roomId,this.capability,'close').catch(()=>{});}
+ close(notify=true){if(this.stopped)return;this.stopped=true;clearInterval(this.timer);clearInterval(this.pulse);this.stopPose();this.channel?.close();this.pc.close();this.events.onDisconnected?.();this.events.onFrame?.(null);this.events.onPreview?.(null);if(notify)void this.transport.request(this.roomId,this.capability,'close').catch(()=>{});}
 }
