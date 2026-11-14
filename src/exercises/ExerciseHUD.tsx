@@ -8,6 +8,7 @@ import {
   stopExerciseSpeech,
 } from "../audio/exerciseFeedback";
 import { EXERCISE_GUIDES } from "./ExerciseDemo";
+import { STARTING_CUES } from "./exercisePresentation";
 const labels: Record<ExerciseHudProps["status"], string> = {
   "no-body": "I CAN’T SEE YOU",
   partial: "PARTLY IN VIEW",
@@ -98,13 +99,27 @@ export default function ExerciseHUD(props: ExerciseHudProps) {
   useEffect(() => () => stopExerciseSpeech(), []);
   const seconds = exerciseId === "superman",
     alternating = exerciseId === "lunge" || exerciseId === "birddog";
-  const effective = paused ? "paused" : complete ? "valid" : status;
-  const title = complete ? "SERIES COMPLETE" : labels[effective];
+  const effective =
+    status === "error"
+      ? "error"
+      : paused
+        ? "paused"
+        : complete
+          ? "valid"
+          : status;
+  const title =
+    complete && effective !== "error" ? "SERIES COMPLETE" : labels[effective];
   return (
     <section
       className={`exercise-hud state-${effective}${pulse ? " rep-pulse" : ""}`}
       aria-label="Exercise progress"
     >
+      <div className="exercise-hud-heading">
+        <span>YOUR PROGRESS</span>
+        <small>
+          {quality === null ? "AT YOUR PACE" : `${quality}% QUALITY`}
+        </small>
+      </div>
       <div
         className="exercise-counter"
         role="status"
@@ -146,46 +161,54 @@ export default function ExerciseHUD(props: ExerciseHudProps) {
             : title}
         </strong>
         <p>
-          {paused
+          {paused && effective !== "error"
             ? "Keep resting. Your completed repetitions and damage are saved."
             : message}
         </p>
       </div>
-      <div className="exercise-start-position">
-        <span>STARTING POSITION</span>
-        <p>{EXERCISE_GUIDES[exerciseId].setup}</p>
-        <small className="exercise-camera-angle">
-          CAMERA · {EXERCISE_GUIDES[exerciseId].camera}
-        </small>
-      </div>
-      <footer>
-        <span>
-          {quality === null
-            ? "Movement quality —"
-            : `Last movement · ${quality}% quality`}
-        </span>
-        <label>
-          <input
-            type="checkbox"
-            checked={voice}
-            onChange={(e) => {
-              const enabled = e.target.checked;
-              VOICE(enabled);
-              try {
-                localStorage.setItem(
-                  "everstride-exercise-voice",
-                  enabled ? "on" : "off",
-                );
-              } catch {}
-              if (enabled && !muted) {
-                armExerciseAudio();
-                speakExercise("Voice coach on. Follow the starting position.");
-              }
-            }}
-          />{" "}
-          Voice coach
-        </label>
-      </footer>
+      <details className="exercise-start-position">
+        <summary>
+          <span>STARTING POSITION</span>
+          <strong>{STARTING_CUES[exerciseId]}</strong>
+          <i aria-hidden="true">＋</i>
+        </summary>
+        <div className="exercise-posture-popover">
+          <p>{EXERCISE_GUIDES[exerciseId].setup}</p>
+          <small className="exercise-camera-angle">
+            CAMERA · {EXERCISE_GUIDES[exerciseId].camera}
+          </small>
+          <footer>
+            <span>
+              {quality === null
+                ? "Movement quality —"
+                : `Last movement · ${quality}% quality`}
+            </span>
+            <label>
+              <input
+                type="checkbox"
+                checked={voice}
+                onChange={(e) => {
+                  const enabled = e.target.checked;
+                  VOICE(enabled);
+                  try {
+                    localStorage.setItem(
+                      "everstride-exercise-voice",
+                      enabled ? "on" : "off",
+                    );
+                  } catch {}
+                  if (enabled && !muted) {
+                    armExerciseAudio();
+                    speakExercise(
+                      "Voice coach on. Follow the starting position.",
+                    );
+                  }
+                }}
+              />{" "}
+              Voice coach
+            </label>
+          </footer>
+        </div>
+      </details>
     </section>
   );
 }

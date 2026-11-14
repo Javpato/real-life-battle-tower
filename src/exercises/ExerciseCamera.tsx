@@ -593,6 +593,7 @@ export default function ExerciseCamera(props: Props) {
   const mirrored =
     (camera.facingMode ?? selection.facingMode) !== "environment";
   const guide = EXERCISE_GUIDES[props.exerciseId];
+  const [showSkeleton, setShowSkeleton] = useState(true);
   return (
     <section
       className="exercise-camera"
@@ -601,12 +602,43 @@ export default function ExerciseCamera(props: Props) {
       data-exercise-stage={stage}
     >
       <header>
-        <span className="exercise-tag">LOCAL BODY TRACKING</span>
-        <button type="button" onClick={() => setDemo((v) => !v)}>
+        <div className="exercise-camera-title">
+          <span className="exercise-tag">LOCAL BODY TRACKING</span>
+          <strong>{guide.title.split(" · ")[1] ?? guide.title}</strong>
+        </div>
+        <button
+          type="button"
+          aria-expanded={demo}
+          onClick={() => setDemo((v) => !v)}
+        >
           {demo ? "Hide guide" : "Show guide"}
         </button>
       </header>
-      {demo && <ExerciseDemo exerciseId={props.exerciseId} />}
+      {demo && (
+        <section
+          className="exercise-guide-popover"
+          role="dialog"
+          aria-label={`${guide.title} guide`}
+          aria-modal="false"
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.stopPropagation();
+              setDemo(false);
+            }
+          }}
+        >
+          <div className="exercise-guide-heading">
+            <strong>
+              Your next move · {props.target}{" "}
+              {props.exerciseId === "superman" ? "seconds" : "repetitions"}
+            </strong>
+            <button type="button" onClick={() => setDemo(false)}>
+              Close exercise guide
+            </button>
+          </div>
+          <ExerciseDemo exerciseId={props.exerciseId} />
+        </section>
+      )}
       <div className={`exercise-feed ${camera.stream ? "is-live" : ""}`}>
         <video
           ref={video}
@@ -619,13 +651,18 @@ export default function ExerciseCamera(props: Props) {
         <canvas
           ref={canvas}
           aria-hidden="true"
-          style={{ transform: mirrored ? "scaleX(-1)" : "none" }}
+          style={{
+            transform: mirrored ? "scaleX(-1)" : "none",
+            visibility: showSkeleton ? "visible" : "hidden",
+          }}
         />
         {!camera.stream && (
           <div className="exercise-placeholder">
-            <span>◉</span>
+            <div className="exercise-prep-art" aria-hidden="true">
+              <ExerciseDemo exerciseId={props.exerciseId} />
+            </div>
             <strong>{guide.camera}</strong>
-            <small>Video is processed locally and is never uploaded.</small>
+            <small>Enable the camera when you are ready.</small>
           </div>
         )}
       </div>
@@ -683,94 +720,110 @@ export default function ExerciseCamera(props: Props) {
           >
             Recalibrate
           </button>
+          <button
+            type="button"
+            className="exercise-primary exercise-start-manual"
+            aria-label="Start without automatic calibration"
+            disabled={
+              camera.status !== "ready" ||
+              inactive ||
+              Boolean(pendingUnit.current) ||
+              props.sessionComplete ||
+              props.progress >= props.target
+            }
+            onClick={() => {
+              setDemo(false);
+              detector.current.pause();
+              lifecycle.current?.invalidateFrames();
+              resetTiming();
+              setPhase("running");
+              setStatus("ready");
+              setMessage(
+                "Series started. Move into position; only observed full reps count.",
+              );
+            }}
+          >
+            Start now
+          </button>
         </div>
-        <div className="exercise-camera-selectors">
-          <label>
-            Camera facing
-            <select
-              aria-label="Camera facing"
-              value={selection.facingMode}
-              onChange={(e) =>
-                changeSelection({
-                  facingMode: e.target.value as CameraSelection["facingMode"],
-                })
-              }
-            >
-              <option value="user">Front / selfie camera</option>
-              <option value="environment">Back / outward camera</option>
-            </select>
-          </label>
-          <label>
-            Camera device
-            <select
-              aria-label="Camera device"
-              value={selection.deviceId ?? ""}
-              onChange={(e) =>
-                changeSelection({
-                  facingMode: selection.facingMode,
-                  deviceId: e.target.value || undefined,
-                })
-              }
-            >
-              <option value="">Automatic camera selection</option>
-              {devices.map((device, i) => (
-                <option
-                  key={device.deviceId || `camera-${i}`}
-                  value={device.deviceId}
+        <details className="exercise-camera-settings">
+          <summary>Camera settings</summary>
+          <div className="exercise-settings-popover">
+            <div className="exercise-camera-selectors">
+              <label>
+                Camera facing
+                <select
+                  aria-label="Camera facing"
+                  value={selection.facingMode}
+                  onChange={(e) =>
+                    changeSelection({
+                      facingMode: e.target
+                        .value as CameraSelection["facingMode"],
+                    })
+                  }
                 >
-                  {device.label || `Camera ${i + 1}`}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        {deviceNotice && (
-          <p className="exercise-note" role="status">
-            {deviceNotice}
-          </p>
-        )}
-        <label className="exercise-auto">
-          <input
-            type="checkbox"
-            checked={autoStart}
-            onChange={(e) => setAutoStart(e.target.checked)}
-          />{" "}
-          Start automatically after calibration
-        </label>
-        <button
-          type="button"
-          className="exercise-primary exercise-start-manual"
-          disabled={
-            camera.status !== "ready" ||
-            inactive ||
-            Boolean(pendingUnit.current) ||
-            props.sessionComplete ||
-            props.progress >= props.target
-          }
-          onClick={() => {
-            detector.current.pause();
-            lifecycle.current?.invalidateFrames();
-            resetTiming();
-            setPhase("running");
-            setStatus("ready");
-            setMessage(
-              "Series started. Move into position; only observed full reps count.",
-            );
-          }}
-        >
-          Start without automatic calibration
-        </button>
+                  <option value="user">Front / selfie camera</option>
+                  <option value="environment">Back / outward camera</option>
+                </select>
+              </label>
+              <label>
+                Camera device
+                <select
+                  aria-label="Camera device"
+                  value={selection.deviceId ?? ""}
+                  onChange={(e) =>
+                    changeSelection({
+                      facingMode: selection.facingMode,
+                      deviceId: e.target.value || undefined,
+                    })
+                  }
+                >
+                  <option value="">Automatic camera selection</option>
+                  {devices.map((device, i) => (
+                    <option
+                      key={device.deviceId || `camera-${i}`}
+                      value={device.deviceId}
+                    >
+                      {device.label || `Camera ${i + 1}`}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            {deviceNotice && (
+              <p className="exercise-note" role="status">
+                {deviceNotice}
+              </p>
+            )}
+            <label className="exercise-auto">
+              <input
+                type="checkbox"
+                checked={autoStart}
+                onChange={(e) => setAutoStart(e.target.checked)}
+              />{" "}
+              Start automatically after calibration
+            </label>
+            <label className="exercise-auto">
+              <input
+                type="checkbox"
+                checked={showSkeleton}
+                onChange={(event) => setShowSkeleton(event.target.checked)}
+              />{" "}
+              Show skeleton overlay
+            </label>
+            <small className="exercise-note">
+              Stop if you feel discomfort. Camera feedback is a game estimate,
+              not a medical assessment.
+            </small>
+          </div>
+        </details>
       </div>
       {rejections >= 3 && (
-        <p className="exercise-note">
+        <p className="exercise-note exercise-rejection-note">
           Several movements were not verified. Recalibrate or use manual
           continuation. Verified progress is kept.
         </p>
       )}
-      <small className="exercise-note">
-        Stop if you feel discomfort. Camera feedback is a game estimate, not a
-        medical assessment.
-      </small>
     </section>
   );
 }

@@ -1,30 +1,925 @@
-.exercise-camera{--ex-green:#a4f3c5;background:#101d24;border:1px solid #38515b;border-radius:14px;padding:16px;color:#eaf5ec;min-width:0;font:14px/1.5 system-ui,sans-serif}.exercise-camera header,.exercise-readout{display:flex;justify-content:space-between;align-items:center;gap:12px}.exercise-tag{font-size:10px;letter-spacing:2px;color:var(--ex-green);font-weight:800}.exercise-camera button{background:#263d45;border:1px solid #48616b;color:#eaf5ec;border-radius:7px;padding:9px 12px;min-height:40px;font:inherit;cursor:pointer}.exercise-camera button:disabled{opacity:.5;cursor:wait}.exercise-camera button:hover{border-color:#a4f3c5}.exercise-camera button.exercise-primary{width:100%;background:#a4f3c5;color:#142822;font-weight:800}.exercise-feed{position:relative;aspect-ratio:4/3;margin:12px 0;background:#0b151c;border:1px solid #344851;border-radius:10px;overflow:hidden}.exercise-feed video,.exercise-feed canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transform:scaleX(-1)}.exercise-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:25px;gap:14px;color:#9aafb7}.exercise-placeholder>span{font-size:42px;color:#a4f3c5}.exercise-placeholder small{max-width:260px}.exercise-countdown{position:absolute;inset:0;display:grid;place-items:center;background:#0a161a88;font-size:64px;font-weight:900;color:#fff}.exercise-feedback{min-height:44px;color:#e8c16e;margin:12px 0}.exercise-readout strong{font-size:21px;color:var(--ex-green)}.exercise-actions{display:flex;flex-wrap:wrap;gap:7px}.exercise-actions button{flex:1}.exercise-note{color:#a4b9bf;font-size:12px;display:block;margin-top:10px}.exercise-auto{display:flex;align-items:center;gap:8px;margin:12px 0;font-size:12px;color:#c0d0d4}.exercise-auto input{accent-color:#a4f3c5}.exercise-demo{border-bottom:1px solid #314851;padding:8px 0 14px}.exercise-demo svg{display:block;width:100%;max-height:150px}.exercise-demo strong{font-size:17px;color:#e8c16e}.exercise-demo p{margin:7px 0}.exercise-demo small{color:#adbec2}@media(max-width:800px) and (orientation:landscape){.exercise-camera{padding:10px}.exercise-feed{max-height:56vh;aspect-ratio:16/9}.exercise-demo svg{max-height:95px}.exercise-feedback{min-height:24px}.exercise-actions button{min-height:44px}}@media(prefers-reduced-motion:reduce){.exercise-camera *{animation:none!important;transition:none!important}}
-/* Distance-readable exercise dashboard; counters never overlay anatomical points. */
-.exercise-hud{color:#fff;background:#10252a;border:2px solid #72958b;border-radius:14px;padding:18px;margin:12px 0;container-type:inline-size;min-width:0}
-.exercise-counter{display:flex;align-items:center;justify-content:center;gap:18px;font-variant-numeric:tabular-nums;line-height:.92;padding:9px 0 18px}
-.exercise-counter>strong{font-family:system-ui,sans-serif!important;font-size:clamp(84px,24cqw,160px)!important;font-weight:950;color:#bafbd1!important;letter-spacing:-.07em}
-.exercise-counter-target{font:800 clamp(42px,11cqw,78px)/1 system-ui,sans-serif;color:#f6fff8;white-space:nowrap}
-.exercise-counter-target small{display:block;font-size:clamp(12px,3.3cqw,20px);letter-spacing:.12em;margin-top:10px}
-.exercise-progress-track{height:20px;border:2px solid #c8ecdc;border-radius:6px;background:#041212;overflow:hidden}
-.exercise-progress-track>span{display:block;height:100%;background:#bafbd1;transition:width .22s ease}
-.exercise-next-side{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:5px 16px;margin-top:14px;padding:10px 0;border-bottom:1px solid #8cb3a4}
-.exercise-next-side small{font:800 clamp(12px,3.2cqw,18px)/1.25 system-ui,sans-serif;max-width:160px;color:#d7f9e8}
-.exercise-next-side strong{font:950 clamp(32px,8.5cqw,54px)/1 system-ui,sans-serif;color:#fff3ab!important}
-.exercise-big-feedback{min-height:100px;padding:15px 0 8px}
-.exercise-big-feedback>strong{font:900 clamp(23px,6.2cqw,40px)/1.1 system-ui,sans-serif;color:#bafbd1!important;display:block;text-wrap:balance}
-.exercise-big-feedback p{font:600 clamp(16px,3.8cqw,22px)/1.35 system-ui,sans-serif;margin:8px 0!important;color:#f1fff8!important}
-.exercise-start-position{padding:13px 15px;background:#e9f3df;color:#112f26;border-radius:9px}
-.exercise-start-position>span{font-weight:900;font-size:12px;letter-spacing:.12em;color:#285a47}
-.exercise-start-position p{margin:5px 0 0!important;font:600 16px/1.45 system-ui,sans-serif!important;color:#112f26!important}
-.exercise-hud footer{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-top:13px;color:#d3e7dc;font-size:12px}
-.exercise-hud footer label{display:flex;align-items:center;gap:8px;min-height:44px;color:#fff}.exercise-hud footer input{width:20px;height:20px;accent-color:#bafbd1}
-.exercise-hud:is(.state-no-body,.state-partial,.state-insufficient,.state-incomplete,.state-error){border-color:#ffd281;background:#2c271d}
-.exercise-hud:is(.state-no-body,.state-partial,.state-insufficient,.state-incomplete,.state-error) .exercise-big-feedback>strong{color:#ffe2a7!important}
-.exercise-hud:is(.state-paused,.state-off,.state-loading){border-color:#afcbe1;background:#172834}.exercise-hud:is(.state-paused,.state-off,.state-loading) .exercise-big-feedback>strong{color:#d2eaff!important}
-.rep-pulse .exercise-counter>strong{animation:rep-count-pop .42s ease-out}.rep-pulse .exercise-progress-track{box-shadow:0 0 0 4px #bafbd150}
-@keyframes rep-count-pop{0%{transform:scale(1)}35%{transform:scale(1.13);color:#fff}100%{transform:scale(1)}}
-.exercise-camera .exercise-actions>div{width:auto}.exercise-camera .exercise-actions button{min-height:48px;font-weight:750}.exercise-camera :is(button,select,input):focus-visible{outline:3px solid #ffe38a;outline-offset:3px}.exercise-camera select{background:#203e44;color:#fff;border:1px solid #9bb8bd;border-radius:7px;min-height:44px;max-width:100%;padding:6px}
-@media(max-height:600px) and (orientation:landscape){.exercise-camera{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(245px,1fr);gap:8px 12px;align-items:start;padding:10px}.exercise-camera>header{grid-column:1/-1}.exercise-camera .exercise-hud{grid-column:2;grid-row:2/span 3;margin:0;padding:10px}.exercise-camera .exercise-feed{grid-column:1;grid-row:2;max-height:none;height:clamp(190px,54vh,360px);aspect-ratio:auto;margin:0}.exercise-camera .exercise-demo{grid-column:1/-1}.exercise-camera .exercise-actions{grid-column:1;gap:5px}.exercise-camera .exercise-auto,.exercise-camera>.exercise-note{grid-column:1}.exercise-camera .exercise-placeholder{padding:10px;gap:8px}.exercise-camera .exercise-placeholder>span{display:none}.exercise-counter{gap:10px;padding-bottom:12px}.exercise-counter>strong{font-size:clamp(72px,23cqw,120px)!important}.exercise-big-feedback{min-height:70px;padding:10px 0 5px}.exercise-big-feedback p{font-size:16px}.exercise-start-position{padding:9px}.exercise-start-position p{font-size:14px!important}.exercise-next-side{margin-top:8px;padding:7px 0}.exercise-hud footer{margin-top:5px}.exercise-camera .exercise-countdown{font-size:100px}}
-@media(prefers-reduced-motion:reduce){.exercise-hud *{animation:none!important;transition:none!important}}
-.exercise-library-tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:9px;margin:16px 0}.exercise-library-tabs button{text-align:left;background:#eef1e5;border:2px solid #d1dbc6;border-radius:8px;padding:12px;min-height:70px;color:#244332}.exercise-library-tabs button[aria-pressed=true]{border-color:#356f53;background:#daecd9}.exercise-library-tabs strong,.exercise-library-tabs small{display:block}.exercise-library-tabs small{font-size:10px;letter-spacing:.06em;margin-top:7px}.exercise-library-demo{background:#10252a;color:#edf9ee;padding:20px;border-radius:12px}.exercise-library-demo .exercise-demo svg{max-height:220px}.exercise-source a{color:#c1efd1;text-decoration:underline}.exercise-library-demo p{color:#e8f1e8;font-size:16px}.exercise-library-demo .exercise-note{color:#ceded5}
-.exercise-camera-angle{display:block;font:700 12px/1.4 system-ui,sans-serif;color:#28533f;margin-top:8px}.exercise-camera-controls{min-width:0}.exercise-camera-selectors{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}.exercise-camera-selectors>label{display:grid;gap:5px;flex:1 1 150px;color:#d9e9de;font-size:12px}.exercise-start-manual{width:100%;min-height:48px!important;margin:10px 0;background:#f8dea2!important;color:#253c2b!important;font-weight:850!important}
+/* Original forest-and-gold exercise interface. The video and telemetry occupy
+   separate grid cells; no counters or controls cover observable joints. */
+.exercise-camera {
+  --ex-green: #baf5cc;
+  --ex-gold: #efd99b;
+  position: relative;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #577367;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #14352c, #091b1a);
+  color: #f3faef;
+  font:
+    14px/1.45 system-ui,
+    sans-serif;
+  isolation: isolate;
+}
+.exercise-camera > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+.exercise-camera-title {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+.exercise-camera-title > strong {
+  font:
+    800 22px/1.1 system-ui,
+    sans-serif;
+  color: #fff4d1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.exercise-tag {
+  font-size: 9px;
+  letter-spacing: 0.17em;
+  color: #9fc8b0;
+  font-weight: 800;
+}
+.exercise-camera button,
+.exercise-camera summary {
+  font:
+    700 13px/1.2 system-ui,
+    sans-serif;
+  cursor: pointer;
+}
+.exercise-camera button {
+  padding: 8px 10px;
+  min-height: 44px;
+  border: 1px solid #688c79;
+  border-radius: 8px;
+  background: #254438;
+  color: #f5fff4;
+}
+.exercise-camera button:hover {
+  border-color: var(--ex-gold);
+  background: #315541;
+}
+.exercise-camera button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+.exercise-camera button.exercise-primary {
+  background: #c1efc3;
+  color: #122c20;
+  border-color: #daf4ca;
+  font-weight: 850;
+}
+.exercise-camera button.exercise-start-manual {
+  background: #efd99b;
+  border-color: #f8e9c3;
+  color: #302c18;
+}
+.exercise-camera :is(button, summary, select, input):focus-visible {
+  outline: 3px solid #ffe19d;
+  outline-offset: 3px;
+}
+.exercise-camera input {
+  accent-color: #b8efc3;
+}
+.exercise-camera select {
+  background: #18382e;
+  color: #f5fff3;
+  border: 1px solid #739c87;
+  border-radius: 7px;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 6px;
+}
+.exercise-feed {
+  position: relative;
+  aspect-ratio: 4/3;
+  margin: 12px 0;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid #526c5c;
+  border-radius: 12px;
+  background: radial-gradient(ellipse at 50% 40%, #203b31, #071614 80%);
+}
+.exercise-feed video,
+.exercise-feed canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: scaleX(-1);
+}
+.exercise-feed canvas {
+  pointer-events: none;
+}
+.exercise-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  gap: 12px;
+  text-align: center;
+  color: #d5e4d4;
+}
+.exercise-placeholder > strong {
+  font-size: 15px;
+  max-width: 36ch;
+}
+.exercise-placeholder > small {
+  color: #a1bcaa;
+  font-size: 12px;
+}
+.exercise-prep-art {
+  width: min(90%, 500px);
+  min-height: 0;
+  flex: 1;
+  max-height: 65%;
+  display: grid;
+  place-items: center;
+}
+.exercise-prep-art .exercise-demo {
+  border: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+.exercise-prep-art .exercise-demo > *:not(svg) {
+  display: none;
+}
+.exercise-prep-art .exercise-demo svg {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+}
+.exercise-hud {
+  position: relative;
+  min-width: 0;
+  container-type: inline-size;
+  display: grid;
+  grid-template-areas: "heading" "counter" "progress" "side" "feedback" "posture";
+  grid-template-rows: auto auto 6px auto minmax(80px, 1fr) auto;
+  gap: 10px;
+  padding: 16px;
+  margin: 12px 0;
+  border: 1px solid #7a9e85;
+  border-radius: 12px;
+  background: #102b23;
+  color: #f7fff1;
+}
+.exercise-hud-heading {
+  grid-area: heading;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font:
+    800 10px/1.2 system-ui,
+    sans-serif;
+  letter-spacing: 0.11em;
+  color: #b8ceb6;
+}
+.exercise-hud-heading small {
+  font: inherit;
+  color: #e2d1a1;
+  white-space: nowrap;
+}
+.exercise-counter {
+  grid-area: counter;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  font-variant-numeric: tabular-nums;
+  line-height: 0.85;
+  padding: 4px 0;
+}
+.exercise-counter > strong {
+  font:
+    950 clamp(112px, 40cqw, 160px)/0.85 system-ui,
+    sans-serif !important;
+  color: #cef9cb !important;
+  letter-spacing: -0.065em;
+  text-shadow: 0 3px 0 #051a14;
+}
+.exercise-counter-target {
+  font:
+    800 clamp(32px, 11cqw, 52px)/1 system-ui,
+    sans-serif;
+  color: #fff4d6;
+  white-space: nowrap;
+}
+.exercise-counter-target small {
+  display: block;
+  margin-top: 7px;
+  font:
+    800 12px/1.1 system-ui,
+    sans-serif;
+  letter-spacing: 0.09em;
+  color: #b5ceb7;
+}
+.exercise-progress-track {
+  grid-area: progress;
+  height: 6px;
+  border-radius: 5px;
+  background: #071812;
+  overflow: hidden;
+}
+.exercise-progress-track > span {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #8bdca2, #e4e9a7);
+  transition: width 0.22s ease;
+}
+.exercise-next-side {
+  grid-area: side;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid #547660;
+}
+.exercise-next-side small {
+  font:
+    800 11px/1.15 system-ui,
+    sans-serif;
+  color: #bacfb9;
+  max-width: 115px;
+}
+.exercise-next-side strong {
+  font:
+    900 clamp(28px, 9cqw, 42px)/1 system-ui,
+    sans-serif;
+  color: #ffe6a6 !important;
+  white-space: nowrap;
+}
+.exercise-big-feedback {
+  grid-area: feedback;
+  align-self: center;
+  min-width: 0;
+  text-align: center;
+}
+.exercise-big-feedback > strong {
+  display: block;
+  font:
+    900 clamp(24px, 7.8cqw, 38px)/1.07 system-ui,
+    sans-serif;
+  color: #c9f7c5 !important;
+  text-wrap: balance;
+}
+.exercise-big-feedback p {
+  font:
+    600 clamp(16px, 4.8cqw, 21px)/1.28 system-ui,
+    sans-serif !important;
+  color: #f0f9e9 !important;
+  margin: 9px 0 0 !important;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+.exercise-start-position {
+  grid-area: posture;
+  min-width: 0;
+  background: #e5edcf;
+  color: #203b29;
+  border: 1px solid #d7e3b7;
+  border-radius: 8px;
+}
+.exercise-start-position > summary {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  list-style: none;
+  padding: 10px 30px 10px 12px;
+  min-height: 44px;
+}
+.exercise-start-position > summary::-webkit-details-marker {
+  display: none;
+}
+.exercise-start-position > summary > span {
+  font:
+    900 9px/1 system-ui,
+    sans-serif;
+  letter-spacing: 0.11em;
+  color: #54714a;
+}
+.exercise-start-position > summary > strong {
+  font:
+    750 14px/1.2 system-ui,
+    sans-serif;
+  color: #193a28 !important;
+}
+.exercise-start-position > summary > i {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font:
+    900 20px/1 system-ui,
+    sans-serif;
+  font-style: normal;
+}
+.exercise-start-position[open] > summary > i {
+  transform: translateY(-50%) rotate(45deg);
+}
+.exercise-posture-popover {
+  position: absolute;
+  z-index: 15;
+  bottom: 65px;
+  left: 0;
+  right: 0;
+  max-height: min(420px, 70vh);
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid #b8c992;
+  border-radius: 10px;
+  background: #eef3dd;
+  color: #193929;
+  box-shadow: 0 10px 45px #0008;
+}
+.exercise-posture-popover p {
+  font:
+    650 16px/1.45 system-ui,
+    sans-serif !important;
+  margin: 0 !important;
+  color: #193929 !important;
+}
+.exercise-camera-angle {
+  display: block;
+  font:
+    700 12px/1.4 system-ui,
+    sans-serif;
+  color: #45633d;
+  margin-top: 10px;
+}
+.exercise-hud footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 14px;
+  font:
+    12px/1.3 system-ui,
+    sans-serif;
+  color: #476542;
+}
+.exercise-hud footer label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+}
+.exercise-hud footer input {
+  width: 20px;
+  height: 20px;
+  accent-color: #397044;
+}
+.exercise-hud:is(
+  .state-no-body,
+  .state-partial,
+  .state-insufficient,
+  .state-incomplete,
+  .state-error
+) {
+  border-color: #d9bd76;
+  background: #302c1a;
+}
+.exercise-hud:is(
+    .state-no-body,
+    .state-partial,
+    .state-insufficient,
+    .state-incomplete,
+    .state-error
+  )
+  .exercise-big-feedback
+  > strong {
+  color: #ffe8a8 !important;
+}
+.exercise-hud:is(.state-paused, .state-off, .state-loading) {
+  background: #172e2d;
+  border-color: #72918d;
+}
+.exercise-hud:is(.state-paused, .state-off, .state-loading)
+  .exercise-big-feedback
+  > strong {
+  color: #e1f0df !important;
+}
+.rep-pulse .exercise-counter > strong {
+  animation: rep-count-pop 0.42s ease-out;
+}
+.rep-pulse .exercise-progress-track {
+  box-shadow: 0 0 0 3px #bafbd14a;
+}
+@keyframes rep-count-pop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.09);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.exercise-camera-controls {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.exercise-camera-controls .exercise-actions {
+  display: contents;
+}
+.exercise-camera-controls button {
+  min-width: 0;
+}
+.exercise-camera-settings {
+  min-width: 0;
+}
+.exercise-camera-settings > summary {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  list-style: none;
+  min-height: 44px;
+  padding: 5px;
+  text-align: center;
+  color: #f2e0ab;
+  border: 1px solid #8e825c;
+  border-radius: 8px;
+}
+.exercise-camera-settings > summary::-webkit-details-marker {
+  display: none;
+}
+.exercise-camera-settings[open] > summary {
+  background: #4a472d;
+}
+.exercise-settings-popover {
+  position: absolute;
+  z-index: 18;
+  right: 0;
+  bottom: calc(100% + 9px);
+  width: min(520px, 100%);
+  max-height: min(440px, 65vh);
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid #b0c094;
+  border-radius: 10px;
+  background: #123025;
+  box-shadow: 0 10px 45px #0009;
+}
+.exercise-camera-selectors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.exercise-camera-selectors > label {
+  display: grid;
+  gap: 5px;
+  flex: 1 1 160px;
+  min-width: 0;
+  font-size: 12px;
+  color: #d5e6d2;
+}
+.exercise-auto {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: #d3e4cf;
+}
+.exercise-note {
+  font:
+    12px/1.4 system-ui,
+    sans-serif;
+  color: #b6cdb6;
+  display: block;
+  margin-top: 10px;
+}
+.exercise-rejection-note {
+  display: none;
+}
+.exercise-guide-popover {
+  position: absolute;
+  z-index: 12;
+  inset: 62px 12px 112px;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 0 18px 18px;
+  border: 1px solid #c4b477;
+  border-radius: 12px;
+  background: #102c24f8;
+  box-shadow: 0 12px 55px #0009;
+}
+.exercise-guide-heading {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  background: #102c24;
+}
+.exercise-guide-heading > strong {
+  color: #efdda7;
+  font:
+    800 14px/1.2 system-ui,
+    sans-serif;
+}
+.exercise-guide-heading > button {
+  flex-shrink: 0;
+}
+.exercise-demo {
+  padding: 10px 0;
+  min-width: 0;
+}
+.exercise-demo svg {
+  display: block;
+  width: 100%;
+  max-height: 220px;
+}
+.exercise-demo strong {
+  font:
+    800 20px/1.2 system-ui,
+    sans-serif;
+  color: #f2d993;
+}
+.exercise-demo p {
+  margin: 10px 0;
+  line-height: 1.5;
+}
+.exercise-demo small {
+  color: #b9ccba;
+}
+.exercise-source a {
+  color: #d1eacb;
+  text-decoration: underline;
+}
+/* Root gives this region a definite viewport height. These are the only three
+   flow rows: title, camera+telemetry, and the always-available control strip. */
+.immersive-game .exercise-camera {
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(250px, 1fr);
+  grid-template-rows: 40px minmax(0, 1fr) 48px;
+  grid-template-areas: "head head" "feed hud" "controls controls";
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+}
+.immersive-game .exercise-camera > header {
+  grid-area: head;
+}
+.immersive-game .exercise-feed {
+  grid-area: feed;
+  margin: 0;
+  aspect-ratio: auto;
+  height: 100%;
+  min-height: 0;
+}
+.immersive-game .exercise-hud {
+  grid-area: hud;
+  min-height: 0;
+  margin: 0;
+  padding: 12px;
+  gap: 8px;
+}
+.immersive-game .exercise-camera-controls {
+  grid-area: controls;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  min-height: 0;
+}
+.immersive-game .exercise-guide-popover {
+  inset: 62px 12px 70px;
+}
+.immersive-game .exercise-settings-popover {
+  max-height: calc(100dvh - 170px);
+}
+@media (max-width: 600px) and (orientation: portrait) {
+  .immersive-game .exercise-camera {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 32px minmax(130px, 0.85fr) minmax(192px, 1fr) 86px;
+    grid-template-areas: "head" "feed" "hud" "controls";
+    gap: 6px;
+    padding: 8px;
+  }
+  .immersive-game .exercise-camera-title > strong {
+    font-size: 17px;
+  }
+  .immersive-game .exercise-tag {
+    display: none;
+  }
+  .immersive-game .exercise-camera > header button {
+    min-height: 32px;
+    padding: 5px 9px;
+  }
+  .immersive-game .exercise-camera-controls {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px;
+  }
+  .immersive-game .exercise-camera-controls button,
+  .immersive-game .exercise-camera-settings > summary {
+    min-height: 40px;
+    font-size: 12px;
+  }
+  .immersive-game .exercise-hud {
+    grid-template-columns: 130px minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(35px, 1fr) 4px auto;
+    grid-template-areas: "counter heading" "counter side" "counter feedback" "progress progress" "posture posture";
+    padding: 8px;
+    gap: 5px 8px;
+  }
+  .immersive-game .exercise-counter {
+    gap: 5px;
+  }
+  .immersive-game .exercise-counter > strong {
+    font-size: 96px !important;
+  }
+  .immersive-game .exercise-counter-target {
+    font-size: 26px;
+  }
+  .immersive-game .exercise-counter-target small {
+    font-size: 8px;
+    letter-spacing: 0;
+  }
+  .immersive-game .exercise-hud-heading {
+    font-size: 9px;
+  }
+  .immersive-game .exercise-hud-heading > small {
+    display: none;
+  }
+  .immersive-game .exercise-next-side {
+    padding: 0 0 4px;
+    gap: 5px;
+  }
+  .immersive-game .exercise-next-side small {
+    font-size: 8px;
+    max-width: 65px;
+  }
+  .immersive-game .exercise-next-side strong {
+    font-size: 24px;
+  }
+  .immersive-game .exercise-big-feedback {
+    text-align: left;
+  }
+  .immersive-game .exercise-big-feedback > strong {
+    font-size: 18px;
+  }
+  .immersive-game .exercise-big-feedback p {
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    margin-top: 5px !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .immersive-game .exercise-start-position > summary {
+    padding: 7px 28px 7px 9px;
+    min-height: 35px;
+    gap: 3px;
+  }
+  .immersive-game .exercise-start-position > summary > strong {
+    font-size: 12px;
+  }
+  .immersive-game .exercise-start-position > summary > span {
+    font-size: 8px;
+  }
+  .immersive-game .exercise-placeholder {
+    padding: 8px;
+    gap: 4px;
+  }
+  .immersive-game .exercise-placeholder > strong {
+    font-size: 11px;
+  }
+  .immersive-game .exercise-placeholder > small {
+    display: none;
+  }
+  .immersive-game .exercise-guide-popover {
+    inset: 46px 8px 100px;
+    padding: 0 12px 12px;
+  }
+  .immersive-game .exercise-guide-heading > strong {
+    font-size: 12px;
+  }
+  .immersive-game .exercise-guide-heading > button {
+    font-size: 11px;
+    min-height: 36px;
+  }
+  .immersive-game .exercise-posture-popover {
+    left: 0;
+    right: 0;
+    bottom: 50px;
+    max-height: 290px;
+  }
+}
+@media (max-height: 600px) and (orientation: landscape) {
+  .immersive-game .exercise-camera {
+    grid-template-columns: minmax(0, 1.15fr) minmax(245px, 0.85fr);
+    grid-template-rows: 28px minmax(0, 1fr) 42px;
+    gap: 4px 8px;
+    padding: 4px 8px;
+  }
+  .immersive-game .exercise-camera-title > strong {
+    font-size: 17px;
+  }
+  .immersive-game .exercise-tag {
+    display: none;
+  }
+  .immersive-game .exercise-camera > header button {
+    min-height: 28px;
+    font-size: 11px;
+    padding: 4px 9px;
+  }
+  .immersive-game .exercise-hud {
+    padding: 5px 8px;
+    grid-template-rows: 64px 3px auto minmax(32px, 1fr) 24px;
+    grid-template-areas: "counter" "progress" "side" "feedback" "posture";
+    gap: 3px;
+  }
+  .immersive-game .exercise-hud-heading {
+    display: none;
+  }
+  .immersive-game .exercise-counter {
+    padding: 0;
+    gap: 10px;
+  }
+  .immersive-game .exercise-counter > strong {
+    font-size: 80px !important;
+    line-height: 0.8 !important;
+  }
+  .immersive-game .exercise-counter-target {
+    font-size: 30px;
+  }
+  .immersive-game .exercise-counter-target small {
+    font-size: 9px;
+    margin-top: 4px;
+  }
+  .immersive-game .exercise-progress-track {
+    height: 3px;
+  }
+  .immersive-game .exercise-next-side {
+    padding: 1px 0 3px;
+    gap: 7px;
+  }
+  .immersive-game .exercise-next-side small {
+    font-size: 9px;
+    max-width: none;
+  }
+  .immersive-game .exercise-next-side strong {
+    font-size: 24px;
+  }
+  .immersive-game .exercise-big-feedback > strong {
+    font-size: 18px;
+    line-height: 1.05;
+  }
+  .immersive-game .exercise-big-feedback p {
+    font-size: 13px !important;
+    line-height: 1.12 !important;
+    margin-top: 3px !important;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+  .immersive-game .exercise-start-position > summary {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 23px;
+    padding: 3px 24px 3px 7px;
+  }
+  .immersive-game .exercise-start-position > summary > span {
+    font-size: 7px;
+    max-width: 50px;
+    line-height: 1.1;
+    flex-shrink: 0;
+  }
+  .immersive-game .exercise-start-position > summary > strong {
+    font-size: 10px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+  .immersive-game .exercise-start-position > summary > i {
+    font-size: 15px;
+    right: 6px;
+  }
+  .immersive-game .exercise-camera-controls {
+    gap: 5px;
+  }
+  .immersive-game .exercise-camera-controls button,
+  .immersive-game .exercise-camera-settings > summary {
+    min-height: 38px;
+    padding: 4px;
+    font-size: 11px;
+  }
+  .immersive-game .exercise-placeholder {
+    padding: 7px;
+    gap: 5px;
+  }
+  .immersive-game .exercise-placeholder > strong {
+    font-size: 11px;
+    max-width: 40ch;
+  }
+  .immersive-game .exercise-placeholder > small {
+    display: none;
+  }
+  .immersive-game .exercise-prep-art {
+    max-height: 75%;
+  }
+  .immersive-game .exercise-guide-popover {
+    inset: 36px 8px 51px;
+    padding: 0 12px 10px;
+  }
+  .immersive-game .exercise-guide-heading {
+    padding: 5px 0;
+  }
+  .immersive-game .exercise-guide-heading > strong {
+    font-size: 12px;
+  }
+  .immersive-game .exercise-guide-heading > button {
+    font-size: 11px;
+    min-height: 30px;
+  }
+  .immersive-game .exercise-guide-popover .exercise-demo svg {
+    max-height: 110px;
+  }
+  .immersive-game .exercise-posture-popover {
+    bottom: 31px;
+    max-height: calc(100dvh - 200px);
+    padding: 12px;
+  }
+  .immersive-game .exercise-settings-popover {
+    max-height: calc(100dvh - 160px);
+  }
+  .immersive-game .exercise-guide-popover .exercise-demo p {
+    font-size: 13px;
+  }
+}
+.exercise-library-tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 9px;
+  margin: 16px 0;
+}
+.exercise-library-tabs button {
+  text-align: left;
+  background: #eef1e5;
+  border: 2px solid #d1dbc6;
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 70px;
+  color: #244332;
+}
+.exercise-library-tabs button[aria-pressed="true"] {
+  border-color: #356f53;
+  background: #daecd9;
+}
+.exercise-library-tabs strong,
+.exercise-library-tabs small {
+  display: block;
+}
+.exercise-library-tabs small {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  margin-top: 7px;
+}
+.exercise-library-demo {
+  background: #102b23;
+  color: #edf9ee;
+  padding: 20px;
+  border-radius: 12px;
+}
+.exercise-library-demo .exercise-demo svg {
+  max-height: 220px;
+}
+.exercise-library-demo p {
+  color: #e8f1e8;
+  font-size: 16px;
+}
+.exercise-library-demo .exercise-note {
+  color: #ceded5;
+}
+@media (prefers-reduced-motion: reduce) {
+  .exercise-camera *,
+  .exercise-hud * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
