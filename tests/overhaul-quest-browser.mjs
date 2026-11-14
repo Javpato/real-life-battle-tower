@@ -78,6 +78,7 @@ try {
             q.onsuccess = () => {
               const s = q.result;
               s.journey.location = { mapId, x, y, facing: "up" };
+              s.journey.tutorialStage = 6; // Explicit quest-isolation fixture; production tutorial is mandatory.
               s.player.position = { x, y };
               store.put(s, `adventure:${id}`);
             };
