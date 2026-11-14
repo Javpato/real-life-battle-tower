@@ -10,6 +10,8 @@ import {effectiveness,stab,skillTypes} from './typeChart.ts';
 import {migrateSave} from './migrateSave.ts';
 export {effectiveness,stab,skillTypes} from './typeChart.ts';
 export {migrateSave} from './migrateSave.ts';
+const LEGACY_SKILL_IDS=new Set(['mini-squat','squat','pause-squat','assisted-lunge','lunge','sumo-squat','wall-sit','reverse-lunge','tempo-squat','single-leg-squat','wall-pushup','incline-pushup','knee-pushup','high-plank','pushup','pause-pushup','diamond','eccentric-pushup','wide-pushup','archer-pushup','birddog','alternating-birddog','short-superman','superman','back-extension','snow-angels','pause-birddog','alternating-superman','tempo-extension','advanced-birddog']);
+export const isLegacySkill=(id:string)=>LEGACY_SKILL_IDS.has(id);
 export const FLASH_SKILLS=['mini-squat','squat','knee-pushup','pushup'] as const;
 export function trialRequirement(id:string):number{
  const skill=SKILL_BY_ID[id];if(!skill)throw Error('UNKNOWN_SKILL');
@@ -149,8 +151,8 @@ export function applyCommand(save:PlayerSave,command:TowerCommand,context:Engine
  switch(command.kind){
  case 'rename':idle();requireRule(typeof command.name==='string'&&command.name.trim().length>0&&command.name.trim().length<=20,'INVALID_NAME');s.name=command.name.trim();break;
  case 'settings':{if(command.muted!==undefined){requireRule(typeof command.muted==='boolean','INVALID_SETTING');s.settings.muted=command.muted;}if(command.reducedMotion!==undefined){requireRule(typeof command.reducedMotion==='boolean','INVALID_SETTING');s.settings.reducedMotion=command.reducedMotion;}if(command.difficulty!==undefined){idle();requireRule(['easy','normal','hard'].includes(command.difficulty),'INVALID_DIFFICULTY');s.settings.difficulty=command.difficulty;}break;}
- case 'equip':{const activeRun=loadoutSafePoint();requireRule(Array.isArray(command.skillIds)&&command.skillIds.length>=1&&command.skillIds.length<=availableSlots(s)&&new Set(command.skillIds).size===command.skillIds.length&&command.skillIds.every(id=>s.skills[id]?.unlocked),'INVALID_LOADOUT');s.loadout=[...command.skillIds];if(activeRun)activeRun.loadout=[...command.skillIds];break;}
- case 'specialize':{const activeRun=loadoutSafePoint();requireRule(command.type===null||s.availableSpecializations.includes(command.type),'SPECIALIZATION_LOCKED');s.specialization=command.type;if(activeRun)activeRun.specialization=command.type;break;}
+ case 'equip':{const activeRun=loadoutSafePoint();requireRule(Array.isArray(command.skillIds)&&command.skillIds.length>=1&&command.skillIds.length<=availableSlots(s)&&new Set(command.skillIds).size===command.skillIds.length&&command.skillIds.every(id=>s.skills[id]?.unlocked),'INVALID_LOADOUT');requireRule(activeRun?.contentVersion!==1||command.skillIds.every(isLegacySkill),'LEGACY_RUN_SKILL_UNAVAILABLE');s.loadout=[...command.skillIds];if(activeRun)activeRun.loadout=[...command.skillIds];break;}
+ case 'specialize':{const activeRun=loadoutSafePoint();requireRule(command.type===null||s.availableSpecializations.includes(command.type),'SPECIALIZATION_LOCKED');requireRule(activeRun?.contentVersion!==1||command.type===null||['leg','arm','back'].includes(command.type),'LEGACY_RUN_TYPE_UNAVAILABLE');s.specialization=command.type;if(activeRun)activeRun.specialization=command.type;break;}
  case 'startTrial':case 'startFlashTrial':{
   const returnRun=s.activity.kind==='tower'?structuredClone(loadoutSafePoint()!):undefined;if(!returnRun)idle();
   const flash=command.kind==='startFlashTrial';

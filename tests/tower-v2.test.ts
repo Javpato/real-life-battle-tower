@@ -92,6 +92,12 @@ describe('determinism and migration',()=>{
   let s=send(initialSave(),{kind:'startRun',mode:'endless'});s.version=1;run(s).contentVersion=1;run(s).floor=5;const oldRun=structuredClone(run(s));const migrated=migrateSave(s);expect(run(migrated)).toEqual(oldRun);expect(migrated.version).toBe(2);
   s=send(s,{kind:'startFloor'});expect(run(s).battle!.enemy).toEqual(generateLegacyFloor(run(s).seed,5));run(s).battle!.turn='won';s=send(s,{kind:'settleFloor',battleId:run(s).battle!.id});expect(run(s).pendingBossReward).toBeUndefined();expect(s.progression!.trialTokens).toBe(0);
  });
+ it('does not introduce new skills or specializations into a legacy expedition',()=>{
+  let s=send(initialSave('Legacy','male',true),{kind:'startRun',mode:'endless'});run(s).contentVersion=1;
+  expect(()=>send(s,{kind:'equip',skillIds:['cat-cow','mini-squat','knee-pushup','birddog']})).toThrow('LEGACY_RUN_SKILL_UNAVAILABLE');
+  expect(()=>send(s,{kind:'specialize',type:'core'})).toThrow('LEGACY_RUN_TYPE_UNAVAILABLE');
+  s=send(s,{kind:'equip',skillIds:['squat','pushup','birddog','superman']});expect(run(s).loadout).toEqual(['squat','pushup','birddog','superman']);
+ });
  it('preserves local unlocks but strips imported timing evidence',()=>{
   const s=initialSave();s.progression!.flashSkills=['mini-squat'];s.progression!.flashCadence['mini-squat']=2000;s.progression!.flashVerification={'mini-squat':'verified'};s.flashEquipped=['mini-squat'];const imported=validateTowerImport(s);
   expect(imported.progression!.flashSkills).toEqual(['mini-squat']);expect(imported.progression!.flashCadence).toEqual({});expect(imported.progression!.flashVerification?.['mini-squat']).toBe('manual');expect(imported.loadout).toEqual(s.loadout);
