@@ -1,6 +1,8 @@
 import {useEffect,useState} from 'react';
+import {startMusic,stopMusic} from '../audio/music';
 import BattleSprite from '../game/BattleSprite';
 export default function Introduction({name,avatar,onDone}:{name:string;avatar:'male'|'female';onDone:()=>void}) {
+ useEffect(()=>{void startMusic('intro');return()=>stopMusic()},[]);
  const [scene,setScene]=useState(0),[letters,setLetters]=useState(0);
  const lines=[`Welcome to Willowmere, ${name}. I'm Moss. Every great journey begins with one small step.`,"Here, your own movement powers your adventure. Walk, explore, and turn a little effort into real strength.",`You begin as a Neutral trainer. There is no single way to grow, ${name}. Find the rhythm that works for you.`,"Terra, Flint and Zephyr lead our three gyms: Leg, Arm and Back. Each badge opens a new specialization and a special skill.","Beyond the woodland route, Rowan awaits at the summit. Earn all three badges to enter the arena. Until then, the valley is yours to explore.","Morning is coming. Your adventure begins at home. I'll meet you outside — and we'll take the first steps together."];
  const line=lines[scene];
