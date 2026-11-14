@@ -1,0 +1,98 @@
+/* Shared visual finish for the approved coral / navy / warm ivory character direction.
+   The selectors style presentation only; journal and camera state remain independent. */
+:root{--bt-ink:#242338;--bt-navy:#25273f;--bt-navy-light:#3b3c57;--bt-coral:#ed796b;--bt-coral-dark:#a9444b;--bt-cream:#fff1d6;--bt-paper:#f1e3c6;--bt-line:#b09d86}
+.bt{--ink:var(--bt-ink);--navy:var(--bt-navy);--paper:var(--bt-cream);--paper2:var(--bt-paper);--red:var(--bt-coral-dark);background:var(--bt-navy)}
+.bt .bt-body{background:var(--bt-paper);background-image:linear-gradient(90deg,#ffffff10 1px,transparent 1px),linear-gradient(#ffffff10 1px,transparent 1px);background-size:16px 16px}
+.bt .bt-header,.bt .bt-footer{background:var(--bt-navy);border-color:var(--bt-coral);color:var(--bt-cream)}
+.bt .bt-header button{background:var(--bt-navy-light);border-color:#d6c3a2;color:var(--bt-cream)}
+.bt button{border-color:var(--bt-navy);box-shadow:0 3px 0 #171627}
+.bt button.primary{background:var(--bt-coral-dark);border-color:#713542;color:#fff8e9}
+.bt button.primary:hover{background:#ba5054}
+.bt button:hover:not(:disabled):not(.primary){background:#f7d3b8;color:var(--bt-ink)}
+.bt button[aria-pressed=true],.bt button.selected{background:var(--bt-navy-light);border-color:var(--bt-coral);color:var(--bt-cream)}
+.bt button:focus-visible,.bt input:focus-visible,.bt select:focus-visible{outline-color:var(--bt-coral-dark)}
+.bt .bt-panel,.bt .academy-inspector,.bt .bt-type-codex,.bt .bt-training-library{border-color:var(--bt-navy);background:var(--bt-cream);box-shadow:4px 4px #25273f38}
+.bt .bt-panel{background-image:linear-gradient(var(--bt-coral),var(--bt-coral));background-repeat:no-repeat;background-size:36px 3px;background-position:12px 0}
+.bt .eyebrow{color:#93464d}
+.bt .bt-hub-body{background:var(--bt-navy)}
+.bt .bt-hub-nav,.bt .bt-hub-caption{background:#25273feb;border-color:var(--bt-coral);color:var(--bt-cream)}
+.bt .bt-hub-caption .eyebrow,.bt .bt-title-lockup .eyebrow{color:#f2b7a3}
+.bt .bt-title-lockup{background:#25273feb;border-color:#f2d9b6;box-shadow:8px 8px #16162788}
+.bt .bt-title-lockup h1{color:#fff2dc;text-shadow:3px 4px #963f4b}.bt .bt-title-lockup h1 span{color:#f18a79}
+.bt .bt-logo{background:var(--bt-navy);color:var(--bt-cream)}
+.bt .bt-logo-mark{background-color:var(--bt-coral);box-shadow:0 0 0 8px #44425c,inset 0 0 0 6px #fff0d1}
+.bt .bt-battle,.bt .bt-battle-series,.bt .bt-battle-dock{background:var(--bt-navy)}
+.bt .bt-battle-dock,.bt .bt-camera-pane,.bt .bt-workout-card{border-color:var(--bt-coral)}
+.bt .bt-health{background:#fff1d6f5;border-color:var(--bt-navy);box-shadow:4px 4px #17162766}
+.bt .bt-health.enemy{border-top-color:var(--bt-coral-dark)}
+.bt .bt-health .bar{background:var(--bt-navy)}
+.bt .bt-battle-label{background:#25273fee;border-color:#f2b7a3;color:var(--bt-cream)}
+.bt .bt-camera-pane{background:var(--bt-paper)}
+.bt .bt-camera-pane .exercise-camera,.bt .bt-camera-pane .exercise-camera-controls{background:var(--bt-navy)}
+.bt .bt-workout-card{background:#25273ff5;color:var(--bt-cream)}
+.bt .bt-workout-card .eyebrow{color:#f2b7a3}
+.bt .academy-tree{background-color:#eddfc5;background-image:radial-gradient(#b8a694 1px,transparent 1px)}
+.bt .academy-disciplines{background:var(--bt-navy);border-color:var(--bt-navy)}
+.bt .academy-map{border-color:var(--bt-navy)}
+.bt .academy-node.is-selected{background:var(--bt-navy-light);outline-color:var(--bt-coral);color:var(--bt-cream)}
+.bt .academy-opportunities,.bt .academy-flash{background:#f7ddc3;border-color:#bd8c78}
+.bt .bt-boss-reward{background:var(--bt-navy);border-color:var(--bt-coral)}
+.bt .bt-boss-reward .eyebrow{color:#f2b7a3}
+.bt .bt-phone-host:not([hidden]),.bt .bt-modal{background:var(--bt-cream);border-color:var(--bt-navy)}
+.bt .bt-modal-cover{background:#19192bd9}
+/* Retained nutrition journal: same frame language, legible body typography. */
+.tower-support{background:var(--bt-paper);color:var(--bt-ink)}
+.tower-support .tower-support-bar{height:58px;min-height:58px;flex-wrap:nowrap;gap:10px;background:var(--bt-navy);color:var(--bt-cream);border-bottom:3px solid var(--bt-coral);padding:6px 12px}
+.tower-support-bar>span{min-width:0;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tower-support .tower-support-bar button{flex:none;min-height:40px;border-color:#d6c3a2;background:var(--bt-navy-light);color:var(--bt-cream);font:700 12px 'Courier New',monospace}
+.tower-support .journal.journal-rpg{inset:58px 0 0;height:calc(100dvh - 58px);--paper:var(--bt-paper);--paper-bright:var(--bt-cream);--forest:var(--bt-navy);--ink:var(--bt-ink);--muted:#626076;--line:var(--bt-line);--gold:var(--bt-coral-dark)}
+.tower-support .journal-rpg:before{box-shadow:inset 0 0 0 3px #b09d86,inset 0 0 0 5px #25273f}
+.tower-support .journal-rpg .journal-nav{background:var(--bt-navy);border-right:4px solid var(--bt-coral);box-shadow:none}
+.tower-support .journal-rpg .journal-nav .brand,.tower-support .journal-rpg .journal-heading h1,.tower-support .journal-rpg h2,.tower-support .journal-rpg h3,.tower-support .journal-rpg .journal-note strong{font-family:'Courier New',monospace;font-weight:800;color:var(--bt-ink)}
+.tower-support .journal-rpg .journal-nav .brand,.tower-support .journal-rpg .journal-note strong{color:var(--bt-cream)}
+.tower-support .journal-rpg .journal-nav .brand-mark{border-color:var(--bt-coral);color:var(--bt-coral);box-shadow:3px 3px #171627;border-radius:0}
+.tower-support .journal-rpg .journal-nav>button.selected{background:var(--bt-cream);color:var(--bt-ink);border-color:var(--bt-coral);box-shadow:0 3px #171627}
+.tower-support .journal-rpg .journal-nav>button.selected:after{background:var(--bt-coral-dark);transform:none}
+.tower-support .journal-rpg .journal-note{background:var(--bt-navy-light);border-color:#b09d86}
+.tower-support .journal-rpg .journal-note p,.tower-support .journal-rpg .journal-nav small,.tower-support .journal-rpg .nav-caption{color:#dbc8b7}
+.tower-support .journal-rpg .journal-main{background:var(--bt-paper)}
+.tower-support .journal-rpg .journal-top{background:var(--bt-cream);border-bottom:2px solid #b09d86;backdrop-filter:none;box-shadow:0 3px #25273f15;color:var(--bt-ink)}
+.tower-support .journal-rpg .journal-top small,.tower-support .journal-rpg .journal-heading p{color:#626076}
+.tower-support .journal-rpg .primary,.tower-support .journal-rpg .journal-exit{background:var(--bt-coral-dark);border-color:#713542;color:#fff8e9;box-shadow:0 3px #4d293a;border-radius:0}
+.tower-support .journal-rpg .secondary,.tower-support .journal-rpg .journal-top .icon-button{background:var(--bt-cream);border-color:var(--bt-navy);color:var(--bt-ink);border-radius:0}
+.tower-support .journal-rpg .card{border:2px solid var(--bt-navy);box-shadow:3px 3px #25273f25;border-radius:0}
+.tower-support .journal-rpg .adventure-card{background:var(--bt-navy)!important;border-color:var(--bt-coral);color:var(--bt-cream)}
+.tower-support .journal-rpg .adventure-card h2{color:var(--bt-cream)}
+.tower-support .journal-rpg .adventure-card p{color:#dbc8b7}
+.tower-support .journal-rpg .date-row{background:var(--bt-cream);border-color:var(--bt-line);border-radius:0}
+.tower-support .journal-rpg input,.tower-support .journal-rpg select,.tower-support .journal-rpg textarea{border-radius:0!important;color:var(--bt-ink)}
+.tower-support .journal-rpg button:focus-visible,.tower-support .journal-rpg input:focus-visible,.tower-support .journal-rpg select:focus-visible{outline-color:var(--bt-coral-dark)}
+@media(max-width:650px){.tower-support .tower-support-bar{padding:6px;gap:6px}.tower-support .tower-support-bar button{font-size:10px;padding:6px 8px}.tower-support-bar>span{font-size:9px}}
+.tower-support .journal-rpg .modal-backdrop{inset:58px 0 0;background:#19192bd9;backdrop-filter:none;padding:10px}
+.tower-support .journal-rpg .food-modal{max-height:calc(100dvh - 78px);background:var(--bt-cream);border:3px solid var(--bt-coral);border-radius:0;box-shadow:6px 6px #16162788}
+.tower-support .journal-rpg .food-modal>.card-title{background:#f1e3c6;border-bottom:2px solid #b09d86;box-shadow:none}
+.tower-support .journal-rpg .food-modal>.card-title>button{background:var(--bt-cream);border:2px solid var(--bt-navy);border-radius:0;color:var(--bt-ink)}
+html[data-journal-theme=dark] .tower-support .journal.journal-rpg{--paper:#302f46;--paper-bright:#3b3a53;--ink:#fff1d6;--muted:#dfd1c7;--line:#81778c;color:#fff1d6}
+html[data-journal-theme=dark] .tower-support .journal.journal-rpg .journal-main{background:#302f46!important}
+html[data-journal-theme=dark] .tower-support .journal.journal-rpg .journal-top{background:#25273f!important;border-color:#ed796b!important;color:#fff1d6}
+html[data-journal-theme=dark] .tower-support .journal.journal-rpg :is(.card,.food-modal){background:#3b3a53!important;border-color:#81778c!important}
+html[data-journal-theme=dark] .tower-support .journal.journal-rpg :is(h1,h2,h3){color:#fff1d6!important}
+html[data-journal-theme=dark] .tower-support .journal.journal-rpg :is(.muted,.tiny,label,.energy-details>div>span,.journal-heading p,.journal-top small){color:#dfd1c7}
+html[data-journal-theme=dark] .tower-support .journal.journal-rpg .journal-nav>button.selected{background:#fff1d6!important;color:#25273f!important}
+html[data-journal-theme=dark] .tower-support .journal-rpg .food-modal>.card-title{background:#302f46}
+html[data-journal-theme=dark] .tower-support .journal-rpg .date-row{background:#3b3a53;border-color:#81778c}
+html[data-journal-theme=dark] .tower-support .journal-rpg .date-row>span{background:#514861;color:#fff1d6}
+html[data-journal-theme=dark] .tower-support .journal-rpg .card-foot{background:#302f46;color:#dfd1c7}
+html[data-journal-theme=dark] .tower-support .journal-rpg :is(input,select,textarea){background:#302f46;color:#fff1d6;border-color:#81778c}
+html[data-journal-theme=dark] .tower-support .journal-rpg .text-button{color:#f2b7a3}
+.tower-support .journal-rpg .journal-nav>button:not(.brand):not(.selected){background:#3b3c57;color:#fff1d6;border-color:#81778c;box-shadow:0 2px #171627}
+.tower-support .journal-rpg .journal-nav>button:not(.brand):hover{background:#51435a;color:#fff1d6}
+.tower-support .journal-rpg .journal-nav>.brand{background:transparent;border:0;box-shadow:none;color:#fff1d6;min-height:0}
+.tower-support .journal-rpg .journal-nav>.brand:hover{background:transparent;color:#fff1d6}
+.tower-support .journal-rpg .journal-nav>.brand .brand-mark{background:#3b3c57}
+.tower-support .journal-rpg .nav-bottom>button{background:#3b3c57;color:#fff1d6;border-color:#81778c}
+.tower-support .journal-rpg :is(.large-number,.calorie-ring strong,.energy-details strong){font-family:'Courier New',monospace;color:var(--ink)}
+.tower-support .journal-rpg :is(.muted,.tiny,.energy-details>div>span,.calorie-ring span,.card-foot){color:#625a69}
+html[data-journal-theme=dark] .tower-support .journal-rpg :is(.muted,.tiny,.energy-details>div>span,.calorie-ring span,.card-foot){color:#dfd1c7}
+html[data-journal-theme=dark] .tower-support .journal-rpg :is(input,select,textarea){background:#302f46!important;color:#fff1d6!important;border-color:#81778c!important}
+.tower-support .journal-rpg .journal-nav>button.selected:hover{background:var(--bt-cream);color:var(--bt-ink)}

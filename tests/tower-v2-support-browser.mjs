@@ -1,0 +1,16 @@
+import {chromium,expect} from '@playwright/test';
+import fs from 'node:fs/promises';
+const output=process.env.QA_DIR||'/tmp/battle-tower-v2-support-qa';await fs.mkdir(output,{recursive:true});
+const base=process.env.GAME_URL||'http://127.0.0.1:5176';
+const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',args:['--no-sandbox']});
+const page=await browser.newPage({viewport:{width:1366,height:768}}),errors=[],oldAssets=[];
+page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(r.url().includes('/assets/tower/hub.png'))oldAssets.push(r.url())});
+async function capture(name){await page.screenshot({path:`${output}/${name}.png`})}
+try{
+ await page.goto(base);await page.waitForTimeout(1900);await page.getByRole('button',{name:'PRESS ANYTHING TO START',exact:true}).click();await page.getByRole('button',{name:'Explore a local preview',exact:true}).click();await page.getByRole('button',{name:'Open journal',exact:true}).click();await expect(page.locator('[data-guide=journal]')).toBeVisible();
+ for(const chapter of ['food','activity','progress','profile','today']){await page.locator(`[data-guide=journal-tab-${chapter}]`).click();await expect(page.locator('.journal-main')).toHaveAttribute('data-journal-chapter',chapter[0].toUpperCase()+chapter.slice(1))}
+ for(const[width,height]of [[1920,1080],[1366,768],[1280,720],[915,412],[800,360]]){await page.setViewportSize({width,height});await page.locator('.journal-main').evaluate(el=>el.scrollTop=0);await page.locator('.journal-nav').evaluate(el=>el.scrollTop=0);await page.mouse.move(0,0);expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(width);await expect(page.locator('.tower-support-bar').getByRole('button',{name:'Back to Battle Tower',exact:true})).toBeInViewport();await expect(page.locator('[data-guide=journal-close]')).toBeInViewport();await capture(`journal-${width}x${height}`)}
+ await page.locator('[data-guide=journal-tab-profile]').click();await page.locator('[data-guide=journal-preferences]').getByLabel('Appearance').selectOption('dark');await capture('journal-dark-800');await page.locator('[data-guide=journal-preferences]').getByLabel('Appearance').selectOption('light');await page.locator('[data-guide=journal-tab-today]').click();await page.locator('[data-guide=journal-add]').click();await expect(page.locator('[data-guide=journal-food-close]')).toBeInViewport();await capture('journal-modal-800');await page.locator('[data-guide=journal-food-close]').click();await page.locator('.tower-support-bar').getByRole('button',{name:'Back to Battle Tower',exact:true}).click();await expect(page.getByRole('navigation',{name:'Tower destinations'})).toBeVisible();
+ await page.goto(base+'/?cameraCompanion');await expect(page.getByRole('heading',{name:'Your phone camera'})).toBeVisible();await expect(page.getByText('REAL-LIFE BATTLE TOWER',{exact:true})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(800);await capture('phone-companion-800');
+ expect(errors).toEqual([]);console.log(JSON.stringify({passed:true,errors,oldAssetRequestsFromGameplay:oldAssets.length,journalChapters:5,phonePairingTested:false}));
+}finally{await fs.writeFile(`${output}/browser-report.json`,JSON.stringify({errors,oldAssets},null,2));await browser.close()}

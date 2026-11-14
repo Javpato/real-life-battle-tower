@@ -277,7 +277,7 @@ export default function Journal({
         <button className="brand" onClick={closeJournal}>
           <span className="brand-mark"><BookOpen size={27}/></span>
           <span>
-            Field journal<small>EVERSTRIDE · PERSONAL NOTES</small>
+            Field journal<small>COZYLIGHT · PERSONAL NOTES</small>
           </span>
         </button>
         <div className="nav-caption">CHAPTERS OF YOUR DAY</div>
@@ -316,7 +316,7 @@ export default function Journal({
           </div>
           <button onClick={closeJournal}>
             <ArrowLeft size={17} />
-            Return to adventure
+            Return to Battle Tower
           </button>
         </div>
       </aside>
@@ -338,11 +338,11 @@ export default function Journal({
           >
             <Settings2 size={20} />
           </button>
-          <button className="journal-exit" data-guide="journal-close" onClick={closeJournal} aria-label="Return to adventure"><span>Return to adventure</span><X size={20}/></button>
+          <button className="journal-exit" data-guide="journal-close" onClick={closeJournal} aria-label="Return to Battle Tower"><span>Return to Battle Tower</span><X size={20}/></button>
         </header>
         <div className="journal-heading">
           <div>
-            <div className="eyebrow">YOUR ADVENTURE, BETWEEN THE PAGES</div>
+            <div className="eyebrow">YOUR TRAINING, BETWEEN THE PAGES</div>
             <h1>
               {tab === "Today"
                 ? "A good day starts here."
@@ -551,16 +551,16 @@ export default function Journal({
               <section className="card adventure-card">
                 <div className="eyebrow">LIFE BEYOND THE NUMBERS</div>
                 <h2>
-                  Your next adventure
+                  Your next ascent
                   <br />
                   is a step away.
                 </h2>
                 <p>
-                  A breath of fresh air.
-                  <br />A new path through the village.
+                  Take a moment to recover.
+                  <br />Your next tower floor will be waiting.
                 </p>
                 <button onClick={closeJournal}>
-                  Back to the village{" "}
+                  Back to Battle Tower{" "}
                   <ArrowLeft
                     size={16}
                     style={{ transform: "rotate(180deg)" }}

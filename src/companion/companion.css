@@ -4,3 +4,20 @@
 
 /* The game modal has a dark palette; this nested fieldbook owns its parchment text. */
 .immersive-game .modal .companion-control h3,.immersive-game .modal .companion-control p{color:#284633}.immersive-game .modal .companion-control small{color:#5e674e}.immersive-game .modal .companion-control .companion-local-warning{color:#684b20}
+/* Battle Tower companion presentation; transport and privacy controls are unchanged. */
+.phone-companion{background:#25273f;color:#fff1d6;font-family:system-ui,sans-serif}
+.phone-companion header>span{color:#f2b7a3;font:700 11px 'Courier New',monospace;letter-spacing:2px}
+.phone-companion h1{font-family:'Courier New',monospace;font-weight:800;color:#fff1d6}
+.phone-companion-card{background:#fff1d6;color:#242338;border:3px solid #ed796b;border-radius:0;box-shadow:6px 6px #161627}
+.phone-companion button,.companion-control button{background:#a9444b;color:#fff8e9;border:2px solid #713542;border-radius:0;font-family:'Courier New',monospace;font-weight:700;box-shadow:0 3px #4d293a}
+.phone-companion button:focus-visible,.phone-companion select:focus-visible,.companion-control button:focus-visible{outline:3px solid #ed796b;outline-offset:3px}
+.phone-companion-card select{background:#fff8e9;color:#242338;border:2px solid #3b3c57;border-radius:0}
+.phone-companion-card input[type=checkbox]{accent-color:#a9444b}
+.phone-camera-preview{background:#161627;border:2px solid #3b3c57;border-radius:0}
+.phone-companion .companion-code,.companion-control .companion-code{color:#a9444b}
+.companion-control{background:#fff1d6;color:#242338;border:2px solid #3b3c57;border-radius:0}
+.companion-control h3{font-family:'Courier New',monospace;font-weight:800;color:#242338}
+.companion-control p,.companion-control small{color:#514c64}
+.companion-control a{color:#843c46}
+.companion-confirm{background:#f5ddca;border:2px solid #ad7d71}
+.companion-preview{background:#161627;border-radius:0}
