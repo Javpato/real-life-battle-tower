@@ -1,5 +1,6 @@
 import type { ExerciseId } from "../core/contracts";
 import ExercisePoseArt from "../tower/ExercisePoseArt";
+import { skillGuide } from "../tower/skillGuides";
 
 export type HomeExerciseId = "sitstand" | "wallpushup" | "bridge";
 export const EXERCISE_GUIDES: Record<
@@ -11,6 +12,7 @@ export const EXERCISE_GUIDES: Record<
     camera: string;
     note: string;
     source?: string;
+    sources?: Array<{ title: string; url: string; scope: string }>;
   }
 > = {
   sitstand: {
@@ -101,50 +103,73 @@ export const EXERCISE_GUIDES: Record<
   },
 };
 
-export type ExerciseRecognitionProfile = 'mini-squat' | 'knee-pushup';
-type ProfileGuide = (typeof EXERCISE_GUIDES)[ExerciseId] & {startingCue:string};
-const PROFILE_GUIDES:Record<ExerciseRecognitionProfile,ProfileGuide> = {
-  'mini-squat': {
-    title: 'Mini Squat · Shallow squat',
-    setup: 'Stand upright with feet planted and leave your visible hip, knee and ankle in view. Begin with comfortably straight knees. This variation uses a shallow bend rather than a full squat.',
-    movement: 'Make a small, controlled bend at your hips and knees, then return to your upright starting position. Complete the return before the next movement.',
-    camera: 'Side or slight three-quarter view · one hip, knee and ankle visible',
-    note: 'Experimental camera estimate for a shallow movement. It does not assess medical suitability or verify contact with the floor. Pause whenever you need.',
-    startingCue: 'Stand tall · feet planted · prepare a shallow bend',
+export type ExerciseRecognitionProfile = "mini-squat" | "knee-pushup";
+type ProfileGuide = (typeof EXERCISE_GUIDES)[ExerciseId] & {
+  startingCue: string;
+};
+const PROFILE_GUIDES: Record<ExerciseRecognitionProfile, ProfileGuide> = {
+  "mini-squat": {
+    title: "Mini Squat · Shallow squat",
+    setup:
+      "Stand upright with feet planted and leave your visible hip, knee and ankle in view. Begin with comfortably straight knees. This variation uses a shallow bend rather than a full squat.",
+    movement:
+      "Make a small, controlled bend at your hips and knees, then return to your upright starting position. Complete the return before the next movement.",
+    camera:
+      "Side or slight three-quarter view · one hip, knee and ankle visible",
+    note: "Experimental camera estimate for a shallow movement. It does not assess medical suitability or verify contact with the floor. Pause whenever you need.",
+    startingCue: "Stand tall · feet planted · prepare a shallow bend",
   },
-  'knee-pushup': {
-    title: 'Knee Push-up · Supported push-up',
-    setup: 'Begin with both knees supported on the floor, palms under your shoulders and elbows extended. Keep your shoulders, hips and knees roughly in one line. Your knees remain bent; the illustration shows the lower legs raised behind you.',
-    movement: 'Keeping your knees supported, bend your elbows to lower your torso, then press back to the starting position. Move your torso together and complete the return.',
-    camera: 'Low side view · show the near shoulder, elbow, wrist, hip and knee; include the lower leg when possible',
-    note: 'Experimental camera estimate. The camera observes the visible pose but cannot verify knee contact, floor support or pressure. Use manual mode if the pose cannot be observed reliably.',
-    startingCue: 'Knees supported · arms extended · body aligned to knees',
+  "knee-pushup": {
+    title: "Knee Push-up · Supported push-up",
+    setup:
+      "Begin with both knees supported on the floor, palms under your shoulders and elbows extended. Keep your shoulders, hips and knees roughly in one line. Your knees remain bent; the illustration shows the lower legs raised behind you.",
+    movement:
+      "Keeping your knees supported, bend your elbows to lower your torso, then press back to the starting position. Move your torso together and complete the return.",
+    camera:
+      "Low side view · show the near shoulder, elbow, wrist, hip and knee; include the lower leg when possible",
+    note: "Experimental camera estimate. The camera observes the visible pose but cannot verify knee contact, floor support or pressure. Use manual mode if the pose cannot be observed reliably.",
+    startingCue: "Knees supported · arms extended · body aligned to knees",
   },
 };
 /** One source for both camera setup and the profile-specific teaching illustration. */
-export function getExerciseGuide(exerciseId:ExerciseId | HomeExerciseId, recognitionProfile?:ExerciseRecognitionProfile): (typeof EXERCISE_GUIDES)[ExerciseId] & {startingCue?:string} {
-  if(recognitionProfile==='mini-squat' && exerciseId==='squat')return PROFILE_GUIDES['mini-squat'];
-  if(recognitionProfile==='knee-pushup' && exerciseId==='pushup')return PROFILE_GUIDES['knee-pushup'];
+export function getExerciseGuide(
+  exerciseId: ExerciseId | HomeExerciseId,
+  recognitionProfile?: ExerciseRecognitionProfile,
+): (typeof EXERCISE_GUIDES)[ExerciseId] & { startingCue?: string } {
+  if (recognitionProfile === "mini-squat" && exerciseId === "squat")
+    return PROFILE_GUIDES["mini-squat"];
+  if (recognitionProfile === "knee-pushup" && exerciseId === "pushup")
+    return PROFILE_GUIDES["knee-pushup"];
   return EXERCISE_GUIDES[exerciseId];
 }
 
 export default function ExerciseDemo({
   exerciseId,
+  skillId,
   recognitionProfile,
   guideOverride,
   hideIllustration = false,
 }: {
   exerciseId: ExerciseId | HomeExerciseId;
+  /** Exact catalogue skill: never infer a variant from its transport exercise ID. */
+  skillId?: string;
   recognitionProfile?: ExerciseRecognitionProfile;
-  guideOverride?: (typeof EXERCISE_GUIDES)['squat'];
+  guideOverride?: (typeof EXERCISE_GUIDES)["squat"];
   hideIllustration?: boolean;
 }) {
-  const physicalGuide = getExerciseGuide(exerciseId,recognitionProfile);
-  const guide = guideOverride ?? physicalGuide;
-  const artId = recognitionProfile && physicalGuide === PROFILE_GUIDES[recognitionProfile] ? recognitionProfile : exerciseId;
+  const physicalGuide = getExerciseGuide(exerciseId, recognitionProfile);
+  const guide: (typeof EXERCISE_GUIDES)["squat"] =
+    guideOverride ?? (skillId ? skillGuide(skillId) : physicalGuide);
+  const artId =
+    skillId ??
+    (recognitionProfile && physicalGuide === PROFILE_GUIDES[recognitionProfile]
+      ? recognitionProfile
+      : exerciseId);
   return (
     <div className="exercise-demo">
-      {!hideIllustration && <ExercisePoseArt exerciseId={artId} title={guide.title}/>}
+      {!hideIllustration && (
+        <ExercisePoseArt exerciseId={artId} title={guide.title} />
+      )}
       <strong>{guide.title}</strong>
       <p>
         <b>Starting position:</b> {guide.setup}
@@ -154,13 +179,34 @@ export default function ExerciseDemo({
       </p>
       <p className="exercise-note">{guide.camera}</p>
       <small>{guide.note}</small>
-      {guide.source && (
-        <p className="exercise-source">
-          <a href={guide.source} target="_blank" rel="noreferrer">
-            Exercise reference · NHS
-          </a>{" "}
-          · original game illustration
-        </p>
+      {guide.sources?.length ? (
+        <details className="exercise-source">
+          <summary>Movement references and camera limits</summary>
+          <ul>
+            {guide.sources.map((source) => (
+              <li key={source.url}>
+                <a href={source.url} target="_blank" rel="noreferrer">
+                  {source.title}
+                </a>
+                <small style={{ display: "block" }}>{source.scope}</small>
+              </li>
+            ))}
+          </ul>
+          <small>
+            References explain movement families; game variations and camera
+            estimates are not a clinical assessment.
+          </small>
+        </details>
+      ) : (
+        guide.source && (
+          <p className="exercise-source">
+            <a href={guide.source} target="_blank" rel="noreferrer">
+              Exercise reference ·{" "}
+              {new URL(guide.source).hostname.replace(/^www\./, "")}
+            </a>{" "}
+            · movement reference
+          </p>
+        )
       )}
     </div>
   );
