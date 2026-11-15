@@ -89,12 +89,12 @@ describe('Flash evidence',()=>{
   let s=winAt(initialSave(),5);s=send(s,{kind:'chooseBossReward',choice:'flash'});s=send(s,{kind:'startFlashTrial',skillId:'mini-squat'});expect(activeSeries(s)!.target).toBe(9);
   s=completeTrial(s);expect(s.progression!.flashSkills).toEqual(['mini-squat']);expect(s.progression!.flashTokens).toBe(0);expect(s.progression!.flashCadence).toEqual({});expect(s.progression!.flashVerification?.['mini-squat']).toBe('manual');
  });
- it('uses three actual cycles then six controlled cycles and rejects broken/too-fast movement',()=>{
+ it('uses three actual cycles then six flexible paced cycles and rejects broken/extreme timing',()=>{
   let s=initialSave();s.progression!.flashTokens=1;s=send(s,{kind:'startFlashTrial',skillId:'mini-squat'});
   s=camera(s,0,2000,false);s=camera(s,1,500);expect(activeSeries(s)!.progress).toBe(0);
   for(let i=2;i<5;i++)s=camera(s,i);expect(s.activity.kind==='trial'&&s.activity.cadenceMs).toBe(2000);
-  s=camera(s,5,1300);expect(activeSeries(s)!.progress).toBe(3);
-  for(let i=6;i<12;i++)s=camera(s,i,1800);s=send(s,{kind:'finishTrial'});expect(s.progression!.flashCadence['mini-squat']).toBe(2000);expect(s.progression!.flashVerification?.['mini-squat']).toBe('verified');
+  s=camera(s,5,1300);expect(activeSeries(s)!.progress).toBe(4);
+  for(let i=6;i<11;i++)s=camera(s,i,1800);s=send(s,{kind:'finishTrial'});expect(s.progression!.flashCadence['mini-squat']).toBe(2000);expect(s.progression!.flashVerification?.['mini-squat']).toBe('verified');
  });
  it('does not give manual damage a cadence bonus and cannot change Flash during an attack',()=>{
   let s=initialSave();s.progression!.flashSkills=['mini-squat'];s.progression!.flashCadence['mini-squat']=2000;s=send(s,{kind:'equipFlash',skillId:'mini-squat',enabled:true});s=send(s,{kind:'startRun',mode:'endless',seed:2});s=send(s,{kind:'startFloor'});s=send(s,{kind:'beginAttack',skillId:'mini-squat'});

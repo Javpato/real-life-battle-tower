@@ -7,6 +7,7 @@ export {generateFloor} from './generation';
 export type {PlayerSave,TowerCommand} from './model';
 import {effectiveness,stab,skillTypes} from './typeChart';
 import {migrateSave} from './migrateSave';
+import {assessFlashCycle,flashCadenceWindow,FLASH_TIMING} from './flash';
 export {effectiveness,stab,skillTypes} from './typeChart';
 export {migrateSave} from './migrateSave';
 const LEGACY_SKILL_IDS=new Set(['mini-squat','squat','pause-squat','assisted-lunge','lunge','sumo-squat','wall-sit','reverse-lunge','tempo-squat','single-leg-squat','wall-pushup','incline-pushup','knee-pushup','high-plank','pushup','pause-pushup','diamond','eccentric-pushup','wide-pushup','archer-pushup','birddog','alternating-birddog','short-superman','superman','back-extension','snow-angels','pause-birddog','alternating-superman','tempo-extension','advanced-birddog']);
@@ -20,8 +21,7 @@ export function trialRequirement(id:string):number{
 }
 export const canLearnSkill=(save:PlayerSave,id:string)=>canAttemptTrial(save,id)&&(!!save.skills[id]?.unlocked||save.debug||(save.progression?.trialTokens??0)>0);
 function cycleDuration(u:ExerciseUnit):number|null{
- const c=u.cycle;if(c?.clockId!==undefined&&(typeof c.clockId!=='string'||!c.clockId.length||c.clockId.length>200))return null;if(!u.verified||u.quality<.8||c?.uninterrupted!==true||!Number.isFinite(c.startedAt)||!Number.isFinite(c.endedAt)||c.startedAt<0||c.endedAt!==u.timestamp||c.endedAt-c.startedAt<1000||c.endedAt-c.startedAt>8000)return null;
- return c.endedAt-c.startedAt;
+ const result=assessFlashCycle(u);return result.accepted?result.durationMs:null;
 }
 function requireRule(ok:unknown,message:string):asserts ok {if(!ok)throw Error(message);}
 const freshProgress=()=>({unlocked:false,mastery:0,totalUnits:0,verifiedUnits:0,manualUnits:0,trialVerification:null as 'verified'|'manual'|'mixed'|null});
@@ -122,7 +122,7 @@ export function applyCommand(save:PlayerSave,command:TowerCommand,context:Engine
   const cycle=cycleDuration(u),clock=u.cycle?.clockId??'legacy-clock';
   const previousEnd=series.cycleEnds&&Object.hasOwn(series.cycleEnds,clock)?series.cycleEnds[clock]:undefined;
   if(cycle!==null&&previousEnd!==undefined&&u.cycle!.startedAt<previousEnd)return;
-  if(activity.kind==='trial'&&activity.trialKind==='flash'&&u.verified){if(cycle===null)return;if(activity.flashStage==='test'&&activity.cadenceMs!==undefined&&(cycle<activity.cadenceMs*.75||cycle>activity.cadenceMs*1.25))return;}
+  if(activity.kind==='trial'&&activity.trialKind==='flash'&&u.verified&&!assessFlashCycle(u,activity.flashStage==='test'?activity.cadenceMs:undefined,previousEnd).accepted)return;
   // Unsupported variants can be practiced manually but cannot claim camera verification.
   requireRule(!u.verified||skill.detector==='supported','VARIANT_REQUIRES_MANUAL');
   series.seen.push(u.id);series.progress++;series.side=u.side;if(cycle!==null)series.cycleEnds={...series.cycleEnds,[clock]:u.cycle!.endedAt};
@@ -130,8 +130,15 @@ export function applyCommand(save:PlayerSave,command:TowerCommand,context:Engine
  observeSeries(series,skill,u);
   if(activity.kind!=='workout')credit(s,skill.id,u.verified);
   if(activity.kind==='trial'){
-   if(activity.trialKind==='flash'&&series.progress<=3&&cycle!==null)(activity.referenceCycles??=[]).push(cycle);
-   if(activity.trialKind==='flash'&&series.progress===3){activity.flashStage='test';if(activity.referenceCycles?.length===3)activity.cadenceMs=[...activity.referenceCycles].sort((a,b)=>a-b)[1];}
+   if(activity.trialKind==='flash'){
+    // A manual reference must not prevent later camera cycles from establishing
+    // a baseline. Mixed trials remain explicitly mixed and do not store cadence.
+    if(cycle!==null&&(activity.referenceCycles?.length??0)<FLASH_TIMING.referenceReps){
+     (activity.referenceCycles??=[]).push(cycle);
+     if(activity.referenceCycles.length===FLASH_TIMING.referenceReps)activity.cadenceMs=[...activity.referenceCycles].sort((a,b)=>a-b)[1];
+    }
+    if(series.progress>=FLASH_TIMING.referenceReps)activity.flashStage='test';
+   }
    activity.completed=series.progress===series.target;return;
   }
   if(activity.kind==='workout'){if(u.verified)activity.verified++;else activity.manual++;if(series.progress===series.target)finishWorkoutEntry(activity);return;}
@@ -142,10 +149,10 @@ export function applyCommand(save:PlayerSave,command:TowerCommand,context:Engine
   const types=activity.contentVersion===1?[skill.type]:skillTypes(skill);
   const power=activity.contentVersion===1?1:1+.1*(activity.powerUps?.[skill.id]??0);
   const cadence=s.progression?.flashCadence[skill.id];
-  const flash=activity.contentVersion===2&&activity.flashEquipped?.includes(skill.id)&&cycle!==null&&cadence&&cycle>=cadence*.75&&cycle<=cadence*1.25?1.25:1;
+  const flash=activity.contentVersion===2&&activity.flashEquipped?.includes(skill.id)&&flashCadenceWindow(cadence).referenceMs!==null&&assessFlashCycle(u,cadence).accepted?1.25:1;
   const raw=skill.damage/series.target*u.quality*effectiveness(types,b.enemy.phases[b.phase])*stab(types,activity.specialization)*power*flash*(u.verified?1:series.manualFactor);
   const threshold=b.enemy.thresholds[b.phase],before=b.enemyHp;b.enemyHp=Math.max(threshold,b.enemyHp-raw);
-  b.lastDamage=before-b.enemyHp;b.hitSerial++;b.log=`${u.verified?'Verified':'Manual'} ${skill.unit==='seconds'?'second':'repetition'} · ${b.lastDamage.toFixed(1)} damage`;
+  b.lastDamage=before-b.enemyHp;b.hitSerial++;b.log=`${u.verified?'Verified':'Manual'} ${skill.unit==='seconds'?'second':'repetition'} · ${b.lastDamage.toFixed(1)} damage${flash>1?' · FLASH ×1.25':''}`;
   if(b.enemyHp<=threshold){closeFatigue(b);b.turn=threshold===0?'won':'transform';}
   else if(series.progress===series.target){closeFatigue(b);b.turn='enemy';}
  }
@@ -158,7 +165,7 @@ export function applyCommand(save:PlayerSave,command:TowerCommand,context:Engine
   const returnRun=s.activity.kind==='tower'?structuredClone(loadoutSafePoint()!):undefined;if(!returnRun)idle();
   const flash=command.kind==='startFlashTrial';
   requireRule(flash?s.skills[command.skillId]?.unlocked&&FLASH_SKILLS.includes(command.skillId as typeof FLASH_SKILLS[number])&&((s.progression!.flashTokens>0)||s.progression!.flashSkills.includes(command.skillId)):canLearnSkill(s,command.skillId),'TRIAL_LOCKED');
-  const skill=SKILL_BY_ID[command.skillId];s.activity={kind:'trial',id:uuid(),skillId:skill.id,series:makeSeries(skill.id,flash?9:trialRequirement(skill.id)),completed:false,trialKind:flash?'flash':'skill',...(returnRun?{returnRun}:{}),...(flash?{flashStage:'reference',referenceCycles:[]}: {})};
+  const skill=SKILL_BY_ID[command.skillId];s.activity={kind:'trial',id:uuid(),skillId:skill.id,series:makeSeries(skill.id,flash?FLASH_TIMING.referenceReps+FLASH_TIMING.testReps:trialRequirement(skill.id)),completed:false,trialKind:flash?'flash':'skill',...(returnRun?{returnRun}:{}),...(flash?{flashStage:'reference',referenceCycles:[]}: {})};
  }break;
  case 'finishTrial':{
   requireRule(s.activity.kind==='trial'&&s.activity.completed,'TRIAL_NOT_FINISHED');const a=s.activity,p=s.skills[a.skillId];
