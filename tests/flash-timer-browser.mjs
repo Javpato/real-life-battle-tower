@@ -58,7 +58,7 @@ try {
  await page.waitForTimeout(240);
  const later=Number.parseFloat(await timer().innerText());
  expect(first).toBeGreaterThan(0);expect(later).toBeGreaterThan(first);
- await page.screenshot({path:`${out}/camera-timer-active.png`});
+ await page.getByRole('region',{name:'Flash timer'}).screenshot({path:`${out}/camera-timer-active.png`});
  await page.getByRole('button',{name:'Pause / rest',exact:true}).click();
  await expect(timer()).toHaveText('0.0s');await page.waitForTimeout(350);await expect(timer()).toHaveText('0.0s');await expect(saved()).toHaveText('0');
  await page.evaluate(()=>{window.__flashAngle=175;});
@@ -83,7 +83,7 @@ try {
  await page.getByRole('button',{name:'Pause trial',exact:true}).click();const frozen=await practice.innerText();await page.waitForTimeout(400);await expect(practice).toHaveText(frozen);
  await page.getByRole('button',{name:'Resume trial',exact:true}).click();
  await page.getByRole('button',{name:'Confirm manual repetition',exact:true}).click();await expect(saved()).toHaveText('1');expect(Number.parseFloat(await practice.innerText())).toBeLessThan(.4);
- await page.screenshot({path:`${out}/manual-unverified-timer.png`});
+ await page.getByRole('region',{name:'Flash timer'}).screenshot({path:`${out}/manual-unverified-timer.png`});
  for(let n=2;n<=9;n++)await page.getByRole('button',{name:'Confirm manual repetition',exact:true}).click();
  await page.getByRole('button',{name:'Finish trial',exact:true}).click();await expect(page.getByTestId('verification')).toHaveText('manual');await expect(page.getByTestId('cadence')).toHaveText('none');
  expect(await page.evaluate(()=>window.__localCaptures)).toBe(0);expect(errors).toEqual([]);
