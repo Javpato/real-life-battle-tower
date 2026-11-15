@@ -109,6 +109,12 @@ describe('whole-set clocks and settings',()=>{
    expect(assessFlashSet(state,u)).toBe(false);expect(state.status).toBe('interrupted');
   }
  });
+ it('ends the timed bonus when manual confirmation is mixed into an active set',()=>{
+  let save=camera(battle(),unit(1000));expect(activeSeries(save)!.flash?.status).toBe('active');
+  save=send(save,{kind:'manualUnit',sessionId:activeSeries(save)!.id});expect(activeSeries(save)!.flash?.status).toBe('interrupted');
+  save=camera(save,unit(1000));expect((save.activity as TowerRun).battle!.log).not.toContain('FLASH');
+  expect(activeSeries(save)).toMatchObject({progress:3,verified:2,manual:1});
+ });
  it('accepts custom duration before a set, validates bounds, and locks it once started',()=>{
   let save=battle();const sessionId=activeSeries(save)!.id;
   for(const seconds of [0,-1,601,NaN,Infinity])expect(()=>send(save,{kind:'configureFlash',sessionId,seconds})).toThrow('INVALID_FLASH_TIME');

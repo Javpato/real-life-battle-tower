@@ -68,7 +68,7 @@ export function assessFlashSet(state:FlashSet,unit:ExerciseUnit):boolean {
  const assessment=assessFlashCycle(unit);
  if(!assessment.accepted){
   // A manual event cannot establish timing, and a broken observed cycle cannot resume a bonus.
-  if(unit.verified)state.status='interrupted';
+  if(unit.verified||state.startedAt!==undefined)state.status='interrupted';
   return false;
  }
  const cycle=unit.cycle!,clock=cycle.clockId??'legacy-clock';
