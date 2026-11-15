@@ -220,3 +220,42 @@ it("keeps the established support side when crossed leg labels briefly swap", ()
   expect(units).toHaveLength(1);
   expect(units[0].side).toBe("left");
 });
+
+it("relearns the support stance when alternating legs without treating the raised foot as the floor", () => {
+  const a = standing(),
+    left = structuredClone(a),
+    right = structuredClone(a);
+  left.landmarks[28].y -= 0.1;
+  left.landmarks[26].y -= 0.07;
+  right.landmarks[27].y -= 0.1;
+  right.landmarks[25].y -= 0.07;
+  const leftBend = lower(left, 0.075),
+    rightBend = lower(right, 0.075);
+  leftBend.landmarks[25].x += 0.08;
+  rightBend.landmarks[26].x -= 0.08;
+  const d = new AssistedExerciseDetector(
+    "single-leg-squat",
+    "squat",
+    "alternate",
+  );
+  d.recalibrate(a);
+  let time = 0;
+  const units: ExerciseUnit[] = [];
+  for (const [pose, n] of [
+    [a, 6],
+    [left, 6],
+    [lower(left, 0.04), 3],
+    [leftBend, 10],
+    [left, 6],
+    [a, 6],
+    [right, 6],
+    [lower(right, 0.04), 3],
+    [rightBend, 10],
+    [right, 6],
+  ] as const)
+    for (let i = 0; i < n; i++) {
+      const u = d.update({ ...pose, timestamp: (time += 50) }).unit;
+      if (u) units.push(u);
+    }
+  expect(units.map((u) => u.side)).toEqual(["left", "right"]);
+});
