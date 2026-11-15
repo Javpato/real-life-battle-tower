@@ -104,6 +104,7 @@ export type PoseReference = {
   hipY: number;
   hipAngle: number;
   kneeAngle?: number;
+  ankleY?: number;
 };
 export type RecognitionOptions = {
   profile?: "mini-squat" | "knee-pushup";
@@ -442,34 +443,41 @@ export function observePose(
       options.reference?.side === g.side
         ? options.reference.kneeAngle
         : undefined;
-    const readyBend = flash
-      ? mini
-        ? baseline === undefined
+    const readyBend =
+      baseline === undefined ? (mini ? 150 : 145) : baseline - 9;
+    const rangeBend =
+      baseline === undefined
+        ? mini
           ? 145
-          : clamp(baseline - 10, 135, 155)
-        : 140
-      : mini
-        ? 160
-        : 145;
-    const rangeBend = flash
-      ? mini
-        ? baseline === undefined
-          ? 135
-          : clamp(baseline - 25, 110, 148)
-        : 135
-      : mini
-        ? 145
-        : 115;
+          : 128
+        : baseline - (mini ? (flash ? 18 : 22) : flash ? 24 : 32);
+    const ref = options.reference;
+    const hipTravel =
+      ref?.side === g.side ? (p[c.hip].y - ref.hipY) / scale : 0;
+    const planted =
+      ref?.ankleY === undefined ||
+      Math.abs(p[c.ankle].y - ref.ankleY) < scale * 0.12;
+    const frontal =
+      good(23) && good(24) && Math.abs(p[23].x - p[24].x) > scale * 0.28;
+    // In a frontal projection the knee can still appear straight throughout a
+    // squat. Use calibrated torso travel over a planted foot in that view.
+    const travelTarget = mini ? (flash ? 0.13 : 0.16) : flash ? 0.19 : 0.24;
+    const travelExtended = frontal && planted && hipTravel >= travelTarget;
+    const isReady =
+      upright && bend > readyBend && hipTravel < travelTarget * 0.4;
+    const isExtended = upright && (bend < rangeBend || travelExtended);
     return finish({
       ...base(g.ids, g.side),
-      ready: upright && bend > readyBend,
-      extended: upright && bend < rangeBend,
-      amplitude: flash
-        ? clamp(
-            (Math.max(readyBend, baseline ?? 165) - bend) /
-              Math.max(20, Math.max(readyBend, baseline ?? 165) - rangeBend),
-          )
-        : clamp((165 - bend) / (mini ? 35 : 80)),
+      ready: isReady,
+      extended: isExtended,
+      amplitude: travelExtended
+        ? clamp(hipTravel / travelTarget)
+        : flash
+          ? clamp(
+              (Math.max(readyBend, baseline ?? 165) - bend) /
+                Math.max(20, Math.max(readyBend, baseline ?? 165) - rangeBend),
+            )
+          : clamp((165 - bend) / (mini ? 35 : 80)),
       motion: p[c.hip].y / scale,
     });
   }
@@ -860,6 +868,7 @@ export class ExerciseDetector {
       side,
       scale: Math.max(0.06, scale),
       hipY: p[c.hip].y,
+      ankleY: p[c.ankle].y,
       hipAngle: angle(p[c.shoulder], p[c.hip], p[c.knee]),
       kneeAngle: angle(p[c.hip], p[c.knee], p[c.ankle]),
     };
@@ -927,6 +936,7 @@ export class ExerciseDetector {
         this.seatedCandidate = {
           at: frame.timestamp,
           hipY: p[c.hip].y,
+          ankleY: p[c.ankle].y,
           kneeAngle,
           side,
           scale,
@@ -1044,17 +1054,20 @@ export class ExerciseDetector {
       return { state: "ready", message: "Settle into the starting position." };
     }
     if (this.phase === "ready") {
-      this.motionStart = o.motion;
-      this.lastMotion = o.motion;
+      if (o.ready) {
+        this.motionStart = o.motion;
+        this.lastMotion = o.motion;
+      }
       if (!o.ready) {
-        this.phase = "moving";
+        this.phase = this.flashTolerance && o.extended ? "return" : "moving";
         this.start = now;
         this.cycleUninterrupted = !o.estimated;
         this.peak = o.amplitude;
-        this.side = undefined;
+        this.side = this.phase === "return" ? o.side : undefined;
         this.estimatedCycle = Boolean(o.estimated);
-        this.movement = 0;
-        this.totalMotion = 0;
+        this.movement = Math.abs(o.motion - this.motionStart);
+        this.totalMotion = this.movement;
+        this.lastMotion = o.motion;
       }
       return {
         state: "moving",
@@ -1079,7 +1092,11 @@ export class ExerciseDetector {
         }
         if (
           now - this.stableSince >=
-          (this.flashTolerance ? 120 : DETECTOR_CONFIG.stableMs)
+          (this.flashTolerance
+            ? 0
+            : this.exerciseId === "squat"
+              ? 50
+              : DETECTOR_CONFIG.stableMs)
         ) {
           this.phase = "return";
           this.stableSince = undefined;
@@ -1121,13 +1138,17 @@ export class ExerciseDetector {
       this.stableSince ??= now;
       if (
         now - this.stableSince >=
-        (this.flashTolerance ? 100 : DETECTOR_CONFIG.returnMs)
+        (this.flashTolerance
+          ? 0
+          : this.exerciseId === "squat"
+            ? 50
+            : DETECTOR_CONFIG.returnMs)
       ) {
         this.phase = "ready";
         this.stableSince = undefined;
         if (
           now - this.start <
-          (this.flashTolerance ? 700 : DETECTOR_CONFIG.minimumCycleMs)
+          (this.flashTolerance ? 300 : DETECTOR_CONFIG.minimumCycleMs)
         )
           return {
             state: "ready",

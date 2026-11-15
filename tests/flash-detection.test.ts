@@ -82,8 +82,8 @@ function movement(
   return units;
 }
 describe("opt-in Flash range tolerance", () => {
-  it("accepts a measured shallower squat only when Flash tolerance is selected", () => {
-    expect(movement("squat", squat(175), squat(132), {})).toHaveLength(0);
+  it("accepts comfortable calibrated squat depth in both standard and Flash modes", () => {
+    expect(movement("squat", squat(175), squat(132), {})).toHaveLength(1);
     const units = movement("squat", squat(175), squat(132), flash);
     expect(units).toHaveLength(1);
     expect(units[0]).toMatchObject({
@@ -93,7 +93,7 @@ describe("opt-in Flash range tolerance", () => {
   });
   it("calibrates a Flash mini squat from relaxed knees without requiring a rigid standing pose", () => {
     const standard: RecognitionOptions = { profile: "mini-squat" };
-    expect(movement("squat", squat(153), squat(122), standard)).toHaveLength(0);
+    expect(movement("squat", squat(153), squat(122), standard)).toHaveLength(1);
     expect(
       movement("squat", squat(153), squat(122), { ...standard, ...flash }),
     ).toHaveLength(1);
@@ -207,7 +207,7 @@ function observedCycle(
   });
 }
 describe("Flash observed movement timer and endpoint dwell", () => {
-  it("accepts a complete controlled cycle with short endpoint pauses and an actual 700ms clock", () => {
+  it("accepts a complete controlled cycle with short endpoint pauses and the actual movement clock without artificial endpoint waiting", () => {
     const detector = new ExerciseDetector(
       "squat",
       "short-dwell",
@@ -218,7 +218,7 @@ describe("Flash observed movement timer and endpoint dwell", () => {
     expect(units).toHaveLength(1);
     expect(units[0].cycle).toMatchObject({
       startedAt: 300,
-      endedAt: 1000,
+      endedAt: 900,
       uninterrupted: true,
     });
     expect(detector.cycleStartedAt).toBeNull();
@@ -295,9 +295,9 @@ describe("Flash observed movement timer and endpoint dwell", () => {
       [200, ready],
       [300, moving],
       [350, bent],
-      [470, bent],
-      [600, ready],
-      [700, ready],
+      [380, bent],
+      [450, ready],
+      [500, ready],
     ];
     for (const [t, observation] of samples)
       expect(detector.updateObservation(observation, t).unit).toBeUndefined();
@@ -311,5 +311,26 @@ describe("Flash observed movement timer and endpoint dwell", () => {
       flash,
     );
     expect(observedCycle(detector, { motion: 0 })).toHaveLength(0);
+  });
+});
+
+it("counts a fast full Flash cycle with a single peak frame and no endpoint pause", () => {
+  const detector = new ExerciseDetector("squat", "fast-peak", undefined, flash);
+  const samples: [number, Observation][] = [
+    [0, ready],
+    [200, ready],
+    [300, bent],
+    [450, moving],
+    [650, ready],
+  ];
+  const units = samples.flatMap(([time, pose]) => {
+    const result = detector.updateObservation(pose, time);
+    return result.unit ? [result.unit] : [];
+  });
+  expect(units).toHaveLength(1);
+  expect(units[0].cycle).toMatchObject({
+    startedAt: 300,
+    endedAt: 650,
+    uninterrupted: true,
   });
 });

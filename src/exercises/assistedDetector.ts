@@ -27,6 +27,7 @@ export type AssistedMeasurement = {
   missing: string[];
   usable: [boolean, boolean];
   bilateral: boolean;
+  legGeometry?: { hipY: number; shoulderY: number; ankleY: number }[];
 };
 const opposite = (side: Side): Side => (side === "left" ? "right" : "left");
 const clamp = (n: number, a = 0, b = 1) => Math.max(a, Math.min(b, n));
@@ -73,9 +74,9 @@ const EMPTY: AssistedMeasurement = {
 };
 export const ASSISTED_TIMING = {
   calibrateMs: 700,
-  readyMs: 180,
-  returnMs: 140,
-  minimumCycleMs: 450,
+  readyMs: 90,
+  returnMs: 60,
+  minimumCycleMs: 300,
   maximumGapMs: 250,
   maximumLatencyMs: 1000,
 } as const;
@@ -384,6 +385,15 @@ export function measureAssistedPose(
     missing: [],
     usable,
     bilateral,
+    ...(profile.strategy === "knee-bend"
+      ? {
+          legGeometry: BOTH.map((i) => ({
+            hipY: p[23 + i].y,
+            shoulderY: p[11 + i].y,
+            ankleY: p[27 + i].y,
+          })),
+        }
+      : {}),
   };
 }
 
@@ -516,24 +526,41 @@ export class AssistedExerciseDetector {
     }
     return timestamp - this.candidateAt >= ASSISTED_TIMING.calibrateMs;
   }
+  private hipRange(m: AssistedMeasurement, i: number) {
+    const ref = this.reference;
+    if (!ref?.legGeometry || !m.legGeometry) return 0;
+    const a = ref.legGeometry[i],
+      b = m.legGeometry[i];
+    // A planted ankle anchors image travel: camera movement or raising a foot
+    // cannot substitute for moving the torso over the supporting leg.
+    if (Math.abs(b.ankleY - a.ankleY) > ref.scale * 0.12) return 0;
+    const sign = this.profile.direction === "decrease" ? -1 : 1;
+    const hip = (sign * (b.hipY - a.hipY)) / ref.scale;
+    const shoulder = (sign * (b.shoulderY - a.shoulderY)) / ref.scale;
+    return Math.max(0, Math.min(hip, shoulder * 1.5)) * 0.65;
+  }
   private ranges(m: AssistedMeasurement): [number, number] {
     return BOTH.map((i) =>
       !m.usable[i] || !this.reference?.usable[i]
         ? 0
-        : Math.min(
-            ...m.features[i].map((v, j) => {
-              const d = v - this.reference!.features[i][j];
-              return this.profile.direction === "decrease"
-                ? -d
-                : this.profile.direction === "either"
-                  ? Math.abs(d)
-                  : d;
-            }),
+        : Math.max(
+            this.hipRange(m, i),
+            Math.min(
+              ...m.features[i].map((v, j) => {
+                const d = v - this.reference!.features[i][j];
+                return this.profile.direction === "decrease"
+                  ? -d
+                  : this.profile.direction === "either"
+                    ? Math.abs(d)
+                    : d;
+              }),
+            ),
           ),
     ) as [number, number];
   }
   private returnRange(m: AssistedMeasurement, index: number) {
     return Math.max(
+      this.hipRange(m, index),
       ...m.features[index].map((v, j) =>
         Math.abs(v - this.reference!.features[index][j]),
       ),
@@ -621,8 +648,9 @@ export class AssistedExerciseDetector {
       );
     }
     if (
-      !sameChains(m, this.reference) ||
-      Math.abs(m.scale / this.reference.scale - 1) > 0.3
+      !BOTH.some((i) => m.usable[i] && this.reference!.usable[i]) ||
+      (this.profile.strategy !== "knee-bend" &&
+        Math.abs(m.scale / this.reference.scale - 1) > 0.3)
     ) {
       this.beginCalibration();
       return feedback(
@@ -659,7 +687,16 @@ export class AssistedExerciseDetector {
     if (this.profile.reverseSide) index = (1 - index) as 0 | 1;
     if (!this.alternating) index = movement[1] > movement[0] ? 1 : 0;
     index = this.activeIndex ?? index;
-    const value = m.bilateral ? Math.min(...movement) : movement[index];
+    let value = m.bilateral ? Math.min(...movement) : movement[index];
+    if (this.profile.id === "single-leg-squat" && m.legGeometry) {
+      const support = m.legGeometry[index],
+        lifted = m.legGeometry[1 - index];
+      const footRaised =
+        support.ankleY - lifted.ankleY > this.reference.scale * 0.08;
+      // The announced side is the supporting leg, not the lifted leg. Once
+      // returning, placing the other foot down does not erase the completed bend.
+      if (!footRaised && this.phase !== "away") value = 0;
+    }
     const returned = m.bilateral
       ? BOTH.every((i) => this.returnRange(m, i) < minimum * 0.4)
       : this.returnRange(m, index) < minimum * 0.4;
@@ -685,10 +722,8 @@ export class AssistedExerciseDetector {
         this.activeIndex = index;
         this.previousRange = value;
       }
-      return feedback(
-        "moving",
-        "Movement observed · continue comfortably, then return.",
-      );
+      // Process a peak in this same frame; a fast reversal may have only one
+      // observed peak. Three distinct start/out/return frames still are required.
     }
     if (this.phase === "out") {
       const change = value - this.previousRange;
@@ -734,8 +769,10 @@ export class AssistedExerciseDetector {
         };
       }
       this.returnAt ??= frame.timestamp;
-      if (frame.timestamp - this.returnAt < ASSISTED_TIMING.returnMs)
-        return feedback("return", "Settle at the starting position.");
+      // Clear geometric hysteresis already proves the return. Requiring a
+      // stationary endpoint drops continuous fast repetitions.
+      if (frame.timestamp <= this.awayAt!)
+        return feedback("return", "Finish returning to the starting position.");
       const duration = frame.timestamp - this.startedAt!;
       const qualified =
         duration >= ASSISTED_TIMING.minimumCycleMs &&
