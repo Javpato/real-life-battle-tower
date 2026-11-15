@@ -936,7 +936,6 @@ export class ExerciseDetector {
         this.seatedCandidate = {
           at: frame.timestamp,
           hipY: p[c.hip].y,
-          ankleY: p[c.ankle].y,
           kneeAngle,
           side,
           scale,
