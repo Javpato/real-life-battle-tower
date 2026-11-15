@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "checks": [
+    "single name/brand/barcode field",
+    "real ZXing decode of synthetic EAN-13 camera",
+    "local photo decode",
+    "rear HD constraints",
+    "no camera before request",
+    "permission retry",
+    "stop after first decode",
+    "late permission stream released",
+    "cancel stale search",
+    "portion confirmation only",
+    "six viewport layouts"
+  ],
+  "errors": [],
+  "physicalPhoneTested": false,
+  "liveUpstreamInThisTest": false
+}

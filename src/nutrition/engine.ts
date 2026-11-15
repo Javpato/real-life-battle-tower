@@ -300,40 +300,7 @@ export function csv(entries: Entry[]) {
     ),
   ].join("\n");
 }
-export async function lookupBarcode(code: string): Promise<Food> {
-  if (!/^\d{8,14}$/.test(code))
-    throw new Error("Enter an 8–14 digit product barcode.");
-  const r = await fetch(
-    `https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=code,product_name,brands,nutriments,image_front_small_url,nutrition_data_per`,
-    { signal: AbortSignal.timeout(12000) },
-  );
-  if (!r.ok) throw new Error("Product service unavailable. Try manual entry.");
-  const data = await r.json();
-  if (data.status !== 1)
-    throw new Error("Product not found. You can add its label manually.");
-  const p = data.product,
-    n = p.nutriments ?? {};
-  const read = (key: string) =>
-    typeof n[key] === "number" && Number.isFinite(n[key]) && n[key] >= 0
-      ? n[key]
-      : null;
-  return {
-    id: code,
-    barcode: code,
-    basis: p.nutrition_data_per === "100ml" ? "ml" : "g",
-    name: p.product_name || "Unnamed product",
-    brand: p.brands,
-    source: `Open Food Facts · retrieved ${today()} · community label, check packaging`,
-    image: p.image_front_small_url,
-    per100: {
-      kcal: read("energy-kcal_100g"),
-      protein: read("proteins_100g"),
-      carbs: read("carbohydrates_100g"),
-      fat: read("fat_100g"),
-      fiber: read("fiber_100g"),
-    },
-  };
-}
+export {lookupBarcode} from './foodSearchService';
 
 /** Historical dates use the last profile version actually established by that day. */
 export function profileForDate(

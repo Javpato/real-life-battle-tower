@@ -4,6 +4,8 @@ import JournalSettings, {
   useJournalPreferences,
 } from "./JournalSettings";
 import FoodSearch from "./FoodSearch";
+import BarcodeScanner from "./BarcodeScanner";
+import {readBarcodePhoto} from "./barcodeScanner";
 import {
   dailyEnergySummary,
   displayWeight,
@@ -18,7 +20,6 @@ import ProjectionPanel from "./ProjectionPanel";
 import Reports from "./Reports";
 import {
   Plus,
-  Search,
   ScanLine,
   ArrowLeft,
   Flame,
@@ -71,14 +72,12 @@ export default function Journal({
   syncPanel?: ReactNode;
 }) {
   const prefs = useJournalPreferences();
-  const scannerRef = useRef<(() => void) | null>(null);
-  const scannerGeneration=useRef(0),guideCallback=useRef(onGuideEvent);
+  const lookupRequest=useRef<AbortController|null>(null),photoGeneration=useRef(0),guideCallback=useRef(onGuideEvent);
   guideCallback.current=onGuideEvent;
-  useEffect(()=>{guideCallback.current?.('journal:opened');return()=>{scannerGeneration.current++;scannerRef.current?.();};},[]);
+  useEffect(()=>{guideCallback.current?.('journal:opened');return()=>{photoGeneration.current++;lookupRequest.current?.abort();};},[]);
   const [tab, T] = useState("Today"),
     [date, D] = useState(today()),
     [add, A] = useState(false),
-    [query, Q] = useState(""),
     [food, F] = useState<Food | null>(null),
     [amount, G] = useState(100),
     [meal, M] = useState("Breakfast"),
@@ -96,9 +95,13 @@ export default function Journal({
     [recipeName, R] = useState(""),
     [yieldG, Y] = useState(400),
     [recipeIds, RI] = useState<string[]>([]),
-    [scanStop, SS] = useState<(() => void) | null>(null);
+    [scanning, setScanning] = useState(false),
+    [lookingUp, setLookingUp] = useState(false),
+    [readingPhoto, setReadingPhoto] = useState(false);
   useEffect(()=>{guideCallback.current?.(`journal:tab:${tab}`);},[tab]);
-  const closeJournal=()=>{scannerGeneration.current++;scannerRef.current?.();scannerRef.current=null;onClose();};
+  const cancelLookup=()=>{photoGeneration.current++;lookupRequest.current?.abort();lookupRequest.current=null;setLookingUp(false);setReadingPhoto(false);};
+  const closeJournal=()=>{cancelLookup();setScanning(false);onClose();};
+  const selectFood=(value:Food)=>{cancelLookup();setScanning(false);F(value);S("Check the label, then confirm your portion.");};
   const entries = s.entries.filter((e) => e.date === date && !e.planned),
     totals = total(entries),
     summary = dailyEnergySummary(s, date),
@@ -138,47 +141,32 @@ export default function Journal({
     A(false);
     F(null);
     S("");
-    scanStop?.();
-    SS(null);
+    cancelLookup();
+    setScanning(false);
   }
   async function lookup(code: string) {
-    S("Looking up the product…");
+    cancelLookup();setScanning(false);F(null);
+    const controller=new AbortController();lookupRequest.current=controller;setLookingUp(true);
+    S(`Barcode read: ${code}. Looking up the product…`);
     try {
-      const f = await lookupBarcode(code);
-      F(f);
-      S("Check the label, then confirm your portion.");
-    } catch (e) {
-      S((e as Error).message);
-    }
+      const f=await lookupBarcode(code,controller.signal);
+      if(lookupRequest.current!==controller)return;
+      F(f);S("Product found. Check the label, then confirm your portion.");
+    } catch(e) {
+      if(lookupRequest.current!==controller)return;
+      S((e as Error).name==='AbortError'?'Product lookup took too long. Retry, search the name or enter the label.':(e as Error).message==='Failed to fetch'?'Barcode read, but the product service could not be reached. Check your connection and retry.':(e as Error).message);
+    } finally {if(lookupRequest.current===controller){lookupRequest.current=null;setLookingUp(false);}}
   }
-  async function scan() {
-    scannerRef.current?.();
-    const generation=++scannerGeneration.current;
-    A(true);
-    S("Allow camera access to scan a packaged product.");
-    try {
-      const { BrowserMultiFormatReader } = await import("@zxing/browser");
-      const reader = new BrowserMultiFormatReader();
-      const controls = await reader.decodeFromVideoDevice(
-        undefined,
-        "barcode-video",
-        (result) => {
-          if (result && generation===scannerGeneration.current) {
-            scannerRef.current?.();
-            SS(null);
-            void lookup(result.getText());
-          }
-        },
-      );
-      if(generation!==scannerGeneration.current){controls.stop();return;}
-      scannerRef.current = () => controls.stop();
-      SS(() => () => controls.stop());
-    } catch (e) {
-      if(generation!==scannerGeneration.current)return;
-      S("Camera unavailable. Enter the barcode or use the label form.");
-    }
+  function scan(){cancelLookup();F(null);S("");setScanning(true);}
+  async function scanPhoto(file:File){
+    cancelLookup();setScanning(false);F(null);const generation=++photoGeneration.current;
+    setReadingPhoto(true);S('Reading the barcode photo on this device…');
+    try{const code=await readBarcodePhoto(file);if(generation===photoGeneration.current)await lookup(code);}
+    catch(e){if(generation===photoGeneration.current)S((e as Error).message);}
+    finally{if(generation===photoGeneration.current)setReadingPhoto(false);}
   }
   function manual() {
+    cancelLookup();setScanning(false);
     if (
       !newFood.name.trim() ||
       newFood.kcal === "" ||
@@ -1283,16 +1271,16 @@ export default function Journal({
                 data-guide="journal-food-close"
                 onClick={() => {
                   A(false);
-                  scannerGeneration.current++;
-                  scanStop?.();
-                  SS(null);
+                  cancelLookup();
+                  setScanning(false);
                 }}
                 aria-label="Close"
               >
                 <X size={22}/>
               </button>
             </div>
-            {status && <p className="notice">{status}</p>}
+            {status && <p className="notice" role="status">{status}</p>}
+            {(lookingUp||readingPhoto)&&<button type="button" onClick={()=>{cancelLookup();S("Lookup cancelled. Search again or enter the label.");}}>Cancel lookup</button>}
             {food ? (
               <>
                 <h3>{food.name}</h3>
@@ -1360,56 +1348,17 @@ export default function Journal({
               </>
             ) : (
               <>
-                <FoodSearch onSelect={F} />
-                <div className="search-field">
-                  <Search size={18} />
-                  <input
-                    aria-label="Search saved foods or barcode"
-                    placeholder="Search saved foods, or enter a barcode…"
-                    value={query}
-                    onChange={(e) => Q(e.target.value)}
-                  />
-                  <button onClick={() => lookup(query)}>Look up</button>
+                {!scanning&&<FoodSearch onSelect={selectFood} savedFoods={[...s.favorites,...s.recipes,...s.entries.map(e=>e.food)]}/>}
+                {scanning&&<BarcodeScanner onCode={code=>void lookup(code)} onClose={()=>{setScanning(false);S('Scanner stopped. Search a name, type the barcode or scan a photo.');}}/>}
+                <div className="button-row barcode-actions">
+                  {!scanning&&<button type="button" className="secondary" data-guide="journal-scanner" onClick={scan}>
+                    <ScanLine size={18}/> Scan a barcode
+                  </button>}
+                  <label className="secondary barcode-photo-button">Scan a photo
+                    <input type="file" accept="image/*" capture="environment" aria-label="Scan a barcode photo" onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)void scanPhoto(file);}}/>
+                  </label>
                 </div>
-                <div className="saved-foods">
-                  {[
-                    ...s.favorites,
-                    ...s.recipes,
-                    ...Array.from(
-                      new Map(
-                        s.entries.map((e) => [e.food.id, e.food]),
-                      ).values(),
-                    ),
-                  ]
-                    .filter(
-                      (f, i, all) =>
-                        all.findIndex((x) => x.id === f.id) === i &&
-                        f.name.toLowerCase().includes(query.toLowerCase()),
-                    )
-                    .map((f) => (
-                      <button key={f.id} onClick={() => F(f)}>
-                        {f.name}
-                        <small>
-                          {f.per100.kcal ?? "?"} kcal / 100 {f.basis ?? "g"}
-                        </small>
-                      </button>
-                    ))}
-                </div>
-                <button className="secondary" data-guide="journal-scanner" onClick={scan}>
-                  <ScanLine size={18} />
-                  Scan a barcode
-                </button>
-                <video
-                  id="barcode-video"
-                  muted
-                  playsInline
-                  style={{
-                    display: scanStop ? "block" : "none",
-                    width: "100%",
-                    maxHeight: 180,
-                  }}
-                />
-                <div className="divider">
+                {!scanning&&<><div className="divider">
                   <span>OR ADD FROM A LABEL</span>
                 </div>
                 <div className="form-grid" data-guide="journal-manual">
@@ -1440,7 +1389,7 @@ export default function Journal({
                 <p className="tiny">
                   Open Food Facts: community-contributed product data, ODbL.
                   Check the packaging. Missing nutrients stay unknown.
-                </p>
+                </p></>}
               </>
             )}
           </section>
