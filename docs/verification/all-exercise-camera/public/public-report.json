@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "hostedUrl": "https://javpato.github.io/real-life-battle-tower/",
+  "physicalValidation": false,
+  "checks": [
+    "90 exercises",
+    "70 automatic / 60 assisted / 20 preview filters",
+    "responsive visual learning and Escape",
+    "live MediaPipe with synthetic blank camera",
+    "no false units"
+  ],
+  "errors": []
+}

@@ -6,6 +6,8 @@
 - Completed: 90 motion teaching sequences, source/limitation register, library/academy/active-exercise learning, responsive lesson dialog, exact per-skill HUD and English voice guidance, phone-frame integration.
 - Verified: 639 tests, production build/shared parity, local SQL, complete tower UI regression, 450 guide renders and synthetic camera/phone integration. Physical human accuracy remains unvalidated; assistance and confirmation cannot create camera verification or Flash cadence.
 
+- Published: GitHub Pages runtime `a614add` (successful run `43715035864`), shared `tower-command`, and release `demo-2026-11-15-exercise-camera`. Public guide/model and real WebRTC battle pairing checks passed using synthetic cameras.
+
 ## Flash, food and in-battle phone update — 2026-11-15
 
 - Completed: visible Flash timer and wider cadence/geometry, meaningful accepted-unit receipts, manual timing labels and repeat pace trials; unified online food search, rear-camera barcode/photo decoding and camera release when entering the journal; phone pairing from active battle with pause/progress preservation.
