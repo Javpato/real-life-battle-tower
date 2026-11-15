@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { flashCadenceWindow } from "../tower/flash";
+import type { Series } from "../tower/model";
 
 export type FlashTiming = {
   stage: "reference" | "test" | "battle";
   cadenceMs?: number;
+  set?: Series["flash"];
 };
 export type FlashTimerProps = FlashTiming & {
   mode?: "camera" | "manual";
@@ -13,24 +14,24 @@ export type FlashTimerProps = FlashTiming & {
   active: boolean;
   feedback?: string;
 };
-
 export default function FlashTimer(props: FlashTimerProps) {
-  const [practiceMs, setPracticeMs] = useState(0);
-  const manual = props.mode === "manual";
+  const [elapsed, setElapsed] = useState(props.elapsedMs);
   useEffect(() => {
-    if (!manual || !props.active) return;
-    const start = performance.now();
-    setPracticeMs(0);
+    setElapsed(props.elapsedMs);
+    if (!props.active || props.elapsedMs <= 0) return;
+    const anchor = performance.now();
     const timer = setInterval(
-      () => setPracticeMs(performance.now() - start),
-      100,
+      () => setElapsed(props.elapsedMs + performance.now() - anchor),
+      50,
     );
     return () => clearInterval(timer);
-  }, [manual, props.active, props.progress]);
-  const elapsed = manual ? practiceMs : props.elapsedMs;
-  const window = flashCadenceWindow(props.cadenceMs);
-  const measured = window.referenceMs !== null;
-  const seconds = (n: number) => (n / 1000).toFixed(1);
+  }, [props.elapsedMs, props.active, props.stage]);
+  const reference = props.stage === "reference";
+  const budget = props.set?.budgetMs;
+  const remaining = budget == null ? null : Math.max(0, budget - elapsed);
+  const interrupted = props.set?.status === "interrupted";
+  const expired = props.set?.status === "expired" || remaining === 0;
+  const manual = props.mode === "manual";
   return (
     <section
       className="exercise-flash-timer"
@@ -38,40 +39,41 @@ export default function FlashTimer(props: FlashTimerProps) {
       data-mode={manual ? "manual" : "camera"}
     >
       <div className="flash-timer-readout">
-        <span>FLASH TIMER{!props.active ? " · PAUSED" : ""}</span>
-        <strong
-          role="timer"
-          aria-label={
-            manual ? "Unverified practice time" : "Observed repetition time"
-          }
-        >
-          {seconds(elapsed)}
+        <span>{reference ? "MEASURE YOUR PACE" : "FLASH · WHOLE SET"}</span>
+        <strong role="timer" aria-label="Set countdown">
+          {reference || remaining == null ? "—" : (remaining / 1000).toFixed(1)}
           <small>s</small>
         </strong>
       </div>
       <div className="flash-timer-detail">
         <b>
-          {manual
-            ? "Practice pace · unverified"
-            : props.stage === "reference"
-              ? "Measure 3 comfortable reps"
-              : measured
-                ? `${seconds(window.minMs)}–${seconds(window.maxMs)}s / rep`
-                : "Camera pace not measured yet"}
+          {reference
+            ? "3 comfortable repetitions"
+            : interrupted
+              ? "Rest taken · normal damage"
+              : expired
+                ? "Time’s up · normal damage"
+                : props.set?.source === "custom"
+                  ? "Your custom target"
+                  : "Personal target · 20% less time"}
         </b>
         <small>
           {manual
-            ? "Timer resets on confirmation. Manual reps do not earn a speed bonus."
-            : measured && elapsed > 0
-              ? elapsed > window.maxMs
-                ? "Take a breath; restart this rep when ready."
-                : `${seconds(Math.max(0, window.maxMs - elapsed))}s left in this rep’s window`
-              : props.stage === "battle" && !measured
-                ? "Retry your Flash trial with the camera to measure your pace."
-                : "Rest freely between reps."}
+            ? "Manual confirmations are unverified and earn no speed bonus."
+            : reference
+              ? "Complete the same movement at your comfortable pace."
+              : props.stage === "test" && (expired || interrupted)
+                ? "Practice freely, then retry the timed set at no cost."
+                : remaining == null
+                  ? "Measure your pace in a camera Flash trial first."
+                  : expired || interrupted
+                    ? "Keep moving when ready. Every accepted repetition still counts."
+                    : elapsed === 0
+                      ? "Countdown starts with your first movement."
+                      : "Complete the set before zero for Flash damage."}
         </small>
-        {!manual && props.lastCycleMs !== null && (
-          <small>Last rep: {seconds(props.lastCycleMs)}s</small>
+        {props.lastCycleMs !== null && (
+          <small>Last rep: {(props.lastCycleMs / 1000).toFixed(1)}s</small>
         )}
         {props.feedback && <small role="status">{props.feedback}</small>}
       </div>

@@ -552,11 +552,13 @@ export default function TowerApp({
         ? {
             stage: activity.flashStage ?? "reference",
             cadenceMs: activity.cadenceMs,
+            set: current.flash,
           }
         : run?.flashEquipped?.includes(currentSkill.id)
           ? {
               stage: "battle",
               cadenceMs: save?.progression?.flashCadence[currentSkill.id],
+              set: current.flash,
             }
           : undefined;
     return (
@@ -586,6 +588,52 @@ export default function TowerApp({
             {localPause || current.paused ? "Resume" : "Rest"}
           </button>
         </div>
+        {flash && current.flash && current.flash.status === "ready" && (
+          <details className="bt-technique">
+            <summary>Set your Flash countdown</summary>
+            <p>Personal target: 20% less time than your comfortable pace.</p>
+            <label>
+              Custom seconds{" "}
+              <input
+                type="number"
+                min="1"
+                max="600"
+                step="0.5"
+                defaultValue={
+                  current.flash.budgetMs ? current.flash.budgetMs / 1000 : ""
+                }
+                onBlur={(event) => {
+                  const seconds = event.currentTarget.valueAsNumber;
+                  if (
+                    Number.isFinite(seconds) &&
+                    seconds >= 1 &&
+                    seconds <= 600
+                  )
+                    void send({
+                      kind: "configureFlash",
+                      sessionId: current.id,
+                      seconds,
+                    });
+                }}
+              />
+            </label>
+            <button
+              onClick={() =>
+                void send({
+                  kind: "configureFlash",
+                  sessionId: current.id,
+                  seconds: null,
+                })
+              }
+            >
+              Use personal pace
+            </button>
+            <small>
+              Choose an honest challenge—keep it fun. Custom targets are
+              labelled separately.
+            </small>
+          </details>
+        )}
         <details className="bt-technique">
           <summary>Technique &amp; camera setup</summary>
           <p>{skillGuide(currentSkill.id).setup}</p>
@@ -658,6 +706,10 @@ export default function TowerApp({
         <ExerciseCamera
           suspended={cameraSuspended}
           flash={flash}
+          onFlashInterrupted={() => {
+            if (current.flash)
+              void send({ kind: "interruptFlash", sessionId: current.id });
+          }}
           guideOverride={skillGuide(currentSkill.id)}
           skillId={currentSkill.id}
           exerciseId={currentSkill.exercise}
@@ -1133,12 +1185,27 @@ export default function TowerApp({
               <p>
                 {activity.flashStage === "reference"
                   ? "Reference: three comfortable down-and-return movements to measure your pace."
-                  : "Challenge: six repetitions in the generous pace window shown by the Flash timer."}{" "}
-                Rest freely. Manual confirmation does not create a speed bonus.
+                  : "Challenge: complete six repetitions before the whole-set countdown reaches zero."}{" "}
+                Rest freely; resting ends the timed bonus, not your exercise.
+                Manual confirmation does not create a speed bonus.
               </p>
             )}
             <p>{s.cue}</p>
-            {activity.completed || sessionComplete ? (
+            {activity.trialKind === "flash" &&
+              !activity.completed &&
+              activity.series.flash &&
+              ["expired", "interrupted"].includes(
+                activity.series.flash.status,
+              ) && (
+                <button
+                  className="primary"
+                  onClick={() => void send({ kind: "retryFlashTrial" })}
+                >
+                  Retry timed set · free
+                </button>
+              )}
+            {activity.completed ||
+            (sessionComplete && activity.trialKind !== "flash") ? (
               <button
                 className="primary"
                 onClick={() => void finish({ kind: "finishTrial" }, "skills")}
@@ -1394,7 +1461,10 @@ export default function TowerApp({
           <div>
             <span className="eyebrow">FIXED LOADOUTS · FINITE ASCENTS</span>
             <h1>The Challenge Hall</h1>
-            <p>Learn the required skills, then face an equal starting line.</p>
+            <p>
+              Easy towers are open from the start. Clear five floors to unlock
+              each hard tower.
+            </p>
           </div>
         </div>
         <div className="bt-grid">
@@ -1405,8 +1475,10 @@ export default function TowerApp({
             return (
               <Panel key={c.id} className="bt-skill">
                 <div className="bt-row between">
-                  <PixelIcon name={c.id} />
-                  <span className="bt-chip">{c.floors} FLOORS</span>
+                  <PixelIcon name={c.id.replace(/-easy$/, "")} />
+                  <span className="bt-chip">
+                    {c.tier?.toUpperCase()} · {c.floors} FLOORS
+                  </span>
                 </div>
                 <h2>{c.name}</h2>
                 <p>{c.description}</p>
@@ -1416,11 +1488,11 @@ export default function TowerApp({
                   ))}
                 </div>
                 <div>
-                  <small>FIXED TECHNIQUES</small>
+                  <small>FOUR TEMPORARY CHALLENGE TECHNIQUES</small>
                   {c.skillIds.map((id) => (
                     <div key={id}>
                       <small>
-                        {save!.skills[id]?.unlocked ? "✓" : "○"}{" "}
+                        {"✓ "}
                         {SKILL_BY_ID[id].name}
                       </small>
                     </div>
@@ -1442,7 +1514,9 @@ export default function TowerApp({
                     })
                   }
                 >
-                  {available ? "Enter challenge" : "Learn the required skills"}
+                  {available
+                    ? "Enter challenge"
+                    : "Clear the matching easy tower first"}
                 </button>
               </Panel>
             );
