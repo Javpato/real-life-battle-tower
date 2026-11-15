@@ -9,6 +9,7 @@ export type {PlayerSave,TowerCommand} from './model.ts';
 import {effectiveness,stab,skillTypes} from './typeChart.ts';
 import {migrateSave} from './migrateSave.ts';
 import {assessFlashCycle,flashCadenceWindow,FLASH_TIMING} from './flash.ts';
+import {exerciseProfile} from './exerciseProfiles.ts';
 export {effectiveness,stab,skillTypes} from './typeChart.ts';
 export {migrateSave} from './migrateSave.ts';
 const LEGACY_SKILL_IDS=new Set(['mini-squat','squat','pause-squat','assisted-lunge','lunge','sumo-squat','wall-sit','reverse-lunge','tempo-squat','single-leg-squat','wall-pushup','incline-pushup','knee-pushup','high-plank','pushup','pause-pushup','diamond','eccentric-pushup','wide-pushup','archer-pushup','birddog','alternating-birddog','short-superman','superman','back-extension','snow-angels','pause-birddog','alternating-superman','tempo-extension','advanced-birddog']);
@@ -37,7 +38,25 @@ export const activeSeries=(save:PlayerSave):Series|null=>save.activity.kind==='t
 export const masteryLabel=(units:number)=>units>=500?'Mastered':units>=150?'Practiced':units>=30?'Familiar':'Learning';
 /** No level/XP/stat progression: mastery only records deliberate practice. */
 function credit(save:PlayerSave,skillId:string,verified:boolean){const p=save.skills[skillId];p.totalUnits++;p.mastery++;if(verified)p.verifiedUnits++;else p.manualUnits++;}
-function validUnit(u:ExerciseUnit){return !!u&&typeof u.id==='string'&&u.id.length>0&&u.id.length<=200&&Number.isFinite(u.quality)&&u.quality>0&&u.quality<=1&&Number.isFinite(u.confidence)&&u.confidence>=0&&u.confidence<=1&&typeof u.verified==='boolean'&&(!u.verified||u.confidence>=.5)&&Number.isFinite(u.timestamp)&&u.timestamp>=0&&(u.side===undefined||u.side==='left'||u.side==='right');}
+function validUnit(u:ExerciseUnit){return !!u&&typeof u.id==='string'&&u.id.length>0&&u.id.length<=200&&Number.isFinite(u.quality)&&u.quality>0&&u.quality<=1&&Number.isFinite(u.confidence)&&u.confidence>=0&&u.confidence<=1&&typeof u.verified==='boolean'&&(!u.verified||u.confidence>=.5)&&Number.isFinite(u.timestamp)&&u.timestamp>=0&&(u.side===undefined||u.side==='left'||u.side==='right')&&(u.skillId===undefined||typeof u.skillId==='string'&&u.skillId.length>0&&u.skillId.length<=80)&&(u.profileId===undefined||typeof u.profileId==='string'&&u.profileId.length>0&&u.profileId.length<=120)&&(u.evidence===undefined||['camera','assisted','confirmation','manual'].includes(u.evidence));}
+/** A family ID alone is not evidence for a particular variation. Legacy clients
+ * without provenance retain their prior rules; explicit provenance is never
+ * silently downgraded when it contradicts its detector or claimed verification. */
+function validateUnitEvidence(skill:Skill,u:ExerciseUnit){
+ requireRule(u.skillId===undefined||u.skillId===skill.id,'WRONG_SKILL');
+ const profile=exerciseProfile(skill.id);
+ if(u.evidence==='assisted'||u.evidence==='confirmation'){
+  requireRule(u.skillId===skill.id,'SKILL_EVIDENCE_REQUIRED');
+  requireRule(profile?.method===u.evidence,'WRONG_EVIDENCE_PROFILE');
+  requireRule(u.profileId===`${u.evidence}-v1:${skill.id}`,'WRONG_EVIDENCE_PROFILE');
+  requireRule(!u.verified&&u.cycle===undefined&&u.quality===1,'INVALID_UNVERIFIED_EVIDENCE');
+ }else if(u.evidence==='camera'){
+  requireRule(u.verified&&skill.detector==='supported','INVALID_CAMERA_EVIDENCE');
+  requireRule(u.profileId===undefined||u.profileId===`camera-v1:${skill.id}`,'WRONG_EVIDENCE_PROFILE');
+ }else if(u.evidence==='manual'){
+  requireRule(!u.verified&&u.cycle===undefined&&u.profileId===undefined,'INVALID_UNVERIFIED_EVIDENCE');
+ }else requireRule(u.profileId===undefined,'EVIDENCE_KIND_REQUIRED');
+}
 /** Keep exact totals but put a rest boundary between reasonably sized series. */
 export function normalizeWorkoutEntries(_s:PlayerSave,entries:WorkoutEntry[]):WorkoutEntry[]{
  requireRule(Array.isArray(entries)&&entries.length>0&&entries.length<=100,'INVALID_WORKOUT');
@@ -117,6 +136,7 @@ export function applyCommand(save:PlayerSave,command:TowerCommand,context:Engine
   requireRule(validUnit(u),'INVALID_UNIT');
   const skill=SKILL_BY_ID[series.skillId];
   requireRule(u.exerciseId===skill.exercise,'WRONG_EXERCISE');
+  validateUnitEvidence(skill,u);
   if(series.paused||series.progress>=series.target||series.seen.includes(u.id))return;
   if(activity.kind==='trial'&&activity.completed||activity.kind==='tower'&&(activity.status!=='battle'||activity.battle?.turn!=='exercise')||activity.kind==='workout'&&activity.status!=='active')return;
   if(skill.alternating&&(!u.side||u.side===series.side))return;
@@ -153,7 +173,7 @@ export function applyCommand(save:PlayerSave,command:TowerCommand,context:Engine
   const flash=activity.contentVersion===2&&activity.flashEquipped?.includes(skill.id)&&flashCadenceWindow(cadence).referenceMs!==null&&assessFlashCycle(u,cadence).accepted?1.25:1;
   const raw=skill.damage/series.target*u.quality*effectiveness(types,b.enemy.phases[b.phase])*stab(types,activity.specialization)*power*flash*(u.verified?1:series.manualFactor);
   const threshold=b.enemy.thresholds[b.phase],before=b.enemyHp;b.enemyHp=Math.max(threshold,b.enemyHp-raw);
-  b.lastDamage=before-b.enemyHp;b.hitSerial++;b.log=`${u.verified?'Verified':'Manual'} ${skill.unit==='seconds'?'second':'repetition'} · ${b.lastDamage.toFixed(1)} damage${flash>1?' · FLASH ×1.25':''}`;
+  b.lastDamage=before-b.enemyHp;b.hitSerial++;b.log=`${u.verified?'Verified':u.evidence==='assisted'?'Assisted':u.evidence==='confirmation'?'Manually confirmed':'Manual'} ${skill.unit==='seconds'?'second':'repetition'} · ${b.lastDamage.toFixed(1)} damage${flash>1?' · FLASH ×1.25':''}`;
   if(b.enemyHp<=threshold){closeFatigue(b);b.turn=threshold===0?'won':'transform';}
   else if(series.progress===series.target){closeFatigue(b);b.turn='enemy';}
  }

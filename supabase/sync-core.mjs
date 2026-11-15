@@ -10,7 +10,7 @@ for(const name of ['contracts']){
 }
 console.log(check?'Shared game source parity verified.':'Generated shared Edge game modules.');
 await mkdir(new URL('./functions/_shared/tower/',import.meta.url),{recursive:true});
-for(const name of ['model','catalog','expandedCatalog','skillGuides','typeChart','migrateSave','generation','flash','engine','importSave']){
+for(const name of ['model','catalog','expandedCatalog','skillGuides','exerciseProfiles','typeChart','migrateSave','generation','flash','engine','importSave']){
  const input=await readFile(new URL(`../src/tower/${name}.ts`,import.meta.url),'utf8');
  const generated='// GENERATED. Edit src/tower, then run supabase/sync-core.mjs.\n'+input.replace(/from (['"])(\.\/[\w-]+)\1/g,"from '$2.ts'").replace(/from (['"])\.\.\/core\/contracts\1/g,"from '../contracts.ts'");
  const path=new URL(`./functions/_shared/tower/${name}.ts`,import.meta.url);
