@@ -453,10 +453,15 @@ export function observePose(
         : baseline - (mini ? (flash ? 18 : 22) : flash ? 24 : 32);
     const ref = options.reference;
     const hipTravel =
-      ref?.side === g.side ? (p[c.hip].y - ref.hipY) / scale : 0;
+      ref?.side === g.side
+        ? (p[c.hip].y -
+            ref.hipY -
+            (ref.ankleY === undefined ? 0 : p[c.ankle].y - ref.ankleY)) /
+          scale
+        : 0;
     const planted =
       ref?.ankleY === undefined ||
-      Math.abs(p[c.ankle].y - ref.ankleY) < scale * 0.12;
+      Math.abs(p[c.ankle].y - ref.ankleY) < scale * 0.35;
     const frontal =
       good(23) && good(24) && Math.abs(p[23].x - p[24].x) > scale * 0.28;
     // In a frontal projection the knee can still appear straight throughout a
@@ -464,7 +469,10 @@ export function observePose(
     const travelTarget = mini ? (flash ? 0.13 : 0.16) : flash ? 0.19 : 0.24;
     const travelExtended = frontal && planted && hipTravel >= travelTarget;
     const isReady =
-      upright && bend > readyBend && hipTravel < travelTarget * 0.4;
+      upright &&
+      (frontal
+        ? planted && hipTravel < travelTarget * 0.65
+        : bend > readyBend && hipTravel < travelTarget * 0.4);
     const isExtended = upright && (bend < rangeBend || travelExtended);
     return finish({
       ...base(g.ids, g.side),

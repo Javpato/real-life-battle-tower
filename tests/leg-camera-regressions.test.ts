@@ -102,7 +102,7 @@ describe("front camera leg movement regressions", () => {
     for (const [pose, count] of [
       [a, 8],
       [lower(a, 0.03), 4],
-      [b, 8],
+      [b, 14],
       [a, 8],
     ] as const)
       for (let n = 0; n < count; n++) {
@@ -148,4 +148,31 @@ it("keeps sumo posture when forward torso lean shortens its projected length", (
     b.landmarks[11 + i].x += 0.04;
   }
   expect(run("sumo-squat", a, b, 500).units).toHaveLength(1);
+});
+
+it("keeps counting frontal squats after a natural change in foot placement", () => {
+  const a = standing(),
+    newStance = lower(a, 0.02);
+  for (const i of [0, 1]) {
+    newStance.landmarks[27 + i].y += 0.03;
+    newStance.landmarks[27 + i].x += i ? 0.04 : -0.04;
+  }
+  const bottom = lower(newStance, 0.09),
+    d = new ExerciseDetector("squat", "stance");
+  d.recalibrate(a);
+  let time = 0;
+  const units: ExerciseUnit[] = [];
+  for (const [pose, n] of [
+    [a, 8],
+    [newStance, 8],
+    [bottom, 16],
+    [newStance, 8],
+    [bottom, 16],
+    [newStance, 8],
+  ] as const)
+    for (let i = 0; i < n; i++) {
+      const u = d.update({ ...pose, timestamp: (time += 50) }).unit;
+      if (u) units.push(u);
+    }
+  expect(units).toHaveLength(2);
 });
