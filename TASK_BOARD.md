@@ -1,5 +1,13 @@
 # Battle Tower v2 delivery
 
+## Recorded movement / countdown follow-up — 2026-11-15
+
+- Implemented perspective-aware leg movement counting, clearer support-leg instructions and faster phase transitions; local recorded-clip regression review is part of acceptance.
+- Implemented whole-set Flash countdown with personal/custom timing, ordinary damage after expiry, free retry and buffered camera receipts.
+- Added ten easy/hard challenge pairs with temporary access, matching five-floor unlocks and legacy save compatibility.
+- Verified browser flows at five viewports and hosted phone pairing with synthetic camera input. Private exercise recordings are excluded from version control.
+
+
 ## All-exercise camera and learning — 2026-11-15
 
 - Completed: 90 exact skill profiles; 10 existing detectors, 60 assisted counters and 20 camera-preview/manual-confirmation options. Stable personal calibration, conservative interval/side/occlusion checks and exact unverified evidence binding.

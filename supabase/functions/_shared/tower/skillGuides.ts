@@ -7,20 +7,20 @@ export type SkillGuide={title:string;setup:string;movement:string;camera:string;
 export const SKILL_GUIDES:Readonly<Record<string,SkillGuide>>={
  ...ADDITIONAL_GUIDES,
  'mini-squat':{
-  title:'Mini Squat',setup:'Stand with feet comfortably apart and your whole body in view.',
+  title:'Mini Squat',setup:'Stand naturally with your feet planted and hips, knees and feet in view. No wide stance is required.',
   movement:'Bend your knees a little and move your hips back, then return to standing. One down-and-up cycle is one repetition.',
-  camera:'Side or slight three-quarter view · shoulders, hips, knees and ankles visible.',
+  camera:'Front or side view · shoulders, hips, knees and ankles visible.',
   note:'Experimental shallow-range recognition. It observes a movement pattern, not a validated assessment of your technique. Keep the movement comfortable.',
  },
  squat:{
-  title:'Squat',setup:'Stand with feet comfortably apart and your weight balanced over both feet.',
+  title:'Squat',setup:'Stand naturally with your weight balanced over both feet. No wide stance is required.',
   movement:'Move your hips back as you bend your knees, then stand tall again with control. Complete the return before starting the next repetition.',
-  camera:'Side or slight three-quarter view · shoulders, hips, knees and ankles visible.',
+  camera:'Front or side view · shoulders, hips, knees and ankles visible.',
   note:'The camera checks a bend-and-return pattern. Small bounces do not count; do not force extra depth to satisfy the game.',
  },
  'pause-squat':{
-  title:'Pause Squat',setup:'Stand with feet comfortably apart, ready to lower into a comfortable squat.',
-  movement:'Lower with control, pause briefly while keeping still, then stand back up. Count one repetition after the complete return.',
+  title:'Pause Squat',setup:'Use your natural comfortable stance; no wide stance is required. Keep hips, knees and feet visible.',
+  movement:'Lower to a comfortable depth, hold still for about 0.7 seconds, then stand back up. Count one repetition after the complete return.',
   camera:'Optional side-view preview · keep your whole body in view.',
   note:'Manual counting: the pause and its duration are not verified by the squat detector. Take a rest between repetitions whenever needed.',
  },
@@ -61,8 +61,8 @@ export const SKILL_GUIDES:Readonly<Record<string,SkillGuide>>={
   note:'Manual counting: the deliberate tempo is not verified by the standard squat detector. The counts guide your rhythm; there is no speed bonus.',
  },
  'single-leg-squat':{
-  title:'Single-leg Squat',setup:'Stand near a stable support. Shift onto one leg and keep the other foot clear without forcing your balance.',
-  movement:'Make a small controlled bend on the supporting leg, then straighten again. Alternate the supporting leg after each repetition.',
+  title:'Single-leg Squat',setup:'Stand near a stable support. The LEFT or RIGHT cue names the leg you stand on. Lift the opposite foot slightly.',
+  movement:'Bend the named supporting leg a little and lower your hips, then straighten again. Lifting a foot alone is not a repetition. Alternate the supporting leg after each repetition.',
   camera:'Optional front or three-quarter preview · both legs and any support visible.',
   note:'Manual counting: single-leg support is not verified. Use a comfortable small range or return to an earlier skill; the side label names the supporting leg.',
  },

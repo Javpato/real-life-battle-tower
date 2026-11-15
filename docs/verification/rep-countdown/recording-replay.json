@@ -1,0 +1,31 @@
+{
+  "method": "Local MediaPipe reinference on screen-recorded camera crops; mirrored preview reversed; all frames preserved; live filter warmed before stable calibration.",
+  "limitations": [
+    "Compressed recordings contain existing skeleton overlays.",
+    "Counts validate these annotated segments only, not general exercise accuracy or physical technique.",
+    "Raw recordings, frames and landmarks are private and excluded."
+  ],
+  "clips": [
+    {
+      "exercise": "Sit to Stand",
+      "expected": 3,
+      "beforeMatched": 0,
+      "afterMatched": 3,
+      "afterUnmatched": 0
+    },
+    {
+      "exercise": "Squat",
+      "expected": 8,
+      "beforeMatched": 3,
+      "afterMatched": 8,
+      "afterUnmatched": 0
+    },
+    {
+      "exercise": "Sumo Squat",
+      "expected": 2,
+      "beforeMatched": 0,
+      "afterMatched": 2,
+      "afterUnmatched": 0
+    }
+  ]
+}

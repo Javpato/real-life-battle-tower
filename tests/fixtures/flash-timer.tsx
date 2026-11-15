@@ -38,7 +38,9 @@ function Fixture() {
     setSave(next);
     return next;
   };
-  const receive = (unit: ExerciseUnit) => {
+  const receive = async (unit: ExerciseUnit) => {
+    const delay = (window as Window & {__flashReceiptDelay?: number}).__flashReceiptDelay ?? 0;
+    if (delay) await new Promise(resolve => setTimeout(resolve, delay));
     setRequests((value) => value + 1);
     try {
       const current = activeSeries(saved.current)!;

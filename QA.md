@@ -1,5 +1,15 @@
 # Battle Tower v2 — verification
 
+## Recorded movement fixes and whole-set Flash — 2026-11-15 afternoon
+
+- Flash now uses a whole-set countdown: median of three comfortable camera cycles × timed repetitions × 0.8. Custom 1–600 second targets can be selected before starting and are labelled separately. Expiry retains completed damage and continues ordinary damage; resting interrupts the bonus, and timed trials can be retried free. Existing unlocks and old active trial rules remain compatible.
+- Fast recognition no longer waits for a cloud receipt between repetitions. A bounded ordered queue preserves authoritative acceptance, rejects stale sessions and discards speculative following events after rejection. Rest drains already completed observations before sending the canonical pause; countdown display reconciles with the accepted start timestamp. Raw fast-motion peaks no longer need to coincide with the smoothed display peak; visibility, timestamp and spike guards remain.
+- Ten easy five-floor towers are available immediately with four temporary assigned techniques. Each unlocks its matching hard tower. Borrowing never grants permanent Infinite Tower ownership. Old active encounters retain their original definitions and old victories remain meaningful.
+- Browser suites passed the full tower flow, Flash three-reference/six-faster-cycle path, manual provenance, challenge access/borrowed attacks and all five viewports. Real hosted signaling/WebRTC during an active battle passed using synthetic camera input, including rest, disconnect and preserved HP/repetitions. This is not a physical phone accuracy test.
+- Public-safe interface captures/reports: `docs/verification/rep-countdown/`. User recordings, camera crops and inferred body landmarks remain local under `/tmp/bt-review`; none are included in the repository or release.
+- Local recording replay uses re-inference on compressed, mirrored screen-recorded camera views with existing skeleton overlays. It is a regression diagnostic, not a general accuracy benchmark or technique validation. With the same stable calibration and complete frame stream in each comparison: Sit to Stand **0/3 → 3/3**, Squat **3/8 → 8/8**, Sumo Squat **0/2 → 2/2** matched independently annotated completed cycles. No unmatched detections in these three reviewed segments. See `recording-replay.json`.
+
+
 ## All-exercise camera and visual learning — 2026-11-15
 
 - Recovered and completed the interrupted camera-profile/detector drafts. Every one of the 90 exact skill IDs has camera setup, observable evidence, limitations, references and a visual movement sequence. Coverage: **10 existing profiles, 60 assisted counters, 20 preview + manual confirmation**. No newly assisted movement is claimed as physically validated or awarded verified technique/Flash evidence.

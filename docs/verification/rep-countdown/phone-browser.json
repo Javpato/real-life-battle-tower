@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "checks": [
+    "pair during active series",
+    "canonical pause blocks manual credit",
+    "real signaling and WebRTC",
+    "actual MediaPipe with synthetic camera",
+    "five viewport accessible close",
+    "preserve damage and reps",
+    "persist connection after close",
+    "continue attack",
+    "preserve pre-existing rest",
+    "disconnect cleanup"
+  ],
+  "errors": [],
+  "physicalPhoneTested": false
+}

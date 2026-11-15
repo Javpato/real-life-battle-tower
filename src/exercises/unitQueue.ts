@@ -3,6 +3,15 @@ export class UnitQueue<T> {
   private entries: { value: T; settle: (accepted: boolean) => void }[] = [];
   private generation = 0;
   private running = false;
+  private waiters: (() => void)[] = [];
+  flush(): Promise<void> {
+    return this.size
+      ? new Promise((resolve) => this.waiters.push(resolve))
+      : Promise.resolve();
+  }
+  private notifyIdle() {
+    if (!this.size) this.waiters.splice(0).forEach((resolve) => resolve());
+  }
   constructor(
     private deliver: (value: T) => void | boolean | Promise<boolean>,
     readonly limit = 8,
@@ -14,6 +23,7 @@ export class UnitQueue<T> {
     this.generation++;
     this.entries = [];
     this.running = false;
+    this.notifyIdle();
   }
   push(value: T, settle: (accepted: boolean) => void) {
     if (this.size >= this.limit) return false;
@@ -40,6 +50,9 @@ export class UnitQueue<T> {
       entry.settle(accepted);
       if (!accepted) return;
     }
-    if (generation === this.generation) this.running = false;
+    if (generation === this.generation) {
+      this.running = false;
+      this.notifyIdle();
+    }
   }
 }

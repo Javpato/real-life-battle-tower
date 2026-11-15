@@ -284,7 +284,15 @@ export default function TowerApp({
     if (save?.settings.muted) stopExerciseSpeech();
   }, [save?.settings.muted]);
   useEffect(() => () => stopExerciseSpeech(), []);
+  const cameraFlush = useRef<() => Promise<void>>(() => Promise.resolve());
   async function send(command: TowerCommand) {
+    if (
+      (command.kind === "pause" && command.paused) ||
+      ["interruptFlash", "cancelSeries", "abandon", "retryFlashTrial", "manualUnit"].includes(
+        command.kind,
+      )
+    )
+      await cameraFlush.current();
     const ok = await tower.send(command);
     if (ok) setMessage("");
     return ok;
@@ -553,12 +561,14 @@ export default function TowerApp({
             stage: activity.flashStage ?? "reference",
             cadenceMs: activity.cadenceMs,
             set: current.flash,
+            legacy: activity.flashPolicyVersion !== 2,
           }
         : run?.flashEquipped?.includes(currentSkill.id)
           ? {
               stage: "battle",
               cadenceMs: save?.progression?.flashCadence[currentSkill.id],
               set: current.flash,
+              legacy: !current.flash,
             }
           : undefined;
     return (
@@ -672,10 +682,17 @@ export default function TowerApp({
               />
             )}
             <div className="bt-progress-display" role="status">
-              {current.progress}
+              {flash?.stage === "test" && current.target === 9
+                ? Math.max(0, current.progress - 3)
+                : current.progress}
               <small>
                 {" "}
-                / {current.target}{" "}
+                /{" "}
+                {flash?.stage === "reference"
+                  ? 3
+                  : flash?.stage === "test" && current.target === 9
+                    ? 6
+                    : current.target}{" "}
                 {currentSkill.unit === "seconds" ? "sec" : "reps"}
               </small>
             </div>
@@ -704,6 +721,9 @@ export default function TowerApp({
           </Panel>
         )}
         <ExerciseCamera
+          onReceiptQueueReady={(flush) => {
+            cameraFlush.current = flush;
+          }}
           suspended={cameraSuspended}
           flash={flash}
           onFlashInterrupted={() => {
@@ -1183,9 +1203,11 @@ export default function TowerApp({
             </h2>
             {activity.trialKind === "flash" && (
               <p>
-                {activity.flashStage === "reference"
-                  ? "Reference: three comfortable down-and-return movements to measure your pace."
-                  : "Challenge: complete six repetitions before the whole-set countdown reaches zero."}{" "}
+                {activity.flashPolicyVersion !== 2
+                  ? "Legacy Flash trial: complete the original per-repetition pace test. New trials use a whole-set countdown."
+                  : activity.flashStage === "reference"
+                    ? "Reference: three comfortable down-and-return movements to measure your pace."
+                    : "Challenge: complete six repetitions before the whole-set countdown reaches zero."}{" "}
                 Rest freely; resting ends the timed bonus, not your exercise.
                 Manual confirmation does not create a speed bonus.
               </p>
@@ -1193,10 +1215,7 @@ export default function TowerApp({
             <p>{s.cue}</p>
             {activity.trialKind === "flash" &&
               !activity.completed &&
-              activity.series.flash &&
-              ["expired", "interrupted"].includes(
-                activity.series.flash.status,
-              ) && (
+              activity.series.flash && (
                 <button
                   className="primary"
                   onClick={() => void send({ kind: "retryFlashTrial" })}

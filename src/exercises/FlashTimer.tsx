@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { flashCadenceWindow } from "../tower/flash";
 import type { Series } from "../tower/model";
 
 export type FlashTiming = {
   stage: "reference" | "test" | "battle";
   cadenceMs?: number;
+  legacy?: boolean;
   set?: Series["flash"];
 };
 export type FlashTimerProps = FlashTiming & {
@@ -32,6 +34,31 @@ export default function FlashTimer(props: FlashTimerProps) {
   const interrupted = props.set?.status === "interrupted";
   const expired = props.set?.status === "expired" || remaining === 0;
   const manual = props.mode === "manual";
+  if (props.legacy) {
+    const window = flashCadenceWindow(props.cadenceMs);
+    return (
+      <section className="exercise-flash-timer" aria-label="Flash timer">
+        <div className="flash-timer-readout">
+          <span>LEGACY FLASH · PER REP</span>
+          <strong role="timer" aria-label="Observed repetition time">
+            {(elapsed / 1000).toFixed(1)}
+            <small>s</small>
+          </strong>
+        </div>
+        <div className="flash-timer-detail">
+          <b>
+            {manual
+              ? "Manual practice · unverified"
+              : `${(window.minMs / 1000).toFixed(1)}–${(window.maxMs / 1000).toFixed(1)}s / rep`}
+          </b>
+          <small>
+            This saved set keeps its original timing rules. New sets use a
+            whole-set countdown.
+          </small>
+        </div>
+      </section>
+    );
+  }
   return (
     <section
       className="exercise-flash-timer"

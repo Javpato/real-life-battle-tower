@@ -38,6 +38,7 @@ type Props = Omit<ExerciseCameraProps, "onUnit"> & {
   recognitionProfile?: "mini-squat" | "knee-pushup";
   flash?: FlashTiming;
   onFlashInterrupted?: () => void;
+  onReceiptQueueReady?: (flush: () => Promise<void>) => void;
   suspended?: boolean;
   guideOverride?: (typeof EXERCISE_GUIDES)["squat"];
   hideIllustration?: boolean;
@@ -291,6 +292,10 @@ export default function ExerciseCamera(props: Props) {
     if (detectorSession.current !== sessionKey(p)) return;
     if (unitQueue.current.size >= unitQueue.current.limit) {
       detector.current.pause();
+      if (!flashInterrupted.current && flashStart.current !== null) {
+        flashInterrupted.current = true;
+        latest.current.onFlashInterrupted?.();
+      }
       setStatus("paused");
       setMessage(
         "Connection is catching up. Your completed repetitions are being saved.",
@@ -354,9 +359,15 @@ export default function ExerciseCamera(props: Props) {
       // Let the detector handle brief occlusion. It must see missing frames to pause held time safely.
       const result = detector.current.update(frame) as RichFeedback;
       if (p.flash) {
+        if (p.flash.set?.startedAt !== undefined)
+          flashStart.current = p.flash.set.startedAt;
         const cycleStart =
           detector.current.cycleStartedAt ?? result.unit?.cycle?.startedAt;
-        if (p.flash.stage === "reference") {
+        if (p.flash.legacy) {
+          setFlashElapsed(
+            cycleStart == null ? 0 : Math.max(0, frame.timestamp - cycleStart),
+          );
+        } else if (p.flash.stage === "reference") {
           flashStart.current = null;
           setFlashElapsed(0);
         } else {
@@ -439,7 +450,7 @@ export default function ExerciseCamera(props: Props) {
                 tolerance: current.flash ? "flash" : "standard",
               },
             );
-            lifecycle.current.invalidateFrames();
+            lifecycle.current?.invalidateFrames();
             setNextSide(detector.current.expectedSide);
             setStatus("incomplete");
             setFlashFeedback(
@@ -742,7 +753,6 @@ export default function ExerciseCamera(props: Props) {
     !!props.flash,
   ]);
   useEffect(() => {
-    unitQueue.current.reset();
     // Manual confirmation may have advanced the anatomical side while recognition was off.
     detector.current = createExerciseDetector(
       props.exerciseId,
@@ -759,7 +769,7 @@ export default function ExerciseCamera(props: Props) {
     calibrated.current.clear();
     lifecycle.current?.invalidateFrames();
     poseFilter.current.reset();
-    issued.current = props.progress;
+    issued.current = Math.max(issued.current, props.progress);
     resetTiming();
     if (
       props.active &&
@@ -780,7 +790,13 @@ export default function ExerciseCamera(props: Props) {
     flashInterrupted.current = false;
     setFlashElapsed(0);
   }, [props.flash?.stage]);
-  useEffect(() => () => unitQueue.current.reset(), []);
+  useEffect(() => {
+    props.onReceiptQueueReady?.(() => unitQueue.current.flush());
+    return () => {
+      unitQueue.current.reset();
+      props.onReceiptQueueReady?.(() => Promise.resolve());
+    };
+  }, []);
   useEffect(() => {
     issued.current = Math.max(issued.current, props.progress);
   }, [props.progress]);
@@ -792,7 +808,6 @@ export default function ExerciseCamera(props: Props) {
   }, [props.mode]);
   useEffect(() => {
     if (!props.suspended) return;
-    unitQueue.current.reset();
     latest.current.onFlashInterrupted?.();
     detector.current.pause();
     lifecycle.current?.stop(
@@ -952,8 +967,6 @@ export default function ExerciseCamera(props: Props) {
   const togglePause = () => {
     const value = !pausedRef.current;
     pausedRef.current = value;
-    unitQueue.current.reset();
-    issued.current = latest.current.progress;
     if (value) latest.current.onFlashInterrupted?.();
     setPaused(value);
     detector.current.pause();
@@ -983,6 +996,14 @@ export default function ExerciseCamera(props: Props) {
     "recovering",
   ].includes(camera.status);
   useEffect(() => {
+    if (
+      (inactive || transportInactive) &&
+      flashStart.current !== null &&
+      !flashInterrupted.current
+    ) {
+      flashInterrupted.current = true;
+      latest.current.onFlashInterrupted?.();
+    }
     if (stage !== "running" || inactive || transportInactive)
       setFlashElapsed(0);
   }, [stage, inactive, transportInactive]);
@@ -1312,8 +1333,18 @@ export default function ExerciseCamera(props: Props) {
         }
         exerciseId={props.exerciseId}
         skillId={props.skillId}
-        progress={props.progress}
-        target={props.target}
+        progress={
+          props.flash?.stage === "test" && props.target === 9
+            ? Math.max(0, props.progress - 3)
+            : props.progress
+        }
+        target={
+          props.flash?.stage === "reference"
+            ? 3
+            : props.flash?.stage === "test" && props.target === 9
+              ? 6
+              : props.target
+        }
         status={hudStatus}
         message={stableMessage}
         missingJoints={missingJoints}
@@ -1389,7 +1420,7 @@ export default function ExerciseCamera(props: Props) {
             disabled={
               camera.status !== "ready" ||
               inactive ||
-              Boolean(pendingUnit.current) ||
+              Boolean(unitQueue.current.size) ||
               props.sessionComplete ||
               props.progress >= props.target
             }
@@ -1404,7 +1435,7 @@ export default function ExerciseCamera(props: Props) {
             disabled={
               camera.status !== "ready" ||
               inactive ||
-              Boolean(pendingUnit.current) ||
+              Boolean(unitQueue.current.size) ||
               props.sessionComplete ||
               props.progress >= props.target
             }

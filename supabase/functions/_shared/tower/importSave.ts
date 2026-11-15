@@ -1,6 +1,6 @@
 // GENERATED. Edit src/tower, then run supabase/sync-core.mjs.
 import {initialSave,normalizeWorkoutEntries} from './engine.ts';
-import {SKILLS,SKILL_BY_ID,CHALLENGES,INITIAL_SKILLS} from './catalog.ts';
+import {SKILLS,SKILL_BY_ID,CHALLENGES,LEGACY_CHALLENGES,INITIAL_SKILLS} from './catalog.ts';
 import {MAX_FLOOR,TYPES} from './generation.ts';
 import type {Element,HistoryEntry,PlayerSave,WorkoutEntryResult} from './model.ts';
 
@@ -63,8 +63,22 @@ export function validateTowerImport(raw:unknown):PlayerSave{
  save.specialization=r.specialization===null?null:type(r.specialization);requireImport(save.specialization===null||save.availableSpecializations.includes(save.specialization));
  const settings=object(r.settings);exactKeys(settings,['muted','reducedMotion','difficulty']);save.settings.muted=bool(settings.muted);save.settings.reducedMotion=bool(settings.reducedMotion);requireImport(settings.difficulty==='easy'||settings.difficulty==='normal'||settings.difficulty==='hard');save.settings.difficulty=settings.difficulty;
  const records=object(r.records);requireImport(Object.keys(records).length<=CHALLENGES.length+1);
- for(const [key,rawRecord] of Object.entries(records)){const challenge=CHALLENGES.find(c=>key===`challenge:${c.id}`);requireImport(key==='endless'||challenge,'UNKNOWN_IMPORT_RECORD');const rec=object(rawRecord);exactKeys(rec,['bestFloor','bestVerifiedFloor','runs','wins']);const bestFloor=integer(rec.bestFloor,challenge?.floors??MAX_FLOOR);integer(rec.bestVerifiedFloor,bestFloor);const runs=integer(rec.runs),wins=integer(rec.wins,runs);requireImport(wins===0||bestFloor===(challenge?.floors??MAX_FLOOR));save.records[key]={bestFloor,bestVerifiedFloor:0,runs,wins};}
- for(const specialization of save.availableSpecializations)requireImport((save.records[`challenge:${specialization}`]?.wins??0)>0,'IMPORT_SPECIALIZATION_UNEARNED');
+ for(const [key,rawRecord] of Object.entries(records)){
+  const challenge=CHALLENGES.find(c=>key===`challenge:${c.id}`),legacy=LEGACY_CHALLENGES.find(c=>key===`challenge:${c.id}`);
+  requireImport(key==='endless'||challenge||legacy,'UNKNOWN_IMPORT_RECORD');
+  const rec=object(rawRecord);exactKeys(rec,['bestFloor','bestVerifiedFloor','runs','wins']);
+  // Original IDs are retained for hard challenges. A record can combine an old
+  // eight-floor expedition with newer five-floor victories; preserve that peak.
+  const maxFloor=challenge||legacy?Math.max(challenge?.floors??0,legacy?.floors??0):MAX_FLOOR;
+  const winningFloor=challenge?.floors??legacy?.floors??MAX_FLOOR;
+  const bestFloor=integer(rec.bestFloor,maxFloor);integer(rec.bestVerifiedFloor,bestFloor);
+  const runs=integer(rec.runs),wins=integer(rec.wins,runs);requireImport(wins===0||bestFloor>=winningFloor);
+  save.records[key]={bestFloor,bestVerifiedFloor:0,runs,wins};
+ }
+ for(const specialization of save.availableSpecializations){
+  const earned=[...CHALLENGES,...LEGACY_CHALLENGES].some(c=>c.specialization===specialization&&(save.records[`challenge:${c.id}`]?.wins??0)>0);
+  requireImport(earned,'IMPORT_SPECIALIZATION_UNEARNED');
+ }
  save.routines=array(r.routines,30).map(rawRoutine=>{const routine=object(rawRoutine);exactKeys(routine,['id','name','entries','restSeconds']);const entries=array(routine.entries,100).map(rawEntry=>{const e=object(rawEntry);exactKeys(e,['skillId','target']);const id=skillId(e.skillId),target=integer(e.target,1000,1);requireImport(!SKILL_BY_ID[id].alternating||target%2===0);return {skillId:id,target};});requireImport(entries.length>0);return {id:string(routine.id,100),name:string(routine.name,60),entries:normalizeWorkoutEntries(save,entries),restSeconds:integer(routine.restSeconds,600)};});
  requireImport(new Set(save.routines.map(x=>x.id)).size===save.routines.length);
  save.history=array(r.history,200).map(historyEntry);requireImport(new Set(save.history.map(x=>x.id)).size===save.history.length);

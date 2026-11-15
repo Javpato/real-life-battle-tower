@@ -1,5 +1,5 @@
 // GENERATED. Edit src/tower, then run supabase/sync-core.mjs.
-import type {Skill,Challenge,PlayerSave,Element} from './model.ts';
+import type {Skill,Challenge,PlayerSave,Element,TowerRun} from './model.ts';
 import {ADDITIONAL_SKILLS} from './expandedCatalog.ts';
 export const INITIAL_SKILLS=['mini-squat','knee-pushup','birddog','short-superman'] as const;
 // Variant recognition is deliberately conservative. Sharing a movement family is not proof
@@ -41,7 +41,7 @@ export const SKILLS:Skill[]=[...LEGACY_SKILLS.map(s=>({...s,types:(secondary[s.i
 const byId=Object.fromEntries(SKILLS.map(s=>[s.id,s]));
 for(const skill of SKILLS){let depth=0,ancestor=skill.prerequisite;const seen=new Set([skill.id]);while(ancestor){if(seen.has(ancestor)||!byId[ancestor])throw Error('INVALID_SKILL_DEPENDENCY');seen.add(ancestor);depth++;ancestor=byId[ancestor].prerequisite;}skill.trialTarget=(skill.unit==='seconds'?[6,10,15]:[4,6,8])[Math.min(2,depth)];}
 export const SKILL_BY_ID:Readonly<Record<string,Skill>>=Object.fromEntries(SKILLS.map(s=>[s.id,s]));
-export const CHALLENGES:Challenge[]=[
+export const LEGACY_CHALLENGES:Challenge[]=[
  {id:'leg',name:'Root Trial',description:'Five floors of lower-body control.',floors:5,seed:31415,types:['leg'],skillIds:['mini-squat','squat','assisted-lunge','lunge'],specialization:'leg'},
  {id:'arm',name:'Ember Trial',description:'Five floors of upper-body strength.',floors:5,seed:27182,types:['arm'],skillIds:['knee-pushup','wall-pushup','incline-pushup','pushup'],specialization:'arm'},
  {id:'back',name:'Gale Trial',description:'Five floors of stability and balance.',floors:5,seed:16180,types:['back'],skillIds:['birddog','alternating-birddog','short-superman','superman'],specialization:'back'},
@@ -53,6 +53,30 @@ export const CHALLENGES:Challenge[]=[
  {id:'control',name:'Perfect Balance',description:'Six floors of deliberate movement.',floors:6,seed:22360,types:['back','leg','arm'],skillIds:['pause-squat','pause-pushup','pause-birddog','tempo-extension']},
  {id:'boss',name:'Keepers’ Gauntlet',description:'Five encounters with the tower keepers.',floors:5,seed:24494,types:['leg','arm','back'],skillIds:['squat','pushup','birddog','superman'],bossEvery:1},
 ];
+// Assigned skills are borrowed by a challenge only. They never alter permanent unlocks.
+const beginnerLoadouts:Record<string,string[]>={
+ leg:['mini-squat','squat','sitstand','calf-raise'],
+ arm:['wall-pushup','incline-pushup','knee-pushup','high-plank'],
+ back:['birddog','short-superman','back-extension','alternating-birddog'],
+ core:['supine-march','deadbug-heel-tap','abdominal-brace','short-crunch'],
+ cardio:['march-in-place','step-touch','heel-dig','shadowbox-straight'],
+ mobility:['shoulder-circles','standing-chest-opening','cat-cow','hip-circles'],
+ mixed:['mini-squat','wall-pushup','birddog','march-in-place'],
+ endurance:['mini-squat','wall-pushup','short-superman','march-in-place'],
+ control:['mini-squat','wall-pushup','birddog','cat-cow'],
+ boss:['mini-squat','wall-pushup','birddog','short-superman'],
+};
+export const CHALLENGES:Challenge[]=LEGACY_CHALLENGES.flatMap(c=>{
+ const skillIds=beginnerLoadouts[c.id];
+ return [
+  {...c,id:`${c.id}-easy`,legacyId:c.id,name:`${c.name} · Easy`,description:'Five floors. Assigned beginner attacks are available here without unlocking them.',floors:5,skillIds,tier:'easy' as const,hpMultiplier:.8,attackMultiplier:.8},
+  {...c,legacyId:c.id,name:`${c.name} · Hard`,description:'Stronger opponents with the same four assigned movements.',floors:5,skillIds,tier:'hard' as const,prerequisiteId:`${c.id}-easy`,hpMultiplier:1.25,attackMultiplier:1.1},
+ ];
+});
+export const getRunChallenge=(run:TowerRun)=> (run.challengeTier?CHALLENGES:LEGACY_CHALLENGES).find(c=>c.id===run.challengeId);
 export const canAttemptTrial=(save:PlayerSave,id:string)=>{const skill=Object.hasOwn(SKILL_BY_ID,id)?SKILL_BY_ID[id]:undefined;return !!skill&&(!skill.prerequisite||!!save.skills[skill.prerequisite]?.unlocked);};
 export const unlockedSkills=(save:PlayerSave)=>SKILLS.filter(s=>save.skills[s.id]?.unlocked);
-export const challengeAvailable=(save:PlayerSave,id:string)=>{const c=CHALLENGES.find(c=>c.id===id);return !!c&&c.skillIds.every(id=>save.skills[id]?.unlocked);};
+export const challengeAvailable=(save:PlayerSave,id:string)=>{
+ const c=CHALLENGES.find(c=>c.id===id);
+ return !!c&&(c.tier==='easy'||!!c.prerequisiteId&&((save.records[`challenge:${c.prerequisiteId}`]?.wins??0)>0||(save.records[`challenge:${c.legacyId}`]?.wins??0)>0));
+};

@@ -51,3 +51,21 @@ describe("ordered exercise receipts", () => {
     expect(q.push(3, () => {})).toBe(false);
   });
 });
+
+it("drains completed observations before a rest command", async () => {
+  let settle!: (accepted: boolean) => void;
+  const order: string[] = [];
+  const queue = new UnitQueue<number>((value) => {
+    order.push(`rep${value}`);
+    return new Promise((resolve) => (settle = resolve));
+  });
+  queue.push(1, () => {});
+  queue.push(2, () => {});
+  const resting = queue.flush().then(() => order.push("rest"));
+  settle(true);
+  await tick();
+  expect(order).toEqual(["rep1", "rep2"]);
+  settle(true);
+  await resting;
+  expect(order).toEqual(["rep1", "rep2", "rest"]);
+});

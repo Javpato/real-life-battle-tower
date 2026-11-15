@@ -14,11 +14,11 @@ try{
   expect(await page.evaluate(()=>document.documentElement.scrollHeight<=innerHeight&&document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.screenshot({path:`${out}/flash-trial-${width}x${height}.png`});
  }
- await click('Manual');const timer=page.getByRole('timer',{name:'Unverified practice time'});await expect(timer).not.toHaveText('0.0s');
+ await click('Manual');const timer=page.getByRole('timer',{name:'Set countdown'});await expect(page.getByRole('region',{name:'Flash timer'})).toContainText('unverified');
  await page.locator('.bt-series-controls').getByRole('button',{name:'Rest',exact:true}).click();const atRest=await timer.textContent();await page.waitForTimeout(400);expect(await timer.textContent()).toBe(atRest);
  await page.locator('.bt-series-controls').getByRole('button',{name:'Resume',exact:true}).click();
  for(let i=0;i<9;i++)await click('Confirm one repetition');await click('Complete Flash trial');
  await expect(page.getByRole('button',{name:'Recalibrate Flash pace'})).toBeVisible();
  await page.getByRole('button',{name:'Recalibrate Flash pace'}).click();await expect(page.getByRole('heading',{name:/Mini Squat · Flash/})).toBeVisible();
- expect(errors).toEqual([]);console.log(JSON.stringify({passed:true,checks:['visible Flash timer at five viewports','manual practice stopwatch and rest','manual unlock','repeat camera pace trial after manual unlock'],errors}));
+ expect(errors).toEqual([]);console.log(JSON.stringify({passed:true,checks:['visible Flash timer at five viewports','explicit manual provenance and rest','manual unlock','repeat camera pace trial after manual unlock'],errors}));
 }finally{await browser.close();}

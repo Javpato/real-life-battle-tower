@@ -388,9 +388,11 @@ export default function SkillAcademy({
                 <section className="academy-flash">
                   <h3>Flash technique</h3>
                   <p>
-                    A visible timer follows each repetition. Three comfortable
-                    movements set a generous personal pace window. Flash allows
-                    shallower movements and more natural variation.
+                    The same attack, at a faster pace. Three comfortable
+                    repetitions set one countdown for the entire set, with 20%
+                    less time. You can choose your own time. Fast movement
+                    detection is more permissive; after zero, repetitions deal
+                    normal damage.
                   </p>
                   {flashKnown ? (
                     <button

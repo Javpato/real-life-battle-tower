@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "syntheticPhoneGeometry": true,
+  "physicalCameraTested": false,
+  "checks": [
+    "three reference cycles",
+    "six faster test cycles",
+    "whole-set countdown decreases without resetting each repetition",
+    "one-second receipts do not block faster repetitions",
+    "verified cadence persists",
+    "manual completion unverified",
+    "no local camera acquisition"
+  ],
+  "cameraCadenceMs": 1079.9000000003725,
+  "errors": []
+}
