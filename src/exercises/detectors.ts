@@ -705,7 +705,8 @@ export function observePose(
   });
 }
 
-/** Raw visibility and pose phases must support the smoothed display geometry. */
+/** Raw visibility always supports display geometry. Flash phase boundaries use
+ * fresh unsmoothed evidence so a smoothing delay cannot erase a quick reversal. */
 export function observeEvidence(
   exercise: ExerciseId,
   frame: PoseFrame,
@@ -724,8 +725,14 @@ export function observeEvidence(
     ...observed,
     visible: raw.visible && observed.visible,
     fresh: raw.fresh !== false && observed.fresh !== false,
-    ready: raw.ready && observed.ready,
-    extended: raw.extended && observed.extended,
+    ready:
+      options.tolerance === "flash" ? raw.ready : raw.ready && observed.ready,
+    extended:
+      options.tolerance === "flash"
+        ? raw.extended
+        : raw.extended && observed.extended,
+    amplitude:
+      options.tolerance === "flash" ? raw.amplitude : observed.amplitude,
     confidence: Math.min(raw.confidence, observed.confidence),
     missingJoints: raw.visible ? observed.missingJoints : raw.missingJoints,
   };

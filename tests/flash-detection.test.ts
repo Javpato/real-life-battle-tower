@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   ExerciseDetector,
   observePose,
+  observeEvidence,
   type Observation,
   type PoseFrame,
   type RecognitionOptions,
@@ -333,4 +334,13 @@ it("counts a fast full Flash cycle with a single peak frame and no endpoint paus
     endedAt: 650,
     uninterrupted: true,
   });
+});
+
+it("keeps a fresh fast peak when the display smoothing trails its phase", () => {
+  const frame = squat(165);
+  frame.rawLandmarks = squat(120).landmarks;
+  expect(observeEvidence("squat", frame, undefined, flash).extended).toBe(true);
+  expect(observeEvidence("squat", frame).extended).toBe(false);
+  frame.landmarks[25].visibility = 0.1;
+  expect(observeEvidence("squat", frame, undefined, flash).visible).toBe(false);
 });
