@@ -112,3 +112,40 @@ describe("front camera leg movement regressions", () => {
     expect(units).toHaveLength(1);
   });
 });
+
+it("retains an observed sumo bend across a brief occlusion but never counts missing frames", () => {
+  const a = standing(),
+    b = lower(a, 0.09),
+    d = new AssistedExerciseDetector("sumo-squat", "squat", "occlusion");
+  d.recalibrate(a);
+  let time = 0;
+  const units: ExerciseUnit[] = [];
+  const feed = (f: PoseFrame, n: number) => {
+    for (let i = 0; i < n; i++) {
+      const u = d.update({ ...f, timestamp: (time += 50) }).unit;
+      if (u) units.push(u);
+    }
+  };
+  feed(a, 6);
+  feed(b, 8);
+  const hidden = structuredClone(b);
+  hidden.landmarks.forEach((p) => (p.visibility = 0));
+  feed(hidden, 3);
+  expect(units).toHaveLength(0);
+  feed(b, 2);
+  feed(a, 5);
+  expect(units).toHaveLength(1);
+  feed(b, 8);
+  feed(hidden, 10);
+  feed(a, 5);
+  expect(units).toHaveLength(1);
+});
+it("keeps sumo posture when forward torso lean shortens its projected length", () => {
+  const a = standing(),
+    b = lower(a, 0.09);
+  for (const i of [0, 1]) {
+    b.landmarks[11 + i].y = b.landmarks[23 + i].y - 0.025;
+    b.landmarks[11 + i].x += 0.04;
+  }
+  expect(run("sumo-squat", a, b, 500).units).toHaveLength(1);
+});

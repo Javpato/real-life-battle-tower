@@ -177,13 +177,14 @@ export function measureAssistedPose(
     ids.reduce((n, i) => n + confidence(i), 0) / ids.length >= 0.55;
   const bilateral =
     !alternating &&
+    profile.id !== "sumo-squat" &&
     (profile.view === "front" ||
       ["jack", "arm-open", "tabletop"].includes(profile.strategy) ||
       profile.id.startsWith("prone-") ||
       profile.id === "wall-arm-slide");
   const both =
     alternating ||
-    profile.view === "front" ||
+    (profile.view === "front" && profile.id !== "sumo-squat") ||
     bilateral ||
     profile.strategy === "opposite-reach";
   const usable: [boolean, boolean] = [good(groups[0]), good(groups[1])];
@@ -199,9 +200,12 @@ export function measureAssistedPose(
       ...EMPTY,
       missing: ids.filter((i) => confidence(i) < 0.4).map((i) => jointNames[i]),
     };
-  const scales = BOTH.filter((i) => usable[i]).map((i) =>
-    distance(limb(i).s, limb(i).h),
-  );
+  const scales = BOTH.filter((i) => usable[i]).map((i) => {
+    const c = limb(i);
+    return profile.strategy === "knee-bend"
+      ? (distance(c.h, c.k) + distance(c.k, c.a)) * 0.65
+      : distance(c.s, c.h);
+  });
   const scale = scales.reduce((a, b) => a + b, 0) / scales.length;
   if (!Number.isFinite(scale) || scale < 0.06 || scale > 0.9) return EMPTY;
   const values: [number, number] = [0, 0],
@@ -226,7 +230,8 @@ export function measureAssistedPose(
     switch (profile.strategy) {
       case "knee-bend":
         values[i] = (180 - knee) / 180;
-        valid = upright;
+        valid =
+          p[s].y < p[h].y + scale * 0.15 && p[h].y < p[a].y - scale * 0.12;
         break;
       case "lunge":
         values[i] = (180 - knee) / 180;
@@ -416,6 +421,7 @@ export class AssistedExerciseDetector {
   private candidateAt?: number;
   private calibrationTimestamp?: number;
   private lastTimestamp?: number;
+  private lastVisibleTimestamp?: number;
   private phase: "start" | "out" | "away" = "start";
   private readyAt?: number;
   private startedAt?: number;
@@ -630,7 +636,16 @@ export class AssistedExerciseDetector {
       missingJoints: m.missing,
     });
     if (!m.visible || !m.posture) {
-      this.pause();
+      // A brief detector dropout may interrupt a fast bend. Keep only an
+      // already-observed phase for at most400ms; never create a unit or held
+      // time from missing evidence. Stale timestamps/frame gaps reset above.
+      if (
+        this.hold ||
+        this.lastVisibleTimestamp === undefined ||
+        frame.timestamp - this.lastVisibleTimestamp > 400 ||
+        (frame.captureLatencyMs ?? 0) > ASSISTED_TIMING.maximumLatencyMs
+      )
+        this.pause();
       return feedback(
         "tracking-lost",
         !m.visible
@@ -638,6 +653,7 @@ export class AssistedExerciseDetector {
           : "Return to the illustrated posture. Rest does not count.",
       );
     }
+    this.lastVisibleTimestamp = frame.timestamp;
     if (!this.reference) {
       if (!this.calibrationReady(m, frame.timestamp))
         return feedback("ready", "Hold your starting position steady.");
@@ -687,6 +703,8 @@ export class AssistedExerciseDetector {
     if (this.profile.reverseSide) index = (1 - index) as 0 | 1;
     if (!this.alternating) index = movement[1] > movement[0] ? 1 : 0;
     index = this.activeIndex ?? index;
+    if (this.profile.id === "sumo-squat" && !m.usable[index])
+      index = (1 - index) as 0 | 1;
     let value = m.bilateral ? Math.min(...movement) : movement[index];
     if (this.profile.id === "single-leg-squat" && m.legGeometry) {
       const support = m.legGeometry[index],
