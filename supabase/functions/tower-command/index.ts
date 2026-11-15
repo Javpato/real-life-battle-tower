@@ -2,7 +2,7 @@ import {createClient} from 'npm:@supabase/supabase-js@2.119.0';
 import {applyCommand,initialSave} from '../_shared/tower/engine.ts';
 import {validateTowerImport} from '../_shared/tower/importSave.ts';
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info','Access-Control-Allow-Methods':'POST,OPTIONS'};
-const respond=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});
+const respond=(data:unknown,status=200)=>new Response(status===204?null:JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json'}});
 function named(variable:string){try{return JSON.parse(Deno.env.get(variable)??'{}').default;}catch{return undefined;}}
 Deno.serve(async request=>{
  if(request.method==='OPTIONS')return respond(null,204);

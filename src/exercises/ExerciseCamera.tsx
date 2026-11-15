@@ -12,7 +12,10 @@ import {
   type CameraSnapshot,
   type CameraMetrics,
 } from "./cameraLifecycle";
-import ExerciseDemo, { EXERCISE_GUIDES, getExerciseGuide } from "./ExerciseDemo";
+import ExerciseDemo, {
+  EXERCISE_GUIDES,
+  getExerciseGuide,
+} from "./ExerciseDemo";
 import ExerciseHUD from "./ExerciseHUD";
 import type { ExerciseVisualState } from "./exerciseUi";
 import "./exercises.css";
@@ -20,6 +23,8 @@ import { RecalibrationGate } from "./preparation";
 import { PoseFilter } from "./poseFilter";
 import { FeedbackDwell } from "./feedbackDwell";
 import { STARTING_CUES } from "./exercisePresentation";
+import type { FlashTiming } from "./FlashTimer";
+import { assessFlashCycle } from "../tower/flash";
 import {
   armExerciseAudio,
   speakExercise,
@@ -28,7 +33,8 @@ import {
 
 type Props = Omit<ExerciseCameraProps, "onUnit"> & {
   recognitionProfile?: "mini-squat" | "knee-pushup";
-  guideOverride?: typeof EXERCISE_GUIDES["squat"];
+  flash?: FlashTiming;
+  guideOverride?: (typeof EXERCISE_GUIDES)["squat"];
   hideIllustration?: boolean;
   onUnit: (unit: ExerciseUnit) => void | boolean | Promise<boolean>;
   lastSide?: "left" | "right";
@@ -170,9 +176,13 @@ export default function ExerciseCamera(props: Props) {
     new ExerciseDetector(props.exerciseId, props.sessionId, props.lastSide, {
       allowPartialSquat: partialSquat,
       profile: props.recognitionProfile,
+      tolerance: props.flash ? "flash" : "standard",
     }),
   );
   const detectorSession = useRef(sessionKey(props));
+  const [flashElapsed, setFlashElapsed] = useState(0),
+    [flashLast, setFlashLast] = useState<number | null>(null),
+    [flashFeedback, setFlashFeedback] = useState("");
   const recalibration = useRef(new RecalibrationGate());
   const dismissedGuide = useRef(new Set<string>());
   const dismissGuide = () => {
@@ -221,6 +231,7 @@ export default function ExerciseCamera(props: Props) {
     setStage(value);
   };
   const resetTiming = () => {
+    setFlashElapsed(0);
     recalibration.current.cancel();
     stableSince.current = null;
     countdownAt.current = null;
@@ -327,6 +338,14 @@ export default function ExerciseCamera(props: Props) {
     if (stageRef.current === "running") {
       // Let the detector handle brief occlusion. It must see missing frames to pause held time safely.
       const result = detector.current.update(frame) as RichFeedback;
+      if (p.flash) {
+        const startedAt = detector.current.cycleStartedAt;
+        setFlashElapsed(
+          startedAt === null ? 0 : Math.max(0, frame.timestamp - startedAt),
+        );
+        if (result.unit?.cycle)
+          setFlashLast(result.unit.cycle.endedAt - result.unit.cycle.startedAt);
+      }
       setNextSide(result.nextSide ?? detector.current.expectedSide);
       setMissingJoints(result.missingJoints ?? []);
       setStatus(
@@ -353,8 +372,49 @@ export default function ExerciseCamera(props: Props) {
         detectorSession.current === sessionKey(latest.current) &&
         issued.current < latest.current.target
       ) {
-        issued.current = Math.max(issued.current, latest.current.progress) + 1;
         const unit = result.unit;
+        const timing = p.flash
+          ? assessFlashCycle(
+              unit,
+              p.flash.stage === "reference" ? undefined : p.flash.cadenceMs,
+            )
+          : null;
+        const timingMessage =
+          timing && !timing.accepted
+            ? {
+                "too-fast": "Try a slightly steadier down-and-return movement.",
+                "too-slow":
+                  "Outside the pace window. Rest, then start a new repetition.",
+                interrupted:
+                  "Tracking was interrupted. Return to the starting position.",
+                "low-quality":
+                  "Use a comfortable, clear down-and-return movement.",
+                "low-confidence":
+                  "Keep the moving joints visible to the camera.",
+                "missing-cycle":
+                  "A complete down-and-return movement is needed for Flash timing.",
+                "invalid-clock":
+                  "Restart this movement to measure a fresh repetition.",
+                overlap:
+                  "Return to the starting position for a fresh repetition.",
+                manual: "Estimated movement has no camera-verified pace.",
+              }[timing.reason]
+            : "";
+        if (
+          p.flash &&
+          p.flash.stage !== "battle" &&
+          unit.verified &&
+          timing &&
+          !timing.accepted
+        ) {
+          detector.current.pause();
+          setFlashElapsed(0);
+          setStatus("incomplete");
+          setFlashFeedback(timingMessage);
+          setMessage(timingMessage);
+          return;
+        }
+        issued.current = Math.max(issued.current, latest.current.progress) + 1;
         const pending = { session: detectorSession.current };
         pendingUnit.current = pending;
         detector.current.pause();
@@ -369,7 +429,17 @@ export default function ExerciseCamera(props: Props) {
           if (accepted) {
             setQuality(Math.round(unit.quality * 100));
             setStatus("valid");
-            setMessage("Repetition saved. Nice work — continue when ready.");
+            const flashNote = p.flash
+              ? timing?.accepted
+                ? p.flash.stage === "battle" && p.flash.cadenceMs
+                  ? "FLASH ×1.25 · repetition saved."
+                  : "Pace measured · repetition saved."
+                : "Repetition saved without a Flash pace bonus."
+              : "";
+            setFlashFeedback(flashNote);
+            setMessage(
+              flashNote || "Repetition saved. Nice work — continue when ready.",
+            );
           } else {
             // A canonical rejection must not spend the remaining local unit budget
             // or change which anatomical side the adventure expects.
@@ -379,11 +449,16 @@ export default function ExerciseCamera(props: Props) {
               current.exerciseId,
               current.sessionId,
               current.lastSide,
-              { allowPartialSquat: partialSquat, profile: current.recognitionProfile },
+              {
+                allowPartialSquat: partialSquat,
+                profile: current.recognitionProfile,
+                tolerance: current.flash ? "flash" : "standard",
+              },
             );
             lifecycle.current.invalidateFrames();
             setNextSide(detector.current.expectedSide);
             setStatus("incomplete");
+            setFlashFeedback("Repetition not saved. Return to position and try again.");
             setMessage(
               "That repetition was not accepted by the adventure. Your saved progress is kept; return to the starting position.",
             );
@@ -640,13 +715,19 @@ export default function ExerciseCamera(props: Props) {
       props.exerciseId,
       props.sessionId,
       props.lastSide,
-      { allowPartialSquat: partialSquat, profile: props.recognitionProfile },
+      {
+        allowPartialSquat: partialSquat,
+        profile: props.recognitionProfile,
+        tolerance: props.flash ? "flash" : "standard",
+      },
     );
     lifecycle.current?.invalidateFrames();
     poseFilter.current.reset();
     issued.current = props.progress;
     resetTiming();
     setQuality(null);
+    setFlashLast(null);
+    setFlashFeedback("");
     setNextSide(detector.current.expectedSide);
     setRejections(0);
     setDemo(
@@ -661,7 +742,13 @@ export default function ExerciseCamera(props: Props) {
       setStatus("insufficient");
       setMessage(EXERCISE_GUIDES[props.exerciseId].setup);
     }
-  }, [props.exerciseId, props.sessionId, partialSquat]);
+  }, [
+    props.exerciseId,
+    props.sessionId,
+    partialSquat,
+    props.recognitionProfile,
+    !!props.flash,
+  ]);
   useEffect(() => {
     detector.current.beginCalibration();
     calibrated.current.clear();
@@ -800,11 +887,13 @@ export default function ExerciseCamera(props: Props) {
   }, [props.source]);
   // A phone preview is opt-in and display-only; accepted evidence still arrives as pose events.
   useEffect(() => {
-    if (props.source !== 'phone' || !video.current) return;
+    if (props.source !== "phone" || !video.current) return;
     const node = video.current;
     node.srcObject = props.externalPreview ?? null;
     if (props.externalPreview) void node.play().catch(() => {});
-    return () => { if (node.srcObject === props.externalPreview) node.srcObject = null; };
+    return () => {
+      if (node.srcObject === props.externalPreview) node.srcObject = null;
+    };
   }, [props.source, props.externalPreview]);
   const startCamera = async (next = selectionRef.current) => {
     if (!video.current || latest.current.source === "phone") return;
@@ -864,6 +953,9 @@ export default function ExerciseCamera(props: Props) {
     "starting",
     "recovering",
   ].includes(camera.status);
+  useEffect(() => {
+    if (stage !== "running" || inactive || transportInactive) setFlashElapsed(0);
+  }, [stage, inactive, transportInactive]);
   const hudStatus: ExerciseVisualState = transportInactive
     ? camera.status === "off"
       ? "off"
@@ -898,7 +990,9 @@ export default function ExerciseCamera(props: Props) {
   }, [hudMessage, hudStatus]);
   const mirrored =
     (camera.facingMode ?? selection.facingMode) !== "environment";
-  const guide = props.guideOverride ?? getExerciseGuide(props.exerciseId,props.recognitionProfile);
+  const guide =
+    props.guideOverride ??
+    getExerciseGuide(props.exerciseId, props.recognitionProfile);
   const preparationState = props.sessionComplete
     ? "completed"
     : transportInactive
@@ -958,7 +1052,7 @@ export default function ExerciseCamera(props: Props) {
               if (enabled && !props.muted) {
                 armExerciseAudio();
                 speakExercise(
-                  `${guide.camera}. ${props.recognitionProfile?getExerciseGuide(props.exerciseId,props.recognitionProfile).setup:STARTING_CUES[props.exerciseId]}.`,
+                  `${guide.camera}. ${props.recognitionProfile ? getExerciseGuide(props.exerciseId, props.recognitionProfile).setup : STARTING_CUES[props.exerciseId]}.`,
                   true,
                 );
               } else stopExerciseSpeech();
@@ -998,10 +1092,17 @@ export default function ExerciseCamera(props: Props) {
               Close exercise guide
             </button>
           </div>
-          <ExerciseDemo exerciseId={props.exerciseId} recognitionProfile={props.recognitionProfile} guideOverride={props.guideOverride} hideIllustration={props.hideIllustration} />
+          <ExerciseDemo
+            exerciseId={props.exerciseId}
+            recognitionProfile={props.recognitionProfile}
+            guideOverride={props.guideOverride}
+            hideIllustration={props.hideIllustration}
+          />
         </section>
       )}
-      <div className={`exercise-feed ${camera.stream || props.externalPreview ? "is-live" : ""}`}>
+      <div
+        className={`exercise-feed ${camera.stream || props.externalPreview ? "is-live" : ""}`}
+      >
         <video
           ref={video}
           muted
@@ -1018,11 +1119,24 @@ export default function ExerciseCamera(props: Props) {
             visibility: showSkeleton ? "visible" : "hidden",
           }}
         />
-        {props.source === "phone" && !props.externalPreview && <div className="exercise-placeholder"><strong>Phone pose tracking</strong><small>Enable the optional video preview on your phone to see it here. Tracking does not require sharing video.</small></div>}
+        {props.source === "phone" && !props.externalPreview && (
+          <div className="exercise-placeholder">
+            <strong>Phone pose tracking</strong>
+            <small>
+              Enable the optional video preview on your phone to see it here.
+              Tracking does not require sharing video.
+            </small>
+          </div>
+        )}
         {!camera.stream && props.source !== "phone" && (
           <div className="exercise-placeholder">
             <div className="exercise-prep-art" aria-hidden="true">
-              <ExerciseDemo exerciseId={props.exerciseId} recognitionProfile={props.recognitionProfile} guideOverride={props.guideOverride} hideIllustration={props.hideIllustration} />
+              <ExerciseDemo
+                exerciseId={props.exerciseId}
+                recognitionProfile={props.recognitionProfile}
+                guideOverride={props.guideOverride}
+                hideIllustration={props.hideIllustration}
+              />
             </div>
             <strong>{guide.camera}</strong>
             <small>Enable the camera when you are ready.</small>
@@ -1119,9 +1233,30 @@ export default function ExerciseCamera(props: Props) {
         </details>
       )}
       <ExerciseHUD
+        flash={
+          props.flash && props.mode !== "manual"
+            ? {
+                ...props.flash,
+                mode: "camera",
+                elapsedMs: flashElapsed,
+                lastCycleMs: flashLast,
+                progress: props.progress,
+                active:
+                  stage === "running" &&
+                  !inactive &&
+                  !transportInactive &&
+                  !props.sessionComplete,
+                feedback: flashFeedback,
+              }
+            : undefined
+        }
         guideSetup={guide.setup}
         guideCamera={guide.camera}
-        startingPosition={props.recognitionProfile==="knee-pushup"?"Knees supported · hands under shoulders":undefined}
+        startingPosition={
+          props.recognitionProfile === "knee-pushup"
+            ? "Knees supported · hands under shoulders"
+            : undefined
+        }
         exerciseId={props.exerciseId}
         progress={props.progress}
         target={props.target}

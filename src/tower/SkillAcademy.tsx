@@ -107,7 +107,11 @@ export default function SkillAcademy({
       <header className="academy-heading">
         <div
           className="bt-instructor"
-          style={{ width: "clamp(48px,7vw,96px)", aspectRatio: "1", flexShrink: 0 }}
+          style={{
+            width: "clamp(48px,7vw,96px)",
+            aspectRatio: "1",
+            flexShrink: 0,
+          }}
         >
           <PixelCharacter id="instructor-1" action="idle" />
         </div>
@@ -387,8 +391,9 @@ export default function SkillAcademy({
                 <section className="academy-flash">
                   <h3>Flash technique</h3>
                   <p>
-                    Controlled full repetitions, not maximum speed. A personal
-                    reference sets your cadence.
+                    A visible timer follows each repetition. Three comfortable
+                    movements set a generous personal pace window. Flash allows
+                    shallower movements and more natural variation.
                   </p>
                   {flashKnown ? (
                     <button
@@ -417,9 +422,14 @@ export default function SkillAcademy({
                         : "Earn a Flash opportunity from a boss"}
                     </button>
                   )}
+                  {flashKnown && (
+                    <button onClick={() => onFlashTrial(selected)}>
+                      Recalibrate Flash pace
+                    </button>
+                  )}
                   <small>
                     {flashKnown
-                      ? "Flash replaces the normal version in the same slot."
+                      ? `Flash replaces the normal version in the same slot. ${save.progression?.flashVerification?.[selected] === "verified" ? "Camera pace measured." : "Manual / mixed unlock: repeat the trial with the camera to earn a pace bonus."}`
                       : "Three reference cycles, then six valid repetitions. Manual mode never fabricates a detected speed bonus."}
                   </small>
                 </section>

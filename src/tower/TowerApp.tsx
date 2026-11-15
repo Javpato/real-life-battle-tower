@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import ExerciseCamera from "../exercises/ExerciseCamera";
+import FlashTimer, { type FlashTiming } from "../exercises/FlashTimer";
 import { CompanionControl } from "../companion";
 import type { PoseFrame } from "../exercises/detectors";
 import { healthPlatform } from "../platform/health";
@@ -245,6 +246,7 @@ export default function TowerApp({
     !series.paused &&
     !localPause &&
     confirm === null &&
+    !showPhone &&
     (activity?.kind === "trial" ||
       (activity?.kind === "workout" && activity.status === "active") ||
       run?.battle?.turn === "exercise");
@@ -253,13 +255,29 @@ export default function TowerApp({
   useEffect(() => {
     const text = victoryAnnouncement.current.observe(run?.battle ?? null);
     let voiceEnabled = true;
-    try { voiceEnabled = localStorage.getItem("everstride-exercise-voice") !== "off"; } catch { /* Storage may be unavailable. */ }
+    try {
+      voiceEnabled =
+        localStorage.getItem("everstride-exercise-voice") !== "off";
+    } catch {
+      /* Storage may be unavailable. */
+    }
     if (text && !save?.settings.muted && voiceEnabled) {
       // Child exercise audio is already stopped before this parent effect runs.
-      try { speakExercise(text, true); } catch { /* Speech support never blocks combat. */ }
+      try {
+        speakExercise(text, true);
+      } catch {
+        /* Speech support never blocks combat. */
+      }
     }
-  }, [run?.battle?.id, run?.battle?.turn, run?.battle?.enemy.name, save?.settings.muted]);
-  useEffect(() => { if (save?.settings.muted) stopExerciseSpeech(); }, [save?.settings.muted]);
+  }, [
+    run?.battle?.id,
+    run?.battle?.turn,
+    run?.battle?.enemy.name,
+    save?.settings.muted,
+  ]);
+  useEffect(() => {
+    if (save?.settings.muted) stopExerciseSpeech();
+  }, [save?.settings.muted]);
   useEffect(() => () => stopExerciseSpeech(), []);
   async function send(command: TowerCommand) {
     const ok = await tower.send(command);
@@ -296,7 +314,13 @@ export default function TowerApp({
     return () => document.removeEventListener("fullscreenchange", f);
   }, []);
   useEffect(() => {
-    if (run?.battle?.turn !== "enemy" || localPause || confirm !== null) return;
+    if (
+      run?.battle?.turn !== "enemy" ||
+      localPause ||
+      showPhone ||
+      confirm !== null
+    )
+      return;
     const t = setTimeout(() => void send({ kind: "resolveEnemy" }), 1050);
     return () => clearTimeout(t);
   }, [
@@ -304,6 +328,7 @@ export default function TowerApp({
     run?.battle?.id,
     run?.battle?.hitSerial,
     localPause,
+    showPhone,
     confirm,
   ]);
   useEffect(() => {
@@ -315,10 +340,10 @@ export default function TowerApp({
       : "",
   ]);
   useEffect(() => {
-    if (rest <= 0 || localPause) return;
+    if (rest <= 0 || localPause || showPhone) return;
     const t = setTimeout(() => setRest(rest - 1), 1000);
     return () => clearTimeout(t);
-  }, [rest, localPause]);
+  }, [rest, localPause, showPhone]);
   useEffect(() => {
     if (previousActivity.current !== activity?.kind) {
       setLocalPause(false);
@@ -328,6 +353,11 @@ export default function TowerApp({
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
+      if (showPhone) {
+        e.preventDefault();
+        void closePhone();
+        return;
+      }
       if (confirm) {
         setConfirm(null);
         return;
@@ -341,7 +371,46 @@ export default function TowerApp({
     };
     document.addEventListener("keydown", key);
     return () => document.removeEventListener("keydown", key);
-  }, [save?.activity.kind, series?.paused, confirm, localPause]);
+  }, [save?.activity.kind, series?.paused, confirm, localPause, showPhone]);
+  const phoneReturn = useRef<{
+    localPause: boolean;
+    seriesId?: string;
+    seriesPaused: boolean;
+    focus: HTMLElement | null;
+  } | null>(null);
+  const phonePanel = useRef<HTMLDivElement>(null);
+  const phoneCloseButton = useRef<HTMLButtonElement>(null);
+  async function openPhone() {
+    if (showPhone) return;
+    phoneReturn.current = {
+      localPause,
+      seriesId: series?.id,
+      seriesPaused: !!series?.paused,
+      focus: document.activeElement as HTMLElement | null,
+    };
+    setShowPhone(true);
+    if (activity?.kind !== "idle") {
+      setLocalPause(true);
+      if (series && !series.paused) await send({ kind: "pause", paused: true });
+    }
+  }
+  async function closePhone() {
+    const previous = phoneReturn.current;
+    if (
+      previous?.seriesId === series?.id &&
+      series &&
+      !previous?.seriesPaused
+    ) {
+      if (!(await send({ kind: "pause", paused: false }))) return;
+    }
+    phoneReturn.current = null;
+    setShowPhone(false);
+    setLocalPause(previous?.localPause ?? false);
+    previous?.focus?.focus();
+  }
+  useEffect(() => {
+    if (showPhone) phoneCloseButton.current?.focus();
+  }, [showPhone]);
   async function toggleFullscreen() {
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
@@ -434,6 +503,13 @@ export default function TowerApp({
                   ? "Saving…"
                   : tower.cloudStatus || "Saved locally"}
             </span>
+            <button
+              onClick={() => void openPhone()}
+              aria-label="Connect phone camera"
+              aria-expanded={showPhone}
+            >
+              Phone camera
+            </button>
             <button onClick={() => void journal()} aria-label="Open journal">
               Journal
             </button>
@@ -465,6 +541,18 @@ export default function TowerApp({
   }) {
     if (!current || !currentSkill) return null;
     const manualOnly = currentSkill.detector === "manual";
+    const flash: FlashTiming | undefined =
+      activity?.kind === "trial" && activity.trialKind === "flash"
+        ? {
+            stage: activity.flashStage ?? "reference",
+            cadenceMs: activity.cadenceMs,
+          }
+        : run?.flashEquipped?.includes(currentSkill.id)
+          ? {
+              stage: "battle",
+              cadenceMs: save?.progression?.flashCadence[currentSkill.id],
+            }
+          : undefined;
     return (
       <aside className="bt-camera-pane">
         <div className="bt-row between">
@@ -514,6 +602,16 @@ export default function TowerApp({
         )}
         {(inputMode === "manual" || manualOnly) && (
           <Panel>
+            {flash && (
+              <FlashTimer
+                {...flash}
+                mode="manual"
+                elapsedMs={0}
+                lastCycleMs={null}
+                progress={current.progress}
+                active={cameraActive}
+              />
+            )}
             <div className="bt-progress-display" role="status">
               {current.progress}
               <small>
@@ -546,6 +644,7 @@ export default function TowerApp({
           </Panel>
         )}
         <ExerciseCamera
+          flash={flash}
           guideOverride={skillGuide(currentSkill.id)}
           hideIllustration={manualOnly}
           exerciseId={currentSkill.exercise}
@@ -654,8 +753,16 @@ export default function TowerApp({
                     const s = SKILL_BY_ID[id];
                     const attackingTypes =
                       current.contentVersion === 1 ? [s.type] : skillTypes(s);
-                    const matchup = effectiveness(attackingTypes, b.enemy.phases[b.phase]);
-                    const matchupLabel = matchup > 1 ? "Super effective" : matchup < 1 ? "Not very effective" : "Effective";
+                    const matchup = effectiveness(
+                      attackingTypes,
+                      b.enemy.phases[b.phase],
+                    );
+                    const matchupLabel =
+                      matchup > 1
+                        ? "Super effective"
+                        : matchup < 1
+                          ? "Not very effective"
+                          : "Effective";
                     return (
                       <button
                         key={id}
@@ -669,7 +776,10 @@ export default function TowerApp({
                           ))}
                         </span>{" "}
                         {s.name}
-                        <small className={`bt-effectiveness ${matchup > 1 ? "strong" : matchup < 1 ? "resisted" : "neutral"}`} data-multiplier={matchup}>
+                        <small
+                          className={`bt-effectiveness ${matchup > 1 ? "strong" : matchup < 1 ? "resisted" : "neutral"}`}
+                          data-multiplier={matchup}
+                        >
                           {matchupLabel} · ×{Number(matchup.toFixed(4))}
                         </small>
                         <small>
@@ -1007,8 +1117,8 @@ export default function TowerApp({
             {activity.trialKind === "flash" && (
               <p>
                 {activity.flashStage === "reference"
-                  ? "Reference: three controlled full cycles at your natural pace."
-                  : "Challenge: six valid cycles within your controlled cadence."}{" "}
+                  ? "Reference: three comfortable down-and-return movements to measure your pace."
+                  : "Challenge: six repetitions in the generous pace window shown by the Flash timer."}{" "}
                 Rest freely. Manual confirmation does not create a speed bonus.
               </p>
             )}
@@ -1395,7 +1505,11 @@ export default function TowerApp({
         >
           <div
             className="bt-instructor"
-            style={{ width: "clamp(48px,7vw,96px)", aspectRatio: "1", flexShrink: 0 }}
+            style={{
+              width: "clamp(48px,7vw,96px)",
+              aspectRatio: "1",
+              flexShrink: 0,
+            }}
           >
             <PixelCharacter id="instructor-2" action="idle" />
           </div>
@@ -1930,9 +2044,7 @@ export default function TowerApp({
         </div>
         <Panel className="bt-device-panel">
           <h2>Connected devices</h2>
-          <button onClick={() => setShowPhone(true)}>
-            Pair a phone camera
-          </button>
+          <button onClick={() => void openPhone()}>Pair a phone camera</button>
           <CloudDevices
             saveId={
               tower.slots.find((s) => s.slot === tower.activeSlot)?.cloudId ??
@@ -2026,18 +2138,50 @@ export default function TowerApp({
             </div>
           )}
           <div
+            ref={phonePanel}
             className="bt-phone-host"
-            hidden={
-              !showPhone || route !== "settings" || activity?.kind !== "idle"
-            }
+            role="dialog"
+            aria-modal="true"
+            aria-label="Connect phone camera"
+            hidden={!showPhone}
+            onKeyDown={(event) => {
+              if (event.key !== "Tab") return;
+              const nodes = [
+                ...(phonePanel.current?.querySelectorAll<HTMLElement>(
+                  'button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), [tabindex="0"]',
+                ) ?? []),
+              ].filter((node) => node.getClientRects().length);
+              const first = nodes[0],
+                last = nodes.at(-1);
+              if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last?.focus();
+              } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first?.focus();
+              }
+            }}
           >
-            <button className="bt-close" onClick={() => setShowPhone(false)}>
-              Close
+            <button
+              ref={phoneCloseButton}
+              className="bt-close"
+              aria-label="Close phone pairing"
+              onClick={() => void closePhone()}
+            >
+              {activity?.kind === "idle" ? "Close" : "Return to session"}
             </button>
+            {activity?.kind !== "idle" && (
+              <p className="bt-pairing-pause" role="status">
+                Session paused. Your repetitions and damage are kept.
+              </p>
+            )}
             <CompanionControl
               onPreview={setPhonePreview}
               onFrame={setPhoneFrame}
-              onSourceChange={setSource}
+              onSourceChange={(next) => {
+                setSource(next);
+                if (next === "phone") setInputMode("camera");
+              }}
             />
           </div>
         </>

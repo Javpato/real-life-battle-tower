@@ -9,6 +9,7 @@ import {
 } from "../audio/exerciseFeedback";
 import { EXERCISE_GUIDES } from "./ExerciseDemo";
 import { STARTING_CUES, exerciseHeadline } from "./exercisePresentation";
+import FlashTimer from "./FlashTimer";
 export default function ExerciseHUD(props: ExerciseHudProps) {
   const {
     exerciseId,
@@ -100,6 +101,7 @@ export default function ExerciseHUD(props: ExerciseHudProps) {
           {quality === null ? "AT YOUR PACE" : `${quality}% QUALITY`}
         </small>
       </div>
+      {props.flash && <FlashTimer {...props.flash} />}
       <div
         className="exercise-counter"
         role="status"

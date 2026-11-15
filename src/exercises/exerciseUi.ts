@@ -1,4 +1,5 @@
 import type { ExerciseId } from "../core/contracts";
+import type { FlashTimerProps } from "./FlashTimer";
 export type ExerciseVisualState =
   | "no-body"
   | "partial"
@@ -16,6 +17,7 @@ export type ExerciseVisualState =
   | "countdown"
   | "recalibrating";
 export type ExerciseHudProps = {
+  flash?: FlashTimerProps;
   exerciseId: ExerciseId;
   guideSetup?: string;
   guideCamera?: string;

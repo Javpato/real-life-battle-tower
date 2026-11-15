@@ -2,6 +2,7 @@ import {useEffect,useRef,useState} from 'react';
 import {readSave,writeSave} from '../services/storage';
 import {gameSync,supabaseClient} from '../services/sync';
 import {initialSave,applyCommand,migrateSave} from './engine';
+import {acceptedExerciseUnit} from './unitReceipt';
 import type {PlayerSave,TowerCommand} from './model';
 export type TowerSlot={slot:1|2|3;save:PlayerSave|null;updatedAt:string|null;cloudId?:string;revision?:number};
 const KEY='battle-tower:slots:v1';
@@ -17,11 +18,12 @@ export function useTower(){
  function send(command:TowerCommand):Promise<boolean>{
   let resolve!:(ok:boolean)=>void;const result=new Promise<boolean>(r=>resolve=r);
   queue.current=queue.current.then(async()=>{if(!current.current){resolve(false);return;}setSaving(true);setError('');try{
+   const previous=current.current;
    let next:PlayerSave;
    const r=remote.current;
    if(r){if(!supabaseClient)throw Error('Cloud unavailable');const operationId=crypto.randomUUID();const pending={saveId:r.id,operationId,leaseEpoch:r.epoch,expectedRevision:r.revision,command};await writeSave(`battle-tower:pending:${r.id}`,pending);const response=await supabaseClient.functions.invoke('tower-command',{body:pending});if(response.error||response.data?.error)throw Error(response.data?.error??response.error?.message);next=response.data.snapshot;r.revision=response.data.revision;await writeSave(`battle-tower:pending:${r.id}`,null);setCloudStatus('Cloud saved');}
    else {if(slotRef.current!==null&&all.current.find(v=>v.slot===slotRef.current)?.cloudId)throw Error('Reconnect this cloud slot before changing it. Your cached progress is safe.');next=applyCommand(current.current,command);}
-   await saveActive(next);publish(next);resolve(true);
+   await saveActive(next);publish(next);resolve(command.kind!=='unit'||acceptedExerciseUnit(previous,next,command));
   }catch(e){if(remote.current){remote.current=null;setCloudStatus('Sync interrupted — reconnect to recover the pending action');}setError(e instanceof Error?e.message:String(e));resolve(false);}finally{setSaving(false);}});return result;
  }
  async function create(slot:1|2|3,name:string,avatar:'male'|'female'){if(!ready)throw Error('SAVES_NOT_READY');if(all.current[slot-1].save)throw Error('Slot already occupied');const s=initialSave(name,avatar);await persist(all.current.map(v=>v.slot===slot?{slot,save:s,updatedAt:new Date().toISOString()}:v));remote.current=null;slotRef.current=slot;setActiveSlot(slot);publish(s);}

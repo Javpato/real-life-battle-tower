@@ -981,3 +981,13 @@
 /* Model explanations open above the controls without shrinking the live HUD. */
 .exercise-model-options[open]{position:absolute;z-index:45;left:12px;right:12px;bottom:72px;max-height:calc(100% - 132px);overflow:auto;box-shadow:0 8px 30px #0008;font-size:14px}
 @media(max-height:550px){.exercise-model-options[open]{top:44px;bottom:56px;max-height:none;left:8px;right:8px;font-size:13px}}
+
+/* Flash uses observed movement time; this display never creates repetitions. */
+.exercise-flash-timer{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center;border:2px solid #9a6435;background:#f7dfaa;color:#192f49;padding:8px;margin:5px 0;font-variant-numeric:tabular-nums}
+.flash-timer-readout>span{display:block;font-size:9px;letter-spacing:.04em}
+.flash-timer-readout>strong{display:block;font-size:clamp(25px,4vw,38px);line-height:1.05;white-space:nowrap}
+.flash-timer-readout>strong>small{font-size:13px;margin-left:3px}
+.flash-timer-detail{min-width:0;line-height:1.2}
+.flash-timer-detail>b{display:block;font-size:12px}
+.flash-timer-detail>small{display:block;font-size:10px;margin-top:3px}
+@media(max-height:550px) and (orientation:landscape){.exercise-flash-timer{padding:4px 6px;gap:6px;margin:3px 0}.flash-timer-readout>strong{font-size:26px}.flash-timer-detail>b{font-size:10px}.flash-timer-detail>small{font-size:9px}.exercise-hud:has(.exercise-flash-timer) .exercise-counter strong{font-size:36px}.exercise-hud:has(.exercise-flash-timer) .exercise-big-feedback{padding:4px}}
