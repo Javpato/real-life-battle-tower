@@ -33,7 +33,13 @@ export type ExerciseProfile = {
   id: string;
   method: ExerciseCameraMethod;
   strategy: MotionStrategy;
-  view: "side" | "low-side" | "front" | "three-quarter" | "low-three-quarter";
+  view:
+    | "side"
+    | "front-or-side"
+    | "low-side"
+    | "front"
+    | "three-quarter"
+    | "low-three-quarter";
   joints: string;
   observable: string;
   limitation: string;
@@ -204,7 +210,7 @@ const rows: Row[] = [
     "mini-squat",
     "existing",
     "legacy",
-    "side",
+    "front-or-side",
     "mini-squat",
     0.12,
     "Hip, knee, ankle",
@@ -216,7 +222,7 @@ const rows: Row[] = [
     "squat",
     "existing",
     "legacy",
-    "side",
+    "front-or-side",
     "squat",
     0.2,
     "Hip, knee, ankle",
@@ -228,7 +234,7 @@ const rows: Row[] = [
     "pause-squat",
     "assisted",
     "knee-bend",
-    "side",
+    "front-or-side",
     "squat",
     0.14,
     "Shoulder, hip, knee, ankle",
@@ -302,7 +308,7 @@ const rows: Row[] = [
     "tempo-squat",
     "assisted",
     "knee-bend",
-    "side",
+    "front-or-side",
     "squat",
     0.14,
     "Shoulder, hip, knee, ankle",
@@ -319,7 +325,7 @@ const rows: Row[] = [
     "single-leg-squat",
     0.1,
     "Both hips, knees and ankles",
-    "Bend of the indicated support leg",
+    "Bend and straighten the indicated supporting leg; lift the opposite foot",
     "Balance assistance and actual weight-bearing remain unverified.",
     "nhsStrength balance",
   ],
@@ -571,7 +577,7 @@ const rows: Row[] = [
     "sitstand",
     "assisted",
     "knee-bend",
-    "side",
+    "front-or-side",
     "sitstand",
     0.18,
     "Shoulder, hip, knee, ankle",
@@ -1338,6 +1344,7 @@ export function exerciseProfile(id: string): ExerciseProfile | undefined {
 }
 export const CAMERA_VIEWS: Record<ExerciseProfile["view"], string> = {
   side: "Side view · camera near hip height",
+  "front-or-side": "Front or side view · hips, knees and feet visible",
   "low-side": "Side view · camera near floor height",
   front: "Front view · keep both sides in frame",
   "three-quarter": "Three-quarter view · both sides visible",

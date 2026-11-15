@@ -58,6 +58,12 @@ export function exerciseHeadline(
   }
   if (p.status === "recalibrating") return "PREPARE TO RECALIBRATE";
   if (p.status === "countdown") return "GET READY";
+  if (
+    p.skillId === "single-leg-squat" &&
+    p.nextSide &&
+    ["ready", "moving", "valid", "incomplete"].includes(p.status)
+  )
+    return `BEND YOUR ${p.nextSide.toUpperCase()} SUPPORTING LEG`;
   if (p.status === "ready")
     return p.skillId
       ? "READY · MOVE WHEN COMFORTABLE"
