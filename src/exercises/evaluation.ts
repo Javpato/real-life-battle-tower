@@ -1,9 +1,18 @@
-import { ExerciseDetector, type PoseFrame } from "./detectors";
+import type { PoseFrame } from "./detectors";
+import { createExerciseDetector } from "./assistedDetector";
+import { PoseFilter } from "./poseFilter";
 import type { ExerciseId, ExerciseUnit } from "../core/contracts";
 /** Local, labelled landmark replay. No benchmark is supplied or implied by this harness. */
 export interface LabelledPoseClip {
   id: string;
   exerciseId: ExerciseId;
+  /** Exact skill is required to evaluate assisted profiles rather than a legacy transport family. */
+  skillId?: string;
+  recognitionTolerance?: "standard" | "flash";
+  /** Match the live camera filter unless the supplied frames are already processed. */
+  filter?: boolean;
+  source?: "screen-recording-reinference" | "camera-landmarks" | "synthetic";
+  notes?: string;
   frames: PoseFrame[];
   expected: { timestamp: number; side?: "left" | "right" }[];
   toleranceMs?: number;
@@ -11,14 +20,19 @@ export interface LabelledPoseClip {
   calibration?: PoseFrame;
 }
 export function evaluatePoseClip(clip: LabelledPoseClip) {
-  const detector = new ExerciseDetector(clip.exerciseId, clip.id, undefined, {
+  const detector = createExerciseDetector(clip.exerciseId, clip.id, undefined, {
+    skillId: clip.skillId,
+    tolerance: clip.recognitionTolerance,
     allowPartialSquat: clip.allowPartialSquat,
   });
-  if (clip.calibration && !detector.recalibrate(clip.calibration))
+  const filter = new PoseFilter();
+  const process = (frame: PoseFrame) =>
+    clip.filter === false ? frame : filter.process(frame);
+  if (clip.calibration && !detector.recalibrate(process(clip.calibration)))
     throw new Error("Invalid labelled calibration");
   const detected: { timestamp: number; unit: ExerciseUnit }[] = [];
   for (const frame of clip.frames) {
-    const result = detector.update(frame);
+    const result = detector.update(process(frame));
     if (result.unit)
       detected.push({ timestamp: frame.timestamp, unit: result.unit });
   }
@@ -48,6 +62,9 @@ export function evaluatePoseClip(clip: LabelledPoseClip) {
   }
   return {
     id: clip.id,
+    skillId: clip.skillId,
+    source: clip.source ?? "unspecified",
+    notes: clip.notes,
     expected: clip.expected.length,
     detected: detected.length,
     matched,

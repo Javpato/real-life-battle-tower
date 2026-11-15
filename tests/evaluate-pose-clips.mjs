@@ -26,6 +26,8 @@ try {
     JSON.stringify(
       {
         kind: "local-landmark-replay",
+        limitation:
+          "Screen-recording re-inference includes compression and drawn pose overlays; results are regression diagnostics, not raw-camera accuracy validation.",
         clips: results,
         totalExpected: results.reduce((n, r) => n + r.expected, 0),
         totalMissed: results.reduce((n, r) => n + r.missed, 0),
