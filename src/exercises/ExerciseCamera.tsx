@@ -24,7 +24,7 @@ import { PoseFilter } from "./poseFilter";
 import { FeedbackDwell } from "./feedbackDwell";
 import { STARTING_CUES } from "./exercisePresentation";
 import type { FlashTiming } from "./FlashTimer";
-import { assessFlashCycle } from "../tower/flash";
+import { assessFlashCycle, flashCadenceWindow } from "../tower/flash";
 import {
   armExerciseAudio,
   speakExercise,
@@ -34,6 +34,7 @@ import {
 type Props = Omit<ExerciseCameraProps, "onUnit"> & {
   recognitionProfile?: "mini-squat" | "knee-pushup";
   flash?: FlashTiming;
+  suspended?: boolean;
   guideOverride?: (typeof EXERCISE_GUIDES)["squat"];
   hideIllustration?: boolean;
   onUnit: (unit: ExerciseUnit) => void | boolean | Promise<boolean>;
@@ -290,6 +291,7 @@ export default function ExerciseCamera(props: Props) {
       pausedRef.current ||
       p.paused ||
       !p.active ||
+      p.suspended ||
       p.mode === "manual" ||
       issued.current >= p.target ||
       p.sessionComplete
@@ -431,7 +433,8 @@ export default function ExerciseCamera(props: Props) {
             setStatus("valid");
             const flashNote = p.flash
               ? timing?.accepted
-                ? p.flash.stage === "battle" && p.flash.cadenceMs
+                ? p.flash.stage === "battle" &&
+                  flashCadenceWindow(p.flash.cadenceMs).referenceMs !== null
                   ? "FLASH ×1.25 · repetition saved."
                   : "Pace measured · repetition saved."
                 : "Repetition saved without a Flash pace bonus."
@@ -458,7 +461,9 @@ export default function ExerciseCamera(props: Props) {
             lifecycle.current.invalidateFrames();
             setNextSide(detector.current.expectedSide);
             setStatus("incomplete");
-            setFlashFeedback("Repetition not saved. Return to position and try again.");
+            setFlashFeedback(
+              "Repetition not saved. Return to position and try again.",
+            );
             setMessage(
               "That repetition was not accepted by the adventure. Your saved progress is kept; return to the starting position.",
             );
@@ -780,6 +785,13 @@ export default function ExerciseCamera(props: Props) {
       );
   }, [props.mode]);
   useEffect(() => {
+    if (!props.suspended) return;
+    detector.current.pause();
+    lifecycle.current?.stop(
+      "Exercise camera stopped while the journal is open. Enable it again when ready.",
+    );
+  }, [props.suspended]);
+  useEffect(() => {
     if (stage !== "recalibrating") return;
     let lastRemaining = 5;
     const tick = () => {
@@ -896,7 +908,12 @@ export default function ExerciseCamera(props: Props) {
     };
   }, [props.source, props.externalPreview]);
   const startCamera = async (next = selectionRef.current) => {
-    if (!video.current || latest.current.source === "phone") return;
+    if (
+      !video.current ||
+      latest.current.source === "phone" ||
+      latest.current.suspended
+    )
+      return;
     if (latest.current.mode === "manual")
       latest.current.onRequestCameraMode?.();
     try {
@@ -954,7 +971,8 @@ export default function ExerciseCamera(props: Props) {
     "recovering",
   ].includes(camera.status);
   useEffect(() => {
-    if (stage !== "running" || inactive || transportInactive) setFlashElapsed(0);
+    if (stage !== "running" || inactive || transportInactive)
+      setFlashElapsed(0);
   }, [stage, inactive, transportInactive]);
   const hudStatus: ExerciseVisualState = transportInactive
     ? camera.status === "off"

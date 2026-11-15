@@ -195,8 +195,10 @@ function WorkoutSummary({
 }
 export default function TowerApp({
   onJournal,
+  cameraSuspended = false,
 }: {
   onJournal: (saveId: string) => void;
+  cameraSuspended?: boolean;
 }) {
   const tower = useTower(),
     save = tower.active;
@@ -247,6 +249,7 @@ export default function TowerApp({
     !localPause &&
     confirm === null &&
     !showPhone &&
+    !cameraSuspended &&
     (activity?.kind === "trial" ||
       (activity?.kind === "workout" && activity.status === "active") ||
       run?.battle?.turn === "exercise");
@@ -644,6 +647,7 @@ export default function TowerApp({
           </Panel>
         )}
         <ExerciseCamera
+          suspended={cameraSuspended}
           flash={flash}
           guideOverride={skillGuide(currentSkill.id)}
           hideIllustration={manualOnly}
