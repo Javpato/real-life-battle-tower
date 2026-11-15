@@ -48,7 +48,14 @@ function run(id: string, start: PoseFrame, end: PoseFrame, dwell = 100) {
     }
   };
   feed(start, 6);
-  feed(lower(start, (end.landmarks[23].y - start.landmarks[23].y) * 0.5), 2);
+  let prepared = start;
+  if (id === "single-leg-squat") {
+    prepared = structuredClone(start);
+    prepared.landmarks[28] = end.landmarks[28];
+    prepared.landmarks[26] = end.landmarks[26];
+    feed(prepared, 6);
+  }
+  feed(lower(prepared, (end.landmarks[23].y - start.landmarks[23].y) * 0.5), 2);
   feed(end, dwell / 50);
   feed(start, 5);
   return { units, feed };
@@ -78,6 +85,7 @@ describe("front camera leg movement regressions", () => {
     lift.landmarks[26].y -= 0.06;
     expect(run("single-leg-squat", a, lift, 500).units).toHaveLength(0);
     const b = lower(lift, 0.065);
+    b.landmarks[25].x += 0.08;
     const r = run("single-leg-squat", a, b, 500);
     expect(r.units).toHaveLength(1);
     expect(r.units[0].side).toBe("left");
@@ -175,4 +183,40 @@ it("keeps counting frontal squats after a natural change in foot placement", () 
       if (u) units.push(u);
     }
   expect(units).toHaveLength(2);
+});
+
+it("keeps the established support side when crossed leg labels briefly swap", () => {
+  const a = standing(),
+    lift = structuredClone(a);
+  lift.landmarks[28].y -= 0.1;
+  lift.landmarks[26].y -= 0.07;
+  const bend = lower(lift, 0.075);
+  bend.landmarks[25].x += 0.08;
+  const swapped = structuredClone(bend);
+  for (const j of [23, 25, 27, 29, 31]) {
+    swapped.landmarks[j] = bend.landmarks[j + 1];
+    swapped.landmarks[j + 1] = bend.landmarks[j];
+  }
+  const d = new AssistedExerciseDetector(
+    "single-leg-squat",
+    "squat",
+    "support",
+  );
+  d.recalibrate(a);
+  let time = 0;
+  const units: ExerciseUnit[] = [];
+  for (const [pose, n] of [
+    [a, 6],
+    [lift, 6],
+    [lower(lift, 0.04), 3],
+    [swapped, 6],
+    [bend, 3],
+    [lift, 6],
+  ] as const)
+    for (let i = 0; i < n; i++) {
+      const u = d.update({ ...pose, timestamp: (time += 50) }).unit;
+      if (u) units.push(u);
+    }
+  expect(units).toHaveLength(1);
+  expect(units[0].side).toBe("left");
 });

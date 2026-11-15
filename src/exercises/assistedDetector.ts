@@ -436,6 +436,10 @@ export class AssistedExerciseDetector {
   private wasHolding = false;
   private sequence = 0;
   private activeIndex?: 0 | 1;
+  private supportReadyAt?: number;
+  private supportPeakAt?: number;
+  private standingFloorY?: number;
+  private supportAnchor?: { x: number; y: number };
   private lastSide?: Side;
   private prefix: string;
   private profile: ExerciseProfile;
@@ -485,6 +489,7 @@ export class AssistedExerciseDetector {
     this.heldMs = 0;
     this.wasHolding = false;
     this.activeIndex = undefined;
+    this.supportAnchor = this.supportReadyAt = this.supportPeakAt = undefined;
     this.pauseQualified = this.descentQualified = false;
     this.previousRange = 0;
     this.outwardMs = 0;
@@ -498,10 +503,54 @@ export class AssistedExerciseDetector {
     if (!m.visible || !m.posture) return false;
     this.pause();
     this.reference = m;
+    if (this.profile.id === "single-leg-squat" && m.legGeometry)
+      this.standingFloorY = Math.max(...m.legGeometry.map((p) => p.ankleY));
     this.readyAt = frame.timestamp;
     return true;
   }
   private measure(frame: PoseFrame) {
+    if (
+      this.profile.id === "single-leg-squat" &&
+      frame.landmarks.length === 33 &&
+      this.supportAnchor &&
+      this.phase !== "start" &&
+      this.reference
+    ) {
+      const i = this.expectedSide === "right" ? 1 : 0;
+      const distance = (j: number) =>
+        Math.hypot(
+          ((frame.landmarks[27 + j].x - this.supportAnchor!.x) * frame.width) /
+            frame.height,
+          frame.landmarks[27 + j].y - this.supportAnchor!.y,
+        );
+      const near = distance(i),
+        other = distance(1 - i),
+        scale = this.reference.scale;
+      // MediaPipe can exchange the crossing leg chains. Keep the support
+      // identity established at rest, only when the other ankle is still near
+      // that planted anchor. No missing joint is filled or invented.
+      if (
+        near > scale * 0.15 &&
+        other < scale * 0.3 &&
+        other + scale * 0.08 < near
+      ) {
+        const swap = (points: PoseFrame["landmarks"]) => {
+          const result = [...points];
+          for (const j of [23, 25, 27, 29, 31]) {
+            result[j] = points[j + 1];
+            result[j + 1] = points[j];
+          }
+          return result;
+        };
+        frame = {
+          ...frame,
+          landmarks: swap(frame.landmarks),
+          rawLandmarks: frame.rawLandmarks
+            ? swap(frame.rawLandmarks)
+            : undefined,
+        };
+      }
+    }
     return measureAssistedPose(this.profile, frame, this.alternating);
   }
   private calibrationReady(m: AssistedMeasurement, timestamp: number) {
@@ -539,7 +588,11 @@ export class AssistedExerciseDetector {
       b = m.legGeometry[i];
     // A planted ankle anchors image travel: camera movement or raising a foot
     // cannot substitute for moving the torso over the supporting leg.
-    if (Math.abs(b.ankleY - a.ankleY) > ref.scale * 0.12) return 0;
+    if (
+      Math.abs(b.ankleY - a.ankleY) >
+      ref.scale * (this.profile.id === "single-leg-squat" ? 0.35 : 0.12)
+    )
+      return 0;
     const sign = this.profile.direction === "decrease" ? -1 : 1;
     const hip = (sign * (b.hipY - a.hipY)) / ref.scale;
     const shoulder = (sign * (b.shoulderY - a.shoulderY)) / ref.scale;
@@ -565,6 +618,19 @@ export class AssistedExerciseDetector {
     ) as [number, number];
   }
   private returnRange(m: AssistedMeasurement, index: number) {
+    if (
+      this.profile.id === "single-leg-squat" &&
+      this.supportAnchor &&
+      m.legGeometry &&
+      this.reference?.legGeometry
+    )
+      return (
+        (Math.abs(
+          m.legGeometry[index].hipY - this.reference.legGeometry[index].hipY,
+        ) /
+          this.reference.scale) *
+        0.65
+      );
     return Math.max(
       this.hipRange(m, index),
       ...m.features[index].map((v, j) =>
@@ -710,10 +776,56 @@ export class AssistedExerciseDetector {
       const support = m.legGeometry[index],
         lifted = m.legGeometry[1 - index];
       const footRaised =
-        support.ankleY - lifted.ankleY > this.reference.scale * 0.08;
-      // The announced side is the supporting leg, not the lifted leg. Once
-      // returning, placing the other foot down does not erase the completed bend.
-      if (!footRaised && this.phase !== "away") value = 0;
+        support.ankleY - lifted.ankleY > this.reference.scale * 0.15;
+      if (
+        this.supportAnchor &&
+        this.phase === "start" &&
+        !footRaised &&
+        this.hipRange(m, index) < minimum * 0.12
+      ) {
+        this.supportAnchor = undefined;
+        this.supportReadyAt = undefined;
+      }
+      if (!this.supportAnchor) {
+        const grounded =
+          Math.abs(
+            support.ankleY -
+              (this.standingFloorY ??
+                Math.max(...this.reference.legGeometry!.map((p) => p.ankleY))),
+          ) <
+          this.reference.scale * 0.25;
+        if (
+          footRaised &&
+          grounded &&
+          m.features[index][0] < 0.22 &&
+          support.hipY <=
+            this.reference.legGeometry![index].hipY +
+              this.reference.scale * 0.3 &&
+          m.scale >= this.reference.scale * 0.85
+        ) {
+          this.supportReadyAt ??= frame.timestamp;
+          if (frame.timestamp - this.supportReadyAt >= 90) {
+            this.supportAnchor = {
+              x: frame.landmarks[27 + index].x,
+              y: frame.landmarks[27 + index].y,
+            };
+            // Start from this stable support stance, not a two-foot pose from
+            // before changing legs. Lifting the other foot does not count.
+            this.reference = m;
+            this.readyAt = frame.timestamp;
+            return feedback(
+              "ready",
+              `Bend your ${this.expectedSide} supporting leg, then straighten.`,
+            );
+          }
+        } else this.supportReadyAt = undefined;
+        if (!this.supportAnchor)
+          return feedback(
+            "ready",
+            `Stand on your ${this.expectedSide} leg and lift the opposite foot before bending.`,
+          );
+      }
+      value = this.hipRange(m, index);
     }
     const returned = m.bilateral
       ? BOTH.every((i) => this.returnRange(m, i) < minimum * 0.4)
@@ -750,6 +862,17 @@ export class AssistedExerciseDetector {
       else if (change < -minimum * 0.1) this.outwardMs = 0;
       this.previousRange = value;
     }
+    if (this.profile.id === "single-leg-squat" && this.phase === "out") {
+      if (value < minimum) this.supportPeakAt = undefined;
+      else {
+        this.supportPeakAt ??= frame.timestamp;
+        if (frame.timestamp - this.supportPeakAt < 60)
+          return feedback(
+            "moving",
+            "Bend the supporting knee and lower your hips, then return.",
+          );
+      }
+    }
     if (this.phase === "out" && value >= minimum) {
       this.phase = "away";
       this.awayAt = frame.timestamp;
@@ -777,7 +900,12 @@ export class AssistedExerciseDetector {
     if (value < minimum && !this.pauseQualified) this.pauseAt = undefined;
     if (returned && (this.phase === "away" || value < minimum * 0.12)) {
       if (this.phase !== "away") {
+        const support = this.supportAnchor;
         this.pause();
+        if (support) {
+          this.supportAnchor = support;
+          this.readyAt = frame.timestamp;
+        }
         return {
           ...feedback(
             "ready",
@@ -811,6 +939,7 @@ export class AssistedExerciseDetector {
           ),
           rejected: true,
         };
+      if (this.profile.id === "single-leg-squat") this.reference = m;
       if (this.alternating) this.lastSide = side;
       return {
         ...feedback(
@@ -821,7 +950,9 @@ export class AssistedExerciseDetector {
       };
     }
     this.returnAt = undefined;
-    return feedback("return", "Finish the return before the next repetition.");
+    return this.phase === "out"
+      ? feedback("moving", "Move through a comfortable range, then return.")
+      : feedback("return", "Finish the return before the next repetition.");
   }
   private unit(
     timestamp: number,
