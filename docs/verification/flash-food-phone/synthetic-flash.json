@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "syntheticPhoneGeometry": true,
+  "physicalCameraTested": false,
+  "checks": [
+    "observed moving timer",
+    "rest resets and freezes",
+    "canonical stale receipt rejection",
+    "three reference and six test cycles",
+    "verified cadence persisted",
+    "manual unverified stopwatch",
+    "manual pause and reset",
+    "manual completion stores no cadence",
+    "no local camera acquisition"
+  ],
+  "cameraCadenceMs": 1139.8999999985099,
+  "errors": []
+}

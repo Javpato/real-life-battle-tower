@@ -4,7 +4,7 @@ Cozylight's physical RPG: **YOUR BODY IS YOUR WEAPON. HOW HIGH CAN YOU CLIMB?**
 
 **[Play in your browser](https://javpato.github.io/real-life-battle-tower/)** · [Source code](https://github.com/Javpato/real-life-battle-tower)
 
-[Download the Android demo APK](https://github.com/Javpato/real-life-battle-tower/releases/tag/demo-2026-11-15) (signed debug build).
+[Download the Android demo APK](https://github.com/Javpato/real-life-battle-tower/releases/tag/demo-2026-11-15-flash-camera) (signed debug build).
 
 Run `npm install`, then `npm run dev`. The game starts with title, three independent saves and the tower menu. On the save screen, **Explore a local preview** opens the isolated developer profile with every skill and specialization available. Infinite Tower preparation exposes a preview starting floor. Preview never writes a normal slot or synchronizes.
 
@@ -20,6 +20,8 @@ Run `npm install`, then `npm run dev`. The game starts with title, three indepen
 - **Settings:** fullscreen, reduced motion, voice feedback, camera source/phone pairing, cloud devices, Android steps and cosmetic banners. Nutrition remains a separate local/shared diary.
 
 The primary camera runs MediaPipe locally. The phone companion transmits joint positions directly; video preview remains optional. A supported detector is not a medical technique assessment. Mini squat and knee push-up are experimental profiles; unsupported variants remain manual-only. See QA.md for what was actually tested.
+
+**Phone camera** in the game header opens pairing during a battle, trial or workout, pauses the session and preserves its progress. Flash shows a repetition timer and a generous personal pace window; manual timing remains unverified. Use **Recalibrate Flash pace** to repeat the camera trial. The journal accepts food names, brands and barcodes in one field, with rear-camera and local-photo scanning; see [food search setup](docs/FOOD_SEARCH.md).
 
 ## Architecture
 

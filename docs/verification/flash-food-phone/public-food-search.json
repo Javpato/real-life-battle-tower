@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "checks": [
+    "actual hosted name-search proxy",
+    "real official Open Food Facts results",
+    "result opens portion form",
+    "actual barcode product endpoint"
+  ],
+  "resultCount": 12,
+  "errors": [],
+  "noFoodLogged": true,
+  "physicalCameraTested": false
+}

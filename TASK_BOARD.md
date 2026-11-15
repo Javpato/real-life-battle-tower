@@ -1,5 +1,12 @@
 # Battle Tower v2 delivery
 
+## Flash, food and in-battle phone update — 2026-11-15
+
+- Completed: visible Flash timer and wider cadence/geometry, meaningful accepted-unit receipts, manual timing labels and repeat pace trials; unified online food search, rear-camera barcode/photo decoding and camera release when entering the journal; phone pairing from active battle with pause/progress preservation.
+- Verified: 381 unit tests, build/parity, local SQL suites, five-viewport tower/Flash/pairing flows, synthetic pose/cadence integration, Chromium/WebKit barcode decoding, real provider name/barcode results and real hosted camera signaling/WebRTC with synthetic video.
+- Published: updated GitHub Pages runtime; `food-search` and `tower-command` functions; verified Android APK in release `demo-2026-11-15-flash-camera`.
+- Remaining validation: physical iPhone autofocus/lighting and real human exercise recognition. Synthetic/WebKit tests do not establish those.
+
 ## Public hosting — 2026-11-15
 
 - Published source/assets/tests on https://github.com/Javpato/real-life-battle-tower and the live HTTPS game on https://javpato.github.io/real-life-battle-tower/ . Main pushes build, validate and deploy through GitHub Actions.
