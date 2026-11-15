@@ -4,7 +4,7 @@ Cozylight's physical RPG: **YOUR BODY IS YOUR WEAPON. HOW HIGH CAN YOU CLIMB?**
 
 **[Play in your browser](https://javpato.github.io/real-life-battle-tower/)** · [Source code](https://github.com/Javpato/real-life-battle-tower)
 
-[Download the Android demo APK](https://github.com/Javpato/real-life-battle-tower/releases/tag/demo-2026-11-15-flash-camera) (signed debug build).
+[Download the Android demo APK](https://github.com/Javpato/real-life-battle-tower/releases/tag/demo-2026-11-15-exercise-camera) (signed debug build).
 
 Run `npm install`, then `npm run dev`. The game starts with title, three independent saves and the tower menu. On the save screen, **Explore a local preview** opens the isolated developer profile with every skill and specialization available. Infinite Tower preparation exposes a preview starting floor. Preview never writes a normal slot or synchronizes.
 
@@ -15,17 +15,17 @@ Run `npm install`, then `npm run dev`. The game starts with title, three indepen
 - **Boss rewards:** choose a temporary +10% attack improvement (cap+50% per run) or a Flash trial opportunity. Flash requires a learned base skill and controlled, observed full cycles; manual unlocks never invent speed evidence.
 - **Types:** six distinct balanced matchup profiles. Hybrid attacks average both types against the defender; STAB×1.25 applies once. The in-game codex explains the full matrix and calculates dual-type matchups.
 - **Challenges:**10 finite towers with assigned four-skill loadouts, visible prerequisites and specialization rewards. Personal Flash variants do not replace assigned challenge skills.
-- **Custom Workout / Training Grounds:**all90 exercises available regardless of combat unlocks, filtered by discipline/support/impact/detection. Save ordered routines, split long goals into short series, rest freely and resume. Guided/manual exercises have exact written instructions; unsupported motion is never falsely verified by a reused camera detector. Training uses exercise-driven minigames, not enemy-HP encounters.
-- **Records:** completed-floor records and workout results; manual/mixed evidence is never promoted to camera verification.
+- **Custom Workout / Training Grounds:**all90 exercises available regardless of combat unlocks, filtered by discipline/support/impact/detection. Save ordered routines, split long goals into short series, rest freely and resume. Every exercise has an exact visual learning sequence, camera setup and source-backed limitations. Ten existing camera profiles and sixty assisted counters cover visible movement; twenty exercises use camera preview plus manual confirmation. Training uses exercise-driven minigames, not enemy-HP encounters.
+- **Records:** completed-floor records and workout results; assisted/manual/mixed evidence is never promoted to camera verification.
 - **Settings:** fullscreen, reduced motion, voice feedback, camera source/phone pairing, cloud devices, Android steps and cosmetic banners. Nutrition remains a separate local/shared diary.
 
-The primary camera runs MediaPipe locally. The phone companion transmits joint positions directly; video preview remains optional. A supported detector is not a medical technique assessment. Mini squat and knee push-up are experimental profiles; unsupported variants remain manual-only. See QA.md for what was actually tested.
+The primary camera runs MediaPipe locally. The phone companion transmits joint positions directly; video preview remains optional. A supported detector is not a medical technique assessment. New assisted profiles are explicitly unverified and cannot establish Flash pace or technique stars. Invisible or ambiguous movements retain a camera preview and manual confirmation. None of the new profiles has real-human validation. See [the per-exercise research register](docs/EXERCISE_CAMERA_RESEARCH.md) and QA.md for actual scope and tests.
 
 **Phone camera** in the game header opens pairing during a battle, trial or workout, pauses the session and preserves its progress. Flash shows a repetition timer and a generous personal pace window; manual timing remains unverified. Use **Recalibrate Flash pace** to repeat the camera trial. The journal accepts food names, brands and barcodes in one field, with rear-camera and local-photo scanning; see [food search setup](docs/FOOD_SEARCH.md).
 
 ## Architecture
 
-`src/tower/model.ts`, `catalog.ts`, `generation.ts` and `engine.ts` are the canonical contracts/content/reducer. `useTower.ts` owns atomic local slots and cloud acknowledgements. Camera events cannot directly update rewards. The renderer animates accepted progress only. `skillGuides.ts` contains physical instructions for every variant.
+`src/tower/model.ts`, `catalog.ts`, `generation.ts` and `engine.ts` are the canonical contracts/content/reducer. `useTower.ts` owns atomic local slots and cloud acknowledgements. Camera events cannot directly update rewards. The renderer animates accepted progress only. `skillGuides.ts` contains physical instructions for every variant. `exerciseProfiles.ts` selects recognition by exact skill ID; `assistedDetector.ts` emits conservative, unverified observations; `exerciseMotionMaps.ts` supplies teaching schematics independently of detector thresholds.
 
 Version2 saves retain the `battle-tower:slots:v1` storage key to preserve the three existing slots. Version1 Tower saves receive a backup and deterministic migration; active old expeditions retain version1 rules. Unreadable slots fail closed instead of overwriting progress. The old exploration state is not imported or interpreted. There is no legacy journey/XP compatibility layer. Explicit import of a NEW local tower profile to an empty cloud save validates content and labels imported evidence unverified.
 

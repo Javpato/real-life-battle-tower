@@ -1,0 +1,116 @@
+.bt-training-learn {
+  margin: 10px 0;
+  min-width: 0;
+}
+.bt .bt-training-learn > button {
+  width: 100%;
+  text-align: left;
+  font-size: 12px;
+  background: #263951;
+  color: #fff1d5;
+  border-color: #b99f70;
+}
+.bt-learning-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(920px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 24px);
+  height: min(780px, calc(100dvh - 24px));
+  padding: 0;
+  border: 3px solid #c4a774;
+  background: #f7edcf;
+  color: #203850;
+  box-shadow: 6px 6px 0 #0f1d32;
+  font: inherit;
+  overflow: hidden;
+}
+.bt-learning-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.bt-learning-dialog::backdrop {
+  background: #071528d9;
+}
+.bt-learning-dialog > header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #23344e;
+  color: #fff0cd;
+  border-bottom: 2px solid #b99f70;
+}
+.bt .bt-learning-dialog > header button {
+  flex: none;
+  min-height: 40px;
+  padding: 6px 12px;
+}
+.bt-learning-content {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 12px;
+}
+@media (max-height: 500px) {
+  .bt-learning-dialog {
+    height: calc(100dvh - 12px);
+    max-height: calc(100dvh - 12px);
+  }
+  .bt-learning-dialog > header {
+    padding: 3px 8px;
+  }
+  .bt-learning-content {
+    padding: 6px;
+  }
+  .bt-learning-dialog .tower-exercise-pose {
+    margin: 0 0 8px;
+  }
+  .bt-learning-dialog .motion-stage svg {
+    max-height: 150px;
+  }
+  .bt-learning-dialog .motion-layout {
+    grid-template-columns: minmax(190px, 0.9fr) minmax(210px, 1.1fr);
+  }
+  .bt-learning-dialog .tower-exercise-pose > figcaption {
+    padding: 5px 8px;
+  }
+}
+@media (max-width: 520px) {
+  .bt-learning-dialog .motion-layout {
+    grid-template-columns: 1fr;
+  }
+  .bt-learning-dialog {
+    width: calc(100vw - 12px);
+    max-width: calc(100vw - 12px);
+  }
+}
+/* The lesson uses paper colours, independent of dark arena/card caption styles. */
+.bt .bt-learning-dialog .exercise-demo {
+  color: #203850;
+}
+.bt .bt-learning-dialog .exercise-demo > strong {
+  color: #864331;
+}
+.bt .bt-learning-dialog .exercise-demo > small,
+.bt .bt-learning-dialog .exercise-note,
+.bt .bt-learning-dialog .motion-explanation > small {
+  color: #4b5b63;
+}
+@media (max-height: 500px) {
+  .bt .bt-learning-dialog .motion-stage svg {
+    height: 120px;
+    max-height: 120px;
+  }
+  .bt .bt-learning-dialog .motion-layout {
+    padding: 6px;
+    gap: 8px;
+  }
+  .bt .bt-learning-dialog .motion-view {
+    padding: 3px 6px;
+  }
+}

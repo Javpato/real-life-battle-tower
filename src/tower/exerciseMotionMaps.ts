@@ -1237,9 +1237,9 @@ for (const [id, base, joints, radius] of [
 /** Exact skill ID wins over shared transport aliases. Variants add their own sequence. */
 export function exerciseMotionMap(id: string): MotionMap {
   const profile = exerciseProfile(id);
-  if (!profile || !maps[profile.art])
-    throw Error("UNKNOWN_EXERCISE_MOTION_MAP");
-  const source = maps[profile.art];
+  // Advanced Bird Dog builds its own five-stage sequence below from the all-fours setup.
+  const source = profile && maps[id === "advanced-birddog" ? "birddog" : profile.art];
+  if (!profile || !source) throw Error("UNKNOWN_EXERCISE_MOTION_MAP");
   let result: MotionMap = {
     ...source,
     frames: source.frames.map((f) => ({ ...f })),

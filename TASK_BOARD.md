@@ -1,5 +1,11 @@
 # Battle Tower v2 delivery
 
+## All-exercise camera and learning — 2026-11-15
+
+- Completed: 90 exact skill profiles; 10 existing detectors, 60 assisted counters and 20 camera-preview/manual-confirmation options. Stable personal calibration, conservative interval/side/occlusion checks and exact unverified evidence binding.
+- Completed: 90 motion teaching sequences, source/limitation register, library/academy/active-exercise learning, responsive lesson dialog, exact per-skill HUD and English voice guidance, phone-frame integration.
+- Verified: 639 tests, production build/shared parity, local SQL, complete tower UI regression, 450 guide renders and synthetic camera/phone integration. Physical human accuracy remains unvalidated; assistance and confirmation cannot create camera verification or Flash cadence.
+
 ## Flash, food and in-battle phone update — 2026-11-15
 
 - Completed: visible Flash timer and wider cadence/geometry, meaningful accepted-unit receipts, manual timing labels and repeat pace trials; unified online food search, rear-camera barcode/photo decoding and camera release when entering the journal; phone pairing from active battle with pause/progress preservation.
@@ -20,7 +26,7 @@
 - Integrated:60 illustrated characters,16poses each,32additional hero back poses;128px native exports, portraits,6arenas,title/hub,24icons, revised minigame renderer and unified support screens. All60current sources reviewed; zero unresolved art validation issues. See art-production/v2/validation.json.
 - Preserved:camera/phone transport,MediaPipe,coach/calibration,manual input,3slots,cloud command architecture,Android steps and journal. Version1Tower saves backed up/migrated; old active runs retain old rules.
 - Tests and evidence:QA.md and art-production/v2/game-captures. Hosted Supabase deployment and physical exercise/device validation are external follow-ups, not claimed as completed.
-- Deliberate coverage limits:60new exercises guided/manual until validated; no per-exercise reviewed pose illustrations yet. Workout mode remains exercise-driven minigames; the older optional workout-final-boss concept is not implemented.
+- Superseded by the camera/learning update above: the former 60-new-exercise manual-only restriction and text-only guides. New visual lessons are teaching schematics; physical detector validation remains pending. Workout mode remains exercise-driven minigames; the older optional workout-final-boss concept is not implemented.
 
 ## Presentation fixes — 2026-11-15
 

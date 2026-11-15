@@ -19,6 +19,10 @@ export type ExerciseVisualState =
 export type ExerciseHudProps = {
   flash?: FlashTimerProps;
   exerciseId: ExerciseId;
+  skillId?: string;
+  unit?: "reps" | "seconds";
+  alternating?: boolean;
+  assisted?: boolean;
   guideSetup?: string;
   guideCamera?: string;
   startingPosition?: string;

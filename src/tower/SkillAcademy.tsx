@@ -6,6 +6,7 @@ import { skillTypes } from "./typeChart";
 import { PixelIcon, PixelCharacter } from "./PixelScene";
 import ExerciseDemo from "../exercises/ExerciseDemo";
 import { skillGuide } from "./skillGuides";
+import { exerciseProfile, recognitionLabel } from "./exerciseProfiles";
 import { DISCIPLINES, SkillTypes, TypeCodex } from "./TypeCodex";
 import "./skill-academy.css";
 const disciplines: Record<Element, { name: string; description: string }> = {
@@ -45,11 +46,7 @@ function arrange(skills: Skill[]) {
   };
 }
 function detectorLabel(s: Skill) {
-  return s.detector === "manual"
-    ? "Guided / manual"
-    : s.detectorStatus === "experimental"
-      ? "Experimental camera"
-      : "Configured camera";
+  return recognitionLabel(s.id);
 }
 type Props = {
   save: PlayerSave;
@@ -297,8 +294,8 @@ export default function SkillAcademy({
               <div className={`academy-detection ${skill.detectorStatus}`}>
                 <strong>{detectorLabel(skill)}</strong>
                 <small>
-                  {skill.detector === "manual"
-                    ? "This exact variation is not camera-verified. Manual effort is recorded separately."
+                  {exerciseProfile(skill.id)?.method !== "existing"
+                    ? `${exerciseProfile(skill.id)?.limitation} Assisted estimates and manual confirmations are recorded as unverified.`
                     : skill.detectorStatus === "experimental"
                       ? "Experimental movement profile; physical accuracy has not been validated."
                       : "Recognition is configured for this movement. A counted repetition is not a technique assessment."}
@@ -345,8 +342,8 @@ export default function SkillAcademy({
               {progress?.unlocked && (
                 <p className="academy-mastery">
                   {progress.mastery} practice units · {progress.verifiedUnits}{" "}
-                  camera / {progress.manualUnits} manual. Practice does not
-                  increase battle stats.
+                  camera / {progress.manualUnits} assisted or manual. Practice
+                  does not increase battle stats.
                 </p>
               )}
               {progress?.unlocked && (
@@ -444,7 +441,7 @@ export default function SkillAcademy({
                       : undefined
                   }
                   guideOverride={skillGuide(skill.id)}
-                  hideIllustration={skill.detector === "manual"}
+                  skillId={skill.id}
                 />
               </details>
             </aside>

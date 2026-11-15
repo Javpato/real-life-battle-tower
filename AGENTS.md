@@ -5,6 +5,7 @@ React/Vite/TypeScript, native pixel canvas presentation, Capacitor Android and S
 ## Shared authority
 - src/tower/model.ts defines PlayerSave, Skill, Series, TowerRun, WorkoutActivity and TowerCommand. src/tower/engine.ts is the single canonical progression/combat/workout reducer. Presentation must not calculate rewards, damage or accepted progress.
 - src/tower/catalog.ts owns the90 physical skills and challenges; generation.ts owns deterministic floors. No XP, levels, old journey compatibility or geographical progression.
+- src/tower/exerciseProfiles.ts owns exact camera eligibility: existing, assisted or preview+confirmation. Never infer a skill from its transport family. New assisted units require skillId/profileId/evidence, remain unverified, and cannot create technique stars or Flash pace. Teaching motion maps are not measured anatomy or game-character sprites.
 - ExerciseCamera/MediaPipe and phone transport emit exercise evidence; never upload camera frames. Only accepted unique events advance. Pausing, stale frames and tracking loss never credit units.
 - Camera/manual/mixed provenance is explicit. Experimental detector profiles are not physical validation. Technique stars require evidence; rests never reduce score.
 - src/tower/useTower.ts persists atomic local slots and canonical cloud acknowledgements. Three normal slots; developer preview is separate and cannot sync. Nutrition keeps its independent journal and consent boundary.

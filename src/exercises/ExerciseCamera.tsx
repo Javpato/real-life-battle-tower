@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { ExerciseCameraProps, ExerciseUnit } from "../core/contracts";
 import {
-  ExerciseDetector,
   type PoseFrame,
   type Observation,
   type DetectorFeedback,
@@ -17,6 +16,9 @@ import ExerciseDemo, {
   getExerciseGuide,
 } from "./ExerciseDemo";
 import ExerciseHUD from "./ExerciseHUD";
+import { createExerciseDetector } from "./assistedDetector";
+import { exerciseProfile, recognitionLabel } from "../tower/exerciseProfiles";
+import { SKILL_BY_ID } from "../tower/catalog";
 import type { ExerciseVisualState } from "./exerciseUi";
 import "./exercises.css";
 import { RecalibrationGate } from "./preparation";
@@ -32,6 +34,7 @@ import {
 } from "../audio/exerciseFeedback";
 
 type Props = Omit<ExerciseCameraProps, "onUnit"> & {
+  skillId?: string;
   recognitionProfile?: "mini-squat" | "knee-pushup";
   flash?: FlashTiming;
   suspended?: boolean;
@@ -87,8 +90,7 @@ const initialCamera: CameraSnapshot = {
   message: "Your camera stays on this device.",
   stream: null,
 };
-const calibrationGroup = (id: Props["exerciseId"]) =>
-  id === "diamond" ? "pushup" : id;
+const calibrationGroup = (id: string) => id;
 function needsGuide(id: string) {
   try {
     return localStorage.getItem("everstride-guide-" + id) !== "seen";
@@ -97,7 +99,7 @@ function needsGuide(id: string) {
   }
 }
 function sessionKey(props: Props) {
-  return `${props.exerciseId}:${props.sessionId ?? "default-session"}`;
+  return `${props.skillId ?? props.exerciseId}:${props.sessionId ?? "default-session"}`;
 }
 
 export default function ExerciseCamera(props: Props) {
@@ -174,9 +176,10 @@ export default function ExerciseCamera(props: Props) {
     phoneArrival = useRef(-Infinity);
   const [partialSquat, setPartialSquat] = useState(false);
   const detector = useRef(
-    new ExerciseDetector(props.exerciseId, props.sessionId, props.lastSide, {
+    createExerciseDetector(props.exerciseId, props.sessionId, props.lastSide, {
       allowPartialSquat: partialSquat,
       profile: props.recognitionProfile,
+      skillId: props.skillId,
       tolerance: props.flash ? "flash" : "standard",
     }),
   );
@@ -211,7 +214,9 @@ export default function ExerciseCamera(props: Props) {
     [stage, setStage] = useState<Stage>("off");
   const [status, setStatus] = useState<ExerciseVisualState>("off"),
     [message, setMessage] = useState(initialCamera.message);
-  const [demo, setDemo] = useState(() => needsGuide(props.exerciseId)),
+  const [demo, setDemo] = useState(() =>
+      needsGuide(props.skillId ?? props.exerciseId),
+    ),
     [paused, setPaused] = useState(false);
   const [countdown, setCountdown] = useState(3),
     [quality, setQuality] = useState<number | null>(null),
@@ -319,7 +324,7 @@ export default function ExerciseCamera(props: Props) {
         ) &&
         detector.current.recalibrate(frame)
       ) {
-        calibrated.current.add(calibrationGroup(p.exerciseId));
+        calibrated.current.add(calibrationGroup(p.skillId ?? p.exerciseId));
         beginCountdown();
         setMessage(
           "Calibration complete. Get ready to continue; your progress is kept.",
@@ -374,7 +379,10 @@ export default function ExerciseCamera(props: Props) {
         detectorSession.current === sessionKey(latest.current) &&
         issued.current < latest.current.target
       ) {
-        const unit = result.unit;
+        const unit: ExerciseUnit = {
+          ...result.unit,
+          ...(p.skillId ? { skillId: p.skillId } : {}),
+        };
         const timing = p.flash
           ? assessFlashCycle(
               unit,
@@ -429,7 +437,7 @@ export default function ExerciseCamera(props: Props) {
             return;
           pendingUnit.current = null;
           if (accepted) {
-            setQuality(Math.round(unit.quality * 100));
+            setQuality(unit.verified ? Math.round(unit.quality * 100) : null);
             setStatus("valid");
             const flashNote = p.flash
               ? timing?.accepted
@@ -441,20 +449,24 @@ export default function ExerciseCamera(props: Props) {
               : "";
             setFlashFeedback(flashNote);
             setMessage(
-              flashNote || "Repetition saved. Nice work — continue when ready.",
+              flashNote ||
+                (unit.evidence === "assisted"
+                  ? "Assisted movement saved. Continue when ready; technique is not verified."
+                  : "Movement saved. Nice work — continue when ready."),
             );
           } else {
             // A canonical rejection must not spend the remaining local unit budget
             // or change which anatomical side the adventure expects.
             const current = latest.current;
             issued.current = current.progress;
-            detector.current = new ExerciseDetector(
+            detector.current = createExerciseDetector(
               current.exerciseId,
               current.sessionId,
               current.lastSide,
               {
                 allowPartialSquat: partialSquat,
                 profile: current.recognitionProfile,
+                skillId: current.skillId,
                 tolerance: current.flash ? "flash" : "standard",
               },
             );
@@ -504,17 +516,23 @@ export default function ExerciseCamera(props: Props) {
       setStatus(o.status ?? (o.ready ? "ready" : "insufficient"));
       if (!o.ready) {
         stableSince.current = null;
-        setMessage(o.message ?? EXERCISE_GUIDES[p.exerciseId].setup);
+        setMessage(
+          o.message ??
+            (
+              p.guideOverride ??
+              getExerciseGuide(p.exerciseId, p.recognitionProfile)
+            ).setup,
+        );
         return;
       }
       stableSince.current ??= frame.timestamp;
       setMessage("Starting position visible. Hold comfortably for a moment.");
       if (
-        calibrated.current.has(calibrationGroup(p.exerciseId)) ||
+        calibrated.current.has(calibrationGroup(p.skillId ?? p.exerciseId)) ||
         frame.timestamp - stableSince.current >= 700
       ) {
         if (!detector.current.recalibrate(frame)) return;
-        calibrated.current.add(calibrationGroup(p.exerciseId));
+        calibrated.current.add(calibrationGroup(p.skillId ?? p.exerciseId));
         setPhase("ready");
         setStatus("ready");
         setMessage(
@@ -531,7 +549,11 @@ export default function ExerciseCamera(props: Props) {
       setMessage(
         o.ready
           ? "Ready. Use Start without automatic calibration when comfortable."
-          : (o.message ?? EXERCISE_GUIDES[p.exerciseId].setup),
+          : (o.message ??
+              (
+                p.guideOverride ??
+                getExerciseGuide(p.exerciseId, p.recognitionProfile)
+              ).setup),
       );
       if (autoRef.current && o.ready) beginCountdown();
       return;
@@ -716,13 +738,14 @@ export default function ExerciseCamera(props: Props) {
   useEffect(() => {
     pendingUnit.current = null;
     detectorSession.current = sessionKey(props);
-    detector.current = new ExerciseDetector(
+    detector.current = createExerciseDetector(
       props.exerciseId,
       props.sessionId,
       props.lastSide,
       {
         allowPartialSquat: partialSquat,
         profile: props.recognitionProfile,
+        skillId: props.skillId,
         tolerance: props.flash ? "flash" : "standard",
       },
     );
@@ -737,7 +760,7 @@ export default function ExerciseCamera(props: Props) {
     setRejections(0);
     setDemo(
       !dismissedGuide.current.has(sessionKey(props)) &&
-        needsGuide(props.exerciseId),
+        needsGuide(props.skillId ?? props.exerciseId),
     );
     if (
       lifecycle.current?.currentStatus === "ready" ||
@@ -745,17 +768,35 @@ export default function ExerciseCamera(props: Props) {
     ) {
       setPhase("framing");
       setStatus("insufficient");
-      setMessage(EXERCISE_GUIDES[props.exerciseId].setup);
+      setMessage(
+        (
+          props.guideOverride ??
+          getExerciseGuide(props.exerciseId, props.recognitionProfile)
+        ).setup,
+      );
     }
   }, [
     props.exerciseId,
+    props.skillId,
     props.sessionId,
     partialSquat,
     props.recognitionProfile,
     !!props.flash,
   ]);
   useEffect(() => {
-    detector.current.beginCalibration();
+    // Manual confirmation may have advanced the anatomical side while recognition was off.
+    detector.current = createExerciseDetector(
+      props.exerciseId,
+      props.sessionId,
+      props.lastSide,
+      {
+        allowPartialSquat: partialSquat,
+        profile: props.recognitionProfile,
+        skillId: props.skillId,
+        tolerance: props.flash ? "flash" : "standard",
+      },
+    );
+    setNextSide(detector.current.expectedSide);
     calibrated.current.clear();
     lifecycle.current?.invalidateFrames();
     poseFilter.current.reset();
@@ -918,7 +959,8 @@ export default function ExerciseCamera(props: Props) {
       latest.current.onRequestCameraMode?.();
     try {
       localStorage.setItem(
-        "everstride-guide-" + latest.current.exerciseId,
+        "everstride-guide-" +
+          (latest.current.skillId ?? latest.current.exerciseId),
         "seen",
       );
     } catch {
@@ -1042,12 +1084,20 @@ export default function ExerciseCamera(props: Props) {
       className="exercise-camera"
       aria-label="Exercise camera"
       data-camera-state={camera.status}
+      data-skill-id={props.skillId ?? props.exerciseId}
+      data-recognition-method={
+        props.skillId ? exerciseProfile(props.skillId)?.method : "existing"
+      }
       data-exercise-stage={stage}
       data-preparation-state={preparationState}
     >
       <header>
         <div className="exercise-camera-title">
-          <span className="exercise-tag">LOCAL BODY TRACKING</span>
+          <span className="exercise-tag">
+            {props.skillId
+              ? recognitionLabel(props.skillId)
+              : "LOCAL BODY TRACKING"}
+          </span>
           <strong>{guide.title.split(" · ")[1] ?? guide.title}</strong>
         </div>
         <div className="exercise-header-actions">
@@ -1069,10 +1119,7 @@ export default function ExerciseCamera(props: Props) {
               }
               if (enabled && !props.muted) {
                 armExerciseAudio();
-                speakExercise(
-                  `${guide.camera}. ${props.recognitionProfile ? getExerciseGuide(props.exerciseId, props.recognitionProfile).setup : STARTING_CUES[props.exerciseId]}.`,
-                  true,
-                );
+                speakExercise(`${guide.camera}. ${guide.setup}`, true);
               } else stopExerciseSpeech();
             }}
           >
@@ -1112,6 +1159,7 @@ export default function ExerciseCamera(props: Props) {
           </div>
           <ExerciseDemo
             exerciseId={props.exerciseId}
+            skillId={props.skillId}
             recognitionProfile={props.recognitionProfile}
             guideOverride={props.guideOverride}
             hideIllustration={props.hideIllustration}
@@ -1151,6 +1199,7 @@ export default function ExerciseCamera(props: Props) {
             <div className="exercise-prep-art" aria-hidden="true">
               <ExerciseDemo
                 exerciseId={props.exerciseId}
+                skillId={props.skillId}
                 recognitionProfile={props.recognitionProfile}
                 guideOverride={props.guideOverride}
                 hideIllustration={props.hideIllustration}
@@ -1168,6 +1217,8 @@ export default function ExerciseCamera(props: Props) {
         </p>
       )}
       {props.exerciseId === "squat" &&
+        (!props.skillId ||
+          exerciseProfile(props.skillId)?.method === "existing") &&
         !partialSquat &&
         (status === "partial" || status === "insufficient") && (
           <button
@@ -1181,15 +1232,18 @@ export default function ExerciseCamera(props: Props) {
             Feet out of frame? Count visible hip movement (estimated)
           </button>
         )}
-      {partialSquat && props.exerciseId === "squat" && (
-        <p className="exercise-note">
-          Cropped squat estimate · feet and knee depth are not verified. Stand
-          tall for a fresh reference.{" "}
-          <button type="button" onClick={() => setPartialSquat(false)}>
-            Use full-leg tracking
-          </button>
-        </p>
-      )}
+      {partialSquat &&
+        props.exerciseId === "squat" &&
+        (!props.skillId ||
+          exerciseProfile(props.skillId)?.method === "existing") && (
+          <p className="exercise-note">
+            Cropped squat estimate · feet and knee depth are not verified. Stand
+            tall for a fresh reference.{" "}
+            <button type="button" onClick={() => setPartialSquat(false)}>
+              Use full-leg tracking
+            </button>
+          </p>
+        )}
       {props.source !== "phone" && (
         <details className="exercise-model-options">
           <summary>
@@ -1251,6 +1305,15 @@ export default function ExerciseCamera(props: Props) {
         </details>
       )}
       <ExerciseHUD
+        unit={props.skillId ? SKILL_BY_ID[props.skillId]?.unit : undefined}
+        alternating={
+          props.skillId ? SKILL_BY_ID[props.skillId]?.alternating : undefined
+        }
+        assisted={
+          props.mode !== "manual" &&
+          !!props.skillId &&
+          exerciseProfile(props.skillId)?.method === "assisted"
+        }
         flash={
           props.flash && props.mode !== "manual"
             ? {
@@ -1271,11 +1334,14 @@ export default function ExerciseCamera(props: Props) {
         guideSetup={guide.setup}
         guideCamera={guide.camera}
         startingPosition={
-          props.recognitionProfile === "knee-pushup"
-            ? "Knees supported · hands under shoulders"
-            : undefined
+          props.skillId
+            ? guide.setup.split(".")[0]
+            : props.recognitionProfile === "knee-pushup"
+              ? "Knees supported · hands under shoulders"
+              : undefined
         }
         exerciseId={props.exerciseId}
+        skillId={props.skillId}
         progress={props.progress}
         target={props.target}
         status={hudStatus}
@@ -1336,7 +1402,9 @@ export default function ExerciseCamera(props: Props) {
             onClick={() => {
               detector.current.beginCalibration();
               lifecycle.current?.invalidateFrames();
-              calibrated.current.delete(calibrationGroup(props.exerciseId));
+              calibrated.current.delete(
+                calibrationGroup(props.skillId ?? props.exerciseId),
+              );
               resetTiming();
               setRejections(0);
               setDemo(false);

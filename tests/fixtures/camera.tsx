@@ -3,8 +3,20 @@ import { StrictMode, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import ExerciseCamera from "../../src/exercises/ExerciseCamera";
 import type { PoseFrame } from "../../src/exercises/detectors";
-import type { ExerciseId } from "../../src/core/contracts";
+import type { ExerciseId, ExerciseUnit } from "../../src/core/contracts";
+import { SKILL_BY_ID } from "../../src/tower/catalog";
+import { skillGuide } from "../../src/tower/skillGuides";
+import { exerciseProfile } from "../../src/tower/exerciseProfiles";
 function CameraFixture() {
+  const params = new URLSearchParams(location.search);
+  const candidate = params.get("skill") ?? "";
+  const skill = Object.hasOwn(SKILL_BY_ID, candidate)
+    ? SKILL_BY_ID[candidate]
+    : undefined;
+  const confirmation =
+    !!skill && exerciseProfile(skill.id)?.method === "confirmation";
+  const [events, setEvents] = useState<ExerciseUnit[]>([]);
+  const [lastSide, setLastSide] = useState<"left" | "right">();
   const [active, setActive] = useState(true),
     [manual, setManual] = useState(false),
     [paused, setPaused] = useState(false),
@@ -13,8 +25,13 @@ function CameraFixture() {
     [exercise, setExercise] = useState<ExerciseId>("squat");
   const [source, setSource] = useState<"webcam" | "phone">("webcam"),
     [phoneFrame, setPhoneFrame] = useState<PoseFrame | null>(null);
-  const [phonePreview, setPhonePreview] = useState<MediaStream|null>(null);
-  useEffect(()=>{const receive=(e:Event)=>setPhonePreview((e as CustomEvent<MediaStream|null>).detail);window.addEventListener("test-phone-preview",receive);return()=>window.removeEventListener("test-phone-preview",receive)},[]);
+  const [phonePreview, setPhonePreview] = useState<MediaStream | null>(null);
+  useEffect(() => {
+    const receive = (e: Event) =>
+      setPhonePreview((e as CustomEvent<MediaStream | null>).detail);
+    window.addEventListener("test-phone-preview", receive);
+    return () => window.removeEventListener("test-phone-preview", receive);
+  }, []);
   useEffect(() => {
     const receive = (event: Event) =>
       setPhoneFrame((event as CustomEvent<PoseFrame | null>).detail);
@@ -55,6 +72,7 @@ function CameraFixture() {
           onClick={() => {
             setSession((v) => v + 1);
             setProgress(0);
+            setLastSide(undefined);
           }}
         >
           New session
@@ -73,8 +91,22 @@ function CameraFixture() {
           </>
         )}
       </nav>
+      {manual && skill && (
+        <button
+          onClick={() => {
+            setProgress((v) => v + 1);
+            if (skill.alternating)
+              setLastSide((side) => (side === "left" ? "right" : "left"));
+          }}
+        >
+          Confirm manual fixture unit
+        </button>
+      )}
       <output data-testid="units">{progress}</output>
       <output data-testid="requests">{requests}</output>
+      <output data-testid="events" hidden>
+        {JSON.stringify(events)}
+      </output>
       <ExerciseCamera
         source={source}
         externalPoseFrame={phoneFrame}
@@ -83,15 +115,25 @@ function CameraFixture() {
           setManual(false);
           setPaused(false);
         }}
-        exerciseId={exercise}
+        exerciseId={skill?.exercise ?? exercise}
+        skillId={skill?.id}
+        lastSide={lastSide}
+        guideOverride={skill ? skillGuide(skill.id) : undefined}
+        recognitionProfile={
+          skill?.id === "mini-squat" || skill?.id === "knee-pushup"
+            ? skill.id
+            : undefined
+        }
         sessionId={`test-session-${session}`}
         target={receiptMode ? 2 : 8}
         progress={progress}
-        active={active && !paused && !manual}
-        mode={manual ? "manual" : "camera"}
+        active={active && !paused && !manual && !confirmation}
+        mode={manual || confirmation ? "manual" : "camera"}
         paused={paused}
         muted
-        onUnit={() => {
+        onUnit={(unit) => {
+          setEvents((previous) => [...previous, unit]);
+          if (unit.side) setLastSide(unit.side);
           if (!receiptMode) {
             setProgress((v) => v + 1);
             return;

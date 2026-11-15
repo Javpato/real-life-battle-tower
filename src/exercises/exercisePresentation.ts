@@ -18,6 +18,9 @@ export function exerciseHeadline(
   p: Pick<
     ExerciseHudProps,
     | "exerciseId"
+    | "skillId"
+    | "startingPosition"
+    | "assisted"
     | "status"
     | "message"
     | "nextSide"
@@ -48,21 +51,28 @@ export function exerciseHeadline(
         p.message,
       )
     )
-      return STARTING_CUES[p.exerciseId].toUpperCase();
+      return (p.startingPosition ?? STARTING_CUES[p.exerciseId]).toUpperCase();
     if (/^Side unclear\./i.test(p.message))
       return "SHOW YOUR FRONT KNEE + BOTH FEET";
     return "KEEP REQUIRED JOINTS IN VIEW";
   }
   if (p.status === "recalibrating") return "PREPARE TO RECALIBRATE";
   if (p.status === "countdown") return "GET READY";
-  if (p.status === "ready") return STARTING_CUES[p.exerciseId].toUpperCase();
+  if (p.status === "ready")
+    return p.skillId
+      ? "READY · MOVE WHEN COMFORTABLE"
+      : STARTING_CUES[p.exerciseId].toUpperCase();
+  if (p.assisted && p.status === "moving") return "MOVE WITH CONTROL";
+  if (p.assisted && p.status === "return") return "RETURN TO YOUR START";
   if (p.status === "return") return RETURN_CUES[p.exerciseId];
   if (p.status === "moving") return MOVEMENT_CUES[p.exerciseId];
   if (p.status === "hold") return "HOLD STEADY";
   if (p.nextSide && (p.status === "valid" || p.status === "incomplete"))
-    return p.exerciseId === "birddog"
-      ? `${p.nextSide.toUpperCase()} ARM + OPPOSITE LEG NEXT`
-      : `${p.nextSide.toUpperCase()} LEG NEXT`;
+    return p.skillId
+      ? `${p.nextSide.toUpperCase()} SIDE NEXT`
+      : p.exerciseId === "birddog"
+        ? `${p.nextSide.toUpperCase()} ARM + OPPOSITE LEG NEXT`
+        : `${p.nextSide.toUpperCase()} LEG NEXT`;
   if (p.status === "incomplete")
     return /slow down/i.test(p.message)
       ? "SLOW DOWN · COMPLETE THE MOVEMENT"

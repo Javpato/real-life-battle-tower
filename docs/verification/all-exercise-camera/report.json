@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "physicalValidation": false,
+  "checks": [
+    "90 exercise library",
+    "lazy visual lessons with Escape and visible close control",
+    "70 automatic profiles / 60 assisted / 20 confirmation filters",
+    "five viewport bounds",
+    "real Lite model with synthetic blank camera",
+    "exact assisted skill on synthetic phone frames",
+    "no idle or paused credit",
+    "unverified metadata and no fabricated quality",
+    "skill-specific reps/seconds",
+    "confirmation preview no automatic units",
+    "manual-to-camera anatomical side retained"
+  ],
+  "errors": []
+}

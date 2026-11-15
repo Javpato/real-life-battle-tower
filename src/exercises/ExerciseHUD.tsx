@@ -59,7 +59,10 @@ export default function ExerciseHUD(props: ExerciseHudProps) {
     const tick = () => {
       const p = current.current;
       const cues = planner.current.update(
-        { ...p, seconds: p.exerciseId === "superman" },
+        {
+          ...p,
+          seconds: p.unit ? p.unit === "seconds" : p.exerciseId === "superman",
+        },
         performance.now(),
       );
       if (p.muted) return;
@@ -79,8 +82,21 @@ export default function ExerciseHUD(props: ExerciseHudProps) {
     if (muted || !voice) stopExerciseSpeech();
   }, [muted, voice]);
   useEffect(() => () => stopExerciseSpeech(), []);
-  const seconds = exerciseId === "superman",
-    alternating = exerciseId === "lunge" || exerciseId === "birddog";
+  const seconds = props.unit
+      ? props.unit === "seconds"
+      : exerciseId === "superman",
+    alternating =
+      props.alternating ?? (exerciseId === "lunge" || exerciseId === "birddog");
+  const paired = props.skillId
+    ? [
+        "birddog",
+        "alternating-birddog",
+        "pause-birddog",
+        "advanced-birddog",
+        "alternating-superman",
+      ].includes(props.skillId)
+    : exerciseId === "birddog";
+  const sidePart = props.skillId ? "SIDE" : "LEG";
   const effective =
     status === "error"
       ? "error"
@@ -98,7 +114,11 @@ export default function ExerciseHUD(props: ExerciseHudProps) {
       <div className="exercise-hud-heading">
         <span>YOUR PROGRESS</span>
         <small>
-          {quality === null ? "AT YOUR PACE" : `${quality}% QUALITY`}
+          {props.assisted
+            ? "ASSISTED · ESTIMATE"
+            : quality === null
+              ? "AT YOUR PACE"
+              : `${quality}% QUALITY`}
         </small>
       </div>
       {props.flash && <FlashTimer {...props.flash} />}
@@ -117,7 +137,7 @@ export default function ExerciseHUD(props: ExerciseHudProps) {
       <div
         className="exercise-progress-track"
         role="progressbar"
-        aria-label={seconds ? "Verified seconds" : "Exercise repetitions"}
+        aria-label={seconds ? "Exercise seconds" : "Exercise repetitions"}
         aria-valuemin={0}
         aria-valuemax={target}
         aria-valuenow={progress}
@@ -130,17 +150,15 @@ export default function ExerciseHUD(props: ExerciseHudProps) {
       </div>
       {alternating && (
         <div
-          className={`exercise-next-side${exerciseId === "birddog" ? " is-pair" : ""}`}
+          className={`exercise-next-side${paired ? " is-pair" : ""}`}
           aria-live="polite"
         >
-          <small>
-            NEXT {exerciseId === "birddog" ? "ARM + OPPOSITE LEG" : "LEG"}
-          </small>
+          <small>NEXT {paired ? "ARM + OPPOSITE LEG" : sidePart}</small>
           <strong>
             {nextSide
-              ? exerciseId === "birddog"
+              ? paired
                 ? `${nextSide.toUpperCase()} ARM + ${nextSide === "left" ? "RIGHT" : "LEFT"} LEG`
-                : `${nextSide.toUpperCase()} LEG`
+                : `${nextSide.toUpperCase()} ${sidePart}`
               : "EITHER SIDE"}
           </strong>
         </div>

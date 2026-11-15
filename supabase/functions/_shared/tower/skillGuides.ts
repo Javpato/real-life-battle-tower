@@ -1,8 +1,9 @@
 // GENERATED. Edit src/tower, then run supabase/sync-core.mjs.
 import {ADDITIONAL_GUIDES} from './expandedCatalog.ts';
+import {exerciseProfile, CAMERA_VIEWS, EXERCISE_SOURCES, recognitionLabel} from './exerciseProfiles.ts';
 /** Physical-skill instructions. These deliberately do not inherit the detector family's
  * guide: a wall sit is a hold, not a squat, even when both share a tracking family. */
-export type SkillGuide={title:string;setup:string;movement:string;camera:string;note:string};
+export type SkillGuide={title:string;setup:string;movement:string;camera:string;note:string;sources?:Array<{title:string;url:string;scope:string}>};
 export const SKILL_GUIDES:Readonly<Record<string,SkillGuide>>={
  ...ADDITIONAL_GUIDES,
  'mini-squat':{
@@ -188,5 +189,8 @@ export const SKILL_GUIDES:Readonly<Record<string,SkillGuide>>={
 };
 export function skillGuide(id:string):SkillGuide{
  if(!Object.hasOwn(SKILL_GUIDES,id))throw Error('UNKNOWN_SKILL_GUIDE');
- return SKILL_GUIDES[id];
+ const guide=SKILL_GUIDES[id],profile=exerciseProfile(id);
+ if(!profile)return guide;
+ const note=profile.method==='existing'?`${guide.note} ${profile.limitation}`:profile.method==='assisted'?`Experimental assisted camera: ${profile.observable}. ${profile.limitation} Estimates are saved as unverified, not technique accreditation. Manual counting remains available; rest freely.`:`Camera preview + manual confirmation: ${profile.limitation} Confirm only movements or held seconds you actually complete. Rest freely.`;
+ return {...guide,camera:`${CAMERA_VIEWS[profile.view]} · ${recognitionLabel(id)}`,note,sources:profile.sources.map(key=>EXERCISE_SOURCES[key]).filter(Boolean)};
 }

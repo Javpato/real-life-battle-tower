@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import ExerciseCamera from "../exercises/ExerciseCamera";
+import ExerciseLearning from "./ExerciseLearning";
+import { exerciseProfile, recognitionLabel } from "./exerciseProfiles";
 import FlashTimer, { type FlashTiming } from "../exercises/FlashTimer";
 import { CompanionControl } from "../companion";
 import type { PoseFrame } from "../exercises/detectors";
@@ -163,7 +165,7 @@ function WorkoutSummary({
             <strong>{SKILL_BY_ID[r.skillId]?.name ?? r.skillId}</strong>
             <small>
               {r.units} / {r.target} · {r.completion} · {r.verified} camera /{" "}
-              {r.manual} manual
+              {r.manual} assisted / manual
             </small>
           </div>
           <div>
@@ -184,7 +186,7 @@ function WorkoutSummary({
             )}
             {r.technicalStars === null && (
               <small>
-                Technical stars unavailable for manual / mixed effort
+                Technical stars unavailable for assisted, manual or mixed effort
               </small>
             )}
           </div>
@@ -543,7 +545,8 @@ export default function TowerApp({
     currentSkill?: Skill | null;
   }) {
     if (!current || !currentSkill) return null;
-    const manualOnly = currentSkill.detector === "manual";
+    const profile = exerciseProfile(currentSkill.id);
+    const manualOnly = !profile || profile.method === "confirmation";
     const flash: FlashTiming | undefined =
       activity?.kind === "trial" && activity.trialKind === "flash"
         ? {
@@ -564,14 +567,17 @@ export default function TowerApp({
         </div>
         <div className="bt-series-controls">
           <button
-            aria-pressed={inputMode === "camera" && !manualOnly}
-            disabled={manualOnly}
+            aria-pressed={inputMode === "camera"}
             onClick={() => setInputMode("camera")}
           >
-            Camera
+            {manualOnly
+              ? "Camera preview"
+              : profile?.method === "assisted"
+                ? "Assisted camera"
+                : "Camera"}
           </button>
           <button
-            aria-pressed={inputMode === "manual" || manualOnly}
+            aria-pressed={inputMode === "manual"}
             onClick={() => setInputMode("manual")}
           >
             Manual
@@ -587,19 +593,21 @@ export default function TowerApp({
           <p>{skillGuide(currentSkill.id).camera}</p>
           <small>{skillGuide(currentSkill.id).note}</small>
         </details>
-        {currentSkill.detectorStatus === "experimental" && (
+        {(currentSkill.detectorStatus === "experimental" ||
+          profile?.method === "assisted") && (
           <p className="muted">
             <small>
-              Experimental camera profile · not yet physically validated. Manual
-              mode is available.
+              Camera movement estimate · not yet physically validated.{" "}
+              {profile?.limitation} Manual mode is always available.
             </small>
           </p>
         )}
         {manualOnly && (
           <p className="muted">
             <small>
-              This movement variation uses manual confirmation. It is recorded
-              as unverified.
+              {profile?.limitation} Use the camera to check your starting
+              position, then confirm each completed movement. Confirmations are
+              recorded as unverified.
             </small>
           </p>
         )}
@@ -642,7 +650,8 @@ export default function TowerApp({
                 : "Confirm one repetition"}
             </button>
             <small>
-              Manual units are saved separately from camera-verified units.
+              Manual confirmations and assisted estimates are saved separately
+              from verified camera units.
             </small>
           </Panel>
         )}
@@ -650,13 +659,15 @@ export default function TowerApp({
           suspended={cameraSuspended}
           flash={flash}
           guideOverride={skillGuide(currentSkill.id)}
-          hideIllustration={manualOnly}
+          skillId={currentSkill.id}
           exerciseId={currentSkill.exercise}
           target={current.target}
           progress={current.progress}
           active={cameraActive && !manualOnly && inputMode === "camera"}
           mode={manualOnly ? "manual" : inputMode}
-          onRequestCameraMode={() => setInputMode("camera")}
+          onRequestCameraMode={
+            manualOnly ? undefined : () => setInputMode("camera")
+          }
           sessionId={current.id}
           lastSide={current.side}
           paused={localPause || current.paused}
@@ -879,7 +890,7 @@ export default function TowerApp({
           </h1>
           <p>
             {done
-              ? `${current.cleared} floors cleared · ${current.verified} verified units · ${current.manual} manual units`
+              ? `${current.cleared} floors cleared · ${current.verified} verified units · ${current.manual} assisted / manual units`
               : `${Math.ceil(current.hp)} / ${current.maxHp} HP · Next: floor ${current.floor}`}
           </p>
           <p className="muted">
@@ -1163,8 +1174,8 @@ export default function TowerApp({
               {activity.completed} series complete · {activity.skipped} skipped
             </p>
             <p>
-              {activity.verified} verified units · {activity.manual} manual
-              units
+              {activity.verified} verified units · {activity.manual} assisted /
+              manual units
             </p>
             <WorkoutSummary
               results={activity.results}
@@ -1214,6 +1225,7 @@ export default function TowerApp({
             ) : (
               <>
                 <p>{s.cue}</p>
+                <ExerciseLearning skillId={s.id} />
                 <button onClick={() => void send({ kind: "skipWorkoutEntry" })}>
                   Skip exercise
                 </button>
@@ -1275,7 +1287,7 @@ export default function TowerApp({
                   <SkillTypes skill={s} /> {s.name}
                   <small>
                     {s.units} {s.unit} · {s.damage} power ·{" "}
-                    {s.detector === "supported" ? "camera available" : "manual"}
+                    {recognitionLabel(s.id)}
                   </small>
                 </button>
               ))}
@@ -1498,8 +1510,10 @@ export default function TowerApp({
             : s.impact === "jump")) &&
         (trainingDetection === "all" ||
           (trainingDetection === "camera"
-            ? s.detector !== "manual"
-            : s.detector === "manual")),
+            ? exerciseProfile(s.id)?.method !== "confirmation"
+            : trainingDetection === "assisted"
+              ? exerciseProfile(s.id)?.method === "assisted"
+              : exerciseProfile(s.id)?.method === "confirmation")),
     );
     return (
       <>
@@ -1594,10 +1608,9 @@ export default function TowerApp({
                   onChange={(e) => setTrainingDetection(e.target.value)}
                 >
                   <option value="all">All methods</option>
-                  <option value="camera">
-                    Camera configured / experimental
-                  </option>
-                  <option value="manual">Guided / manual</option>
+                  <option value="camera">Automatic movement counting</option>
+                  <option value="assisted">Assisted camera estimates</option>
+                  <option value="manual">Preview + manual confirmation</option>
                 </select>
               </label>
             </div>
@@ -1611,14 +1624,10 @@ export default function TowerApp({
                 <h3>{s.name}</h3>
                 <SkillTypes skill={s} />
                 <small>
-                  {s.units} {s.unit} ·{" "}
-                  {s.detector === "manual"
-                    ? "Guided / manual"
-                    : s.detectorStatus === "experimental"
-                      ? "Experimental camera"
-                      : "Configured camera"}
+                  {s.units} {s.unit} · {recognitionLabel(s.id)}
                 </small>
                 <p>{s.cue}</p>
+                <ExerciseLearning skillId={s.id} />
                 <div className="bt-row">
                   <button
                     className="primary"
@@ -1650,8 +1659,9 @@ export default function TowerApp({
           </div>
           {!visible.length && <p>No exercises match these filters.</p>}
           <small>
-            Camera configuration is not physical validation. Guided exercises
-            remain unverified. Training never spends a skill trial opportunity.
+            Camera setup and visual guides are available for every exercise.
+            Assisted estimates and manual confirmations remain unverified.
+            Training never spends a skill trial opportunity.
           </small>
         </details>
         <div className="bt-loadout">
@@ -1895,7 +1905,7 @@ export default function TowerApp({
                     <th>Journey</th>
                     <th>Result</th>
                     <th>Completed</th>
-                    <th>Camera / manual</th>
+                    <th>Verified / assisted &amp; manual</th>
                     <th>Date</th>
                   </tr>
                 </thead>
