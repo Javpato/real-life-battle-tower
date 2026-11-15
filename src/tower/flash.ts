@@ -1,3 +1,4 @@
+import type {FlashSet} from './model';
 import type {ExerciseUnit} from '../core/contracts';
 
 /** Shared pacing policy for Flash trials, battle bonuses and the timer display.
@@ -5,7 +6,7 @@ import type {ExerciseUnit} from '../core/contracts';
  * never earns progress or consumes an opportunity; a new complete cycle can retry.
  */
 export const FLASH_TIMING = {
- minCycleMs:700,
+ minCycleMs:350,
  maxCycleMs:12000,
  minQuality:.5,
  minConfidence:.5,
@@ -50,4 +51,30 @@ export function assessFlashCycle(unit:ExerciseUnit,cadenceMs?:number,previousEnd
  if(durationMs<window.minMs)return reject('too-fast',durationMs);
  if(durationMs>window.maxMs)return reject('too-slow',durationMs);
  return {accepted:true,durationMs};
+}
+
+/** Version 2 has one budget for the entire set, including gaps between reps. */
+export function flashSetBudget(target:number,cadenceMs?:number,customSeconds?:number):number|null {
+ if(customSeconds!==undefined)return Number.isFinite(customSeconds)&&customSeconds>=1&&customSeconds<=600?Math.round(customSeconds*1000):null;
+ const reference=flashCadenceWindow(cadenceMs).referenceMs;
+ return reference===null?null:Math.round(target*reference*.8);
+}
+export function createFlashSet(target:number,cadenceMs?:number,customSeconds?:number):FlashSet {
+ return {policyVersion:2,budgetMs:flashSetBudget(target,cadenceMs,customSeconds),source:customSeconds===undefined?'personal':'custom',status:'ready'};
+}
+/** Mutates only the canonical series snapshot, never UI-provided elapsed time. */
+export function assessFlashSet(state:FlashSet,unit:ExerciseUnit):boolean {
+ if(state.status==='expired'||state.status==='interrupted')return false;
+ const assessment=assessFlashCycle(unit);
+ if(!assessment.accepted){
+  // A manual event cannot establish timing, and a broken observed cycle cannot resume a bonus.
+  if(unit.verified)state.status='interrupted';
+  return false;
+ }
+ const cycle=unit.cycle!,clock=cycle.clockId??'legacy-clock';
+ if(state.clockId!==undefined&&state.clockId!==clock||state.lastEndedAt!==undefined&&cycle.startedAt<state.lastEndedAt){state.status='interrupted';return false;}
+ state.clockId=clock;state.startedAt??=cycle.startedAt;state.lastEndedAt=cycle.endedAt;
+ if(state.budgetMs===null)return false;
+ state.status=cycle.endedAt-state.startedAt<=state.budgetMs?'active':'expired';
+ return state.status==='active';
 }

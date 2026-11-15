@@ -1,13 +1,13 @@
 import type {Element,ExerciseUnit} from '../core/contracts';
 import type {PlayerSave,TowerCommand,EngineContext,Series,TowerRun,TowerBattle,WorkoutActivity,WorkoutEntry,Skill,HistoryEntry,WorkoutEntryResult,SeriesTelemetry} from './model';
-import {SKILLS,SKILL_BY_ID,CHALLENGES,canAttemptTrial,INITIAL_SKILLS} from './catalog';
+import {SKILLS,SKILL_BY_ID,CHALLENGES,canAttemptTrial,INITIAL_SKILLS,challengeAvailable,getRunChallenge} from './catalog';
 import {generateFloor,MAX_FLOOR,nextRandom,normalizeSeed,TYPES} from './generation';
 export {SKILLS,SKILL_BY_ID,CHALLENGES} from './catalog';
 export {generateFloor} from './generation';
 export type {PlayerSave,TowerCommand} from './model';
 import {effectiveness,stab,skillTypes} from './typeChart';
 import {migrateSave} from './migrateSave';
-import {assessFlashCycle,flashCadenceWindow,FLASH_TIMING} from './flash';
+import {assessFlashCycle,flashCadenceWindow,FLASH_TIMING,createFlashSet,assessFlashSet} from './flash';
 import {exerciseProfile} from './exerciseProfiles';
 export {effectiveness,stab,skillTypes} from './typeChart';
 export {migrateSave} from './migrateSave';
@@ -142,7 +142,8 @@ export function applyCommand(save:PlayerSave,command:TowerCommand,context:Engine
   const cycle=cycleDuration(u),clock=u.cycle?.clockId??'legacy-clock';
   const previousEnd=series.cycleEnds&&Object.hasOwn(series.cycleEnds,clock)?series.cycleEnds[clock]:undefined;
   if(cycle!==null&&previousEnd!==undefined&&u.cycle!.startedAt<previousEnd)return;
-  if(activity.kind==='trial'&&activity.trialKind==='flash'&&u.verified&&!assessFlashCycle(u,activity.flashStage==='test'?activity.cadenceMs:undefined,previousEnd).accepted)return;
+  if(activity.kind==='trial'&&activity.trialKind==='flash'&&u.verified&&!assessFlashCycle(u,activity.flashPolicyVersion===2?undefined:activity.flashStage==='test'?activity.cadenceMs:undefined,previousEnd).accepted){if(series.flash)series.flash.status='interrupted';return;}
+  const withinFlash=series.flash?assessFlashSet(series.flash,u):false;
   // Unsupported variants can be practiced manually but cannot claim camera verification.
   requireRule(!u.verified||skill.detector==='supported','VARIANT_REQUIRES_MANUAL');
   series.seen.push(u.id);series.progress++;series.side=u.side;if(cycle!==null)series.cycleEnds={...series.cycleEnds,[clock]:u.cycle!.endedAt};
@@ -157,9 +158,9 @@ export function applyCommand(save:PlayerSave,command:TowerCommand,context:Engine
      (activity.referenceCycles??=[]).push(cycle);
      if(activity.referenceCycles.length===FLASH_TIMING.referenceReps)activity.cadenceMs=[...activity.referenceCycles].sort((a,b)=>a-b)[1];
     }
-    if(series.progress>=FLASH_TIMING.referenceReps)activity.flashStage='test';
+    if(series.progress>=FLASH_TIMING.referenceReps){activity.flashStage='test';if(activity.flashPolicyVersion===2&&!series.flash)series.flash=createFlashSet(FLASH_TIMING.testReps,activity.cadenceMs,activity.flashCustomSeconds);}
    }
-   activity.completed=series.progress===series.target;return;
+   activity.completed=series.progress===series.target&&(activity.flashPolicyVersion!==2||series.manual>0||series.flash?.status==='active');return;
   }
   if(activity.kind==='workout'){if(u.verified)activity.verified++;else activity.manual++;if(series.progress===series.target)finishWorkoutEntry(activity);return;}
   if(activity.kind!=='tower')return;
@@ -169,7 +170,7 @@ export function applyCommand(save:PlayerSave,command:TowerCommand,context:Engine
   const types=activity.contentVersion===1?[skill.type]:skillTypes(skill);
   const power=activity.contentVersion===1?1:1+.1*(activity.powerUps?.[skill.id]??0);
   const cadence=s.progression?.flashCadence[skill.id];
-  const flash=activity.contentVersion===2&&activity.flashEquipped?.includes(skill.id)&&flashCadenceWindow(cadence).referenceMs!==null&&assessFlashCycle(u,cadence).accepted?1.25:1;
+  const flash=activity.contentVersion===2&&activity.flashEquipped?.includes(skill.id)&&flashCadenceWindow(cadence).referenceMs!==null&&(series.flash?withinFlash:assessFlashCycle(u,cadence).accepted)?1.25:1;
   const raw=skill.damage/series.target*u.quality*effectiveness(types,b.enemy.phases[b.phase])*stab(types,activity.specialization)*power*flash*(u.verified?1:series.manualFactor);
   const threshold=b.enemy.thresholds[b.phase],before=b.enemyHp;b.enemyHp=Math.max(threshold,b.enemyHp-raw);
   b.lastDamage=before-b.enemyHp;b.hitSerial++;b.log=`${u.verified?'Verified':u.evidence==='assisted'?'Assisted':u.evidence==='confirmation'?'Manually confirmed':'Manual'} ${skill.unit==='seconds'?'second':'repetition'} · ${b.lastDamage.toFixed(1)} damage${flash>1?' · FLASH ×1.25':''}`;
@@ -185,7 +186,7 @@ export function applyCommand(save:PlayerSave,command:TowerCommand,context:Engine
   const returnRun=s.activity.kind==='tower'?structuredClone(loadoutSafePoint()!):undefined;if(!returnRun)idle();
   const flash=command.kind==='startFlashTrial';
   requireRule(flash?s.skills[command.skillId]?.unlocked&&FLASH_SKILLS.includes(command.skillId as typeof FLASH_SKILLS[number])&&((s.progression!.flashTokens>0)||s.progression!.flashSkills.includes(command.skillId)):canLearnSkill(s,command.skillId),'TRIAL_LOCKED');
-  const skill=SKILL_BY_ID[command.skillId];s.activity={kind:'trial',id:uuid(),skillId:skill.id,series:makeSeries(skill.id,flash?FLASH_TIMING.referenceReps+FLASH_TIMING.testReps:trialRequirement(skill.id)),completed:false,trialKind:flash?'flash':'skill',...(returnRun?{returnRun}:{}),...(flash?{flashStage:'reference',referenceCycles:[]}: {})};
+  const skill=SKILL_BY_ID[command.skillId];s.activity={kind:'trial',id:uuid(),skillId:skill.id,series:makeSeries(skill.id,flash?FLASH_TIMING.referenceReps+FLASH_TIMING.testReps:trialRequirement(skill.id)),completed:false,trialKind:flash?'flash':'skill',...(returnRun?{returnRun}:{}),...(flash?{flashStage:'reference',referenceCycles:[],flashPolicyVersion:2 as const}: {})};
  }break;
  case 'finishTrial':{
   requireRule(s.activity.kind==='trial'&&s.activity.completed,'TRIAL_NOT_FINISHED');const a=s.activity,p=s.skills[a.skillId];
@@ -209,12 +210,29 @@ export function applyCommand(save:PlayerSave,command:TowerCommand,context:Engine
   else {requireRule(command.choice==='heal'&&r.loadout.every(id=>(r.powerUps![id]??0)>=5),'HEAL_REWARD_UNAVAILABLE');r.hp=r.maxHp;}
   delete r.pendingBossReward;break;
  }
- case 'startRun':idle();requireRule(command.mode==='endless'||command.mode==='challenge','INVALID_RUN_MODE');{const challenge=command.mode==='challenge'?CHALLENGES.find(c=>c.id===command.challengeId):undefined;requireRule(command.mode==='endless'||challenge,'UNKNOWN_CHALLENGE');const loadout=challenge?.skillIds??s.loadout;requireRule((s.debug?loadout.length>=1:loadout.length===4)&&loadout.length<=4&&loadout.every(id=>s.skills[id]?.unlocked),'SKILL_LOCKED');if(challenge)requireRule(loadout.length===4,'CHALLENGE_NEEDS_FOUR_SKILLS');if(command.seed!==undefined)requireRule(Number.isSafeInteger(command.seed),'INVALID_SEED');if(command.floor!==undefined)requireRule(s.debug&&Number.isSafeInteger(command.floor)&&command.floor>=1&&command.floor<=MAX_FLOOR&&command.mode==='endless','DEBUG_FLOOR_ONLY');s.activity={kind:'tower',id:uuid(),mode:command.mode,challengeId:challenge?.id,seed:challenge?.seed??normalizeSeed(command.seed??context.seed?.()??Math.floor(Math.random()*2147483646)),contentVersion:2,powerUps:{},flashEquipped:challenge?[]:[...(s.flashEquipped??[])],floor:command.floor??1,lastSettledFloor:0,loadout:[...loadout],specialization:s.specialization,status:'ready',battle:null,hp:100,maxHp:100,verified:0,manual:0,cleared:0,startedAt:now,difficulty:s.settings.difficulty};}break;
- case 'startFloor':{const r=run();requireRule(r.status==='ready'||r.status==='between','FLOOR_ALREADY_ACTIVE');requireRule(!r.pendingBossReward,'CHOOSE_BOSS_REWARD');requireRule(r.contentVersion===1||s.debug||r.loadout.length===4,'FOUR_SKILLS_REQUIRED');const challenge=CHALLENGES.find(c=>c.id===r.challengeId);const enemy=generateFloor(r.seed,r.floor,challenge??'endless',r.contentVersion);const difficulty=r.difficulty==='easy'?.8:r.difficulty==='hard'?1.2:1;enemy.attack*=difficulty;const b:TowerBattle={id:uuid(),enemy,enemyHp:enemy.hp,playerHp:r.hp,maxHp:r.maxHp,phase:0,turn:'player',series:null,defending:false,fatigue:{leg:0,arm:0,back:0,core:0,cardio:0,mobility:0},rng:nextRandom(normalizeSeed(r.seed+r.floor*7919)),log:`Floor ${r.floor} · ${enemy.title}`,hitSerial:0,lastDamage:0,verified:0,manual:0};r.battle=b;r.status='battle';}break;
- case 'beginAttack':{const b=playerTurn(),r=run();requireRule(r.loadout.includes(command.skillId)&&s.skills[command.skillId]?.unlocked,'SKILL_NOT_EQUIPPED');const skill=SKILL_BY_ID[command.skillId];b.series=makeSeries(skill.id,skill.units);b.turn='exercise';b.log=skill.description;}break;
+ case 'startRun':idle();requireRule(command.mode==='endless'||command.mode==='challenge','INVALID_RUN_MODE');{const challenge=command.mode==='challenge'?CHALLENGES.find(c=>c.id===command.challengeId):undefined;requireRule(command.mode==='endless'||challenge,'UNKNOWN_CHALLENGE');const loadout=challenge?.skillIds??s.loadout;if(challenge)requireRule(challengeAvailable(s,challenge.id)||s.debug,'CHALLENGE_LOCKED');requireRule((s.debug?loadout.length>=1:loadout.length===4)&&loadout.length<=4&&(challenge||loadout.every(id=>s.skills[id]?.unlocked)),'SKILL_LOCKED');if(challenge)requireRule(loadout.length===4,'CHALLENGE_NEEDS_FOUR_SKILLS');if(command.seed!==undefined)requireRule(Number.isSafeInteger(command.seed),'INVALID_SEED');if(command.floor!==undefined)requireRule(s.debug&&Number.isSafeInteger(command.floor)&&command.floor>=1&&command.floor<=MAX_FLOOR&&command.mode==='endless','DEBUG_FLOOR_ONLY');s.activity={kind:'tower',id:uuid(),mode:command.mode,challengeId:challenge?.id,challengeTier:challenge?.tier,seed:challenge?.seed??normalizeSeed(command.seed??context.seed?.()??Math.floor(Math.random()*2147483646)),contentVersion:2,powerUps:{},flashEquipped:challenge?[]:[...(s.flashEquipped??[])],floor:command.floor??1,lastSettledFloor:0,loadout:[...loadout],specialization:s.specialization,status:'ready',battle:null,hp:100,maxHp:100,verified:0,manual:0,cleared:0,startedAt:now,difficulty:s.settings.difficulty};}break;
+ case 'startFloor':{const r=run();requireRule(r.status==='ready'||r.status==='between','FLOOR_ALREADY_ACTIVE');requireRule(!r.pendingBossReward,'CHOOSE_BOSS_REWARD');requireRule(r.contentVersion===1||s.debug||r.loadout.length===4,'FOUR_SKILLS_REQUIRED');const challenge=getRunChallenge(r);const enemy=generateFloor(r.seed,r.floor,challenge??'endless',r.contentVersion);const difficulty=r.difficulty==='easy'?.8:r.difficulty==='hard'?1.2:1;enemy.attack*=challenge?.attackMultiplier??difficulty;if(challenge?.hpMultiplier){enemy.hp=Math.round(enemy.hp*challenge.hpMultiplier);enemy.thresholds=enemy.phases.map((_,i)=>i===enemy.phases.length-1?0:Math.round(enemy.hp*(enemy.phases.length-i-1)/enemy.phases.length));}const b:TowerBattle={id:uuid(),enemy,enemyHp:enemy.hp,playerHp:r.hp,maxHp:r.maxHp,phase:0,turn:'player',series:null,defending:false,fatigue:{leg:0,arm:0,back:0,core:0,cardio:0,mobility:0},rng:nextRandom(normalizeSeed(r.seed+r.floor*7919)),log:`Floor ${r.floor} · ${enemy.title}`,hitSerial:0,lastDamage:0,verified:0,manual:0};r.battle=b;r.status='battle';}break;
+ case 'beginAttack':{const b=playerTurn(),r=run();requireRule(r.loadout.includes(command.skillId)&&(s.skills[command.skillId]?.unlocked||r.mode==='challenge'&&!!r.challengeTier&&!!getRunChallenge(r)?.skillIds.includes(command.skillId)),'SKILL_NOT_EQUIPPED');const skill=SKILL_BY_ID[command.skillId];b.series=makeSeries(skill.id,skill.units);if(r.contentVersion===2&&r.flashEquipped?.includes(skill.id))b.series.flash=createFlashSet(skill.units,s.progression?.flashCadence[skill.id]);b.turn='exercise';b.log=skill.description;}break;
+ case 'configureFlash':{
+  const series=activeSeries(s);requireRule(series&&series.id===command.sessionId,'STALE_EXERCISE_SESSION');
+  const trial=s.activity.kind==='trial'&&s.activity.trialKind==='flash'&&s.activity.flashPolicyVersion===2?s.activity:null;
+  requireRule(!!series.flash||!!trial,'NO_FLASH_SERIES');
+  requireRule((trial?series.progress<=(series.target===FLASH_TIMING.testReps?0:FLASH_TIMING.referenceReps):series.progress===0)&&(!series.flash||series.flash.status==='ready'),'FLASH_ALREADY_STARTED');
+  requireRule(command.seconds===null||typeof command.seconds==='number'&&Number.isFinite(command.seconds)&&command.seconds>=1&&command.seconds<=600,'INVALID_FLASH_TIME');
+  const seconds=command.seconds??undefined;
+  if(trial){trial.flashCustomSeconds=seconds;if(series.flash)series.flash=createFlashSet(FLASH_TIMING.testReps,trial.cadenceMs,seconds);}
+  else series.flash=createFlashSet(series.target,s.progression?.flashCadence[series.skillId],seconds);
+ }break;
+ case 'interruptFlash':{const series=activeSeries(s);requireRule(series&&series.id===command.sessionId,'STALE_EXERCISE_SESSION');if(series.flash)series.flash.status='interrupted';}break;
+ case 'retryFlashTrial':{
+  requireRule(s.activity.kind==='trial'&&s.activity.trialKind==='flash'&&s.activity.flashPolicyVersion===2&&!s.activity.completed,'NO_FLASH_RETRY');
+  const a=s.activity;
+  if(a.cadenceMs){a.series=makeSeries(a.skillId,FLASH_TIMING.testReps);a.series.flash=createFlashSet(FLASH_TIMING.testReps,a.cadenceMs,a.flashCustomSeconds);a.flashStage='test';}
+  else {a.series=makeSeries(a.skillId,FLASH_TIMING.referenceReps+FLASH_TIMING.testReps);a.flashStage='reference';a.referenceCycles=[];}
+ }break;
  case 'unit':accept(command.sessionId,command.unit);break;
  case 'manualUnit':{const series=activeSeries(s);requireRule(series&&series.id===command.sessionId,'STALE_EXERCISE_SESSION');const skill=SKILL_BY_ID[series.skillId];accept(series.id,{id:command.operationId?`manual:${command.operationId}`:uuid(),exerciseId:skill.exercise,quality:1,confidence:0,verified:false,timestamp:now,...(skill.alternating?{side:series.side==='left'?'right' as const:'left' as const}:{})});}break;
- case 'pause':{requireRule(typeof command.paused==='boolean','INVALID_PAUSE');const series=activeSeries(s);requireRule(series,'NO_ACTIVE_SERIES');series.paused=command.paused;if(series.telemetry)delete series.telemetry.lastTimestamp;}break;
+ case 'pause':{requireRule(typeof command.paused==='boolean','INVALID_PAUSE');const series=activeSeries(s);requireRule(series,'NO_ACTIVE_SERIES');series.paused=command.paused;if(command.paused&&series.flash)series.flash.status='interrupted';if(series.telemetry)delete series.telemetry.lastTimestamp;}break;
  case 'cancelSeries':{const b=battle();requireRule(b.turn==='exercise','NO_ACTIVE_SERIES');closeFatigue(b);if(b.series)b.series.paused=false;b.turn='enemy';b.log='Series stopped. Credited progress is kept.';}break;
  case 'resolveEnemy':{const b=battle();requireRule(b.turn==='enemy'&&!b.series?.paused,'NOT_ENEMY_TURN');b.rng=nextRandom(b.rng);const type=run().contentVersion===1?b.enemy.phases[b.phase][b.phase%b.enemy.phases[b.phase].length]:b.enemy.phases[b.phase];const damage=b.enemy.attack*effectiveness(type,run().specialization?[run().specialization!]:[])*1.25*(b.defending?.5:1);b.playerHp=Math.max(0,b.playerHp-damage);b.defending=false;b.turn=b.playerHp===0?'lost':'player';b.log=`${b.enemy.name} responds · ${damage.toFixed(1)} damage`;run().hp=b.playerHp;}break;
  case 'continuePhase':{const b=battle();requireRule(b.turn==='transform'&&!b.series?.paused&&b.phase+1<b.enemy.phases.length,'NO_TRANSFORMATION');b.phase++;b.turn='enemy';b.log='A new form awakens. Take a breath.';}break;
@@ -229,10 +247,10 @@ export function applyCommand(save:PlayerSave,command:TowerCommand,context:Engine
    r.lastSettledFloor=r.floor;r.cleared=r.floor;record.bestFloor=Math.max(record.bestFloor,r.floor);if(r.manual===0)record.bestVerifiedFloor=Math.max(record.bestVerifiedFloor,r.floor);
    r.hp=b.enemy.boss?r.maxHp:Math.min(r.maxHp,b.playerHp+20);
    if(r.contentVersion===2&&r.mode==='endless'){if(r.floor%3===0)s.progression!.trialTokens++;if(b.enemy.boss)r.pendingBossReward={floor:r.floor};}
-   const challenge=CHALLENGES.find(c=>c.id===r.challengeId);
+   const challenge=getRunChallenge(r);
    if(r.floor===MAX_FLOOR||challenge&&r.floor>=challenge.floors){r.status='complete';record.runs++;record.wins++;if(challenge?.specialization&&!s.availableSpecializations.includes(challenge.specialization))s.availableSpecializations.push(challenge.specialization);history(s,{id:r.id,kind:'tower',name:challenge?.name??'Endless Tower',completed:r.cleared,skipped:0,verified:r.verified,manual:r.manual,result:'complete',at:now,seed:r.seed});}
    else{r.floor++;r.status='between';}
-  }else{r.hp=0;r.status='lost';record.runs++;history(s,{id:r.id,kind:'tower',name:CHALLENGES.find(c=>c.id===r.challengeId)?.name??'Endless Tower',completed:r.cleared,skipped:0,verified:r.verified,manual:r.manual,result:'lost',at:now,seed:r.seed});}
+  }else{r.hp=0;r.status='lost';record.runs++;history(s,{id:r.id,kind:'tower',name:getRunChallenge(r)?.name??'Endless Tower',completed:r.cleared,skipped:0,verified:r.verified,manual:r.manual,result:'lost',at:now,seed:r.seed});}
   r.battle=null;break;
  }
  case 'abandon':{const a=s.activity;if(a.kind==='tower'&&!['lost','complete'].includes(a.status)){const key=a.mode==='endless'?'endless':`challenge:${a.challengeId}`;const record=s.records[key]??={bestFloor:0,bestVerifiedFloor:0,runs:0,wins:0};record.runs++;history(s,{id:a.id,kind:'tower',name:CHALLENGES.find(c=>c.id===a.challengeId)?.name??'Endless Tower',completed:a.cleared,skipped:0,verified:a.verified,manual:a.manual,result:'abandoned',at:now,seed:a.seed});}if(a.kind==='workout'&&a.status!=='complete'){if(a.status==='active')(a.results??=[]).push(workoutEntryResult(a.series,a.series.progress?'partial':'skipped'));history(s,workoutHistory(a,now,'abandoned'));}s.activity=a.kind==='trial'&&a.returnRun?a.returnRun:{kind:'idle'};break;}
