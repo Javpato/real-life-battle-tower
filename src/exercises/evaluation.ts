@@ -18,6 +18,8 @@ export interface LabelledPoseClip {
   toleranceMs?: number;
   allowPartialSquat?: boolean;
   calibration?: PoseFrame;
+  /** Warm the live filter on setup frames, then calibrate at the first visible frame at/after this timestamp. */
+  calibrationAtMs?: number;
 }
 export function evaluatePoseClip(clip: LabelledPoseClip) {
   const detector = createExerciseDetector(clip.exerciseId, clip.id, undefined, {
@@ -30,9 +32,16 @@ export function evaluatePoseClip(clip: LabelledPoseClip) {
     clip.filter === false ? frame : filter.process(frame);
   if (clip.calibration && !detector.recalibrate(process(clip.calibration)))
     throw new Error("Invalid labelled calibration");
+  let calibrated = clip.calibrationAtMs === undefined;
   const detected: { timestamp: number; unit: ExerciseUnit }[] = [];
   for (const frame of clip.frames) {
-    const result = detector.update(process(frame));
+    const processed = process(frame);
+    if (!calibrated) {
+      if (frame.timestamp >= clip.calibrationAtMs!)
+        calibrated = detector.recalibrate(processed);
+      if (!calibrated) continue;
+    }
+    const result = detector.update(processed);
     if (result.unit)
       detected.push({ timestamp: frame.timestamp, unit: result.unit });
   }
@@ -64,6 +73,7 @@ export function evaluatePoseClip(clip: LabelledPoseClip) {
     id: clip.id,
     skillId: clip.skillId,
     source: clip.source ?? "unspecified",
+    calibrated,
     notes: clip.notes,
     expected: clip.expected.length,
     detected: detected.length,
