@@ -107,6 +107,8 @@ export type PoseReference = {
 };
 export type RecognitionOptions = {
   profile?: "mini-squat" | "knee-pushup";
+  /** Flash accepts a comfortable measured range; confidence and fresh-cycle rules are unchanged. */
+  tolerance?: "standard" | "flash";
   allowPartialSquat?: boolean;
   reference?: PoseReference;
 };
@@ -116,6 +118,7 @@ export function observePose(
   preferredObservedSide?: Side,
   options: RecognitionOptions = {},
 ): Observation {
+  const flash = options.tolerance === "flash";
   const empty: Observation = {
     visible: false,
     ready: false,
@@ -431,20 +434,53 @@ export function observePose(
     const upright =
       p[c.hip].y < p[c.knee].y + scale * 0.2 &&
       (!good(c.shoulder) || p[c.shoulder].y < p[c.hip].y);
+    const mini = options.profile === "mini-squat";
+    // A Flash mini squat is relative to the person's visible relaxed stance.
+    // There is still a separate bend/return band and measured torso travel;
+    // standing jitter cannot satisfy both ends of a repetition.
+    const baseline =
+      options.reference?.side === g.side
+        ? options.reference.kneeAngle
+        : undefined;
+    const readyBend = flash
+      ? mini
+        ? baseline === undefined
+          ? 145
+          : clamp(baseline - 10, 135, 155)
+        : 140
+      : mini
+        ? 160
+        : 145;
+    const rangeBend = flash
+      ? mini
+        ? baseline === undefined
+          ? 135
+          : clamp(baseline - 25, 110, 148)
+        : 135
+      : mini
+        ? 145
+        : 115;
     return finish({
       ...base(g.ids, g.side),
-      ready: upright && bend > (options.profile === "mini-squat" ? 160 : 145),
-      extended: upright && bend < (options.profile === "mini-squat" ? 145 : 115),
-      amplitude: clamp((165 - bend) / (options.profile === "mini-squat" ? 35 : 80)),
+      ready: upright && bend > readyBend,
+      extended: upright && bend < rangeBend,
+      amplitude: flash
+        ? clamp(
+            (Math.max(readyBend, baseline ?? 165) - bend) /
+              Math.max(20, Math.max(readyBend, baseline ?? 165) - rangeBend),
+          )
+        : clamp((165 - bend) / (mini ? 35 : 80)),
       motion: p[c.hip].y / scale,
     });
   }
   if (exercise === "pushup" || exercise === "diamond") {
     const groups = candidates.flatMap((c) =>
-      (options.profile === "knee-pushup" ? [c.knee] : [c.ankle, c.knee]).map((end) => ({
-        side: c.side,
-        ids: [c.shoulder, c.elbow, c.wrist, c.hip, end],
-      })),
+      (options.profile === "knee-pushup" ? [c.knee] : [c.ankle, c.knee]).map(
+        (end) => ({
+          side: c.side,
+          ids: [c.shoulder, c.elbow, c.wrist, c.hip, end],
+        }),
+      ),
     );
     const g = select(groups);
     if (!g)
@@ -452,19 +488,31 @@ export function observePose(
         groups.map((g) => g.ids),
         "Show the near shoulder, elbow, wrist and hip, plus a knee or ankle. The far arm may be hidden.",
       );
+    const relaxed = flash && exercise === "pushup";
     const c = chain(g.side),
       end = g.ids[4],
-      scale = Math.max(0.06, distance(c.shoulder, c.hip));
+      // Keep the calibrated torso scale during Flash. Recomputing it while
+      // the torso moves can cancel a real shallow descent in the motion check.
+      scale =
+        relaxed && options.reference?.side === g.side
+          ? options.reference.scale
+          : Math.max(0.06, distance(c.shoulder, c.hip));
     const horizontal =
       Math.abs(p[c.shoulder].x - p[c.hip].x) >
-      Math.abs(p[c.shoulder].y - p[c.hip].y) * 0.9;
+      Math.abs(p[c.shoulder].y - p[c.hip].y) * (relaxed ? 0.65 : 0.9);
     const alignment = angle(p[c.shoulder], p[c.hip], p[end]),
       bend = angle(p[c.shoulder], p[c.elbow], p[c.wrist]);
     return finish({
       ...base(g.ids, g.side),
-      ready: horizontal && alignment > 135 && bend > 140,
-      extended: horizontal && alignment > 130 && bend < 118,
-      amplitude: clamp((165 - bend) / 80),
+      ready:
+        horizontal &&
+        alignment > (relaxed ? 120 : 135) &&
+        bend > (relaxed ? 135 : 140),
+      extended:
+        horizontal &&
+        alignment > (relaxed ? 115 : 130) &&
+        bend < (relaxed ? 128 : 118),
+      amplitude: clamp((165 - bend) / (relaxed ? 55 : 80)),
       motion: p[c.shoulder].y / scale,
     });
   }
@@ -730,6 +778,22 @@ export class ExerciseDetector {
         ? "right"
         : "left"
       : undefined;
+  }
+  /** The current observed movement clock, never time since the previous rep.
+   * Tracking loss, estimated geometry and pause remove timing eligibility.
+   */
+  get cycleStartedAt(): number | null {
+    return (this.phase === "moving" || this.phase === "return") &&
+      this.cycleUninterrupted &&
+      !this.estimatedCycle
+      ? this.start
+      : null;
+  }
+  private get flashTolerance(): boolean {
+    return (
+      this.options.tolerance === "flash" &&
+      (this.exerciseId === "squat" || this.exerciseId === "pushup")
+    );
   }
   /** Pause invalidates an unfinished cycle but preserves completed units, hold fractions and alternation. */
   pause() {
@@ -1013,7 +1077,10 @@ export class ExerciseDetector {
           this.stableSince = now;
           this.side = o.side;
         }
-        if (now - this.stableSince >= DETECTOR_CONFIG.stableMs) {
+        if (
+          now - this.stableSince >=
+          (this.flashTolerance ? 120 : DETECTOR_CONFIG.stableMs)
+        ) {
           this.phase = "return";
           this.stableSince = undefined;
         }
@@ -1052,10 +1119,16 @@ export class ExerciseDetector {
     }
     if (o.ready) {
       this.stableSince ??= now;
-      if (now - this.stableSince >= DETECTOR_CONFIG.returnMs) {
+      if (
+        now - this.stableSince >=
+        (this.flashTolerance ? 100 : DETECTOR_CONFIG.returnMs)
+      ) {
         this.phase = "ready";
         this.stableSince = undefined;
-        if (now - this.start < DETECTOR_CONFIG.minimumCycleMs)
+        if (
+          now - this.start <
+          (this.flashTolerance ? 700 : DETECTOR_CONFIG.minimumCycleMs)
+        )
           return {
             state: "ready",
             rejected: true,
@@ -1077,7 +1150,7 @@ export class ExerciseDetector {
             this.exerciseId === "sitstand" ||
             this.exerciseId === "wallpushup" ||
             this.exerciseId === "bridge") &&
-          this.movement < 0.08
+          this.movement < (this.flashTolerance ? 0.05 : 0.08)
         )
           return {
             state: "ready",
@@ -1129,13 +1202,18 @@ export class ExerciseDetector {
       verified: !this.estimatedCycle && !o.estimated,
       timestamp,
       // Full movement onset -> observed stable return, never inter-rep gaps.
-      ...((this.exerciseId === 'squat' || this.exerciseId === 'pushup') &&
-        !this.estimatedCycle && !o.estimated ? {cycle: {
-          clockId: this.prefix,
-          startedAt: this.start,
-          endedAt: timestamp,
-          uninterrupted: this.cycleUninterrupted,
-        }} : {}),
+      ...((this.exerciseId === "squat" || this.exerciseId === "pushup") &&
+      !this.estimatedCycle &&
+      !o.estimated
+        ? {
+            cycle: {
+              clockId: this.prefix,
+              startedAt: this.start,
+              endedAt: timestamp,
+              uninterrupted: this.cycleUninterrupted,
+            },
+          }
+        : {}),
     };
   }
 }
