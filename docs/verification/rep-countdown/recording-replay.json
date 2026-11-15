@@ -1,5 +1,5 @@
 {
-  "method": "Local MediaPipe reinference on screen-recorded camera crops; mirrored preview reversed; all frames preserved; live filter warmed before stable calibration.",
+  "method": "Local bundled MediaPipe Lite reinference on screen-recorded camera crops; mirrored preview reversed before inference; all frames including missing poses preserved; live filter warmed before stable calibration; exact skill profiles replayed against independently visually annotated complete cycles.",
   "limitations": [
     "Compressed recordings contain existing skeleton overlays.",
     "Counts validate these annotated segments only, not general exercise accuracy or physical technique.",
@@ -11,6 +11,7 @@
       "expected": 3,
       "beforeMatched": 0,
       "afterMatched": 3,
+      "afterMissed": 0,
       "afterUnmatched": 0
     },
     {
@@ -18,6 +19,7 @@
       "expected": 8,
       "beforeMatched": 3,
       "afterMatched": 8,
+      "afterMissed": 0,
       "afterUnmatched": 0
     },
     {
@@ -25,7 +27,19 @@
       "expected": 2,
       "beforeMatched": 0,
       "afterMatched": 2,
+      "afterMissed": 0,
+      "afterUnmatched": 0
+    },
+    {
+      "exercise": "Single-leg Squat",
+      "expected": 3,
+      "beforeMatched": 0,
+      "afterMatched": 3,
+      "afterMissed": 0,
       "afterUnmatched": 0
     }
-  ]
+  ],
+  "baselineDetectorRevision": "c92e64e",
+  "correctedDetectorRevision": "a0692c4",
+  "singleLegAnnotation": "Three alternating supporting-leg cycles; repeated same-side attempts are excluded after the preceding valid cycle. Foot lifting alone is not a repetition."
 }

@@ -5,7 +5,7 @@
 - Implemented perspective-aware leg movement counting, clearer support-leg instructions and faster phase transitions; local recorded-clip regression review is part of acceptance.
 - Implemented whole-set Flash countdown with personal/custom timing, ordinary damage after expiry, free retry and buffered camera receipts.
 - Added ten easy/hard challenge pairs with temporary access, matching five-floor unlocks and legacy save compatibility.
-- Verified browser flows at five viewports and hosted phone pairing with synthetic camera input. Private exercise recordings are excluded from version control.
+- Verified browser flows at five viewports, delayed receipts and hosted phone pairing with synthetic camera input. Independent local replay matched all 16 annotated cycles across four recordings with zero extra detections; single-leg alternation is preserved. Private exercise recordings are excluded from version control. Final Android package/signature/parity verified; backend updated without database changes.
 
 
 ## All-exercise camera and learning — 2026-11-15
