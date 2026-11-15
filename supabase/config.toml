@@ -10,3 +10,7 @@ verify_jwt = false
 
 [functions.tower-command]
 verify_jwt = false
+
+[functions.food-search]
+# Public, read-only fixed-host product search; no access to saves or journal data.
+verify_jwt = false
